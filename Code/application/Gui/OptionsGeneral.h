@@ -16,6 +16,7 @@
 
 class QCheckBox;
 class QComboBox;
+class QRadioButton;
 class QSpinBox;
 
 class OptionsGeneral : public QWidget
@@ -87,6 +88,10 @@ private:
    QSpinBox* mpMruFilesSpin;
    QSpinBox* mpBufferSpin;
    QSpinBox* mpThreadSpin;
+   QRadioButton* mpStatsAutoRadio;
+   QRadioButton* mpStatsFullRadio;
+   QRadioButton* mpStatsSkipRadio;
+   QSpinBox* mpStatsSkipSpin;
    QCheckBox* mpProgressClose;
    QCheckBox* mpMouseWheelZoom;
    QComboBox* mpClassificationPositionPlotView;

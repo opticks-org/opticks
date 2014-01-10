@@ -13,13 +13,15 @@
 #include "Statistics.h"
 #include "StatisticsWidget.h"
 #include "StringUtilities.h"
+
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QTableWidget>
 
 StatisticsWidget::StatisticsWidget(HistogramPlotImp* pPlot, QWidget* pParent) :
-      QWidget(pParent), mpHistogram(pPlot)
+   QWidget(pParent),
+   mpHistogram(pPlot)
 {
    mpTitle = new QLabel("Statistics", this);
    mpStats = new QTableWidget(this);
@@ -29,13 +31,15 @@ StatisticsWidget::StatisticsWidget(HistogramPlotImp* pPlot, QWidget* pParent) :
    mpStats->setAlternatingRowColors(true);
    mpStats->setEditTriggers(QTableWidget::NoEditTriggers);
    mpStats->setColumnCount(2);
-   mpStats->setRowCount(4);
+   mpStats->setRowCount(5);
    mpStats->horizontalHeader()->hide();
+   mpStats->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
    mpStats->verticalHeader()->hide();
    mpStats->setItem(0, 0, new QTableWidgetItem("Minimum Value"));
    mpStats->setItem(1, 0, new QTableWidgetItem("Maximum Value"));
    mpStats->setItem(2, 0, new QTableWidgetItem("Mean Value"));
    mpStats->setItem(3, 0, new QTableWidgetItem("Standard Deviation"));
+   mpStats->setItem(4, 0, new QTableWidgetItem("Full Resolution"));
 
    QVBoxLayout* pTopLevel = new QVBoxLayout(this);
    pTopLevel->setMargin(0);
@@ -45,8 +49,7 @@ StatisticsWidget::StatisticsWidget(HistogramPlotImp* pPlot, QWidget* pParent) :
 }
 
 StatisticsWidget::~StatisticsWidget()
-{
-}
+{}
 
 void StatisticsWidget::updateStatistics()
 {
@@ -60,10 +63,19 @@ void StatisticsWidget::updateStatistics()
       {
          comp = pLayer->getComplexComponent();
       }
-      mpTitle->setText(QString("<b>%1 Statistics</b>").arg(QString::fromStdString(StringUtilities::toDisplayString(comp))));
+      mpTitle->setText(QString("<b>%1 Statistics</b>").arg(QString::fromStdString(
+         StringUtilities::toDisplayString(comp))));
       mpStats->setItem(0, 1, new QTableWidgetItem(QString::number(pStats->getMin(comp))));
       mpStats->setItem(1, 1, new QTableWidgetItem(QString::number(pStats->getMax(comp))));
       mpStats->setItem(2, 1, new QTableWidgetItem(QString::number(pStats->getAverage(comp))));
       mpStats->setItem(3, 1, new QTableWidgetItem(QString::number(pStats->getStandardDeviation(comp))));
+
+      QString fullResText = "Yes";
+      if (pStats->getStatisticsResolution() != 1)
+      {
+         fullResText = "No";
+      }
+
+      mpStats->setItem(4, 1, new QTableWidgetItem(fullResText));
    }
 }

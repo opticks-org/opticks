@@ -96,8 +96,7 @@ private:
    // is not possible.
    const RasterElementImp* mpRasterElement;
    std::vector<DimensionDescriptor> mBands;
-   FactoryResource<BitMask> mpAoi;
-   SafePtr<AoiElement> mpOriginalAoi; // a refresh will update mpAoi if this still exists
+   SafePtr<AoiElement> mpAoi;
 
    std::map<ComplexComponent, double> mMinValues;
    std::map<ComplexComponent, double> mMaxValues;

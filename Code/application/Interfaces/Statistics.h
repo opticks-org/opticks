@@ -11,6 +11,7 @@
 #define STATISTICS_H
 
 #include "ComplexData.h"
+#include "ConfigurationSettings.h"
 #include "Serializable.h"
 
 #include <vector>
@@ -42,6 +43,8 @@ class BadValues;
 class Statistics : public Serializable
 {
 public:
+   SETTING(Resolution, Statistics, int, 0);
+
    /**
     *  Sets the minimum value for the data.
     *

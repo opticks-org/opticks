@@ -14,6 +14,7 @@
 #include "PlotView.h"
 #include "ProductView.h"
 #include "SpatialDataView.h"
+#include "Statistics.h"
 #include "StringUtilities.h"
 #include "TypesFile.h"
 #include "UtilityServices.h"
@@ -22,6 +23,7 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QGridLayout>
 #include <QtGui/QLabel>
+#include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
 #include <QtGui/QVBoxLayout>
 
@@ -82,6 +84,24 @@ OptionsGeneral::OptionsGeneral() :
    pThreadingLayout->addStretch(10);
    LabeledSection* pThreadingSection = new LabeledSection(pThreadingLayoutWidget, "Multi-threading", this);
 
+   // Statistics Resolution
+   QWidget* pStatsWidget = new QWidget(this);
+   mpStatsAutoRadio = new QRadioButton("Automatic", pStatsWidget);
+   mpStatsFullRadio = new QRadioButton("Full", pStatsWidget);
+   mpStatsSkipRadio = new QRadioButton("Skip Factor:", pStatsWidget);
+   mpStatsSkipSpin = new QSpinBox(pStatsWidget);
+   mpStatsSkipSpin->setRange(1, 100);
+
+   QGridLayout* pStatsLayout = new QGridLayout(pStatsWidget);
+   pStatsLayout->setMargin(0);
+   pStatsLayout->setSpacing(5);
+   pStatsLayout->addWidget(mpStatsAutoRadio, 0, 0, 1, 3);
+   pStatsLayout->addWidget(mpStatsFullRadio, 1, 0, 1, 3);
+   pStatsLayout->addWidget(mpStatsSkipRadio, 2, 0);
+   pStatsLayout->addWidget(mpStatsSkipSpin, 2, 1);
+   pStatsLayout->setColumnStretch(2, 10);
+   LabeledSection* pStatsSection = new LabeledSection(pStatsWidget, "Statistics Resolution", this);
+
    // Progress Dialog
    mpProgressClose = new QCheckBox("Automatically close on process completion", this);
    LabeledSection* pProgressSection = new LabeledSection(mpProgressClose, "Progress Dialog", this);
@@ -130,6 +150,7 @@ OptionsGeneral::OptionsGeneral() :
    pLayout->addWidget(pMruFilesSection);
    pLayout->addWidget(pUndoSection);
    pLayout->addWidget(pThreadingSection);
+   pLayout->addWidget(pStatsSection);
    pLayout->addWidget(pProgressSection);
    pLayout->addWidget(pMouseWheelZoomSection);
    if (pMarkingsSection != NULL)
@@ -138,10 +159,34 @@ OptionsGeneral::OptionsGeneral() :
    }
    pLayout->addStretch(10);
 
+   // Connections
+   VERIFYNR(connect(mpStatsSkipRadio, SIGNAL(toggled(bool)), mpStatsSkipSpin, SLOT(setEnabled(bool))));
+
    // Initialization
    mpMruFilesSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingNumberOfMruFiles()));
    mpBufferSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingUndoBufferSize()));
    mpThreadSpin->setValue(static_cast<int>(ConfigurationSettings::getSettingThreadCount()));
+
+   int statsResolution = Statistics::getSettingResolution();
+   if (statsResolution <= 0)
+   {
+      mpStatsAutoRadio->setChecked(true);
+      mpStatsSkipSpin->setEnabled(false);
+      mpStatsSkipSpin->setValue(1);
+   }
+   else if (statsResolution == 1)
+   {
+      mpStatsFullRadio->setChecked(true);
+      mpStatsSkipSpin->setEnabled(false);
+      mpStatsSkipSpin->setValue(1);
+   }
+   else
+   {
+      mpStatsSkipRadio->setChecked(true);
+      mpStatsSkipSpin->setEnabled(true);
+      mpStatsSkipSpin->setValue(statsResolution - 1);
+   }
+
    mpProgressClose->setChecked(Progress::getSettingAutoClose());
    mpMouseWheelZoom->setChecked(ConfigurationSettings::getSettingAlternateMouseWheelZoom());
    if (pMarkingsSection != NULL)
@@ -167,6 +212,18 @@ void OptionsGeneral::applyChanges()
    ConfigurationSettings::setSettingNumberOfMruFiles(static_cast<unsigned int>(mpMruFilesSpin->value()));
    ConfigurationSettings::setSettingUndoBufferSize(static_cast<unsigned int>(mpBufferSpin->value()));
    ConfigurationSettings::setSettingThreadCount(static_cast<unsigned int>(mpThreadSpin->value()));
+
+   int statsResolution = 0;
+   if (mpStatsFullRadio->isChecked() == true)
+   {
+      statsResolution = 1;
+   }
+   else if (mpStatsSkipRadio->isChecked() == true)
+   {
+      statsResolution = mpStatsSkipSpin->value() + 1;
+   }
+   Statistics::setSettingResolution(statsResolution);
+
    Progress::setSettingAutoClose(mpProgressClose->isChecked());
    ConfigurationSettings::setSettingAlternateMouseWheelZoom(mpMouseWheelZoom->isChecked());
 

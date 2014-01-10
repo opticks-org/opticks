@@ -36,17 +36,9 @@ StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
                              DimensionDescriptor band,
                              AoiElement* pAoi) :
    mpRasterElement(pRasterElement),
-   mpAoi(NULL),
-   mpOriginalAoi(pAoi),
-   mStatisticsResolution(0)
+   mpAoi(pAoi),
+   mStatisticsResolution(Statistics::getSettingResolution())
 {
-   if (pAoi != NULL)
-   {
-      mpAoi = FactoryResource<BitMask>();
-      const BitMask* pBitMask = pAoi->getSelectedPoints();
-      ENSURE(pBitMask);
-      mpAoi->merge(*(pBitMask));
-   }
    mBands.push_back(band);
 
    // no need to detach later since StatisticsImp owns mBadValues
@@ -58,18 +50,9 @@ StatisticsImp::StatisticsImp(const RasterElementImp* pRasterElement,
                              AoiElement* pAoi) :
    mpRasterElement(pRasterElement),
    mBands(bands),
-   mpAoi(NULL),
-   mpOriginalAoi(pAoi),
-   mStatisticsResolution(0)
+   mpAoi(pAoi),
+   mStatisticsResolution(Statistics::getSettingResolution())
 {
-   if (pAoi != NULL)
-   {
-      mpAoi = FactoryResource<BitMask>();
-      const BitMask* pBitMask = pAoi->getSelectedPoints();
-      ENSURE(pBitMask);
-      mpAoi->merge(*(pBitMask));
-   }
-
    // no need to detach later since StatisticsImp owns mBadValues
    VERIFYNR(mBadValues.attach(SIGNAL_NAME(BadValues, Modified), Slot(this, &StatisticsImp::badValuesChanged)));
 }
@@ -354,7 +337,12 @@ void StatisticsImp::getHistogram(const double*& pBinCenters, const unsigned int*
 
 void StatisticsImp::setStatisticsResolution(int resolution)
 {
-   if (resolution != mStatisticsResolution && resolution > 0)
+   if (resolution < 0)
+   {
+      resolution = 0;
+   }
+
+   if (resolution != mStatisticsResolution)
    {
       mStatisticsResolution = resolution;
       resetAll();
@@ -493,9 +481,9 @@ bool StatisticsImp::toXml(XMLWriter* pXml) const
       pXml->addAttr("rasterId", mpRasterElement->getId());
    }
 
-   if (mpOriginalAoi.get() != NULL)
+   if (mpAoi.get() != NULL)
    {
-      pXml->addAttr("aoiId", mpOriginalAoi->getId());
+      pXml->addAttr("aoiId", mpAoi->getId());
    }
 
    if (mBands.empty() == false)
@@ -580,7 +568,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
    VERIFY(pElement != NULL);
    mBadValues.clear();
    mpRasterElement = NULL;
-   mpOriginalAoi.reset(NULL);
+   mpAoi.reset(NULL);
    mBands.clear();
    resetAll();
 
@@ -592,7 +580,7 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
 
    if (pElement->hasAttribute(X("aoiId")) == true)
    {
-      mpOriginalAoi.reset(dynamic_cast<AoiElement*>(Service<SessionManager>()->getSessionItem(
+      mpAoi.reset(dynamic_cast<AoiElement*>(Service<SessionManager>()->getSessionItem(
          A(pElement->getAttribute(X("aoiId"))))));
    }
 
@@ -695,15 +683,17 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
 
    int rowNum = pDescriptor->getRowCount();
    int colNum = pDescriptor->getColumnCount();
-   if (mStatisticsResolution == 0)
+   VERIFYNRV(rowNum > 0 && colNum > 0);
+
+   if (mStatisticsResolution < 1)
    {
       if (rowNum < colNum)
       {
-         mStatisticsResolution = rowNum/500;
+         mStatisticsResolution = rowNum / 500;
       }
       else
       {
-         mStatisticsResolution = colNum/500;
+         mStatisticsResolution = colNum / 500;
       }
 
       if (mStatisticsResolution < 1)
@@ -712,18 +702,37 @@ void StatisticsImp::calculateStatistics(ComplexComponent component)
       }
    }
 
-   if (mpOriginalAoi.get() != NULL)
+   // Create a bitmask for all pixels based on the statistics resolution
+   FactoryResource<BitMask> pMask;
+   if (mStatisticsResolution == 1)
    {
-      mpAoi->clear();
-      mpAoi->merge(*(mpOriginalAoi->getSelectedPoints()));
+      pMask->setRegion(0, 0, colNum - 1, rowNum - 1, DRAW);
    }
-   else if (mpAoi.get() != NULL)
+   else
    {
-      mpAoi = FactoryResource<BitMask>(NULL);
+      // Increase the size of the bitmask bounding box to the full size so that the bitmask does
+      // not need to resize itself for every pixel that is set
+      pMask->setPixel(0, 0, true);
+      pMask->setPixel(colNum - 1, rowNum - 1, true);
+      pMask->setPixel(0, 0, false);
+      pMask->setPixel(colNum - 1, rowNum - 1, false);
+
+      for (int i = 0; i < rowNum * colNum; i += mStatisticsResolution)
+      {
+         int col = i % colNum;
+         int row = (i - col) / colNum;
+         pMask->setPixel(col, row, true);
+      }
+   }
+
+   // Intersect bitmask pixels based on the AOI
+   if (mpAoi.get() != NULL)
+   {
+      pMask->intersect(*(mpAoi->getSelectedPoints()));
    }
 
    StatisticsInput statInput(mBands, dynamic_cast<const RasterElement*>(mpRasterElement),
-      component, mStatisticsResolution, &mBadValues, mpAoi.get());
+      component, mStatisticsResolution, &mBadValues, pMask.get());
    StatisticsOutput statOutput;
 
    mta::StatusBarReporter barReporter("Computing statistics", "app", "CF884AA2-A1BF-468d-9609-795DE0F7B7A4");
@@ -914,11 +923,7 @@ void StatisticsThread::run()
             }
          }
 
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
-         for (int cnt = 0; diter != diter.end() && cnt < mInput.mResolution; ++cnt)
-         {
-            diter.nextPixel();
-         }
+         diter.nextPixel();
       }
       if (isBip)
       {
@@ -1146,11 +1151,8 @@ void HistogramThread::run()
                break;
             }
          }
-//#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Remove this if BitMaskIterator becomes an STL iterator or change it if BitMaskIterator::operator+=(int) is created (tclarke)")
-         for (int cnt = 0; diter != diter.end() && cnt < mInput.mStatInput.mResolution; ++cnt)
-         {
-            diter.nextPixel();
-         }
+
+         diter.nextPixel();
       }
       if (isBip)
       {

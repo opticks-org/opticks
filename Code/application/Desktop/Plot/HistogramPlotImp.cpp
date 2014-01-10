@@ -44,12 +44,15 @@
 #include <vector>
 
 #include <QtGui/QApplication>
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QIcon>
-#include <QtGui/QInputDialog>
 #include <QtGui/QLayout>
 #include <QtGui/QMessageBox>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QRadioButton>
+#include <QtGui/QSpinBox>
 #include <QtGui/QWidgetAction>
 
 using namespace std;
@@ -3295,15 +3298,76 @@ void HistogramPlotImp::setResolution()
       return;
    }
 
-   int oldResolution = pStatistics->getStatisticsResolution();
-   bool bSuccess = false;
+   QDialog resolutionDialog(this);
+   resolutionDialog.setWindowTitle("Statistics Resolution");
+   QRadioButton* pStatsAutoRadio = new QRadioButton("Automatic", &resolutionDialog);
+   QRadioButton* pStatsFullRadio = new QRadioButton("Full", &resolutionDialog);
+   QRadioButton* pStatsSkipRadio = new QRadioButton("Skip Factor:", &resolutionDialog);
+   QSpinBox* pStatsSkipSpin = new QSpinBox(&resolutionDialog);
+   pStatsSkipSpin->setRange(1, 100);
 
-   int newResolution = QInputDialog::getInteger(this, "Statistics Resolution",
-      "Enter the skip factor for computing the statistics:", oldResolution, 1, 100, 1, &bSuccess);
+   QFrame* pLine = new QFrame(&resolutionDialog);
+   pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
 
-   if ((bSuccess == true) && (oldResolution != newResolution))
+   QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &resolutionDialog);
+
+   QGridLayout* pLayout = new QGridLayout(&resolutionDialog);
+   pLayout->setMargin(10);
+   pLayout->setSpacing(5);
+   pLayout->addWidget(pStatsAutoRadio, 0, 0, 1, 3);
+   pLayout->addWidget(pStatsFullRadio, 1, 0, 1, 3);
+   pLayout->addWidget(pStatsSkipRadio, 2, 0);
+   pLayout->addWidget(pStatsSkipSpin, 2, 1);
+   pLayout->addWidget(pLine, 4, 0, 1, 3);
+   pLayout->addWidget(pButtonBox, 5, 0, 1, 3);
+   pLayout->setRowStretch(3, 10);
+   pLayout->setColumnStretch(2, 10);
+
+   int oldSkipFactor = pStatistics->getStatisticsResolution();
+   if (oldSkipFactor <= 0)
    {
-      pStatistics->setStatisticsResolution(newResolution);
+      pStatsAutoRadio->setChecked(true);
+      pStatsSkipSpin->setEnabled(false);
+      pStatsSkipSpin->setValue(1);
+   }
+   else if (oldSkipFactor == 1)
+   {
+      pStatsFullRadio->setChecked(true);
+      pStatsSkipSpin->setEnabled(false);
+      pStatsSkipSpin->setValue(1);
+   }
+   else
+   {
+      pStatsSkipRadio->setChecked(true);
+      pStatsSkipSpin->setEnabled(true);
+      pStatsSkipSpin->setValue(oldSkipFactor - 1);
+   }
+
+   resolutionDialog.resize(250, 125);
+
+   VERIFYNR(connect(pStatsSkipRadio, SIGNAL(toggled(bool)), pStatsSkipSpin, SLOT(setEnabled(bool))));
+   VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), &resolutionDialog, SLOT(accept())));
+   VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), &resolutionDialog, SLOT(reject())));
+
+   if (resolutionDialog.exec() == QDialog::Rejected)
+   {
+      return;
+   }
+
+   int newSkipFactor = 0;
+   if (pStatsFullRadio->isChecked() == true)
+   {
+      newSkipFactor = 1;
+   }
+   else if (pStatsSkipRadio->isChecked() == true)
+   {
+      newSkipFactor = pStatsSkipSpin->value() + 1;
+   }
+
+   if (oldSkipFactor != newSkipFactor)
+   {
+      pStatistics->setStatisticsResolution(newSkipFactor);
 
       if (mpElement.get() != NULL)
       {
@@ -3320,7 +3384,7 @@ void HistogramPlotImp::setResolution()
                   pStatistics = mpElement->getStatistics(bandDim);
                   if (pStatistics != NULL)
                   {
-                     pStatistics->setStatisticsResolution(newResolution);
+                     pStatistics->setStatisticsResolution(newSkipFactor);
                   }
                }
             }
@@ -3328,8 +3392,10 @@ void HistogramPlotImp::setResolution()
 
          mpElement->updateData();
       }
-
-      updateHistogramValues();
+      else
+      {
+         updateHistogramValues();
+      }
    }
 }
 
