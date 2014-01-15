@@ -7,7 +7,6 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QHeaderView>
 #include <QtGui/QImage>
 #include <QtGui/QMouseEvent>
 
@@ -24,19 +23,11 @@ Legend::Legend(QWidget* parent) :
    setSelectionMode(QAbstractItemView::NoSelection);
    setSortingEnabled(false);
    setFocusPolicy(Qt::NoFocus);
-
-   QHeaderView* pHeader = header();
-   if (pHeader != NULL)
-   {
-      pHeader->setMovable(false);
-      pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-      pHeader->hide();
-   }
+   setHeaderHidden(true);
 }
 
 Legend::~Legend()
-{
-}
+{}
 
 void Legend::showSecondaryObjects(bool bShow)
 {
@@ -191,7 +182,6 @@ bool Legend::removeItem(PlotObject* pObject)
       }
 
       mObjects.remove(pObject);
-      resizeColumnToContents(0);
       return true;
    }
 
@@ -202,7 +192,6 @@ void Legend::clear()
 {
    QTreeWidget::clear();
    mObjects.clear();
-   resizeColumnToContents(0);
 }
 
 void Legend::selectObject(QTreeWidgetItem* pItem)
