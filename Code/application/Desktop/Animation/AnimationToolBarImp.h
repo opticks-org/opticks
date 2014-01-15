@@ -13,6 +13,7 @@
 #include <QtGui/QComboBox>
 #include <QtGui/QLabel>
 #include <QtGui/QMenu>
+#include <QtGui/QProxyStyle>
 #include <QtGui/QSlider>
 #include <QtCore/QString>
 
@@ -83,9 +84,13 @@ protected slots:
 
    void activateSlider();
    void releaseSlider();
+   void moveToFrame();
 
 protected:
-   void removeAnimationController(AnimationController* pController);
+   virtual bool event(QEvent* pEvent);
+   virtual void contextMenuEvent(QContextMenuEvent* pEvent);
+
+   QString getFrameText(double frameValue) const;
 
 private:
    AnimationToolBarImp(const AnimationToolBarImp& rhs);
@@ -93,8 +98,11 @@ private:
 
    void setPlayButtonState(AnimationState state);
    void setChangeDirectionButtonState(AnimationState state);
-   int getSliderIndex(double frameValue);
+   int getSliderIndex(const QPoint& globalPos) const;
+   int getSliderIndex(double frameValue) const;
+   double getSliderFrame(int sliderIndex) const;
    void updateBumpers();
+
    /**
    * WheelEventSlider is a subclass of QSlider to avoid
    * a bug in QSlider's mouse wheel event handling.
@@ -126,6 +134,21 @@ private:
       WheelEventSlider(const WheelEventSlider& rhs);
       WheelEventSlider& operator=(const WheelEventSlider& rhs);
 
+      class WheelEventSliderStyle : public QProxyStyle
+      {
+      public:
+         virtual int styleHint(StyleHint hint, const QStyleOption* pOption = NULL, const QWidget* pWidget = NULL,
+            QStyleHintReturn* pReturnData = NULL) const
+         {
+            if (hint == QStyle::SH_Slider_AbsoluteSetButtons)
+            {
+               return Qt::LeftButton;
+            }
+
+            return QProxyStyle::styleHint(hint, pOption, pWidget, pReturnData);
+         }
+      };
+
       bool mBumpersEnabled;
       int mLeftBumper;
       int mRightBumper;
@@ -140,6 +163,8 @@ private:
    QAction* mpStepForwardAction;         // button steps the movie one frame forward
    QAction* mpStepBackwardAction;        // button steps the movie one frame backward
    WheelEventSlider* mpFrameSlider;      // slider is used to change the frame the movie is displaying
+   QMenu* mpSliderMenu;                  // context menu for slider
+   QAction* mpMoveToAction;              // context menu action to move to the frame at the mouse location
    QToolButton* mpBumperButton;          // button enables/disables bumpers and provides access to bumpers menu
    QAction* mpLeftBumperToFrameAction;   // menu action to set left bumper to current frame
    QAction* mpRightBumperToFrameAction;  // menu action to set right bumper to current frame

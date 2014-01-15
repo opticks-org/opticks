@@ -10,11 +10,15 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
 #include <QtGui/QApplication>
+#include <QtGui/QHelpEvent>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QPainter>
 #include <QtGui/QResizeEvent>
+#include <QtGui/QStyle>
+#include <QtGui/QStyleOptionSlider>
 #include <QtGui/QToolButton>
+#include <QtGui/QToolTip>
 #include <QtGui/QWidgetAction>
 
 #include "Animation.h"
@@ -69,33 +73,28 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    std::string shortcutContext = windowTitle().toStdString();
 
    // Animation buttons
-   mpStopAction = addAction(QIcon(":/icons/Stop"), QString(), this, SLOT(stop()));
+   mpStopAction = addAction(QIcon(":/icons/Stop"), "Stop", this, SLOT(stop()));
    mpStopAction->setAutoRepeat(false);
-   mpStopAction->setToolTip("Stop");
    mpStopAction->setCheckable(true);
    pDesktop->initializeAction(mpStopAction, shortcutContext);
 
-   mpPlayPauseAction = addAction(QIcon(":/icons/PlayForward"), QString(), this, SLOT(playPause()));
+   mpPlayPauseAction = addAction(QIcon(":/icons/PlayForward"), "Play//Pause", this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
    mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
-   mpPlayPauseAction->setToolTip("Play//Pause");
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
 
-   mpStepBackwardAction = addAction(QIcon(":/icons/AdvanceBackward"), QString(), this, SLOT(stepBackward()));
+   mpStepBackwardAction = addAction(QIcon(":/icons/AdvanceBackward"), "Step Backward", this, SLOT(stepBackward()));
    mpStepBackwardAction->setAutoRepeat(true);
-   mpStepBackwardAction->setToolTip("Step backward");
    pDesktop->initializeAction(mpStepBackwardAction, shortcutContext);
 
-   mpStepForwardAction = addAction(QIcon(":/icons/AdvanceForward"), QString(), this, SLOT(stepForward()));
+   mpStepForwardAction = addAction(QIcon(":/icons/AdvanceForward"), "Step Forward", this, SLOT(stepForward()));
    mpStepForwardAction->setAutoRepeat(true);
-   mpStepForwardAction->setToolTip("Step forward");
    pDesktop->initializeAction(mpStepForwardAction, shortcutContext);
 
    addSeparator();
 
-   mpSlowDownAction = addAction(QIcon(":/icons/SlowDown"), QString(), this, SLOT(slowDown()));
+   mpSlowDownAction = addAction(QIcon(":/icons/SlowDown"), "Slow Down", this, SLOT(slowDown()));
    mpSlowDownAction->setAutoRepeat(false);
-   mpSlowDownAction->setToolTip("Slow Down");
    pDesktop->initializeAction(mpSlowDownAction, shortcutContext);
 
    mpFrameSpeedCombo = new QComboBox(this);
@@ -125,16 +124,15 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
 
    addWidget(mpFrameSpeedCombo);
 
-   mpSpeedUpAction = addAction(QIcon(":/icons/SpeedUp"), QString(), this, SLOT(speedUp()));
+   mpSpeedUpAction = addAction(QIcon(":/icons/SpeedUp"), "Speed Up", this, SLOT(speedUp()));
    mpSpeedUpAction->setAutoRepeat(false);
-   mpSpeedUpAction->setToolTip("Speed Up");
    pDesktop->initializeAction(mpSpeedUpAction, shortcutContext);
 
    addSeparator();
 
-   mpChangeDirectionAction = addAction(QIcon(":/icons/DirectionForward"), QString(), this, SLOT(changeDirection()));
+   mpChangeDirectionAction = addAction(QIcon(":/icons/DirectionForward"), "Change Direction", this,
+      SLOT(changeDirection()));
    mpChangeDirectionAction->setAutoRepeat(false);
-   mpChangeDirectionAction->setToolTip("Change Direction");
    pDesktop->initializeAction(mpChangeDirectionAction, shortcutContext);
 
    // Animation cycle
@@ -182,7 +180,6 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    QWidget* pSliderWidget = new QWidget(this);
 
    mpFrameSlider = new WheelEventSlider(Qt::Horizontal, pSliderWidget);
-   mpFrameSlider->setToolTip("The current position in the animation");
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderPressed()), this, SLOT(activateSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
@@ -194,6 +191,13 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    pSliderLayout->addWidget(mpFrameSlider);
    pSliderLayout->addSpacing(5);
    addWidget(pSliderWidget);
+
+   // Slider context menu
+   mpSliderMenu = new QMenu(this);
+
+   mpMoveToAction = new QAction("Move To Frame", this);
+   mpMoveToAction->setAutoRepeat(false);
+   VERIFYNR(connect(mpMoveToAction, SIGNAL(triggered()), this, SLOT(moveToFrame())));
 
    // Current frame and time labels
    mpTimestampLabel = new QLabel(this);
@@ -347,12 +351,12 @@ void AnimationToolBarImp::setPlayButtonState(AnimationState state)
       if (state == PLAY_FORWARD || state == PLAY_BACKWARD)
       {
          mpPlayPauseAction->setIcon(QIcon(":/icons/Pause"));
-         mpPlayPauseAction->setToolTip("Pause");
+         mpPlayPauseAction->setText("Pause");
       }
       else
       {
          mpPlayPauseAction->setIcon(QIcon(":/icons/PlayForward"));
-         mpPlayPauseAction->setToolTip("Play");
+         mpPlayPauseAction->setText("Play");
       }
 
       if (mpController->getNumAnimations() > 0)
@@ -423,10 +427,7 @@ void AnimationToolBarImp::setCurrentFrame(int frameIndex)
 {
    if (mpController != NULL)
    {
-      double startFrame = mpController->getStartFrame();
-      double range = mpController->getStopFrame() - startFrame;
-      double fraction = static_cast<double>(frameIndex) / static_cast<double>(mpFrameSlider->maximum());
-      double newFrame = startFrame + range * fraction;
+      double newFrame = getSliderFrame(frameIndex);
       mpController->setCurrentFrame(newFrame);
    }
 }
@@ -531,7 +532,8 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       double stopFrame = mpController->getStopFrame();
 
       // Add 0.5 to round to the nearest index
-      currentStep = static_cast<int> (mpFrameSlider->maximum() * ((frameValue - startFrame) / (stopFrame - startFrame)) + 0.5);
+      currentStep = static_cast<int> (mpFrameSlider->maximum() *
+         ((frameValue - startFrame) / (stopFrame - startFrame)) + 0.5);
 
       // Slider
       mpFrameSlider->setValue(currentStep);
@@ -539,24 +541,7 @@ void AnimationToolBarImp::updateCurrentFrame(double frameValue)
       // Frame text
       if (mHideTimestamp == false)
       {
-         AnimationServicesImp* pAnimationServices = AnimationServicesImp::instance();
-         if (pAnimationServices != NULL)
-         {
-            FrameType frameType = mpController->getFrameType();
-
-            std::string frameText = pAnimationServices->frameToString(frameValue, frameType);
-            if (frameType == FRAME_ID)
-            {
-               strFrameText = "Frame: " + QString::fromStdString(frameText) + "/" +
-                  QString::number(static_cast<unsigned int>(stopFrame - startFrame + 1.0));
-            }
-            else
-            {
-               strFrameText = QString::fromStdString(frameText);
-            }
-
-            strFrameText += " ";
-         }
+         strFrameText = getFrameText(frameValue) + " ";
       }
    }
 
@@ -785,6 +770,115 @@ void AnimationToolBarImp::releaseSlider()
    }
 }
 
+void AnimationToolBarImp::moveToFrame()
+{
+   bool success = false;
+   int sliderIndex = mpMoveToAction->data().toInt(&success);
+   if ((success == true) && (sliderIndex != -1))
+   {
+      mpFrameSlider->setSliderPosition(sliderIndex);
+      setCurrentFrame(sliderIndex);
+   }
+}
+
+bool AnimationToolBarImp::event(QEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      if (pEvent->type() == QEvent::ToolTip)
+      {
+         QHelpEvent* pHelpEvent = dynamic_cast<QHelpEvent*>(pEvent);
+         VERIFY(pHelpEvent != NULL);
+
+         // Display a tool tip containing the frame text for the current mouse position
+         const QPoint& globalPos = pHelpEvent->globalPos();
+
+         int index = getSliderIndex(globalPos);
+         if (index != -1)
+         {
+            double frameValue = getSliderFrame(index);
+            QString frameText = getFrameText(frameValue);
+            QToolTip::showText(globalPos, frameText, mpFrameSlider, mpFrameSlider->rect());
+            return true;
+         }
+      }
+   }
+
+   return ToolBarImp::event(pEvent);
+}
+
+void AnimationToolBarImp::contextMenuEvent(QContextMenuEvent* pEvent)
+{
+   if (pEvent != NULL)
+   {
+      // Only display the context menu if the mouse is over the slider
+      const QPoint& globalPos = pEvent->globalPos();
+
+      int sliderIndex = getSliderIndex(globalPos);
+      if (sliderIndex != -1)
+      {
+         mpSliderMenu->clear();
+
+         if ((mpController != NULL) && (mpController->getAnimationState() != STOP))
+         {
+            mpSliderMenu->addAction(mpStopAction);
+         }
+
+         mpSliderMenu->addAction(mpPlayPauseAction);
+         mpSliderMenu->addSeparator();
+
+         if (mpStepBackwardAction->isEnabled() == true)
+         {
+            mpSliderMenu->addAction(mpStepBackwardAction);
+         }
+
+         if (mpStepForwardAction->isEnabled() == true)
+         {
+            mpSliderMenu->addAction(mpStepForwardAction);
+         }
+
+         double frameValue = getSliderFrame(sliderIndex);
+         QString actionText = "Move to '" + getFrameText(frameValue) + "'";
+         mpMoveToAction->setText(actionText);
+         mpMoveToAction->setData(QVariant(sliderIndex));
+
+         mpSliderMenu->addAction(mpMoveToAction);
+         mpSliderMenu->popup(globalPos);
+         return;
+      }
+   }
+
+   ToolBarImp::contextMenuEvent(pEvent);
+}
+
+QString AnimationToolBarImp::getFrameText(double frameValue) const
+{
+   if (mpController == NULL)
+   {
+      return QString();
+   }
+
+   AnimationServicesImp* pAnimationServices = AnimationServicesImp::instance();
+   if (pAnimationServices == NULL)
+   {
+      return QString();
+   }
+
+   FrameType frameType = mpController->getFrameType();
+   QString frameText = QString::fromStdString(pAnimationServices->frameToString(frameValue, frameType));
+
+   if (frameType == FRAME_ID)
+   {
+      double startFrame = mpController->getStartFrame();
+      double stopFrame = mpController->getStopFrame();
+
+      frameText = "Frame: " + frameText + "/" +
+         QString::number(static_cast<unsigned int>(stopFrame - startFrame + 1.0));
+   }
+
+   return frameText;
+}
+
 void AnimationToolBarImp::setHideTimestamp(bool hideTimestamp)
 {
    if (mHideTimestamp != hideTimestamp)
@@ -842,7 +936,29 @@ void AnimationToolBarImp::updateBumperMenu()
    mpRestoreBumpersAction->setEnabled(dv_cast<bool>(pSettings->getSetting(bumperPath), false));
 }
 
-int AnimationToolBarImp::getSliderIndex(double frameValue)
+int AnimationToolBarImp::getSliderIndex(const QPoint& globalPos) const
+{
+   QPoint sliderPos = mpFrameSlider->mapFromGlobal(globalPos);
+   QRect sliderRect = mpFrameSlider->rect();
+
+   if (sliderRect.contains(sliderPos) == false)
+   {
+      return -1;
+   }
+
+   QStyleOptionSlider option;
+   option.initFrom(mpFrameSlider);
+   option.subControls = QStyle::SC_All;
+
+   QRect handleRect = mpFrameSlider->style()->subControlRect(QStyle::CC_Slider, &option, QStyle::SC_SliderHandle,
+      mpFrameSlider);
+
+   int index = QStyle::sliderValueFromPosition(mpFrameSlider->minimum(), mpFrameSlider->maximum(),
+      sliderPos.x() - (handleRect.width() / 2), mpFrameSlider->width() - handleRect.width());
+   return index;
+}
+
+int AnimationToolBarImp::getSliderIndex(double frameValue) const
 {
    if (frameValue < 0.0)  // unset bumper value
    {
@@ -860,6 +976,20 @@ int AnimationToolBarImp::getSliderIndex(double frameValue)
    }
 
    return static_cast<int>(index);
+}
+
+double AnimationToolBarImp::getSliderFrame(int sliderIndex) const
+{
+   if (mpController == NULL)
+   {
+      return 0.0;
+   }
+
+   double startFrame = mpController->getStartFrame();
+   double range = mpController->getStopFrame() - startFrame;
+   double fraction = static_cast<double>(sliderIndex) / static_cast<double>(mpFrameSlider->maximum());
+   double frame = startFrame + range * fraction;
+   return frame;
 }
 
 void AnimationToolBarImp::updateBumpers()
@@ -892,6 +1022,7 @@ AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
                                    mLeftBumper(-1),
                                    mRightBumper(-1)
 {
+   setStyle(new WheelEventSliderStyle());
 }
 
 void AnimationToolBarImp::WheelEventSlider::wheelEvent(QWheelEvent* pEvent)
