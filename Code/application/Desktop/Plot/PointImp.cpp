@@ -144,20 +144,70 @@ void PointImp::draw(LocationType pixelSize)
          break;
 
       case INVERT_SELECTION:
-         // Invert symbol color and draw slightly enlarged symbol behind it when selected
+      {
+         // Invert the background color and draw slightly enlarged symbol behind it when selected
          glPushMatrix();
          glLineWidth(2);
 
          // Invert the color
-         glColor3ub(255 - mColor.red(), 255 - mColor.green(), 255 - mColor.blue());
+         QColor backgroundColor = pPlot->getBackgroundColor();
+
+         int selectionHue = -1;
+         int selectionSaturation = 255;
+         int selectionValue = 255;
+
+         int pointHue = mColor.hue();
+         int backgroundHue = backgroundColor.hue();
+         if ((pointHue > -1) && (backgroundHue > -1))
+         {
+            selectionHue = (pointHue + backgroundHue) / 2;
+            if (abs(pointHue - backgroundHue) < 180)
+            {
+               selectionHue += 180;
+            }
+         }
+         else if (pointHue > -1)
+         {
+            selectionHue = pointHue + 180;
+         }
+         else if (backgroundHue > -1)
+         {
+            selectionHue = backgroundHue + 180;
+         }
+         else
+         {
+            int pointValue = mColor.value();
+            int backgroundValue = backgroundColor.value();
+
+            selectionValue = (pointValue + backgroundValue) / 2;
+            if (abs(pointValue - backgroundValue) < 128)
+            {
+               selectionValue += 128;
+            }
+         }
+
+         while (selectionHue >= 360)
+         {
+            selectionHue -= 360;
+         }
+
+         while (selectionValue >= 256)
+         {
+            selectionValue -= 256;
+         }
+
+         QColor selectionColor = QColor::fromHsv(selectionHue, selectionSaturation, selectionValue);
+         glColor3ub(selectionColor.red(), selectionColor.green(), selectionColor.blue());
 
          // Draw the inverted symbol
          glTranslatef(dWorldX, dWorldY, 0);
-         glScalef( (mSymbolSize + 1) / pixelSize.mX, (mSymbolSize + 1) / pixelSize.mY, 0);
+         glScalef((mSymbolSize + 2) / pixelSize.mX, (mSymbolSize + 2) / pixelSize.mY, 0);
          glCallList(pPlot->getDisplayListIndex() + mSymbol);
          glLineWidth(1);
          glPopMatrix();
          break;
+      }
+
       case BOX_SELECTION:
          // Draw a gray box around the symbol if it is selected
          glPushMatrix();
