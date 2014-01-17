@@ -51,12 +51,14 @@ public:
    PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary);
    PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary);
    bool insertObject(PlotObject* pObject);
+   bool insertObjects(const std::list<PlotObject*>& objects);
    std::list<PlotObject*> getObjects() const;
    std::list<PlotObject*> getObjects(const PlotObjectType& objectType) const;
    std::list<PlotObject*> getObjectsAt(const QPoint& point) const;
    bool containsObject(PlotObject* pObject) const;
    unsigned int getNumObjects() const;
    bool deleteObject(PlotObject* pObject);
+   bool deleteObjects(const std::list<PlotObject*>& objects);
 
    bool moveObjectToFront(PlotObject* pObject);
    bool moveObjectToBack(PlotObject* pObject);
@@ -175,6 +177,14 @@ private:
    { \
       return impClass::addObject(objectType, bPrimary); \
    } \
+   bool insertObject(PlotObject* pObject) \
+   { \
+      return impClass::insertObject(pObject); \
+   } \
+   bool insertObjects(const std::list<PlotObject*>& objects) \
+   { \
+      return impClass::insertObjects(objects); \
+   } \
    void getObjects(std::list<PlotObject*>& objects) const \
    { \
       objects = impClass::getObjects(); \
@@ -194,6 +204,10 @@ private:
    bool deleteObject(PlotObject* pObject) \
    { \
       return impClass::deleteObject(pObject); \
+   } \
+   bool deleteObjects(const std::list<PlotObject*>& objects) \
+   { \
+      return impClass::deleteObjects(objects); \
    } \
    void clear() \
    { \

@@ -85,22 +85,23 @@ public:
    /**
     *  Creates a new object but doesn't add it to the plot.
     *
-    *  This method creates a new object of the given type.
-    *  The object can be created as a primary object or secondary
-    *  object.  A primary plot object is one that appears in the foreground of
-    *  the plot and has an entry in the legend.  Most objects added to a plot
-    *  will be primary objects, but sometimes objects such as gridlines can be
-    *  created as secondary objects so that they will not be included with the
-    *  main data objects in the plot.
+    *  This method creates a new object of the given type.  The object can be
+    *  created as a primary object or secondary object.  A primary plot object
+    *  is one that appears in the foreground of the plot and has an entry in the
+    *  legend.  Most objects added to a plot will be primary objects, but
+    *  sometimes objects such as gridlines can be created as secondary objects
+    *  so that they will not be included with the main data objects in the plot.
     *
     *  @param   objectType
     *           The type of plot object to add.
     *  @param   bPrimary
-    *           Set this value to TRUE to create a primary object or FALSE to
-    *           create a secondary object.
+    *           Set this value to \c true to create a primary object or to
+    *           \c false to create a secondary object.
     *
-    *  @return  A pointer to the new plot object.  NULL is returned if an error
-    *           occurred and the object could not be added.
+    *  @return  A pointer to the new plot object.  Returns \c NULL if an error
+    *           occurred and the object could not be created.
+    *
+    *  @see     addObject()<br>insertObject()
     */
    virtual PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary) = 0;
 
@@ -118,16 +119,58 @@ public:
     *  @param   objectType
     *           The type of plot object to add.
     *  @param   bPrimary
-    *           Set this value to TRUE to create a primary object or FALSE to
-    *           create a secondary object.
+    *           Set this value to \c true to create a primary object or to
+    *           \c false to create a secondary object.
     *
-    *  @return  A pointer to the new plot object.  NULL is returned if an error
-    *           occurred and the object could not be added.
+    *  @return  A pointer to the new plot object.  Returns \c NULL if an error
+    *           occurred and the object could not be created or added to the
+    *           plot.
     *
-    *  @notify  This method will notify signalObjectAdded() with
-    *           any<PlotObject*>.
+    *  @notify  This method notifies signalObjectAdded() with
+    *           boost::any<#PlotObject*> after the object has been successfully
+    *           created and added to the plot.
+    *
+    *  @see     createObject()<br>insertObject()
     */
    virtual PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary) = 0;
+
+   /**
+    *  Adds an existing object to the plot.
+    *
+    *  @param   pObject
+    *           The object to add to the plot.  This method does nothing and
+    *           returns \c false if \c NULL is passed in.
+    *
+    *  @return  Returns \c true if the object was successfully added to the
+    *           plot.  Returns \c false if the given object already exists in
+    *           the plot.
+    *
+    *  @notify  This method notifies signalObjectAdded() with
+    *           boost::any<#PlotObject*> after the object has been successfully
+    *           added to the plot.
+    *
+    *  @see     createObject()<br>addObject()<br>insertObjects()
+    */
+   virtual bool insertObject(PlotObject* pObject) = 0;
+
+   /**
+    *  Adds multiple existing objects to the plot.
+    *
+    *  @param   objects
+    *           The objects to add to the plot.  This method does nothing and
+    *           returns \c false if the list is empty.
+    *
+    *  @return  Returns \c true if all of the given objects were successfully
+    *           added to the plot.  Returns \c false if at least one object
+    *           could not be added.
+    *
+    *  @notify  This method notifies signalObjectAdded() with
+    *           boost::any<#PlotObject*> for each object that is successfully
+    *           added to the plot.
+    *
+    *  @see     createObject()<br>addObject()<br>insertObject()
+    */
+   virtual bool insertObjects(const std::list<PlotObject*>& objects) = 0;
 
    /**
     *  Retrieves all objects in the plot.
@@ -170,20 +213,53 @@ public:
     *  Removes an object from the plot and deletes it.
     *
     *  @param   pObject
-    *           The annotation object to delete.
+    *           The plot object to delete.
     *
-    *  @return  TRUE if the object was successfully removed and deleted,
-    *           otherwise FALSE.
+    *  @return  Returns \c true if the given object was successfully removed and
+    *           deleted; otherwise returns \c false.
     *
-    *  @see     clear()
+    *  @notify  This method notifies signalObjectDeleted() with
+    *           boost::any<#PlotObject*> immediately after the object is
+    *           successfully removed but before the object is deleted.
     *
-    *  @notify  This method will notify signalObjectDeleted() with
-    *           any<PlotObject*>.
+    *  @see     deleteObjects()<br>clear()
     */
    virtual bool deleteObject(PlotObject* pObject) = 0;
 
    /**
-    *  Removes all objects from the plot.
+    *  Removes multiple objects from the plot and deletes them.
+    *
+    *  @param   objects
+    *           The plot objects to delete.  This method does nothing and
+    *           returns \c false if the list is empty.
+    *
+    *  @return  Returns \c true if all of the given objects were successfully
+    *           removed and deleted.  Returns \c false if at least one object
+    *           could not be deleted.
+    *
+    *  @notify  This method notifies signalObjectDeleted() with
+    *           boost::any<#PlotObject*> for each object that is successfully
+    *           removed.  The signal is notified immediately after the object is
+    *           removed but before the object is deleted.
+    *
+    *  @see     deleteObject()<br>clear()
+    */
+   virtual bool deleteObjects(const std::list<PlotObject*>& objects) = 0;
+
+   /**
+    *  Removes all primary objects from the plot and deletes them.
+    *
+    *  @note    This method deletes only primary objects.  To clear the plot of
+    *           both primary and secondary objects, call
+    *           getObjects(std::list<PlotObject*>&) const followed by
+    *           deleteObjects().
+    *
+    *  @notify  This method notifies signalObjectDeleted() with
+    *           boost::any<#PlotObject*> for each object that is successfully
+    *           removed.  The signal is notified immediately after the object is
+    *           removed but before the object is deleted.
+    *
+    *  @see     deleteObjects()
     */
    virtual void clear() = 0;
 

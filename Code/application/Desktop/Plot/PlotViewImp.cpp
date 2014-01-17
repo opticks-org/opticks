@@ -182,6 +182,8 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
       SLOT(enableMouseModeAction(const MouseMode*, bool))));
    VERIFYNR(connect(this, SIGNAL(mouseModeChanged(const MouseMode*)), this,
       SLOT(updateMouseModeAction(const MouseMode*))));
+   VERIFYNR(connect(this, SIGNAL(objectAdded(PlotObject*)), this, SLOT(updateExtents())));
+   VERIFYNR(connect(this, SIGNAL(objectDeleted(PlotObject*)), this, SLOT(updateExtents())));
    VERIFYNR(connect(&mMouseLocator, SIGNAL(locationChanged(const LocationType&)), this, SLOT(refresh())));
 }
 
@@ -192,9 +194,10 @@ PlotViewImp::~PlotViewImp()
    {
       // Destroy the element because the layer will not delete it since it does not exist in the model
       DataElementImp* pElement = dynamic_cast<DataElementImp*>(mpAnnotationLayer->getDataElement());
-
       delete pElement;
+
       delete mpAnnotationLayer;
+      mpAnnotationLayer = NULL;
    }
 
    // Destroy the mouse modes
@@ -211,12 +214,25 @@ PlotViewImp::~PlotViewImp()
       glDeleteLists(mDisplayListIndex, DISPLAY_LIST_SIZE);
    }
 
+   // Destroy the plot objects
+   VERIFYNR(disconnect(this, SIGNAL(objectAdded(PlotObject*)), this, SLOT(updateExtents())));
+   VERIFYNR(disconnect(this, SIGNAL(objectDeleted(PlotObject*)), this, SLOT(updateExtents())));
+
    for (list<PlotObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); )
    {
       PlotObject* pObject = *iter;
       iter = mObjects.erase(iter);
       if (pObject != NULL)
       {
+         if (pObject->isPrimary() == true)
+         {
+            PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
+            VERIFYNRV(pObjectImp != NULL);
+
+            VERIFYNR(disconnect(pObjectImp, SIGNAL(extentsChanged()), this, SLOT(updateExtents())));
+            VERIFYNR(disconnect(pObjectImp, SIGNAL(visibilityChanged(bool)), this, SLOT(updateExtents())));
+         }
+
          emit objectDeleted(pObject);
          notify(SIGNAL_NAME(PlotView, ObjectDeleted), pObject);
          delete dynamic_cast<PlotObjectImp*>(pObject);
@@ -458,8 +474,42 @@ bool PlotViewImp::insertObject(PlotObject* pObject)
    mObjects.push_back(pObject);
    emit objectAdded(pObject);
    notify(SIGNAL_NAME(PlotView, ObjectAdded), boost::any(pObject));
-   updateExtents();
+
    return true;
+}
+
+bool PlotViewImp::insertObjects(const list<PlotObject*>& objects)
+{
+   if (objects.empty() == true)
+   {
+      return false;
+   }
+
+   VERIFYNR(disconnect(this, SIGNAL(objectAdded(PlotObject*)), this, SLOT(updateExtents())));
+
+   bool success = true;
+   bool objectsInserted = false;
+   for (list<PlotObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   {
+      PlotObject* pObject = *iter;
+      if ((pObject != NULL) && (insertObject(pObject) == true))
+      {
+         objectsInserted = true;
+      }
+      else
+      {
+         success = false;
+      }
+   }
+
+   VERIFYNR(connect(this, SIGNAL(objectAdded(PlotObject*)), this, SLOT(updateExtents())));
+
+   if (objectsInserted == true)
+   {
+      updateExtents();
+   }
+
+   return success;
 }
 
 list<PlotObject*> PlotViewImp::getObjects() const
@@ -561,25 +611,61 @@ bool PlotViewImp::deleteObject(PlotObject* pObject)
       return false;
    }
 
-   list<PlotObject*>::iterator iter = mObjects.begin();
-   while (iter != mObjects.end())
+   list<PlotObject*>::iterator iter = std::find(mObjects.begin(), mObjects.end(), pObject);
+   if (iter != mObjects.end())
    {
-      PlotObject* pCurrentObject = NULL;
-      pCurrentObject = *iter;
-      if (pCurrentObject == pObject)
+      if (pObject->isPrimary() == true)
       {
-         mObjects.erase(iter);
-         emit objectDeleted(pObject);
-         notify(SIGNAL_NAME(PlotView, ObjectDeleted), boost::any(pObject));
-         updateExtents();
-         delete dynamic_cast<PlotObjectImp*>(pObject);
-         return true;
+         PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
+         VERIFY(pObjectImp != NULL);
+
+         VERIFYNR(disconnect(pObjectImp, SIGNAL(extentsChanged()), this, SLOT(updateExtents())));
+         VERIFYNR(disconnect(pObjectImp, SIGNAL(visibilityChanged(bool)), this, SLOT(updateExtents())));
       }
 
-      ++iter;
+      mObjects.erase(iter);
+      emit objectDeleted(pObject);
+      notify(SIGNAL_NAME(PlotView, ObjectDeleted), boost::any(pObject));
+      delete dynamic_cast<PlotObjectImp*>(pObject);
+
+      return true;
    }
 
    return false;
+}
+
+bool PlotViewImp::deleteObjects(const std::list<PlotObject*>& objects)
+{
+   if (objects.empty() == true)
+   {
+      return false;
+   }
+
+   VERIFYNR(disconnect(this, SIGNAL(objectDeleted(PlotObject*)), this, SLOT(updateExtents())));
+
+   bool success = true;
+   bool objectsDeleted = false;
+   for (list<PlotObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   {
+      PlotObject* pObject = *iter;
+      if ((pObject != NULL) && (deleteObject(pObject) == true))
+      {
+         objectsDeleted = true;
+      }
+      else
+      {
+         success = false;
+      }
+   }
+
+   VERIFYNR(connect(this, SIGNAL(objectDeleted(PlotObject*)), this, SLOT(updateExtents())));
+
+   if (objectsDeleted == true)
+   {
+      updateExtents();
+   }
+
+   return success;
 }
 
 bool PlotViewImp::moveObjectToFront(PlotObject* pObject)
@@ -880,37 +966,17 @@ void PlotViewImp::deleteSelectedObjects(bool filterVisible)
 
 void PlotViewImp::clear()
 {
-   list<PlotObject*> deleteObjects;
-
-   list<PlotObject*>::iterator iter = mObjects.begin();
-   while (iter != mObjects.end())
+   list<PlotObject*> objectsToDelete;
+   for (list<PlotObject*>::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
    {
-      PlotObject* pObject = NULL;
-      pObject = *iter;
-      if (pObject != NULL)
+      PlotObject* pObject = *iter;
+      if ((pObject != NULL) && (pObject->isPrimary() == true))
       {
-         if (pObject->isPrimary() == true)
-         {
-            deleteObjects.push_back(pObject);
-         }
+         objectsToDelete.push_back(pObject);
       }
-
-      ++iter;
    }
 
-   iter = deleteObjects.begin();
-   while (iter != deleteObjects.end())
-   {
-      PlotObject* pObject = NULL;
-      pObject = *iter;
-      if (pObject != NULL)
-      {
-         deleteObject(pObject);
-      }
-
-      ++iter;
-   }
-
+   deleteObjects(objectsToDelete);
    zoomExtents();
 }
 
@@ -1686,6 +1752,11 @@ void PlotViewImp::updateExtents()
 
 void PlotViewImp::updateAnnotationObjects()
 {
+   if (mpAnnotationLayer == NULL)
+   {
+      return;
+   }
+
    list<GraphicObject*> textObjects;
    mpAnnotationLayer->getObjects(TEXT_OBJECT, textObjects);
 
