@@ -55,7 +55,7 @@ env = Environment(variables=vars,
                   ENV=os.environ,
                   TARGET_ARCH=TARGET_ARCH,
                   MSVC_VERSION="10.0",
-                  tools=["default", "java", "qwt",
+                  tools=["default", "qwt",
                          "xercesc", "ehs", "minizip", "yaml-cpp",
                          "raptor", "zlib", "pthreads", "qt4"],
                   toolpath=[TOOLPATH])
@@ -117,7 +117,7 @@ elif OS == "windows":
       env.AppendUnique(LINKFLAGS=['/INCREMENTAL', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrt.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
 
 env.AppendUnique(LIBPATH=["%s/lib" % dep_path])
-env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+env.VariantDir(env["BUILDDIR"], "#", duplicate=0)
 
 if OS != "windows":
    if MODE == 'release':
@@ -160,22 +160,22 @@ Export('env','libInstallTargets','MODE','TOOLPATH','pluginTargets')
 
 for sub in libdirs:
    src_dir = '#/%s' % sub
-   build_dir = '%s/%s' % (env["BUILDDIR"], sub)
-   env.BuildDir(build_dir, src_dir, duplicate=0)
-   libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
+   variant_dir = '%s/%s' % (env["BUILDDIR"], sub)
+   env.VariantDir(variant_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % sub, exports='variant_dir'))
    env.Alias("%s-Install" % (sub), env.Install(env["LIBDIR"], libs[-1]))
    libInstallTargets.append(libs[-1])
 
 for sub in pluginlibdirs:
    src_dir = '#/%s' % sub
-   build_dir = '%s/%s' % (env["BUILDDIR"], sub)
-   env.BuildDir(build_dir, src_dir, duplicate=0)
-   libs.append(env.SConscript('%s/SConscript' % sub, exports='build_dir'))
+   variant_dir = '%s/%s' % (env["BUILDDIR"], sub)
+   env.VariantDir(variant_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % sub, exports='variant_dir'))
    libInstallTargets.append(libs[-1])
    pluginTargets.append(libs[-1])
 
-build_dir = '%s/SimpleApiLib' % env["BUILDDIR"]
-simpleapi = env.SConscript("SimpleApiLib/SConscript", exports='build_dir')
+variant_dir = '%s/SimpleApiLib' % env["BUILDDIR"]
+simpleapi = env.SConscript("SimpleApiLib/SConscript", exports='variant_dir')
 if OS == "windows":
    binInstallTargets.append(simpleapi)
 libInstallTargets.append(simpleapi)
@@ -213,9 +213,9 @@ subprocess.Popen(update_build_rev_args).wait()
 if OS == "windows":
    EXE_PREFIX = "Opticks" #generate OpticksBatch.exe on Windows
 src_dir=Dir('#/Batch').abspath
-build_dir = '%s/Batch' % env["BUILDDIR"]
-env.BuildDir(build_dir, src_dir, duplicate=0)
-batch = SConscript('Batch/SConscript', exports='build_dir')
+variant_dir = '%s/Batch' % env["BUILDDIR"]
+env.VariantDir(variant_dir, src_dir, duplicate=0)
+batch = SConscript('Batch/SConscript', exports='variant_dir')
 batchEnv = env.Clone()
 batchEnv.Tool("xqilla", toolpath=[TOOLPATH])
 if OS == "windows":
@@ -231,9 +231,9 @@ env.Alias('batch',batchBin)
 if OS == "windows":
    if OPTICKSPLATFORM == "Win32":
       src_dir = Dir("#/ArcProxy").abspath
-      build_dir = "%s/ArcProxy" % env["BUILDDIR"] 
-      env.BuildDir(build_dir, src_dir, duplicate=0)
-      arcBin = SConscript("ArcProxy/SConscript", exports='build_dir')
+      variant_dir = "%s/ArcProxy" % env["BUILDDIR"] 
+      env.VariantDir(variant_dir, src_dir, duplicate=0)
+      arcBin = SConscript("ArcProxy/SConscript", exports='variant_dir')
       arcProxyInstall = env.Install("%s/ArcProxy" % env["PLUGINDIR"], arcBin)
    else:
       #copy from 32-bit build, requires 32-bit compilations happen first

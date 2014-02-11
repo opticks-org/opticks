@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment and set up a unique sub-environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 env = env.Clone()
 env.Tool("hdf4",toolpath=[TOOLPATH])
 env.Tool("hdf5",toolpath=[TOOLPATH])
@@ -11,13 +11,13 @@ env.Tool("hdf5",toolpath=[TOOLPATH])
 ####
 # build sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
 
 ####
 # build the library and set up an alias to ease building it later
 ####
-lib = env.Library("%s/HdfPlugInLib" % build_dir,objs)
+lib = env.Library("%s/HdfPlugInLib" % variant_dir,objs)
 env.Alias('libHdfPlugInLib', lib)
 
 ####

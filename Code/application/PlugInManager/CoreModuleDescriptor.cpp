@@ -38,6 +38,8 @@
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInRegistration.h"
+#include "PointCloudInMemoryPager.h"
+#include "PointCloudMemoryMappedPager.h"
 #include "PropertiesAnnotationLayer.h"
 #include "PropertiesAoiLayer.h"
 #include "PropertiesClassification.h"
@@ -54,6 +56,7 @@
 #include "PropertiesModuleDescriptor.h"
 #include "PropertiesPlotView.h"
 #include "PropertiesPlugInDescriptor.h"
+#include "PropertiesPointCloudView.h"
 #include "PropertiesProductView.h"
 #include "PropertiesPseudocolorLayer.h"
 #include "PropertiesQWidgetWrapper.h"
@@ -97,6 +100,8 @@ GENERATE_FACTORY(OpticksCore);
 REGISTER_PLUGIN_BASIC(OpticksCore, CopyrightInformation);
 REGISTER_PLUGIN_BASIC(OpticksCore, InMemoryPager);
 REGISTER_PLUGIN_BASIC(OpticksCore, MemoryMappedPager);
+REGISTER_PLUGIN_BASIC(OpticksCore, PointCloudInMemoryPager);
+REGISTER_PLUGIN_BASIC(OpticksCore, PointCloudMemoryMappedPager);
 REGISTER_PLUGIN(OpticksCore, OptionsAnimation, OptionQWidgetWrapper<OptionsAnimation>());
 REGISTER_PLUGIN(OpticksCore, OptionsAnnotationLayer, OptionQWidgetWrapper<OptionsAnnotationLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsAoiLayer, OptionQWidgetWrapper<OptionsAoiLayer>());
@@ -135,6 +140,7 @@ REGISTER_PLUGIN(OpticksCore, PropertiesMeasurementObject, PropertiesQWidgetWrapp
 REGISTER_PLUGIN(OpticksCore, PropertiesModuleDescriptor, PropertiesQWidgetWrapper<PropertiesModuleDescriptor>());
 REGISTER_PLUGIN(OpticksCore, PropertiesPlotView, PropertiesQWidgetWrapper<PropertiesPlotView>());
 REGISTER_PLUGIN(OpticksCore, PropertiesPlugInDescriptor, PropertiesQWidgetWrapper<PropertiesPlugInDescriptor>());
+REGISTER_PLUGIN(OpticksCore, PropertiesPointCloudView, PropertiesQWidgetWrapper<PropertiesPointCloudView>());
 REGISTER_PLUGIN(OpticksCore, PropertiesProductView, PropertiesQWidgetWrapper<PropertiesProductView>());
 REGISTER_PLUGIN(OpticksCore, PropertiesPseudocolorLayer, PropertiesQWidgetWrapper<PropertiesPseudocolorLayer>());
 REGISTER_PLUGIN(OpticksCore, PropertiesRasterLayer, PropertiesQWidgetWrapper<PropertiesRasterLayer>());

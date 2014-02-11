@@ -111,6 +111,8 @@
 #include "PlugInDescriptor.h"
 #include "PlugInManagerServicesImp.h"
 #include "PlugInResource.h"
+#include "PointCloudViewImp.h"
+#include "PointCloudWindowAdapter.h"
 #include "ProductViewAdapter.h"
 #include "ProductWindowAdapter.h"
 #include "ProgressAdapter.h"
@@ -1421,7 +1423,7 @@ Window* ApplicationWindow::createWindow(const QString& strWindowName, WindowType
    {
       pWindow = new DockWindowAdapter(SessionItemImp::generateUniqueId(), strWindowName.toStdString(), this);
    }
-   else if ((windowType == WORKSPACE_WINDOW) || (windowType == SPATIAL_DATA_WINDOW) || (windowType == PRODUCT_WINDOW))
+   else if ((windowType == WORKSPACE_WINDOW) || (windowType == SPATIAL_DATA_WINDOW) || (windowType == PRODUCT_WINDOW) || (windowType == POINT_CLOUD_WINDOW))
    {
       QString strName = strWindowName;
       strName.replace(QRegExp("\\\\"), "/");
@@ -1437,6 +1439,10 @@ Window* ApplicationWindow::createWindow(const QString& strWindowName, WindowType
       else if (windowType == PRODUCT_WINDOW)
       {
          pWindow = new ProductWindowAdapter(SessionItemImp::generateUniqueId(), strName.toStdString(), mpWorkspace);
+      }
+      else if (windowType == POINT_CLOUD_WINDOW)
+      {
+         pWindow = new PointCloudWindowAdapter(SessionItemImp::generateUniqueId(), strName.toStdString(), mpWorkspace);
       }
    }
    else if (windowType == TOOLBAR)
@@ -4791,6 +4797,7 @@ void ApplicationWindow::enableActions(bool bEnable)
 {
    bool bView = false;
    bool bSpatialDataView = false;
+   bool bPointCloudView = false;
    bool bProductView = false;
    bool bProductWindow = false;
    bool bEnableEditActions = false;
@@ -4843,6 +4850,12 @@ void ApplicationWindow::enableActions(bool bEnable)
          }
       }
 
+      PointCloudViewImp* pPointCloudView = dynamic_cast<PointCloudViewImp*>(pView);
+      if (pPointCloudView != NULL)
+      {
+         bPointCloudView = true;
+      }
+
       ProductView* pProductView = dynamic_cast<ProductView*>(pView);
       if (pProductView != NULL)
       {
@@ -4873,7 +4886,7 @@ void ApplicationWindow::enableActions(bool bEnable)
    m_pMeasurement_Edit_Action->setEnabled(bEnable && bSpatialDataView);
    mpCreateAnimationAction->setEnabled(bEnable && bSpatialDataView);
    m_pRefresh_Action->setEnabled(bEnable);
-   m_pReset_Action->setEnabled(bEnable && bSpatialDataView);
+   m_pReset_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
    mpResetStretchAction->setEnabled(bEnable && bSpatialDataView);
    m_pDisplay_Mode_Action->setEnabled(bEnable && bSpatialDataView);
    mpClearMarkingsAction->setEnabled(bEnable && bSpatialDataView);
@@ -4882,13 +4895,13 @@ void ApplicationWindow::enableActions(bool bEnable)
    m_pPan_Action->setEnabled(bEnable);
 
    // Rotate actions
-   m_pRotate_Left_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pRotate_Right_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pFlip_Horiz_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pFlip_Vert_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pRotate_By_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pFree_Rotate_Action->setEnabled(bEnable && bSpatialDataView);
-   m_pReset_Action->setEnabled(bEnable && bSpatialDataView);
+   m_pRotate_Left_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pRotate_Right_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pFlip_Horiz_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pFlip_Vert_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pRotate_By_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pFree_Rotate_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
+   m_pReset_Action->setEnabled(bEnable && (bSpatialDataView || bPointCloudView));
    mpNorthUpAction->setEnabled(bEnable && bSpatialDataView);
    mpSensorUpAction->setEnabled(bEnable && bSpatialDataView);
 
@@ -5341,6 +5354,12 @@ void ApplicationWindow::clearMarkings()
    if (pWindow->getWindowType() == PRODUCT_WINDOW)
    {
       QMessageBox::information(this, "Product window selected", "Clear markings is not currently supported for a Product window", QMessageBox::Ok | QMessageBox::Default);
+      return;
+   }
+
+   if (pWindow->getWindowType() == POINT_CLOUD_WINDOW)
+   {
+      QMessageBox::information(this, "Point cloud window selected", "Clear markings is not currently supported for a Point cloud window", QMessageBox::Ok | QMessageBox::Default);
       return;
    }
 

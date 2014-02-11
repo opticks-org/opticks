@@ -3,18 +3,18 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir')
+Import('env variant_dir')
 
 ####
 # build top-level sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.Object(srcs)
 
 ####
 # build the library and set up an alias to ease building it later
 ####
-lib = env.Library("%s/Model" % build_dir,objs)
+lib = env.Library("%s/Model" % variant_dir,objs)
 env.Alias('libModel', lib)
 
 ####

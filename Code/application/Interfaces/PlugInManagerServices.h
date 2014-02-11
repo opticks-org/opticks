@@ -147,6 +147,17 @@ public:
 
    /**
     * The type that should be returned from PlugIn::getType()
+    * for types of plug-in that implement the PointCloudPager interface.
+    *
+    * @return Returns the type used for point cloud pager plug-ins.
+    */
+   static std::string PointCloudPagerType()
+   {
+      return "PointCloudPager";
+   }
+
+   /**
+    * The type that should be returned from PlugIn::getType()
     * for viewer plug-ins.
     *
     * @return Returns the type used for viewer plug-ins.
@@ -373,6 +384,7 @@ public:
     *  - PerspectiveView
     *  - PlotView
     *  - PlotWidget
+    *  - PointCloudElement
     *  - PolarPlot
     *  - #ProcessingLocation
     *  - ProductView

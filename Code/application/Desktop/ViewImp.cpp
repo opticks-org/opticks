@@ -1694,20 +1694,6 @@ void ViewImp::paintEvent(QPaintEvent* pEvent)
    painter.endNativePainting();
 }
 
-void ViewImp::initializeGL()
-{
-   // Turn off unnecessary OpenGL functions to increase speed
-   glDisable(GL_CULL_FACE);
-   glShadeModel(GL_FLAT);          // don't need shading
-   glDisable(GL_NORMALIZE);        // don't automatically normalize normal
-   glDisable(GL_LIGHTING);         // don't need a lighting model
-   glDisable(GL_DEPTH_TEST);       // disable z-buffering
-   glDisable(GL_STENCIL_TEST);     // disable stencil
-   glDisable(GL_ALPHA_TEST);
-
-   setAutoBufferSwap(true);
-}
-
 void ViewImp::setupScreenMatrices()
 {
    int viewPort[4];

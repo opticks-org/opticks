@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
 env.Tool("ehs",toolpath=[TOOLPATH])
@@ -18,8 +18,8 @@ subdirs = ["pthreads-wrapper"]
 ####
 cpps = glob.glob("*.cpp") 
 cpps.remove("StringUtilities.cpp") #remove StringUtilities.cpp, it needs special compile flags on Windows
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), cpps)
-mocfiles = map(lambda x,bd=build_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), cpps)
+mocfiles = map(lambda x,bd=variant_dir,e=env: e.Moc('%s/Interfaces/%s' % (bd,x)),
                ["AlgorithmDialog.h",
                 "AnimationFrameSpinBox.h",
                 "AnimationFrameSubsetWidget.h",
@@ -52,14 +52,14 @@ objs = env.Object(srcs + mocfiles)
 env2 = env.Clone()
 if env2["OS"] == "windows":
    env2.AppendUnique(CXXFLAGS="/bigobj")
-objs += env2.Object('%s/%s' % (build_dir, "StringUtilities.cpp"))
+objs += env2.Object('%s/%s' % (variant_dir, "StringUtilities.cpp"))
 
 ####
 # build subdirectory sources
 ####
 for sub in subdirs:
    env.Append(CPPPATH="#/PlugInUtilities/%s" % sub)
-   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
+   srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
    objs += env.Object(srcs)
 
 ####
@@ -70,7 +70,7 @@ env.Append(CPPPATH="#/PlugInUtilities/Interfaces")
 ####
 # build the library and set up an alias to ease building it later
 ####
-lib = env.Library("%s/PlugInUtilities" % build_dir,objs)
+lib = env.Library("%s/PlugInUtilities" % variant_dir,objs)
 env.Alias('libPlugInUtilities', lib)
 
 ####

@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment and set up a unique sub-environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 env = env.Clone()
 env.Tool("ossim",toolpath=[TOOLPATH])
 env.Tool("openjpeg",toolpath=[TOOLPATH])
@@ -11,13 +11,13 @@ env.Tool("openjpeg",toolpath=[TOOLPATH])
 ####
 # build sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
 
 ####
 # build the library and set up an alias to ease building it later
 ####
-lib = env.Library("%s/NitfPlugInLib" % build_dir,objs)
+lib = env.Library("%s/NitfPlugInLib" % variant_dir,objs)
 env.Alias('libNitfPlugInLib', lib)
 
 ####

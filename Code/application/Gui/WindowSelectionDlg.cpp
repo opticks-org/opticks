@@ -134,12 +134,20 @@ QDialog(parent)
             if (pWin != NULL)
             {
                winType = pWin->getWindowType();
-               if (winType == SPATIAL_DATA_WINDOW || winType == PRODUCT_WINDOW)
+               if (winType == SPATIAL_DATA_WINDOW || winType == PRODUCT_WINDOW || winType == POINT_CLOUD_WINDOW)
                {
                   string name = pWin->getName();
                   if (name.empty() == false)
                   {
-                     QString label(winType == SPATIAL_DATA_WINDOW ? "SDW>" : "PW>");
+                     QString label("SDW>");
+                     if (winType == PRODUCT_WINDOW)
+                     {
+                        label = "PW>";
+                     }
+                     else if (winType == POINT_CLOUD_WINDOW)
+                     {
+                        label = "PCW>";
+                     }
                      label += name.c_str();
                      QListWidgetItem* pItem = new QListWidgetItem(label, mpTileList);
                      pItem->setData(Qt::UserRole, QVariant::fromValue(reinterpret_cast<void*>(pWin)));

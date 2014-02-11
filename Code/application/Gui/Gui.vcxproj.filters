@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -26,6 +26,9 @@
     </Filter>
     <Filter Include="Undo">
       <UniqueIdentifier>{7d4b6c69-cce5-4253-8a8e-e929c411b989}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources\shaders">
+      <UniqueIdentifier>{fab46217-bbf5-47c1-8dc5-1e86b296dc9a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +273,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesPlugInDescriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertiesPointCloudView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PropertiesProductView.cpp">
@@ -582,6 +588,9 @@
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesMeasurementObject.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesPointCloudView.cpp">
       <Filter>moc</Filter>
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesPseudocolorLayer.cpp">
@@ -1443,6 +1452,9 @@
     <CustomBuild Include="PropertiesMeasurementObject.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="PropertiesPointCloudView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="PropertiesPseudocolorLayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -1545,5 +1557,19 @@
     <CustomBuild Include="Undo\UndoStack.h">
       <Filter>Undo</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\pointcloud_fragment_color_stretch.glsl">
+      <Filter>resources\shaders</Filter>
+    </None>
+    <None Include="res\shaders\pointcloud_vertex_attribute.glsl">
+      <Filter>resources\shaders</Filter>
+    </None>
+    <None Include="res\shaders\pointcloud_vertex_height.glsl">
+      <Filter>resources\shaders</Filter>
+    </None>
+    <None Include="res\shaders\pointcloud_fragment_color_map.glsl">
+      <Filter>resources\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

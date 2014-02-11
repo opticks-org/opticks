@@ -3,14 +3,14 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 env = env.Clone()
 env.Append(CPPDEFINES=["APPLICATION_XERCES"],CPPPATH=["$COREDIR/Wizard","#/WizardItems"],LIBS=["Wizard","Utilities","PlugInUtilities"])
 
 ####
 # build sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
 wizard_extras = []
 if env["OS"] != "windows":
@@ -26,7 +26,7 @@ if env["OS"] != "windows":
 ####
 # build the plug-in library and set up an alias to ease building it later
 ####
-lib = env.SharedLibrary('%s/WizardExecutor' % build_dir,objs+wizard_extras)
+lib = env.SharedLibrary('%s/WizardExecutor' % variant_dir,objs+wizard_extras)
 libInstall = env.Install(env["PLUGINDIR"], lib)
 env.Alias('WizardExecutor', libInstall)
 

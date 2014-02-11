@@ -179,6 +179,7 @@
    <file alias="PlayRepeat">icons/PlayRepeatIcon.png</file>
    <file alias="PlugIn">icons/PlugInIcon.png</file>
    <file alias="Point">icons/PointIcon.png</file>
+   <file alias="PointCloudView">icons/PointCloudViewIcon.png</file>
    <file alias="Polygon">icons/PolygonIcon.png</file>
    <file alias="Polyline">icons/PolylineIcon.png</file>
    <file alias="PopFront">icons/PopFrontIcon.png</file>
@@ -279,6 +280,7 @@
    <file alias="hdf5">Hdf5License.txt</file>
    <file alias="ijg">IjgLicense.txt</file>
    <file alias="libgeotiff">LibgeotiffLicense.txt</file>
+   <file alias="liblas">LiblasLicense.txt</file>
    <file alias="libtiff">LibtiffLicense.txt</file>
    <file alias="minizip">MiniZipLicense.txt</file>
    <file alias="opencollada">OpenColladaLicense.txt</file>
@@ -299,5 +301,11 @@
    <file alias="xqilla">XqillaLicense.txt</file>
    <file alias="yaml-cpp">YamlLicense.txt</file>
    <file alias="zlib">ZlibLicense.txt</file>
+</qresource>
+<qresource prefix="/shaders/pointcloud">
+  <file alias="vertex_height">shaders/pointcloud_vertex_height.glsl</file>
+  <file alias="vertex_attribute">shaders/pointcloud_vertex_attribute.glsl</file>
+  <file alias="fragment_color_stretch">shaders/pointcloud_fragment_color_stretch.glsl</file>
+  <file alias="fragment_color_map">shaders/pointcloud_fragment_color_map.glsl</file>
 </qresource>
 </RCC>

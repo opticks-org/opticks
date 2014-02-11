@@ -21,6 +21,9 @@
 #include "ImportDescriptorImp.h"
 #include "MessageLog.h"
 #include "PlugInManagerServices.h"
+#include "PointCloudDataDescriptorAdapter.h"
+#include "PointCloudElementAdapter.h"
+#include "PointCloudFileDescriptorImp.h"
 #include "RasterDataDescriptorAdapter.h"
 #include "RasterElementAdapter.h"
 #include "RasterFileDescriptorImp.h"
@@ -82,6 +85,7 @@ ModelServicesImp::ModelServicesImp() :
    mElementTypes.push_back("DataElement");
    mElementTypes.push_back("DataElementGroup");
    mElementTypes.push_back("GcpList");
+   mElementTypes.push_back("PointCloudElement");
    mElementTypes.push_back("RasterElement");
    mElementTypes.push_back("Signature");
    mElementTypes.push_back("SignatureLibrary");
@@ -119,6 +123,10 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    {
       pDescriptor = new RasterDataDescriptorAdapter(name, type, pParent);
    }
+   else if (isKindOfElement(type, "PointCloudElement") == true)
+   {
+      pDescriptor = new PointCloudDataDescriptorAdapter(name, type, pParent);
+   }
    else if (isKindOfElement(type, "Signature") == true)
    {
       pDescriptor = new SignatureDataDescriptorAdapter(name, type, pParent);
@@ -138,6 +146,10 @@ DataDescriptor* ModelServicesImp::createDataDescriptor(const string& name, const
    if (isKindOfElement(type, "RasterElement"))
    {
       pDescriptor = new RasterDataDescriptorAdapter(name, type, parent);
+   }
+   else if (isKindOfElement(type, "PointCloudElement"))
+   {
+      pDescriptor = new PointCloudDataDescriptorAdapter(name, type, parent);
    }
    else if (isKindOfElement(type, "Signature"))
    {
@@ -320,6 +332,26 @@ DataElement* ModelServicesImp::createElement(const DataDescriptor* pDescriptor, 
    else if ((type == "GcpList") || (type == "GcpListAdapter"))
    {
       pElement = new GcpListAdapter(*pDescriptorImp, id);
+   }
+   else if ((type == "PointCloudElement") || (type == "PointCloudElementAdapter"))
+   {
+      const PointCloudDataDescriptor* pPcDescriptor = dynamic_cast<const PointCloudDataDescriptor*>(pDescriptor);
+      if (pPcDescriptor != NULL)
+      {
+         PointCloudElement* pCloud = new PointCloudElementAdapter(*pDescriptorImp, id);
+         if (pCloud != NULL)
+         {
+            if (pDescriptorImp->getProcessingLocation() == IN_MEMORY)
+            {
+               if (!pCloud->createInMemoryPager())
+               {
+                  delete dynamic_cast<PointCloudElementImp*>(pCloud);
+                  pCloud = NULL;
+               }
+            }
+         }
+         pElement = pCloud;
+      }
    }
    else if ((type == "RasterElement") || (type == "RasterElementAdapter"))
    {
@@ -824,6 +856,11 @@ bool ModelServicesImp::isKindOfElement(const string& className, const string& el
    {
       bSuccess = GraphicElementImp::isKindOfElement(elementName);
    }
+   else if ((className == "PointCloudElement") || (className == "PointCloudElementAdapter") ||
+      (className == "PointCloudElementImp"))
+   {
+      bSuccess = PointCloudElementImp::isKindOfElement(elementName);
+   }
    else if ((className == "RasterElement") || (className == "RasterElementAdapter") ||
       (className == "RasterElementImp"))
    {
@@ -893,6 +930,11 @@ void ModelServicesImp::getElementTypes(const string& className, vector<string>& 
    {
       GraphicElementImp::getElementTypes(classList);
    }
+   else if ((className == "PointCloudElement") || (className == "PointCloudElementAdapter") ||
+      (className == "PointCloudElementImp"))
+   {
+      PointCloudElementImp::getElementTypes(classList);
+   }
    else if ((className == "RasterElement") || (className == "RasterElementAdapter") ||
       (className == "RasterElementImp"))
    {
@@ -936,6 +978,11 @@ bool ModelServicesImp::isKindOfDataDescriptor(const string& className, const str
    {
       bSuccess = RasterDataDescriptorImp::isKindOfDataDescriptor(descriptorName);
    }
+   else if ((className == "PointCloudDataDescriptor") || (className == "PointCloudDataDescriptorAdapter") ||
+      (className == "PointCloudDataDescriptorImp"))
+   {
+      bSuccess = PointCloudDataDescriptorImp::isKindOfDataDescriptor(descriptorName);
+   }
    else if ((className == "SignatureDataDescriptor") || (className == "SignatureDataDescriptorAdapter") ||
       (className == "SignatureDataDescriptorImp"))
    {
@@ -955,6 +1002,11 @@ void ModelServicesImp::getDataDescriptorTypes(const string& className, vector<st
       (className == "RasterDataDescriptorImp"))
    {
       RasterDataDescriptorImp::getDataDescriptorTypes(classList);
+   }
+   else if ((className == "PointCloudDataDescriptor") || (className == "PointCloudDataDescriptorAdapter") ||
+      (className == "PointCloudDataDescriptorImp"))
+   {
+      PointCloudDataDescriptorImp::getDataDescriptorTypes(classList);
    }
    else if ((className == "SignatureDataDescriptor") || (className == "SignatureDataDescriptorAdapter") ||
       (className == "SignatureDataDescriptorImp"))
@@ -976,6 +1028,11 @@ bool ModelServicesImp::isKindOfFileDescriptor(const string& className, const str
    {
       bSuccess = RasterFileDescriptorImp::isKindOfFileDescriptor(descriptorName);
    }
+   else if ((className == "PointCloudFileDescriptor") || (className == "PointCloudFileDescriptorAdapter") ||
+      (className == "PointCloudFileDescriptorImp"))
+   {
+      bSuccess = PointCloudFileDescriptorImp::isKindOfFileDescriptor(descriptorName);
+   }
    else if ((className == "SignatureFileDescriptor") || (className == "SignatureFileDescriptorAdapter") ||
       (className == "SignatureFileDescriptorImp"))
    {
@@ -995,6 +1052,11 @@ void ModelServicesImp::getFileDescriptorTypes(const string& className, vector<st
       (className == "RasterFileDescriptorImp"))
    {
       RasterFileDescriptorImp::getFileDescriptorTypes(classList);
+   }
+   else if ((className == "PointCloudFileDescriptor") || (className == "PointCloudFileDescriptorAdapter") ||
+      (className == "PointCloudFileDescriptorImp"))
+   {
+      PointCloudFileDescriptorImp::getFileDescriptorTypes(classList);
    }
    else if ((className == "SignatureFileDescriptor") || (className == "SignatureFileDescriptorAdapter") ||
       (className == "SignatureFileDescriptorImp"))

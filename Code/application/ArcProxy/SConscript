@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 
 if env["OS"] != "windows":
    arcBin = None
@@ -22,7 +22,7 @@ else:
    ####
    # build sources
    ####
-   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+   srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
    objs = env.Object(srcs)
    arcBin = env.Program("%s/ArcProxy" % env["BUILDDIR"], objs)
 

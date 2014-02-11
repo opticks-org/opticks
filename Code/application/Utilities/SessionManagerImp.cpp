@@ -45,6 +45,7 @@
 #include "PlugIn.h"
 #include "PlugInDescriptorImp.h"
 #include "PlugInManagerServicesImp.h"
+#include "PointCloudViewAdapter.h"
 #include "PolarPlotAdapter.h"
 #include "ProductViewAdapter.h"
 #include "ProductView.h"
@@ -435,6 +436,10 @@ SessionItem *SessionManagerImp::createView(const string &type, const string &id,
       if (strType == "SpatialDataViewAdapter")
       {
          pView = new SpatialDataViewAdapter(id, name, NULL, 0);
+      }
+      else if (strType == "PointCloudViewAdapter")
+      {
+         pView = new PointCloudViewAdapter(id, name, NULL, 0);
       }
       else if (strType == "ProductViewAdapter")
       {

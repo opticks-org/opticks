@@ -52,6 +52,7 @@
 #include "PlotSetAdapter.h"
 #include "PlotSetGroupAdapter.h"
 #include "PlotWidgetAdapter.h"
+#include "PointCloudViewAdapter.h"
 #include "PolarPlotAdapter.h"
 #include "ProductViewAdapter.h"
 #include "ProgressDlg.h"
@@ -428,6 +429,10 @@ View* DesktopServicesImp::createView(const string& viewName, ViewType viewType, 
          pView = new CartesianPlotAdapter(SessionItemImp::generateUniqueId(), viewName, NULL, pParent);
          break;
 
+      case POINT_CLOUD_VIEW:
+         pView = new PointCloudViewAdapter(SessionItemImp::generateUniqueId(), viewName, NULL, pParent);
+         break;
+
       default:
          break;
    }
@@ -505,6 +510,10 @@ bool DesktopServicesImp::isKindOfView(const string& className, const string& vie
    {
       bSuccess = PolarPlotImp::isKindOfView(viewName);
    }
+   else if ((className == "PointCloudView") || (className == "PointCloudViewAdapter") || (className == "PointCloudViewImp"))
+   {
+      bSuccess = PointCloudViewImp::isKindOfView(viewName);
+   }
    else if ((className == "ProductView") || (className == "ProductViewAdapter") || (className == "ProductViewImp"))
    {
       bSuccess = ProductViewImp::isKindOfView(viewName);
@@ -553,6 +562,10 @@ void DesktopServicesImp::getViewTypes(const string& className, vector<string>& c
    else if ((className == "PolarPlot") || (className == "PolarPlotAdapter") || (className == "PolarPlotImp"))
    {
       PolarPlotImp::getViewTypes(classList);
+   }
+   else if ((className == "PointCloudView") || (className == "PointCloudViewAdapter") || (className == "PointCloudViewImp"))
+   {
+      PointCloudViewImp::getViewTypes(classList);
    }
    else if ((className == "ProductView") || (className == "ProductViewAdapter") || (className == "ProductViewImp"))
    {

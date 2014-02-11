@@ -88,7 +88,7 @@ public:
     *  Sets the widget to be displayed in the window.
     *
     *  This method sets the view window to display a custom Qt widget instead of
-    *  a View.  This method does nothing for SpatialDataWindow and ProductWindow
+    *  a View.  This method does nothing for SpatialDataWindow, PointCloudWindow and ProductWindow
     *  objects since by default, they contain a view.
     *
     *  @param   pWidget

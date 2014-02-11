@@ -14,18 +14,18 @@ default_sconscript = """import glob
 ####
 # import the environment
 ####
-Import('env build_dir')
+Import('env variant_dir')
 
 ####
 # build sources
 ####
-srcs = map(lambda x,bd=build_dir: '%%s/%%s' %% (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%%s/%%s' %% (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
 
 ####
 # build the plug-in library and set up an alias
 ####
-lib = env.SharedLibrary('%%s/%s' %% build_dir,objs)
+lib = env.SharedLibrary('%%s/%s' %% variant_dir,objs)
 libInstall = env.Install(env["PLUGINDIR"], lib)
 env.Alias('%s', libInstall)
 
@@ -118,7 +118,7 @@ if OPTICKSPLATFORM == "solaris-sparc":
               LIBPATH=[env["LIBDIR"]],
               LIBS=env["QT_MODULES"] + ["PlugInLib","PlugInUtilities","PlugInLib","nsl","dl","GLU","GL","Xm","Xext","X11","m"])
 elif OPTICKSPLATFORM == "linux-x86_64":
-   env.Append(CXXFLAGS="-m64 -fpic -w",
+   env.Append(CXXFLAGS="-std=c++0x -m64 -fpic -w",
               SHLINKFLAGS="-Wl,-E -melf_x86_64 -fpic",
               CPPDEFINES=["_USRDLL","APPLICATION_XERCES"],
               LIBPATH=[env["LIBDIR"]],
@@ -148,7 +148,7 @@ elif OS == "windows":
       env.AppendUnique(LINKFLAGS=['/INCREMENTAL', '/NODEFAULTLIB:"libc.lib"', '/NODEFAULTLIB:"libcmt.lib"', '/NODEFAULTLIB:"msvcrt.lib"', '/NODEFAULTLIB:"libcd.lib"', '/NODEFAULTLIB:"libcmtd.lib"'])
 
 env.AppendUnique(LIBPATH=["%s/lib" % dep_path])
-env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+env.VariantDir(env["BUILDDIR"], "#", duplicate=0)
 
 if OS != "windows":
    if MODE == 'release':
@@ -163,6 +163,7 @@ if OS != "windows":
 ignore = Split(env['ignore'])
 if OPTICKSPLATFORM == "linux-x86_64":
    ignore.append("LegacyModule")
+   ignore.append("XmlRpc")
 
 plugins = map(lambda x: os.path.basename(x),
               map(lambda x: x[0],
@@ -207,9 +208,9 @@ for plugin in plugins:
       except:
          continue
    src_dir = '#/%s' % plugin
-   build_dir = '%s/%s' % (env["BUILDDIR"], plugin)
-   env.BuildDir(build_dir, src_dir, duplicate=0)
-   libs.append(env.SConscript('%s/SConscript' % plugin, exports='build_dir'))
+   variant_dir = '%s/%s' % (env["BUILDDIR"], plugin)
+   env.VariantDir(variant_dir, src_dir, duplicate=0)
+   libs.append(env.SConscript('%s/SConscript' % plugin, exports='variant_dir'))
 
 ####
 # Install the plug-ins to the proper directories

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -190,6 +190,7 @@
     <ClCompile Include="DummyCustomImporter.cpp" />
     <ClCompile Include="MessageLogTest.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
+    <ClCompile Include="PointCloudHistogram.cpp" />
     <ClCompile Include="SampleRasterElementImporter.cpp" />
     <ClCompile Include="Scriptor.cpp" />
   </ItemGroup>
@@ -202,6 +203,7 @@
     <ClInclude Include="DummyCustomAlgorithm.h" />
     <ClInclude Include="DummyCustomImporter.h" />
     <ClInclude Include="MessageLogTest.h" />
+    <ClInclude Include="PointCloudHistogram.h" />
     <ClInclude Include="SampleRasterElementImporter.h" />
     <ClInclude Include="Scriptor.h" />
   </ItemGroup>

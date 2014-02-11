@@ -263,6 +263,11 @@ void PlugInArgImp::initArgTypes()
       mArgTypes.push_back("PerspectiveView");
       mArgTypes.push_back("PlotView");
       mArgTypes.push_back("PlotWidget");
+      mArgTypes.push_back("PointCloudDataDescriptor");
+      mArgTypes.push_back("PointCloudElement");
+      mArgTypes.push_back("PointCloudFileDescriptor");
+      mArgTypes.push_back("PointCloudView");
+      mArgTypes.push_back("PointCloudWindow");
       mArgTypes.push_back("PolarPlot");
       mArgTypes.push_back("ProcessingLocation");
       mArgTypes.push_back("ProductView");

@@ -846,7 +846,8 @@ enum ViewTypeEnum
    SPATIAL_DATA_VIEW,   /**< Displays one or more layers from a LayerList. */
    PRODUCT_VIEW,        /**< Provides a paper layout where annotation objects can be added to construct
                              a finished product. */
-   PLOT_VIEW            /**< Displays a plot with two axes and an optional legend. */
+   PLOT_VIEW,            /**< Displays a plot with two axes and an optional legend. */
+   POINT_CLOUD_VIEW      /**< Displays a point cloud. */
 };
 
 /**
@@ -905,7 +906,8 @@ enum WindowTypeEnum
    PRODUCT_WINDOW,         /**< A workspace window that contains a product view. */
    DOCK_WINDOW,            /**< A window that can contain a QWidget that can float or dock along the edges
                                 of the main application window. */
-   TOOLBAR                 /**< A dock window containing buttons and other widgets to perform certain actions. */
+   TOOLBAR,                /**< A dock window containing buttons and other widgets to perform certain actions. */
+   POINT_CLOUD_WINDOW      /**< A workspace window that contains a point cloud view. */
 };
 
 /**

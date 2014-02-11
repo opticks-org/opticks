@@ -12,6 +12,7 @@ def generate(env):
       ehs_lib = ehs_lib + "D"
    dep_include = env["OPTICKSDEPENDENCIESINCLUDE"]
    env.AppendUnique(CXXFLAGS=["-I%s/ehs" % dep_include],
+                    LDFLAGS=["ssl"],
                     LIBS=[ehs_lib])
 
 def exists(env):

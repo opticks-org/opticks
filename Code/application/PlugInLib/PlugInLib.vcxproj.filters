@@ -69,6 +69,12 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_DockWindowShell.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="PointCloudAccessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudPagerShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AlgorithmShell.h">
@@ -108,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WizardShell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PointCloudPagerShell.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

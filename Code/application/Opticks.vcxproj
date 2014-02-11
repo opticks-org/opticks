@@ -369,6 +369,16 @@
     <ClInclude Include="Interfaces\PlugInManagerServices.h" />
     <ClInclude Include="Interfaces\PlugInRegistration.h" />
     <ClInclude Include="Interfaces\Point.h" />
+    <ClInclude Include="Interfaces\PointCloudAccessor.h" />
+    <ClInclude Include="Interfaces\PointCloudAccessorImpl.h" />
+    <ClInclude Include="Interfaces\PointCloudDataDescriptor.h" />
+    <ClInclude Include="Interfaces\PointCloudDataRequest.h" />
+    <ClInclude Include="Interfaces\PointCloudElement.h" />
+    <ClInclude Include="Interfaces\PointCloudFileDescriptor.h" />
+    <ClInclude Include="Interfaces\PointCloudPager.h" />
+    <ClInclude Include="Interfaces\PointCloudView.h" />
+    <ClInclude Include="Interfaces\PointCloudWindow.h" />
+    <ClInclude Include="Interfaces\PointDataBlock.h" />
     <ClInclude Include="Interfaces\PointSet.h" />
     <ClInclude Include="Interfaces\PolarGridlines.h" />
     <ClInclude Include="Interfaces\PolarPlot.h" />

@@ -17,6 +17,7 @@
 #include "DimensionDescriptor.h"
 #include "DynamicObject.h"
 #include "ObjectResource.h"
+#include "PointCloudDataDescriptor.h"
 #include "PropertiesRasterLayer.h"
 #include "RasterDataDescriptor.h"
 #include "RasterFileDescriptor.h"
@@ -40,6 +41,7 @@
 #include <QtGui/QRegExpValidator>
 
 #include <algorithm>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -278,6 +280,185 @@ void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool e
          mpTreeWidget->setCellWidgetType(pProcessingLocationItem, 1, CustomTreeWidget::COMBO_BOX);
          mpTreeWidget->setComboBox(pProcessingLocationItem, 1, mpProcessingLocationCombo);
       }
+   }
+
+   PointCloudDataDescriptor* pPointDescriptor = dynamic_cast<PointCloudDataDescriptor*>(mpDescriptor.get());
+   if (pPointDescriptor != NULL)
+   {
+      //Point cloud descriptor items
+      int widgetIndex = 3;
+      // Point count
+      QTreeWidgetItem* pCountItem = new QTreeWidgetItem();
+      pCountItem->setText(0, "Point Count");
+      pCountItem->setText(1, QString::number(pPointDescriptor->getPointCount()));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pCountItem);
+
+      // X Data type
+      QTreeWidgetItem* pDataTypeItem = new QTreeWidgetItem();
+      string dataTypeText = StringUtilities::toDisplayString(pPointDescriptor->getSpatialDataType());
+      pDataTypeItem->setText(0, "Spatial Data Type");
+      pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pDataTypeItem);
+
+      // X Min
+      QTreeWidgetItem* pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "X Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getXMin() * pPointDescriptor->getXScale() + pPointDescriptor->getXOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // X Max
+      QTreeWidgetItem* pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "X Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getXMax() * pPointDescriptor->getXScale() + pPointDescriptor->getXOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // X Raw Min
+      pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "X Raw Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getXMin(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // X Raw Max
+      pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "X Raw Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getXMax(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // X Scale
+      QTreeWidgetItem* pScaleItem = new QTreeWidgetItem();
+      pScaleItem->setText(0, "X Scale");
+      pScaleItem->setText(1, QString::number(pPointDescriptor->getXScale(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pScaleItem);
+
+      // X Offset
+      QTreeWidgetItem* pOffsetItem = new QTreeWidgetItem();
+      pOffsetItem->setText(0, "X Offset");
+      pOffsetItem->setText(1, QString::number(pPointDescriptor->getXOffset(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pOffsetItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pOffsetItem);
+
+      // Y Min
+      pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "Y Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getYMin() * pPointDescriptor->getYScale() + pPointDescriptor->getYOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // Y Max
+      pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "Y Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getYMax() * pPointDescriptor->getYScale() + pPointDescriptor->getYOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // Y Min
+      pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "Y Raw Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getYMin(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // Y Max
+      pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "Y Raw Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getYMax(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // Y Scale
+      pScaleItem = new QTreeWidgetItem();
+      pScaleItem->setText(0, "Y Scale");
+      pScaleItem->setText(1, QString::number(pPointDescriptor->getYScale(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pScaleItem);
+
+      // Y Offset
+      pOffsetItem = new QTreeWidgetItem();
+      pOffsetItem->setText(0, "Y Offset");
+      pOffsetItem->setText(1, QString::number(pPointDescriptor->getYOffset(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pOffsetItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pOffsetItem);
+
+      // Z Min
+      pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "Z Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getZMin() * pPointDescriptor->getZScale() + pPointDescriptor->getZOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // Z Max
+      pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "Z Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getZMax() * pPointDescriptor->getZScale() + pPointDescriptor->getZOffset(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // Z Min
+      pMinimumItem = new QTreeWidgetItem();
+      pMinimumItem->setText(0, "Z Raw Minimum");
+      pMinimumItem->setText(1, QString::number(pPointDescriptor->getZMin(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMinimumItem);
+
+      // Z Max
+      pMaximumItem = new QTreeWidgetItem();
+      pMaximumItem->setText(0, "Z Raw Maximum");
+      pMaximumItem->setText(1, QString::number(pPointDescriptor->getZMax(), 'f', numeric_limits<double>::digits10));
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pMaximumItem);
+
+      // Z Scale
+      pScaleItem = new QTreeWidgetItem();
+      pScaleItem->setText(0, "Z Scale");
+      pScaleItem->setText(1, QString::number(pPointDescriptor->getZScale(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pScaleItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pScaleItem);
+
+      // Z Offset
+      pOffsetItem = new QTreeWidgetItem();
+      pOffsetItem->setText(0, "Z Offset");
+      pOffsetItem->setText(1, QString::number(pPointDescriptor->getZOffset(), 'f', numeric_limits<double>::digits10));
+      if (mEditAll)
+      {
+         mpTreeWidget->setCellWidgetType(pOffsetItem, 1, CustomTreeWidget::LINE_EDIT);
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pOffsetItem);
+
+      // Intensity Data type
+      pDataTypeItem = new QTreeWidgetItem();
+      pDataTypeItem->setText(0, "Intensity Data Type");
+      if (pPointDescriptor->hasIntensityData())
+      {
+         string dataTypeText = StringUtilities::toDisplayString(pPointDescriptor->getIntensityDataType());
+         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
+      }
+      else
+      {
+         pDataTypeItem->setText(1, "No Intensity Data Available");
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pDataTypeItem);
+
+      // Classification Data type
+      pDataTypeItem = new QTreeWidgetItem();
+      pDataTypeItem->setText(0, "Classification Data Type");
+      if (pPointDescriptor->hasClassificationData())
+      {
+         string dataTypeText = StringUtilities::toDisplayString(pPointDescriptor->getClassificationDataType());
+         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
+      }
+      else
+      {
+         pDataTypeItem->setText(1, "No Classification Data Available");
+      }
+      mpTreeWidget->insertTopLevelItem(widgetIndex++, pDataTypeItem);
    }
 
    // Signature data descriptor items

@@ -16,6 +16,8 @@
 #include "PlugIn.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "PointCloudElement.h"
+#include "PointCloudView.h"
 #include "ProductView.h"
 #include "ProgressImp.h"
 #include "RasterElement.h"
@@ -585,6 +587,16 @@ void ExecutableAgentImp::populateArgValues(PlugInArgList *pArgList)
 
       if (pElement == NULL)
       {
+         PointCloudView* pPointView = dynamic_cast<PointCloudView*>(pView);
+         if (pPointView != NULL)
+         {
+            pElement = pPointView->getPrimaryPointCloud();
+            if (pElement != NULL && !pElement->isKindOf(elementType))
+            {
+               pElement = NULL;
+            }
+         }
+
          RasterElement* pPrimaryRaster = NULL;
 
          // Prefer the primary RasterElement of the view

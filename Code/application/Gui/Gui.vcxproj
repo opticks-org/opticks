@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -239,6 +239,7 @@
     <ClCompile Include="PropertiesModuleDescriptor.cpp" />
     <ClCompile Include="PropertiesPlotView.cpp" />
     <ClCompile Include="PropertiesPlugInDescriptor.cpp" />
+    <ClCompile Include="PropertiesPointCloudView.cpp" />
     <ClCompile Include="PropertiesProductView.cpp" />
     <ClCompile Include="PropertiesPseudocolorLayer.cpp" />
     <ClCompile Include="PropertiesRasterLayer.cpp" />
@@ -343,6 +344,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesLatLonLayer.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesMeasurementLayer.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesMeasurementObject.cpp" />
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesPointCloudView.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesPseudocolorLayer.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesRasterLayer.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PropertiesScriptingWindow.cpp" />
@@ -1682,6 +1684,24 @@
     <ClInclude Include="PropertiesModuleDescriptor.h" />
     <ClInclude Include="PropertiesPlotView.h" />
     <ClInclude Include="PropertiesPlugInDescriptor.h" />
+    <CustomBuild Include="PropertiesPointCloudView.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="PropertiesProductView.h" />
     <CustomBuild Include="PropertiesPseudocolorLayer.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Filename).h...</Message>
@@ -2392,7 +2412,21 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\rcc.exe" -name %(Filename) -o "$(BuildDir)\Res\$(ProjectName)\rcc_%(Filename).cpp" "%(FullPath)"
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Res\$(ProjectName)\rcc_%(Filename).cpp;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalInputs>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\pointcloud_fragment_color_map.glsl" />
+    <None Include="res\shaders\pointcloud_fragment_color_stretch.glsl" />
+    <None Include="res\shaders\pointcloud_vertex_attribute.glsl" />
+    <None Include="res\shaders\pointcloud_vertex_height.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

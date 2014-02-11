@@ -78,7 +78,8 @@ public:
     *  Returns the active view in the window.
     *
     *  @return  A pointer to the active View in the window.  If the window is a
-    *           SpatialDataWindow, a SpatialDataView is returned.  If the
+    *           SpatialDataWindow, a SpatialDataView is returned.  If the window
+    *           is a PointCloudWindow, a PointCloudView is returned. If the
     *           window is a ProductWindow, a ProductView is returned if the
     *           product view does not have an active edit view.  Otherwise, the
     *           active edit view in the product view is returned.  \b NULL is

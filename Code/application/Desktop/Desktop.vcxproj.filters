@@ -473,6 +473,12 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PlotWidgetImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointCloudWindowImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointCloudViewImp.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PointImp.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -532,6 +538,18 @@
     </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_WorkspaceWindowImp.cpp">
       <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudViewImp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudViewAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudWindowAdapter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointCloudWindowImp.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -718,6 +736,12 @@
     <ClInclude Include="Plot\TextAdapter.h">
       <Filter>Plot</Filter>
     </ClInclude>
+    <ClInclude Include="PointCloudViewAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PointCloudWindowAdapter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="DockWindowImp.h">
@@ -884,6 +908,12 @@
     </CustomBuild>
     <CustomBuild Include="Plot\TextImp.h">
       <Filter>Plot</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PointCloudViewImp.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PointCloudWindowImp.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

@@ -95,7 +95,6 @@ protected:
 protected:
    static unsigned int sKeyboardNumber;
 
-private:
    PerspectiveViewImp(const PerspectiveViewImp& rhs);
 
    struct PointType
@@ -117,6 +116,8 @@ private:
    double mFrontPlane;     // front clipping plane
    double mBackPlane;      // back clipping plane
    double mPixelAspect; 
+
+private:
    Qt::KeyboardModifiers mCurrentModifiers;
    bool mDisplayContextMenu;
    bool mAllowZoomOnResize;

@@ -418,6 +418,16 @@
 #define APP_PLOTWIDGET_TOOLBARS_MENU_ACTION "APP_PLOTWIDGET_TOOLBARS_MENU_ACTION"
 
 /**
+ *  Colorization mode for point cloud view.
+ */
+#define APP_POINTCLOUDVIEW_COLORBY_MENU_ACTION "APP_POINTCLOUDVIEW_COLORBY_MENU_ACTION"
+
+/**
+ *  Stretch mode for point cloud view.
+ */
+#define APP_POINTCLOUDVIEW_STRETCH_MENU_ACTION "APP_POINTCLOUDVIEW_STRETCH_MENU_ACTION"
+
+/**
  *  Toggles the display of major and minor polar gridlines.
  */
 #define APP_POLARPLOT_GRIDLINES_MENU_ACTION "APP_POLARPLOT_GRIDLINES_MENU_ACTION"

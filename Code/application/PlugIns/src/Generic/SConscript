@@ -3,20 +3,20 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir')
+Import('env variant_dir')
 env = env.Clone()
 env.Append(CPPPATH=["$COREDIR/Desktop","$COREDIR/Utilities"])
 
 ####
 # build sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
 objs = env.SharedObject(srcs)
 
 ####
 # build the plug-in library and set up an alias to wase building it later
 ####
-lib = env.SharedLibrary('%s/Generic' % build_dir,objs)
+lib = env.SharedLibrary('%s/Generic' % variant_dir,objs)
 libInstall = env.Install(env["PLUGINDIR"], lib)
 env.Alias('Generic', libInstall)
 

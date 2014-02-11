@@ -19,6 +19,7 @@
 #include "ObjectFactory.h"
 #include "ObjectResource.h"
 #include "Point.h"
+#include "PointCloudDataDescriptor.h"
 #include "SpatialDataView.h"
 #include "StringUtilities.h"
 #include "TypesFile.h"
@@ -729,6 +730,12 @@ ADD_ENUM_MAPPING(Point::OCTAGON_FILLED, "Filled Octagon", "filledOctagon")
 ADD_ENUM_MAPPING(Point::OCTAGON_CROSS_HAIR, "Octagon +", "octagonCrosshair")
 END_ENUM_MAPPING()
 
+BEGIN_ENUM_MAPPING(PointCloudArrangement)
+ADD_ENUM_MAPPING(POINT_ARRAY, "Unsorted Array", "POINT_ARRAY")
+ADD_ENUM_MAPPING(POINT_KDTREE_XY_ARRAY, "Sorted KD Tree - XY - Array", "POINT_KDTREE_XY_ARRAY")
+ADD_ENUM_MAPPING(POINT_KDTREE_XYZ_ARRAY, "Sorted KD Tree - XYZ - Array", "POINT_KDTREE_XYZ_ARRAY")
+END_ENUM_MAPPING()
+
 BEGIN_ENUM_MAPPING(PositionType)
 ADD_ENUM_MAPPING(TOP_LEFT_BOTTOM_LEFT, "Top Left/Bottom Left", "TopLeftBottomLeft")
 ADD_ENUM_MAPPING(TOP_LEFT_BOTTOM_RIGHT, "Top Left/Bottom Right", "TopLeftBottomRight")
@@ -822,6 +829,7 @@ BEGIN_ENUM_MAPPING(ViewType)
 ADD_ENUM_MAPPING(SPATIAL_DATA_VIEW, "Spatial Data View", "Spatial Data View")
 ADD_ENUM_MAPPING(PRODUCT_VIEW, "Product View", "Product View")
 ADD_ENUM_MAPPING(PLOT_VIEW, "Plot View", "Plot View")
+ADD_ENUM_MAPPING(POINT_CLOUD_VIEW, "Point Cloud View", "Point Cloud View")
 END_ENUM_MAPPING()
 
 BEGIN_ENUM_MAPPING(WavelengthUnitsType)
@@ -842,6 +850,7 @@ ADD_ENUM_MAPPING(SPATIAL_DATA_WINDOW, "Spatial Data Window", "SpatialDataWindow"
 ADD_ENUM_MAPPING(PRODUCT_WINDOW, "Product Window", "ProductWindow")
 ADD_ENUM_MAPPING(DOCK_WINDOW, "Dock Window", "DockWindow")
 ADD_ENUM_MAPPING(TOOLBAR, "Toolbar", "ToolbarWindow")
+ADD_ENUM_MAPPING(POINT_CLOUD_WINDOW, "Point Cloud Window", "PointCloudWindow")
 END_ENUM_MAPPING()
 
 ENUM_MAPPING_PRE_DEFINITIONS(ReleaseType, ReleaseType)

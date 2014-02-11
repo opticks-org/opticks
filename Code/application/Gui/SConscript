@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir')
+Import('env variant_dir')
 
 ####
 # subdirectories to build objects from
@@ -15,8 +15,8 @@ if env["OS"] == "linux" or env["OS"] == "windows":
 ####
 # build top-level sources
 ####
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
-srcs.append(env.Qrc("%s/res/Application.qrc" % build_dir))
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs.append(env.Qrc("%s/res/Application.qrc" % variant_dir))
 objs = env.Object(srcs)
 
 ####
@@ -24,7 +24,7 @@ objs = env.Object(srcs)
 ####
 for sub in subdirs:
    env.Append(CPPPATH="#/Gui/%s" % sub)
-   srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
+   srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("%s/*.cpp" % sub))
    objs += env.Object(srcs)
 
 ####
@@ -32,12 +32,12 @@ for sub in subdirs:
 # we only want the singletons
 ####
 env.Append(CPPPATH="#/Gui/Image")
-objs += env.Object(map(lambda d: "%s/Image/%s" % (build_dir, d), ["GpuResourceManager.cpp","ImageFilterManager.cpp","GpuProgramDescriptorImp.cpp","ImageFilterDescriptorImp.cpp"]))
+objs += env.Object(map(lambda d: "%s/Image/%s" % (variant_dir, d), ["GpuResourceManager.cpp","ImageFilterManager.cpp","GpuProgramDescriptorImp.cpp","ImageFilterDescriptorImp.cpp"]))
 
 ####
 # build the library and set up an alias to ease building it later
 ####
-lib = env.Library("%s/Gui" % build_dir,objs)
+lib = env.Library("%s/Gui" % variant_dir,objs)
 env.Alias('libGui', lib)
 
 ####

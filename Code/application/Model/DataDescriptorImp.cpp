@@ -12,6 +12,7 @@
 #include "DataDescriptor.h"
 #include "FileDescriptorAdapter.h"
 #include "ModelServicesImp.h"
+#include "PointCloudFileDescriptorAdapter.h"
 #include "RasterFileDescriptorAdapter.h"
 #include "SignatureFileDescriptorAdapter.h"
 #include "SessionManager.h"
@@ -434,6 +435,10 @@ bool DataDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
             if (pModel->isKindOfFileDescriptor(fileDescriptorType, "RasterFileDescriptor") == true)
             {
                mpFileDescriptor = new RasterFileDescriptorAdapter();
+            }
+            else if (pModel->isKindOfFileDescriptor(fileDescriptorType, "PointCloudFileDescriptor") == true)
+            {
+               mpFileDescriptor = new PointCloudFileDescriptorAdapter();
             }
             else if (pModel->isKindOfFileDescriptor(fileDescriptorType, "SignatureFileDescriptor") == true)
             {

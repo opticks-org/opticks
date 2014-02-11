@@ -98,11 +98,13 @@ To edit/add new dependencies:
 
    To publish a package to the repository on opticks.org:
       The ivy config and all archives must already be in the staging/ directory
+      By default, artifacts are published to the public repo.
+      To publish to the local repository use -Dresolver=opticks-local-publish
       Publishing to opticks.org requires a username and password, which is restricted to committers of the Opticks project.
       By default, you cannot overwrite an existing revision of a module when publishing.
       This is by design as the entire system depends on the content of the module never changing for a given revision number.
       If you are aware of the problems with overwriting revisions of a module, you can use the -Doverwrite=true flag. 
-         > dependencies publish-package -Dmodule=[module name here] -Drev[module revision here]
+         > dependencies publish-package -Dmodule=[module name here] -Drev=[module revision here]
 
 If you are running on a system other than Windows and are encountering
 problems running tar or gtar, you can set the following properties to use

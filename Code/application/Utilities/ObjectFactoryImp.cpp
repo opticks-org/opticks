@@ -29,6 +29,8 @@
 #include "GraphicObject.h"
 #include "ImportAgentAdapter.h"
 #include "Layer.h"
+#include "PointCloudDataRequestImp.h"
+#include "PointCloudFileDescriptorAdapter.h"
 #include "RasterFileDescriptorAdapter.h"
 #include "SettableSessionItemAdapter.h"
 #include "SignatureFileDescriptorAdapter.h"
@@ -65,6 +67,9 @@ namespace
 
    DataRequest* CreateDataRequest();
    void DestroyDataRequest(void* pObj);
+
+   PointCloudDataRequest* CreatePointCloudDataRequest();
+   void DestroyPointCloudDataRequest(void* pObj);
 
    DataVariantAnyData* CreateDataVariantAnyData();
    void DestroyDataVariantAnyData(void* pObj);
@@ -104,6 +109,11 @@ namespace
 
    void* CreateVectorLayer();
    void DestroyVectorLayer(void* pObj);
+
+   static PointCloudFileDescriptor* CreatePointCloudFileDescriptor();
+   static void DestroyPointCloudFileDescriptor(void* pObj);
+   static void* CreateVectorPointCloudFileDescriptor();
+   static void DestroyVectorPointCloudFileDescriptor(void* pObj);
 
    static RasterFileDescriptor* CreateRasterFileDescriptor();
    static void DestroyRasterFileDescriptor(void* pObj);
@@ -283,6 +293,9 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectMap.insert(ObjectMapType::value_type("FileFinder", (void*(*)())CreateFileFinder));
       sCreateObjectMap.insert(ObjectMapType::value_type("Filename", (void*(*)())CreateFilename));
       sCreateObjectMap.insert(ObjectMapType::value_type("Font", (void*(*)())CreateFontObject));
+      sCreateObjectMap.insert(ObjectMapType::value_type("PointCloudDataRequest", (void*(*)())CreatePointCloudDataRequest));
+      sCreateObjectMap.insert(ObjectMapType::value_type("PointCloudFileDescriptor",
+         (void*(*)())CreatePointCloudFileDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("GeoreferenceDescriptor",
          (void*(*)())CreateGeoreferenceDescriptor));
       sCreateObjectMap.insert(ObjectMapType::value_type("RasterFileDescriptor",
@@ -344,6 +357,9 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectMap.insert(ObjectMapType2::value_type("FileFinder", (void(*)(void*))DestroyFileFinder));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Filename", (void(*)(void*))DestroyFilename));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("Font", (void(*)(void*))DestroyFontObject));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("PointCloudDataRequest", (void(*)(void*))DestroyPointCloudDataRequest));
+      sDestroyObjectMap.insert(ObjectMapType2::value_type("PointCloudFileDescriptor",
+         (void(*)(void*))DestroyPointCloudFileDescriptor));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("GeoreferenceDescriptor",
          (void(*)(void*))DestroyGeoreferenceDescriptor));
       sDestroyObjectMap.insert(ObjectMapType2::value_type("RasterFileDescriptor",
@@ -401,6 +417,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sCreateObjectVectorMap.insert(VectorMapType::value_type("GeoreferenceDescriptor",
          (void*(*)())CreateVectorGeoreferenceDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("Layer", (void*(*)())CreateVectorLayer));
+      sCreateObjectVectorMap.insert(VectorMapType::value_type("PointCloudFileDescriptor",
+         (void*(*)())CreateVectorPointCloudFileDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("RasterFileDescriptor",
          (void*(*)())CreateVectorRasterFileDescriptor));
       sCreateObjectVectorMap.insert(VectorMapType::value_type("SignatureFileDescriptor",
@@ -458,6 +476,8 @@ ObjectFactoryImp* ObjectFactoryImp::instance()
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("GeoreferenceDescriptor",
          (void(*)(void*))DestroyVectorGeoreferenceDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("Layer", (void(*)(void*))DestroyVectorLayer));
+      sDestroyObjectVectorMap.insert(VectorMapType2::value_type("PointCloudFileDescriptor",
+         (void(*)(void*))DestroyVectorPointCloudFileDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("RasterFileDescriptor",
          (void(*)(void*))DestroyVectorRasterFileDescriptor));
       sDestroyObjectVectorMap.insert(VectorMapType2::value_type("SignatureFileDescriptor",
@@ -659,6 +679,18 @@ void DestroyDataRequest(void* pObj)
 }
 
 //=============================
+// PointCloudDataRequest
+PointCloudDataRequest* CreatePointCloudDataRequest()
+{
+   return new PointCloudDataRequestImp();
+}
+
+void DestroyPointCloudDataRequest(void* pObj)
+{
+   delete reinterpret_cast<PointCloudDataRequestImp*>(pObj);
+}
+
+//=============================
 // DataVariantAnyData
 DataVariantAnyData* CreateDataVariantAnyData()
 {
@@ -825,6 +857,29 @@ void DestroyVectorLayer(void* pObj)
 {
    delete reinterpret_cast<vector<Layer*>*>(pObj);
 }
+
+//=============================
+// PointCloudFileDescriptor
+PointCloudFileDescriptor* CreatePointCloudFileDescriptor()
+{
+   return new PointCloudFileDescriptorAdapter();
+}
+
+void DestroyPointCloudFileDescriptor(void* pObj)
+{
+   delete reinterpret_cast<PointCloudFileDescriptorAdapter*>(pObj);
+}
+
+void* CreateVectorPointCloudFileDescriptor()
+{
+   return new vector<PointCloudFileDescriptor*>();
+}
+
+void DestroyVectorPointCloudFileDescriptor(void* pObj)
+{
+   delete reinterpret_cast<vector<PointCloudFileDescriptor*>*>(pObj);
+}
+
 
 //=============================
 // RasterFileDescriptor

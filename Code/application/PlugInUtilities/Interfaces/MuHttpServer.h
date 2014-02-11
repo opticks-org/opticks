@@ -13,6 +13,9 @@
 #include "AttachmentPtr.h"
 #include "EnumWrapper.h"
 #include "SessionManager.h"
+#ifdef WIN_API
+#define strcasecmp _stricmp
+#endif
 #include <ehs.h>
 #include <QtCore/QMap>
 #include <QtCore/QObject>

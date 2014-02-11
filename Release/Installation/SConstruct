@@ -88,6 +88,7 @@ if OPTICKS_PLATFORM == "linux-x86_64":
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Ice.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/ImageComparison.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Kml.so'))
+   debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Las.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/Modis.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/MovieExporter.so'))
    debenv.Install('$PREF/PlugIns', debenv.File('$PLUGINDIR/NitfCommonTre.so'))

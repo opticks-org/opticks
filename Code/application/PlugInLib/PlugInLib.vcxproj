@@ -158,6 +158,8 @@
     <ClCompile Include="ModuleShell.cpp" />
     <ClCompile Include="OptionShell.cpp" />
     <ClCompile Include="PlugInShell.cpp" />
+    <ClCompile Include="PointCloudAccessor.cpp" />
+    <ClCompile Include="PointCloudPagerShell.cpp" />
     <ClCompile Include="PropertiesShell.cpp" />
     <ClCompile Include="RasterElementImporterShell.cpp" />
     <ClCompile Include="RasterPagerShell.cpp" />
@@ -192,6 +194,7 @@
     <ClInclude Include="InterpreterManagerShell.h" />
     <ClInclude Include="OptionShell.h" />
     <ClInclude Include="PlugInShell.h" />
+    <ClInclude Include="PointCloudPagerShell.h" />
     <ClInclude Include="PropertiesShell.h" />
     <ClInclude Include="RasterElementImporterShell.h" />
     <ClInclude Include="RasterPagerShell.h" />

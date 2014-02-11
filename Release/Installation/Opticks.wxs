@@ -102,6 +102,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__libexpat_Dependency" Guid="$(var.C__libexpat_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="libexpat.dll" Id="F__libexpat_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__liblas_Dependency" Guid="$(var.C__liblas_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="liblas.dll" Id="F__liblas_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <Component Id="C__opencv_Dependency" Guid="$(var.C__opencv_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="opencv_core220.dll" Id="F__opencv_core_Dependency" DiskId="1" KeyPath="yes" />
                <File Name="opencv_imgproc220.dll" Id="F__opencv_imgproc_Dependency" DiskId="1" />
@@ -272,6 +275,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="Ice.dll" Id="F__IcePlugIn" DiskId="1" />
                <File Name="ImageComparison.dll" Id="F__ImageComparisonPlugIn" DiskId="1" />
                <File Name="Kml.dll" Id="F__KmlPlugIn" DiskId="1" />
+               <File Name="Las.dll" Id="F__LasPlugIn" DiskId="1" />
                <File Name="Modis.dll" Id="F__ModisPlugIn" DiskId="1" />
                <File Name="MovieExporter.dll" Id="F__MovieExporterPlugIn" DiskId="1" />
                <File Name="Nitf.dll" Id="F__NitfPlugIn" DiskId="1" />
@@ -423,6 +427,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__hm425m_Dependency" />
          <ComponentRef Id="C__szlibdll_Dependency" />
          <ComponentRef Id="C__libexpat_Dependency" />
+         <ComponentRef Id="C__liblas_Dependency" />
          <ComponentRef Id="C__opencv_Dependency" />
          <ComponentRef Id="C__openjpeg_Dependency" />
          <ComponentRef Id="C__ossim_Dependency" />

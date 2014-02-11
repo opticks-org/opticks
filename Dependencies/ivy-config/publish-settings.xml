@@ -6,5 +6,9 @@
          <ivy pattern="${opticks.public.publish.root}/${opticks.public.ivy.pattern}"/>
          <artifact pattern="${opticks.public.publish.root}/${opticks.public.artifact.pattern}"/>
       </ssh>
+      <filesystem name="opticks-local-publish">
+         <ivy pattern="${opticks.local.root}/${opticks.local.ivy.pattern}"/>
+         <artifact pattern="${opticks.local.root}/${opticks.local.artifact.pattern}"/>
+      </filesystem>
    </resolvers>
 </ivysettings>

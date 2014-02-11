@@ -3,7 +3,7 @@ import glob
 ####
 # import the environment
 ####
-Import('env build_dir TOOLPATH')
+Import('env variant_dir TOOLPATH')
 env = env.Clone()
 env.Tool('ossim', toolpath=[TOOLPATH])
 env.Tool('opencv', toolpath=[TOOLPATH])
@@ -11,15 +11,15 @@ env.Tool('opencv', toolpath=[TOOLPATH])
 ####
 # build sources
 ####
-env.Append(CPPPATH=[build_dir])
-srcs = map(lambda x,bd=build_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
-srcs = env.Moc(env.Uic('%s/ConvolutionMatrixWidget.ui' % build_dir)) + srcs
+env.Append(CPPPATH=[variant_dir])
+srcs = map(lambda x,bd=variant_dir: '%s/%s' % (bd,x), glob.glob("*.cpp"))
+srcs = env.Moc(env.Uic('%s/ConvolutionMatrixWidget.ui' % variant_dir)) + srcs
 objs = env.SharedObject(srcs)
 
 ####
 # build the plug-in library and set up an alias to wase building it later
 ####
-lib = env.SharedLibrary('%s/ConvolutionFilter' % build_dir,objs)
+lib = env.SharedLibrary('%s/ConvolutionFilter' % variant_dir,objs)
 libInstall = env.Install(env["PLUGINDIR"], lib)
 env.Alias('ConvolutionFilter', libInstall)
 

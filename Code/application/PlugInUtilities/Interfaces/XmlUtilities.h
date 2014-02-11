@@ -38,7 +38,7 @@ namespace XmlUtilities
     *
     * @param desc
     *        The DimensionDescriptor to be populated during the deserialization.
-    * @param DOMNode
+    * @param pNode
     *        Pointer to XML node containing the dimension descriptor information to be deserialized.
     */
    void deserializeDimensionDescriptor(DimensionDescriptor& desc, XERCES_CPP_NAMESPACE_QUALIFIER DOMNode* pNode);
@@ -63,7 +63,7 @@ namespace XmlUtilities
     *        The name of the XML element containing the information for the dimension descriptors.
     * @param desc
     *        The vector of DimensionDescriptors to be populated during the deserialization.
-    * @param DOMNode
+    * @param pNode
     *        Pointer to XML node containing the dimension descriptor information to be deserialized.
     */
    void deserializeDimensionDescriptors(const std::string& elementName,

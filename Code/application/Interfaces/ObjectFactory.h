@@ -57,6 +57,8 @@ public:
     *           - Filename
     *           - Font
     *           - ImportAgent
+    *           - PointCloudDataRequest
+    *           - PointCloudFileDescriptor
     *           - RasterFileDescriptor
     *           - SettableSessionItem
     *           - SignatureFileDescriptor
@@ -129,6 +131,7 @@ public:
     *           - Filename
     *           - GraphicObject
     *           - Layer
+    *           - PointCloudFileDescriptor
     *           - RasterFileDescriptor
     *           - SignatureFileDescriptor
     *           - Units
