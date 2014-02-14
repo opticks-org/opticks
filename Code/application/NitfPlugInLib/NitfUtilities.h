@@ -921,6 +921,13 @@ namespace Nitf
       return trimmedString;
    }
 
+   template <>
+   inline bool fromBuffer<bool>(std::vector<char>& buf, bool& ok, bool allBlankOk, bool allDashesOk)
+   {
+      unsigned int tmp = fromBuffer<unsigned int>(buf, ok, allBlankOk, allDashesOk);
+      return tmp != 0;
+   }
+
    // create the error message
    inline bool readFieldErrMsg(std::string& msg, const std::string& name, const std::vector<char>& buf, int len)
    {
