@@ -13,7 +13,7 @@ def generate(env):
    dep_include = env["OPTICKSDEPENDENCIESINCLUDE"]
    env.AppendUnique(CXXFLAGS=["-I%s/ehs" % dep_include],
                     LDFLAGS=["ssl"],
-                    LIBS=[ehs_lib])
+                    LIBS=[ehs_lib,'boost_regex'])
 
 def exists(env):
     return env.Detect('ehs')
