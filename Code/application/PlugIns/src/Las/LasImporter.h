@@ -12,6 +12,7 @@
 
 #include "ImporterShell.h"
 #include "OptionLasImporter.h"
+#include <boost/atomic.hpp>
 
 namespace liblas
 {
@@ -76,6 +77,8 @@ private:
    double mOffsetX;
    double mOffsetY;
    double mOffsetZ;
+
+   boost::atomic<bool> mPolishEntered; // used to prevent infinite recursion in polishDataDescriptor
 };
 
 #endif

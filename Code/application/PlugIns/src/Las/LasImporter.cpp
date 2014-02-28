@@ -38,13 +38,14 @@
 #include <liblas/liblas.hpp>
 #include <liblas/iterator.hpp>
 
+#include <boost/atomic.hpp>
 #include <math.h>
 #include <QtCore/QString>
 #include <QtGui/QComboBox>
 
 REGISTER_PLUGIN_BASIC(Las, LasImporter);
 
-LasImporter::LasImporter() : mCustomOptions()
+LasImporter::LasImporter() : mCustomOptions(), mPolishEntered(false)
 {
    setName("LAS Importer");
    setDescription("LAS LIDAR point cloud importer");
@@ -201,18 +202,24 @@ bool LasImporter::getOutputSpecification(PlugInArgList*& pOutArgList)
 
 void LasImporter::polishDataDescriptor(DataDescriptor *pDescriptor)
 {
-    // if no metadata has been pushed into the options widget, then the user hasn't called the widget
-    // so don't update the metadata with bad values
-    if ( !( mCustomOptions.getInputGridSize()->text() == "" && mCustomOptions.getInputMaxPoints()->text() == "" ) )
-    {
-        DynamicObject* pMetadata = pDescriptor->getMetadata();
-        pMetadata->setAttributeByPath( "LAS/Thinning Options/Algorithm", 
+   // if no metadata has been pushed into the options widget, then the user hasn't called the widget
+   // so don't update the metadata with bad values
+   if ( !( mCustomOptions.getInputGridSize()->text() == "" && mCustomOptions.getInputMaxPoints()->text() == "" ) )
+   {
+      DynamicObject* pMetadata = pDescriptor->getMetadata();
+      // ensure we are reentrant by locking the sets or we'll get in an infinite loop
+      bool echk = false; // check value...must be stack local for reentrance check to work
+      if (mPolishEntered.compare_exchange_strong(echk, true, boost::memory_order_seq_cst))
+      {
+         pMetadata->setAttributeByPath( "LAS/Thinning Options/Algorithm", 
             mCustomOptions.getDropDown()->currentIndex() );
-        pMetadata->setAttributeByPath( "LAS/Thinning Options/Max Points", 
+         pMetadata->setAttributeByPath( "LAS/Thinning Options/Max Points", 
             mCustomOptions.getInputMaxPoints()->text().toInt() );
-        pMetadata->setAttributeByPath( "LAS/Thinning Options/Grid Size", 
+         pMetadata->setAttributeByPath( "LAS/Thinning Options/Grid Size", 
             mCustomOptions.getInputGridSize()->text().toDouble() );
-    }
+         mPolishEntered.store(false);
+      }
+   }
 }
 
 bool LasImporter::execute( PlugInArgList* pInArgList, PlugInArgList* pOutArgList )
