@@ -8,7 +8,6 @@
  */
 
 #include "AppVersion.h"
-#include "ImageResolutionWidget.h"
 #include "OptionsPngExporter.h"
 #include "PicturesPlotWidgetExporter.h"
 #include "PicturesViewExporter.h"
@@ -16,6 +15,8 @@
 #include "PlugInArgList.h"
 #include "PlugInRegistration.h"
 #include "PngDetails.h"
+#include "PngExportOptionsWidget.h"
+#include "SpatialDataView.h"
 #include "View.h"
 
 REGISTER_PLUGIN(OpticksPictures, PngPicturesPlotWidgetExporter, PicturesPlotWidgetExporter(new PngDetails));
@@ -65,13 +66,13 @@ bool PngDetails::savePict(QString strFilename, QImage img, const SessionItem *pI
 
 QWidget* PngDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
+   View* pView = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
    if (mpOptionsWidget.get() == NULL)
    {
-      mpOptionsWidget.reset(new ImageResolutionWidget());
+      mpOptionsWidget.reset(new PngExportOptionsWidget());
       unsigned int outputWidth = 0;
       unsigned int outputHeight = 0;
 
-      View* pView = dynamic_cast<View*>(pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg()));
       if (pView != NULL)
       {
          QWidget* pViewWidget = pView->getWidget();
@@ -81,7 +82,16 @@ QWidget* PngDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
       }
       mpOptionsWidget->setResolution(outputWidth, outputHeight);
    }
-
+   bool bShowBackgroundColorCheckbox = false;
+   if (pView != NULL)
+   {
+      SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+      if (pSpatialDataView != NULL)
+      {
+         bShowBackgroundColorCheckbox = true;
+      }
+   }
+   mpOptionsWidget->showBackgroundColorTransparentCheckbox(bShowBackgroundColorCheckbox);
    return mpOptionsWidget.get();
 }
 
@@ -97,4 +107,14 @@ void PngDetails::computeExportResolution(unsigned int& imageWidth, unsigned int&
 bool PngDetails::isProduction() const
 {
    return APP_IS_PRODUCTION_RELEASE;
+}
+
+bool PngDetails::isBackgroundTransparent()
+{
+   bool bReturn = OptionsPngExporter::getSettingSetBackgroundColorTransparent();
+   if (mpOptionsWidget.get() != NULL)
+   {
+      bReturn = mpOptionsWidget->getBackgroundColorTransparent();
+   }
+   return bReturn;
 }

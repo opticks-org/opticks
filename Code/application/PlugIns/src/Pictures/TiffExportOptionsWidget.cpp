@@ -21,7 +21,7 @@
 using namespace std;
 
 TiffExportOptionsWidget::TiffExportOptionsWidget() :
-   LabeledSectionGroup(NULL)
+   LabeledSectionGroup(NULL), mpBackgroundSection(NULL)
 {
    // Resolution section
    mpResolutionWidget = new ImageResolutionWidget();
@@ -49,15 +49,32 @@ TiffExportOptionsWidget::TiffExportOptionsWidget() :
 
    LabeledSection* pPackBitsSection = new LabeledSection(pPackBitsLayoutWidget, "Compression Options", this);
 
+   // Background Color Transparent
+   QWidget* pBackgroundColorTransparentLayoutWidget = new QWidget(this);
+
+   mpBackgroundColorTransparent = new QCheckBox("Background Color Transparent", 
+      pBackgroundColorTransparentLayoutWidget);
+
+   QVBoxLayout* pVLayout = new QVBoxLayout(pBackgroundColorTransparentLayoutWidget);
+   pVLayout->setMargin(0);
+   pVLayout->setSpacing(5);
+   pVLayout->addWidget(mpBackgroundColorTransparent);
+
+   mpBackgroundSection = new LabeledSection(
+      pBackgroundColorTransparentLayoutWidget, "Background Options", this);
+
    // Initialization
    addSection(pResolutionSection);
    addSection(pPackBitsSection);
+   addSection(mpBackgroundSection);
    addStretch(10);
    setSizeHint(350, 250);
 
    // Initialize From Settings
    mpPackBits->setChecked(OptionsTiffExporter::getSettingPackBitsCompression());
    mpRowsPerStrip->setValue(static_cast<int>(OptionsTiffExporter::getSettingRowsPerStrip()));
+   mpBackgroundColorTransparent->setChecked(
+      OptionsTiffExporter::getSettingSetBackgroundColorTransparent());
 }
 
 TiffExportOptionsWidget::~TiffExportOptionsWidget()
@@ -81,4 +98,18 @@ unsigned int TiffExportOptionsWidget::getRowsPerStrip() const
 bool TiffExportOptionsWidget::getPackBitsCompression() const
 {
    return mpPackBits->isChecked();
+}
+
+bool TiffExportOptionsWidget::getBackgroundColorTransparent() const
+{
+   return mpBackgroundColorTransparent->isChecked();
+}
+
+void TiffExportOptionsWidget::showBackgroundColorTransparentCheckbox(bool bShow) 
+{
+   if (mpBackgroundSection != NULL)
+   {
+      mpBackgroundSection->setVisible(bShow);
+   }
+   return;
 }

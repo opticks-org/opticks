@@ -37,6 +37,12 @@ public:
       return NULL;
    }
    virtual bool isProduction() const = 0;
+
+   virtual bool isBackgroundTransparent()
+   {
+      return false;
+   }
+
 protected:
    void calculateExportResolution(unsigned int& width, unsigned int& height, bool ratioLock, bool useViewResolution,
       unsigned int desiredWidth, unsigned int desiredHeight)

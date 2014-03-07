@@ -35,6 +35,7 @@ public:
    SETTING(OutputWidth, TiffExporter, unsigned int, 0);
    SETTING(OutputHeight, TiffExporter, unsigned int, 0);
    SETTING(TransformationMethod, TiffExporter, std::string, "TiePointPixelScale");
+   SETTING(SetBackgroundColorTransparent, TiffExporter, bool, false)
 
    enum TransformationMethodEnum
    {

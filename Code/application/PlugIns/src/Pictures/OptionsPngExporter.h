@@ -29,6 +29,7 @@ public:
    SETTING(AspectRatioLock, PngExporter, bool, false);
    SETTING(OutputWidth, PngExporter, unsigned int, 0);
    SETTING(OutputHeight, PngExporter, unsigned int, 0);
+   SETTING(SetBackgroundColorTransparent, PngExporter, bool, false)
 
    void applyChanges();
 

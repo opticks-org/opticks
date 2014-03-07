@@ -110,6 +110,15 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_OptionsTiffImporter.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="PngExportOptionsWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PngExportOptionsWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_TiffExportOptionsWidget.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BmpDetails.h">
@@ -166,9 +175,6 @@
     <ClInclude Include="TiffDetails.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TiffExportOptionsWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="GeoTiffExportOptionsWidget.h">
@@ -187,6 +193,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="OptionsTiffImporter.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PngExportOptionsWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="TiffExportOptionsWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

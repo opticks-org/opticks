@@ -17,6 +17,7 @@
 #include "PlotWidget.h"
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
+#include "ProductView.h"
 #include "Progress.h"
 #include "View.h"
 
@@ -102,6 +103,19 @@ bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    // Do not display the progress before calling generateImage
    // because the progress dialog is exported as part of the image on Solaris.
    QImage image(outputSize, QImage::Format_ARGB32);
+   View* pView = dynamic_cast<View*>(mpItem);
+   ProductView* pProductView = NULL;
+   ColorType backColor;
+   if (pView != NULL)
+   {
+      pProductView = dynamic_cast<ProductView*>(pView);
+      backColor = pView->getBackgroundColor();
+      if (pProductView == NULL && mpDetails->isBackgroundTransparent())
+      {
+         backColor.mAlpha = 0;
+         pView->setBackgroundColor(backColor);
+      }
+   }
    FAIL_IF(!generateImage(image), "Could not generate image", return false);
 
    if (image.isNull() == true)
@@ -113,6 +127,13 @@ bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       }
 
       pStep->finalize(Message::Failure, mMessage);
+      //reset the background color to original value
+      if (pProductView == NULL && mpDetails->isBackgroundTransparent()
+         && pView != NULL)
+      {
+         backColor.mAlpha = 255;
+         pView->setBackgroundColor(backColor);
+      }
       return false;
    }
 
@@ -124,6 +145,14 @@ bool PicturesExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
    // Save the image
    bool bSuccess = mpDetails->savePict(QString::fromStdString(mOutPath), image, mpItem);
+
+   //reset the background color to original value
+   if (pProductView == NULL && mpDetails->isBackgroundTransparent() && pView != NULL)
+   {
+      backColor.mAlpha = 255;
+      pView->setBackgroundColor(backColor);
+   }
+
    if (bSuccess == false)
    {
       mMessage = "Unable to save the file, check folder permissions";

@@ -14,7 +14,7 @@
 
 #include <memory>
 
-class ImageResolutionWidget;
+class PngExportOptionsWidget;
 
 class PngDetails : public PicturesDetails
 {
@@ -26,10 +26,11 @@ public:
    bool savePict(QString strFilename, QImage img, const SessionItem *pItem);
    QWidget* getExportOptionsWidget(const PlugInArgList* pInArgList);
    bool isProduction() const;
+   bool isBackgroundTransparent();
 
 private:
    void computeExportResolution(unsigned int& imageWidth, unsigned int& imageHeight);
-   std::auto_ptr<ImageResolutionWidget> mpOptionsWidget;
+   std::auto_ptr<PngExportOptionsWidget> mpOptionsWidget;
 };
 
 #endif

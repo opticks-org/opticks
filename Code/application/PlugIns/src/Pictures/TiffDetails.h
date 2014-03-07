@@ -29,6 +29,7 @@ public:
    bool savePict(QString strFilename, QImage img, const SessionItem *pItem);
    QWidget* getExportOptionsWidget(const PlugInArgList *pInArgList);
    bool isProduction() const;
+   bool isBackgroundTransparent();
 
    /**
     *  Adds geo-information to the TIFF file.

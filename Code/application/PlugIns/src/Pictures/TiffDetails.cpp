@@ -64,10 +64,10 @@ std::string TiffDetails::extensions()
 
 QWidget* TiffDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
 {
+   View* pView = pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg());
    if (mpOptionsWidget.get() == NULL)
    {
       mpOptionsWidget.reset(new TiffExportOptionsWidget());
-      View* pView = dynamic_cast<View*>(pInArgList->getPlugInArgValue<View>(Exporter::ExportItemArg()));
       unsigned int outputWidth = 0;
       unsigned int outputHeight = 0;
       if (pView != NULL)
@@ -80,7 +80,16 @@ QWidget* TiffDetails::getExportOptionsWidget(const PlugInArgList* pInArgList)
 
       mpOptionsWidget->setResolution(outputWidth, outputHeight);
    }
-
+   bool bShowBackgroundColorCheckbox = false;
+   if (pView != NULL)
+   {
+      SpatialDataView* pSpatialDataView = dynamic_cast<SpatialDataView*>(pView);
+      if (pSpatialDataView != NULL)
+      {
+         bShowBackgroundColorCheckbox = true;
+      }
+   }
+   mpOptionsWidget->showBackgroundColorTransparentCheckbox(bShowBackgroundColorCheckbox);
    return mpOptionsWidget.get();
 }
 
@@ -128,19 +137,23 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
 
    unsigned int rowsPerStrip = OptionsTiffExporter::getSettingRowsPerStrip();
    bool packBits = OptionsTiffExporter::getSettingPackBitsCompression();
-
+   bool saveBackgroundAsTransparent = isBackgroundTransparent();
    if (mpOptionsWidget.get() != NULL)
    {
       rowsPerStrip = mpOptionsWidget->getRowsPerStrip();
       packBits = mpOptionsWidget->getPackBitsCompression();
    }
-
+   int samplesPerPixel = 3;
+   if (saveBackgroundAsTransparent)
+   {
+      samplesPerPixel = 4;
+   }
    // Initialize private variables for tiff
    TIFFSetField(pOut, TIFFTAG_IMAGEWIDTH, static_cast<uint32>(img.width()));
    TIFFSetField(pOut, TIFFTAG_IMAGELENGTH, static_cast<uint32>(img.height()));
    TIFFSetField(pOut, TIFFTAG_BITSPERSAMPLE, 8);
    TIFFSetField(pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-   TIFFSetField(pOut, TIFFTAG_SAMPLESPERPIXEL, 3);
+   TIFFSetField(pOut, TIFFTAG_SAMPLESPERPIXEL, samplesPerPixel);
    TIFFSetField(pOut, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
    TIFFSetField(pOut, TIFFTAG_ROWSPERSTRIP, rowsPerStrip);
    TIFFSetField(pOut, TIFFTAG_COMPRESSION, (packBits ? COMPRESSION_PACKBITS : COMPRESSION_NONE));
@@ -148,6 +161,7 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
    //allocate the memory needed
    tdata_t pBuf = _TIFFmalloc(TIFFScanlineSize(pOut));
 
+   //determine if we should mask out the background pixels
    //loop through the image and convert to tiff and write to the file
    int x;
    int y;
@@ -161,7 +175,12 @@ bool TiffDetails::savePict(QString strFilename, QImage img, const SessionItem *p
          pp[0] = qRed(pData[x]);
          pp[1] = qGreen(pData[x]);
          pp[2] = qBlue(pData[x]);
-         pp += 3;
+         if (saveBackgroundAsTransparent)
+         {
+            pp[3] = qAlpha(pData[x]);
+         }
+
+         pp += samplesPerPixel;
       }
 
       //write out 1 row and check for error
@@ -327,4 +346,14 @@ void TiffDetails::computeExportResolution(unsigned int& imageWidth, unsigned int
       OptionsTiffExporter::getSettingUseViewResolution(),
       OptionsTiffExporter::getSettingOutputWidth(),
       OptionsTiffExporter::getSettingOutputHeight());
+}
+
+bool TiffDetails::isBackgroundTransparent()
+{
+   bool bReturn = OptionsTiffExporter::getSettingSetBackgroundColorTransparent();
+   if (mpOptionsWidget.get() != NULL)
+   {
+      bReturn = mpOptionsWidget->getBackgroundColorTransparent();
+   }
+   return bReturn;
 }

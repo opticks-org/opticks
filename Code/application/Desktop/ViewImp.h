@@ -481,7 +481,7 @@ private slots:
       QColor clrBackground; \
       if (backgroundColor.isValid() == true) \
       { \
-         clrBackground.setRgb(backgroundColor.mRed, backgroundColor.mGreen, backgroundColor.mBlue); \
+         clrBackground.setRgb(backgroundColor.mRed, backgroundColor.mGreen, backgroundColor.mBlue, backgroundColor.mAlpha); \
       } \
       \
       impClass::setBackgroundColor(clrBackground); \
@@ -496,6 +496,7 @@ private slots:
          backgroundColor.mRed = clrBackground.red(); \
          backgroundColor.mGreen = clrBackground.green(); \
          backgroundColor.mBlue = clrBackground.blue(); \
+         backgroundColor.mAlpha = clrBackground.alpha(); \
       } \
       \
       return backgroundColor; \

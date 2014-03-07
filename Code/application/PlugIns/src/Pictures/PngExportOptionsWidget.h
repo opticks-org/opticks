@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#ifndef TIFFEXPORTOPTIONSWIDGET_H
-#define TIFFEXPORTOPTIONSWIDGET_H
+#ifndef PNGEXPORTOPTIONSWIDGET_H
+#define PNGEXPORTOPTIONSWIDGET_H
 
 #include "LabeledSectionGroup.h"
 
@@ -16,26 +16,24 @@ class ImageResolutionWidget;
 class QCheckBox;
 class QSpinBox;
 
-class TiffExportOptionsWidget : public LabeledSectionGroup
+class PngExportOptionsWidget : public LabeledSectionGroup
 {
    Q_OBJECT
 
 public:
-   TiffExportOptionsWidget();
-   virtual ~TiffExportOptionsWidget();
+   PngExportOptionsWidget();
+   virtual ~PngExportOptionsWidget();
 
    void setResolution(unsigned int width, unsigned int height);
    void getResolution(unsigned int& width, unsigned int& height) const;
    unsigned int getRowsPerStrip() const;
-   bool getPackBitsCompression() const;
    bool getBackgroundColorTransparent() const;
    void showBackgroundColorTransparentCheckbox(bool bShow) ;
 
 private:
-   TiffExportOptionsWidget(const TiffExportOptionsWidget& rhs);
-   TiffExportOptionsWidget& operator=(const TiffExportOptionsWidget& rhs);
+   PngExportOptionsWidget(const PngExportOptionsWidget& rhs);
+   PngExportOptionsWidget& operator=(const PngExportOptionsWidget& rhs);
 
-   QCheckBox* mpPackBits;
    QSpinBox* mpRowsPerStrip;
    ImageResolutionWidget* mpResolutionWidget;
    QCheckBox* mpBackgroundColorTransparent;
