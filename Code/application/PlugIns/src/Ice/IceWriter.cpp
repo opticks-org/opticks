@@ -35,6 +35,7 @@
 #include "ThresholdLayer.h"
 #include "TypesFile.h"
 #include "Units.h"
+#undef VERSION // Ensure no compile errors due to HDF5 headers
 #include "xmlwriter.h"
 
 #include <iomanip>

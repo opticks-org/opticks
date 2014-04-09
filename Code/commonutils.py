@@ -155,7 +155,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         lla("libQtSvg.so.4")
         lla("libQtXml.so.4")
         lla("libQtXmlPatterns.so.4")
-        lla("libhdf5.so.6")
+        lla("libhdf5.so.8")
         lla("libsz.so.2")
         la(join("plugins", "imageformats", "libqgif.so"), "imageformats")
         la(join("plugins", "imageformats", "libqjpeg.so"), "imageformats")
@@ -179,13 +179,15 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         lla("libyaml-cpp.so.0.2")
     elif platform == "Windows":
         bla("pthreadVC2.dll")
+        bla("zlib.dll") #gdal
         bla("zlib1.dll")
         bla("raptor.dll")
         bla("libexpat.dll")
         bla("shapelib.dll")
         bla("hd425m.dll")
         bla("hm425m.dll")
-        bla("szlibdll.dll")
+        bla("szlibdll.dll") #hdf4
+        bla("szip.dll") #hdf5
         bla("gdal18.dll")
         bla("cg.dll")
         bla("cgc.exe")
@@ -221,7 +223,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             bla("avformatd.dll")
             bla("avutild.dll")
             bla("ossimd.dll")
-            bla("hdf5ddll.dll")
+            bla("hdf5.dll")
             la(join("plugins", "imageformats", "qgifd4.dll"), "imageformats")
             la(join("plugins", "imageformats", "qjpegd4.dll"), "imageformats")
             la(join("plugins", "imageformats", "qmngd4.dll"), "imageformats")
@@ -261,7 +263,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             bla("avformat.dll")
             bla("avutil.dll")
             bla("ossim.dll")
-            bla("hdf5dll.dll")
+            bla("hdf5.dll")
             la(join("plugins", "imageformats", "qgif4.dll"), "imageformats")
             la(join("plugins", "imageformats", "qjpeg4.dll"), "imageformats")
             la(join("plugins", "imageformats", "qmng4.dll"), "imageformats")

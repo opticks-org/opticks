@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>hdf5dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hdf5.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 </Project>
