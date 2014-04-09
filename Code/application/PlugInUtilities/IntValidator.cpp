@@ -47,7 +47,7 @@ void textToValue(const QString& input, bool* pSuccess, signed char* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -74,7 +74,7 @@ void textToValue(const QString& input, bool* pSuccess, unsigned char* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -101,7 +101,7 @@ void textToValue(const QString& input, bool* pSuccess, short* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -114,7 +114,7 @@ void textToValue(const QString& input, bool* pSuccess, unsigned short* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -127,7 +127,7 @@ void textToValue(const QString& input, bool* pSuccess, int* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -140,7 +140,7 @@ void textToValue(const QString& input, bool* pSuccess, unsigned int* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -153,7 +153,7 @@ void textToValue(const QString& input, bool* pSuccess, long* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -166,7 +166,7 @@ void textToValue(const QString& input, bool* pSuccess, unsigned long* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -180,7 +180,7 @@ void textToValue(const QString& input, bool* pSuccess, int64_t* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -193,7 +193,7 @@ void textToValue(const QString& input, bool* pSuccess, uint64_t* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -207,7 +207,7 @@ void textToValue(const QString& input, bool* pSuccess, Int64* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
@@ -220,7 +220,7 @@ void textToValue(const QString& input, bool* pSuccess, UInt64* pParam)
    {
       if (pSuccess != NULL)
       {
-         pSuccess = false;
+         *pSuccess = false;
       }
       return;
    }
