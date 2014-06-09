@@ -71,6 +71,13 @@ std::string XmlBase::URLtoPath(const XMLCh* pUrl)
       {
          path = path.substr(3);
       }
+#if defined(WIN_API)
+      else if (path.size() >= 3 && path.substr(0, 3) == "///")
+      {
+         // seems to be a UNC path
+         path = path.substr(1);
+      }
+#endif
 
       int mapPos(0);
       while (sTransMap[mapPos].mpC != NULL)
