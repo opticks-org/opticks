@@ -7,11 +7,17 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QCheckBox>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QWidget>
+
 #include "AppVersion.h"
 #include "AppConfig.h"
 #include "AppVerify.h"
 #include "DataElement.h"
 #include "DesktopServices.h"
+#include "DynamicObject.h"
+#include "ImportDescriptor.h"
 #include "MessageLogResource.h"
 #include "Layer.h"
 #include "LayerImporter.h"
@@ -35,7 +41,10 @@ XERCES_CPP_NAMESPACE_USE
 
 REGISTER_PLUGIN_BASIC(OpticksCoreIo, LayerImporter);
 
-LayerImporter::LayerImporter()
+LayerImporter::LayerImporter() :
+   mpOptionsWidget(NULL),
+   mpCheckBox(NULL),
+   mPolishEntered(false)
 {
    setName("Layer Importer");
    setCreator("Ball Aerospace & Technologies Corp.");
@@ -117,6 +126,16 @@ vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& file
                ImportDescriptor* pImportDescriptor = ModelImporter::populateImportDescriptor(pChildElement, filename);
                if (pImportDescriptor != NULL)
                {
+                  DataDescriptor* pDataDescriptor = pImportDescriptor->getDataDescriptor();
+                  if (NULL != pDataDescriptor)
+                  {
+                     DynamicObject* pMetadataZ = pDataDescriptor->getMetadata();
+                     VERIFYRV(pMetadataZ, descriptors);
+                     if (!pMetadataZ->getAttributeByPath("Layer/Import Options/Use Pixel Coordinates").isValid())
+                     {
+                        pMetadataZ->setAttributeByPath("Layer/Import Options/Use Pixel Coordinates", false);
+                     }
+                  }
                   descriptors.push_back(pImportDescriptor);
                }
             }
@@ -125,6 +144,32 @@ vector<ImportDescriptor*> LayerImporter::getImportDescriptors(const string& file
    }
 
    return descriptors;
+}
+
+void LayerImporter::polishDataDescriptor(DataDescriptor *pDescriptor)
+{
+   // if no metadata has been pushed into the options widget, then the user hasn't called the widget
+   // so don't update the metadata with bad values
+
+   // call base class method.
+   ImporterShell::polishDataDescriptor(pDescriptor);
+
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
+   VERIFYNRV(NULL != pDescriptor);
+
+   // ensure we are reentrant by locking the sets or we'll get in an infinite loop
+   bool echk = false; // check value...must be stack local for reentrance check to work
+   if (mPolishEntered.compare_exchange_strong(echk, true, boost::memory_order_seq_cst))
+   {
+      bool usePixelCoords = false;
+      if (NULL != mpCheckBox)
+      {
+         usePixelCoords = mpCheckBox->isChecked();
+      }
+      pMetadata->setAttributeByPath( "Layer/Import Options/Use Pixel Coordinates",
+         usePixelCoords );
+      mPolishEntered.store(false);
+   }
 }
 
 unsigned char LayerImporter::getFileAffinity(const std::string& filename)
@@ -209,6 +254,18 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       pMsg->addProperty("name", name);
       pMsg->addProperty("type", type);
       pMsg->addProperty("format version", formatVersion);
+   }
+
+
+   // If user requested pixel coordinates be used.
+   bool usePixelCoords = false;
+   DataDescriptor* pDesc = pElement->getDataDescriptor();
+   VERIFY( pDesc );
+   pDesc->getMetadata()->getAttributeByPath( "Layer/Import Options/Use Pixel Coordinates" ).getValue( usePixelCoords );
+   if (usePixelCoords)
+   {
+      // Remove geoVertices and geoBox elements.
+      removeGeoNodes(pRootElement);
    }
 
    if (pView == NULL)
@@ -305,6 +362,59 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    {
       // set the output arguments
       pOutArgList->setPlugInArgValue("Layer", pLayer);
+   }
+
+   return true;
+}
+
+QWidget* LayerImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
+{
+   if (NULL == mpOptionsWidget.get())
+   {
+      mpOptionsWidget.reset(new QWidget());
+      QHBoxLayout* pTopLevel = new QHBoxLayout(mpOptionsWidget.get());
+      mpCheckBox = new QCheckBox("Use pixel coordinates", mpOptionsWidget.get());
+      mpCheckBox->setToolTip(QString("Check to ignore geolocation values to position the layer, and instead use pixel coordinates to position the layer."));
+      mpCheckBox->setChecked(false);
+      pTopLevel->addWidget(mpCheckBox);
+   }
+   if (NULL != mpOptionsWidget.get())
+   {
+      bool usePixelCoords = false;
+      pDescriptor->getMetadata()->getAttributeByPath("Layer/Import Options/Use Pixel Coordinates").getValue(usePixelCoords);
+      Qt::CheckState state = Qt::Unchecked;
+      if (usePixelCoords)
+      {
+         state = Qt::Checked;
+      }          
+      mpCheckBox->setCheckState(state);
+   }
+
+   return mpOptionsWidget.get();
+}
+
+bool LayerImporter::removeGeoNodes(DOMNode* pNode) const
+{
+   if (NULL != pNode)
+   {
+      if (XMLString::equals(pNode->getNodeName(), X("geoVertices")) ||
+          XMLString::equals(pNode->getNodeName(), X("geoBox")))
+      {
+         DOMNode* pParentNode = pNode->getParentNode();
+         if (NULL != pParentNode)
+         {
+            pParentNode->removeChild(pNode);
+         }
+      }
+      else if (pNode->hasChildNodes())
+      {
+         DOMNodeList* pChildren = pNode->getChildNodes();
+         for (unsigned int i = 0; i < pChildren->getLength(); ++i)
+         {
+            DOMNode* pChildNode = pChildren->item(i);
+            removeGeoNodes(pChildNode);
+         }
+      }
    }
 
    return true;

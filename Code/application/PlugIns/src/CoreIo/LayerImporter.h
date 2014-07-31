@@ -12,6 +12,9 @@
 
 #include "ImporterShell.h"
 
+#include <boost/atomic.hpp>
+#include <memory>
+
 class DesktopServices;
 class PlugInManagerServices;
 
@@ -24,20 +27,30 @@ class LayerImporter : public ImporterShell
 {
 public:
    LayerImporter();
-   ~LayerImporter();
+   virtual ~LayerImporter();
 
-   bool getInputSpecification(PlugInArgList*& pInArgList);
-   bool getOutputSpecification(PlugInArgList*& pOutArgList);
-   std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
-   unsigned char getFileAffinity(const std::string& filename);
-   bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+   virtual bool getInputSpecification(PlugInArgList*& pInArgList);
+   virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
+   virtual std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename);
+   virtual unsigned char getFileAffinity(const std::string& filename);
+   virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+
+   virtual QWidget* getImportOptionsWidget(DataDescriptor* pDescriptor);
 
 protected:
    std::vector<ImportDescriptor*> getImportDescriptors(const std::string& filename, bool reportErrors);
+   virtual void polishDataDescriptor (DataDescriptor *pDescriptor);
 
 private:
+   bool removeGeoNodes(DOMNode* pNode) const;
+
+   std::auto_ptr<QWidget> mpOptionsWidget;
+   QCheckBox* mpCheckBox;
+
    Service<DesktopServices> mpDesktop;
    Service<PlugInManagerServices> mpPlugInManager;
+
+   boost::atomic<bool> mPolishEntered; // used to prevent infinite recursion in polishDataDescriptor
 };
 
 #endif
