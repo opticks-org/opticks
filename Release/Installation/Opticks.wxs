@@ -182,6 +182,12 @@ are defined in Opticks-Version.wxi, so include that file now -->
             <Component Id="C__xqilla224_Dependency" Guid="$(var.C__xqilla224_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="xqilla22.dll" Id="F__xqilla224_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
+            <Component Id="C__zlib_Dependency" Guid="$(var.C__zlib_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="zlib.dll" Id="F__zlib_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
+            <Component Id="C__szip_Dependency" Guid="$(var.C__szip_DependencyGuid)" Win64="$(var.64Bit)">
+               <File Name="szip.dll" Id="F__szip_Dependency" DiskId="1" KeyPath="yes" />
+            </Component>
             <Component Id="C__zlib1_Dependency" Guid="$(var.C__zlib1_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="zlib1.dll" Id="F__zlib1_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
@@ -451,6 +457,8 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__xercesc_3_1_Dependency" />
          <ComponentRef Id="C__xqilla224_Dependency" />
          <ComponentRef Id="C__zlib1_Dependency" />
+		 <ComponentRef Id="C__zlib_Dependency" />
+		 <ComponentRef Id="C__szip_Dependency" />
          <ComponentRef Id="C__QtImageFormatGif" />
          <ComponentRef Id="C__QtImageFormatJpeg" />
          <ComponentRef Id="C__QtImageFormatMng" />

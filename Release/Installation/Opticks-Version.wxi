@@ -64,6 +64,8 @@
    <?define C__xercesc_3_1_DependencyGuid = "e44b4edf-9e45-4511-81a0-107c61018c43" ?>
    <?define C__xqilla224_DependencyGuid = "7bd4c16c-216a-4e53-afd2-471fd8dde55b" ?>
    <?define C__zlib1_DependencyGuid = "c9a4ac94-dbdf-43d0-9781-c41ee869ef41" ?>
+   <?define C__zlib_DependencyGuid = "495CB649-A9DD-44CC-A986-89365EFFDB83" ?>
+   <?define C__szip_DependencyGuid = "93C85129-9D7D-42BE-BB52-60806F04A620" ?>
    <?define C__QtImageFormatGifGuid = "037361b4-89a0-4cd4-97fb-615e30ed24d4" ?>
    <?define C__QtImageFormatJpegGuid = "48523c63-b4a4-4276-9e76-a33d310b0ae3" ?>
    <?define C__QtImageFormatMngGuid = "e787680e-0776-423e-ae56-0c4b41b900ef" ?>
@@ -180,6 +182,8 @@
    <?define C__xercesc_3_1_DependencyGuid = "6f8a1206-5eec-40eb-92de-95db61d008e7" ?>
    <?define C__xqilla224_DependencyGuid = "048a499a-3622-440d-b332-6ff378c356cb" ?>
    <?define C__zlib1_DependencyGuid = "4880a988-1782-4b73-9ff5-8701796bdee4" ?>
+   <?define C__zlib_DependencyGuid = "5E761DB2-C06D-4685-9B96-1E54C7F1BA4E" ?>
+   <?define C__szip_DependencyGuid = "A7D9A749-3BEB-44DA-8D61-3F68775C26EC" ?>
    <?define C__QtImageFormatGifGuid = "1db0d36b-f2b4-411c-b164-b0a522cb97e3" ?>
    <?define C__QtImageFormatJpegGuid = "031fe82b-8c49-42d7-854f-930e59969c55" ?>
    <?define C__QtImageFormatMngGuid = "8939c1c5-0900-43c0-89ad-871187e14c6b" ?>
