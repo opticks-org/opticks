@@ -179,7 +179,7 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    // Current frame slider
    QWidget* pSliderWidget = new QWidget(this);
 
-   mpFrameSlider = new WheelEventSlider(this, Qt::Horizontal, pSliderWidget);
+   mpFrameSlider = new WheelEventSlider(Qt::Horizontal, pSliderWidget);
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderPressed()), this, SLOT(activateSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(sliderReleased()), this, SLOT(releaseSlider())));
    VERIFYNR(connect(mpFrameSlider, SIGNAL(actionTriggered(int)), this, SLOT(sliderActionTriggered(int))));
@@ -407,53 +407,20 @@ void AnimationToolBarImp::sliderActionTriggered(int action)
    int start;
    int stop;
    mpFrameSlider->getPlaybackRange(start, stop);
-   switch (action)
+
+   // convert bumper index to frame index
+
+   int framePos = mpFrameSlider->sliderPosition();
+   if (framePos < start)
    {
-   case QSlider::SliderSingleStepAdd:
-   case QSlider::SliderSingleStepSub:
-   case QSlider::SliderPageStepAdd:
-   case QSlider::SliderPageStepSub:
-   case QSlider::SliderMove: // all fall through
-      {
-         // convert bumper index to frame index
-         int framePos = mpFrameSlider->sliderPosition();
-         if (framePos < start)
-         {
-            framePos = start;
-         }
-         else if (framePos > stop)
-         {
-            framePos = stop;
-         }
-         mpFrameSlider->setSliderPosition(framePos);
-         setCurrentFrame(framePos);
-         break;
-      }
-   case QSlider::SliderToMinimum:
-      if (mpController->getBumpersEnabled())
-      {
-         mpController->setCurrentFrame(mpController->getStartBumper());
-      }
-      else
-      {
-         mpController->setCurrentFrame(mpController->getStartFrame());
-      }
-      mpFrameSlider->setSliderPosition(start);
-      break;
-   case QSlider::SliderToMaximum:
-      if (mpController->getBumpersEnabled())
-      {
-         mpController->setCurrentFrame(mpController->getStopBumper());
-      }
-      else
-      {
-         mpController->setCurrentFrame(mpController->getStopFrame());
-      }
-      mpFrameSlider->setSliderPosition(stop);
-      break;
-   default:
-      return;
+      framePos = start;
    }
+   else if (framePos > stop)
+   {
+      framePos = stop;
+   }
+   mpFrameSlider->setSliderPosition(framePos);
+   setCurrentFrame(framePos);
 }
 
 void AnimationToolBarImp::setCurrentFrame(int frameIndex)
@@ -544,7 +511,7 @@ void AnimationToolBarImp::updateFrameRange()
 
    // Update the slider range
    mpFrameSlider->setRange(0, numSteps);
-   mpFrameSlider->setSingleStep(std::max(1,lineStep));   // Page step is updated by the slider widget itself on resize
+   mpFrameSlider->setSingleStep(lineStep);   // Page step is updated by the slider widget itself on resize
 
    // update bumpers
    updateBumpers();
@@ -1021,8 +988,7 @@ double AnimationToolBarImp::getSliderFrame(int sliderIndex) const
    double startFrame = mpController->getStartFrame();
    double range = mpController->getStopFrame() - startFrame;
    double fraction = static_cast<double>(sliderIndex) / static_cast<double>(mpFrameSlider->maximum());
-   long maximum = mpFrameSlider->maximum();
-   double frame = startFrame + range * sliderIndex / maximum;
+   double frame = startFrame + range * fraction;
    return frame;
 }
 
@@ -1049,9 +1015,9 @@ void AnimationToolBarImp::updateBumpers()
    mpFrameSlider->repaint();
 }
 
-AnimationToolBarImp::WheelEventSlider::WheelEventSlider(AnimationToolBarImp* pToolbar, Qt::Orientation orientation, QWidget *parent) :
-                                   QSlider(orientation, parent),
-                                   mpToolbar(pToolbar),
+AnimationToolBarImp::WheelEventSlider::WheelEventSlider(
+                                   Qt::Orientation orientation, QWidget *parent)
+                                   : QSlider(orientation, parent),
                                    mBumpersEnabled(false),
                                    mLeftBumper(-1),
                                    mRightBumper(-1)
@@ -1111,8 +1077,6 @@ void AnimationToolBarImp::WheelEventSlider::resizeEvent(QResizeEvent* pEvent)
 
    int pageSize = static_cast<int>((maxValue - minValue) * pixelRatio);
    setPageStep(pageSize);
-
-   mpToolbar->updateBumpers();
 }
 
 void AnimationToolBarImp::WheelEventSlider::setLeftBumper(int index)
