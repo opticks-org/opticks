@@ -98,6 +98,9 @@ are defined in Opticks-Version.wxi, so include that file now -->
             </Component>
             <Component Id="C__hdf5dll_Dependency" Guid="$(var.C__hdf5dll_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="hdf5dll.dll" Id="F__hdf5dll_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="hdf5.dll" Id="F__hdf5_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="zlib.dll" Id="F__zlib_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="szip.dll" Id="F__szip_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__libexpat_Dependency" Guid="$(var.C__libexpat_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="libexpat.dll" Id="F__libexpat_Dependency" DiskId="1" KeyPath="yes" />

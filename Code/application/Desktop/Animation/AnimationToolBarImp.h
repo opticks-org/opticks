@@ -110,7 +110,7 @@ private:
    class WheelEventSlider : public QSlider, public Serializable
    {
    public:
-      WheelEventSlider(Qt::Orientation orientation, QWidget *parent = 0);
+      WheelEventSlider(AnimationToolBarImp* pToolbar, Qt::Orientation orientation, QWidget *parent = 0);
       void setLeftBumper(int index);
       void setRightBumper(int index);
       void resetBumpers();
@@ -149,6 +149,7 @@ private:
          }
       };
 
+      AnimationToolBarImp* mpToolbar;
       bool mBumpersEnabled;
       int mLeftBumper;
       int mRightBumper;
