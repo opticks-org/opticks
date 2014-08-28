@@ -119,6 +119,7 @@
                         <File Name="Importers.htm" Id="F__Help_importers.htm" />
                         <File Name="Import_Data.htm" Id="F__Help_import_data.htm" />
                         <File Name="Import_Shape_File.htm" Id="F__Help_import_shape_file.htm" />
+                        <File Name="LAS_Importer.htm" Id="F__Help_las_importer.htm" />
                         <File Name="Layer_Exporters.htm" Id="F__Help_layer_exporters.htm" />
                         <File Name="NITF_DES_Exporter.htm" Id="F__Help_nitf_des_exporter.htm" />
                         <File Name="NITF_Importer.htm" Id="F__Help_nitf_importer.htm" />
@@ -202,6 +203,15 @@
                         <File Name="Workspace_Options_Cube.htm" Id="F__Help_workspace_options_cube.htm" />
                      </Component>
                   </Directory>
+                  <Directory Id="D__Help_pointcloud" Name="PointCloud" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\PointCloud">
+                     <Component Id="C__Help_pointcloud" Guid="$(var.C__Help_pointcloud_Guid)" Win64="no">
+                        <File Name="Basics.htm" Id="F__Help_basics.htm" />
+                        <File Name="PointCloud_Colorization.htm" Id="F__Help_pointcloud_colorization.htm" />
+                        <File Name="PointCloud_Decimation.htm" Id="F__Help_pointcloud_decimation.htm" />
+                        <File Name="PointCloud_PointSize.htm" Id="F__Help_pointcloud_pointsize.htm" />
+                        <File Name="PointCloud_Z_Exaggeration.htm" Id="F__Help_pointcloud_z_exaggeration.htm" />
+                     </Component>
+                  </Directory>
                   <Directory Id="D__Help_products" Name="Products" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Products">
                      <Component Id="C__Help_products" Guid="$(var.C__Help_products_Guid)" Win64="no">
                         <File Name="Create_a_New_Product.htm" Id="F__Help_create_a_new_product.htm" />
@@ -275,6 +285,7 @@
                            <File Name="Advanced_Options.gif" Id="F__Help_advanced_options.gif" />
                            <File Name="Animations_Tab.gif" Id="F__Help_animations_tab.gif" />
                            <File Name="Animations_Tab_2.gif" Id="F__Help_animations_tab_2.gif" />
+                           <File Name="Animation_Context_Menu.png" Id="F__Help_animation_context_menu.png" />
                            <File Name="Animation_Cycle.gif" Id="F__Help_animation_cycle.gif" />
                            <File Name="Animation_Options.gif" Id="F__Help_animation_options.gif" />
                            <File Name="Annotate_Layer_1.gif" Id="F__Help_annotate_layer_1.gif" />
@@ -636,6 +647,10 @@
                            <File Name="Keyboard_Shortcut_Select.gif" Id="F__Help_keyboard_shortcut_select.gif" />
                            <File Name="KM_Button.gif" Id="F__Help_km_button.gif" />
                            <File Name="Labels_Enabled.gif" Id="F__Help_labels_enabled.gif" />
+                           <File Name="LAS_importer_data_options.png" Id="F__Help_las_importer_data_options.png" />
+                           <File Name="LAS_importer_data_options_545x492.png" Id="F__Help_las_importer_data_options_545x492.png" />
+                           <File Name="LAS_importer_options.png" Id="F__Help_las_importer_options.png" />
+                           <File Name="LAS_importer_options_549x383.png" Id="F__Help_las_importer_options_549x383.png" />
                            <File Name="Lat-Long_Props.gif" Id="F__Help_lat_long_props.gif" />
                            <File Name="Layer_button.gif" Id="F__Help_layer_button.gif" />
                            <File Name="Link_All_Windows_Button.gif" Id="F__Help_link_all_windows_button.gif" />
@@ -681,6 +696,7 @@
                            <File Name="Multiply_Button.gif" Id="F__Help_multiply_button.gif" />
                            <File Name="M_Button.gif" Id="F__Help_m_button.gif" />
                            <File Name="Nautical_Miles_button.gif" Id="F__Help_nautical_miles_button.gif" />
+                           <File Name="New_Animation_Player_Dialog.png" Id="F__Help_new_animation_player_dialog.png" />
                            <File Name="New_Button.png" Id="F__Help_new_button.png" />
                            <File Name="New_Button_22x21.png" Id="F__Help_new_button_22x21.png" />
                            <File Name="New_Direction.gif" Id="F__Help_new_direction.gif" />
@@ -751,6 +767,19 @@
                            <File Name="Plus_box_gray.gif" Id="F__Help_plus_box_gray.gif" />
                            <File Name="PNG_Exporter_Options.gif" Id="F__Help_png_exporter_options.gif" />
                            <File Name="PNG_Export_Options.gif" Id="F__Help_png_export_options.gif" />
+                           <File Name="PointCloud_ContextMenu_ColorBy.png" Id="F__Help_pointcloud_contextmenu_colorby.png" />
+                           <File Name="PointCloud_ContextMenu_StretchType.png" Id="F__Help_pointcloud_contextmenu_stretchtype.png" />
+                           <File Name="PointCloud_PointSize.png" Id="F__Help_pointcloud_pointsize.png" />
+                           <File Name="PointCloud_PointSize_560x491.png" Id="F__Help_pointcloud_pointsize_560x491.png" />
+                           <File Name="PointCloud_View.png" Id="F__Help_pointcloud_view.png" />
+                           <File Name="PointCloud_ViewDecimation.png" Id="F__Help_pointcloud_viewdecimation.png" />
+                           <File Name="PointCloud_ViewDecimation_566x496.png" Id="F__Help_pointcloud_viewdecimation_566x496.png" />
+                           <File Name="PointCloud_ViewOptions.png" Id="F__Help_pointcloud_viewoptions.png" />
+                           <File Name="PointCloud_ViewOptions_524x569.png" Id="F__Help_pointcloud_viewoptions_524x569.png" />
+                           <File Name="PointCloud_ViewOptions_530x576.png" Id="F__Help_pointcloud_viewoptions_530x576.png" />
+                           <File Name="PointCloud_View_589x516.png" Id="F__Help_pointcloud_view_589x516.png" />
+                           <File Name="PointCloud_Z_Exageration.png" Id="F__Help_pointcloud_z_exageration.png" />
+                           <File Name="PointCloud_Z_Exageration_571x501.png" Id="F__Help_pointcloud_z_exageration_571x501.png" />
                            <File Name="Preview_File_Contents_Button.gif" Id="F__Help_preview_file_contents_button.gif" />
                            <File Name="Print_Button.gif" Id="F__Help_print_button.gif" />
                            <File Name="Product_Class_Properties.gif" Id="F__Help_product_class_properties.gif" />
@@ -1001,6 +1030,7 @@
                   </Directory>
                   <Directory Id="D__Help_skinsupport" Name="SkinSupport" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\SkinSupport">
                      <Component Id="C__Help_skinsupport" Guid="$(var.C__Help_skinsupport_Guid)" Win64="no">
+                        <File Name="body_longdesc.htm" Id="F__Help_body_longdesc.htm" />
                         <File Name="DropDownClosed.gif" Id="F__Help_dropdownclosed.gif" />
                         <File Name="DropDownOpen.gif" Id="F__Help_dropdownopen.gif" />
                         <File Name="ExpandingClosed.gif" Id="F__Help_expandingclosed.gif" />
@@ -1008,6 +1038,8 @@
                         <File Name="MadCap.css" Id="F__Help_madcap.css" />
                         <File Name="MadCapAll.js" Id="F__Help_madcapall.js" />
                         <File Name="MadCapBodyEnd.js" Id="F__Help_madcapbodyend.js" />
+                        <File Name="mctoolbar_longdesc.htm" Id="F__Help_mctoolbar_longdesc.htm" />
+                        <File Name="navigation_longdesc.htm" Id="F__Help_navigation_longdesc.htm" />
                      </Component>
                   </Directory>
                   <Directory Id="D__Help_tie_points" Name="Tie_Points" DiskId="1" FileSource="$(var.OpticksHelpDir)\Opticks\Content\Tie_Points">
