@@ -381,6 +381,10 @@ void FeatureClassWidget::setFeatureClassProperties(const ArcProxyLib::FeatureCla
 
    pInspector->setFeatureType(featureClassProperties.getFeatureType());
    pInspector->setFeatureCount(featureClassProperties.getFeatureCount());
+   if (!mQueries.empty())
+   {
+      pInspector->setDisplayOptions(mQueries.begin()->second);
+   }
 }
 
 void FeatureClassWidget::addDisplayItems()
