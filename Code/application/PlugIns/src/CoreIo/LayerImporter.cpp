@@ -311,6 +311,8 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          Service<ModelServices> pModel;
          if (pModel->setElementParent(pElement, pNewParentElement) == false)
          {
+            pProgress->updateProgress("The layer already exists.", 100, ERRORS);
+            pStep->finalize(Message::Failure, "The layer already exists.");
             return false;
          }
       }
@@ -339,6 +341,8 @@ bool LayerImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    {
       if (pLayer->fromXml(pRootElement, formatVersion) == false)
       {
+         pProgress->updateProgress("Problem with layer file.", 100, ERRORS);
+         pStep->finalize(Message::Failure, "Problem with layer file.");
          return false;
       }
    }
