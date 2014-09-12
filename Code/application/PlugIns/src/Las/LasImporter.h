@@ -62,7 +62,7 @@ protected:
                                                               ProcessingLocation location);
 
 private:
-   OptionLasImporter mCustomOptions;
+   OptionLasImporter* mpCustomOptions;
 
    unsigned int mTotalPoints;
    double mMinX;

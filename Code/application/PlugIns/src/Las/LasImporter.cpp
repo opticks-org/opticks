@@ -45,7 +45,7 @@
 
 REGISTER_PLUGIN_BASIC(Las, LasImporter);
 
-LasImporter::LasImporter() : mCustomOptions(), mPolishEntered(false)
+LasImporter::LasImporter() : mpCustomOptions(NULL), mPolishEntered(false)
 {
    setName("LAS Importer");
    setDescription("LAS LIDAR point cloud importer");
@@ -61,6 +61,7 @@ LasImporter::LasImporter() : mCustomOptions(), mPolishEntered(false)
 
 LasImporter::~LasImporter()
 {
+   delete mpCustomOptions;
 }
 
 std::vector<ImportDescriptor*> LasImporter::getImportDescriptors(const std::string& filename)
@@ -204,7 +205,7 @@ void LasImporter::polishDataDescriptor(DataDescriptor *pDescriptor)
 {
    // if no metadata has been pushed into the options widget, then the user hasn't called the widget
    // so don't update the metadata with bad values
-   if ( !( mCustomOptions.getInputGridSize()->text() == "" && mCustomOptions.getInputMaxPoints()->text() == "" ) )
+   if ( mpCustomOptions != NULL && !( mpCustomOptions->getInputGridSize()->text() == "" && mpCustomOptions->getInputMaxPoints()->text() == "" ) )
    {
       DynamicObject* pMetadata = pDescriptor->getMetadata();
       // ensure we are reentrant by locking the sets or we'll get in an infinite loop
@@ -212,11 +213,11 @@ void LasImporter::polishDataDescriptor(DataDescriptor *pDescriptor)
       if (mPolishEntered.compare_exchange_strong(echk, true, boost::memory_order_seq_cst))
       {
          pMetadata->setAttributeByPath( "LAS/Thinning Options/Algorithm", 
-            mCustomOptions.getDropDown()->currentIndex() );
+            mpCustomOptions->getDropDown()->currentIndex() );
          pMetadata->setAttributeByPath( "LAS/Thinning Options/Max Points", 
-            mCustomOptions.getInputMaxPoints()->text().toInt() );
+            mpCustomOptions->getInputMaxPoints()->text().toInt() );
          pMetadata->setAttributeByPath( "LAS/Thinning Options/Grid Size", 
-            mCustomOptions.getInputGridSize()->text().toDouble() );
+            mpCustomOptions->getInputGridSize()->text().toDouble() );
          mPolishEntered.store(false);
       }
    }
@@ -325,10 +326,15 @@ QWidget* LasImporter::getImportOptionsWidget(DataDescriptor* pDescriptor)
     pDescriptor->getMetadata()->getAttributeByPath("LAS/Thinning Options/Max Points").getValue(maxPoints);
     pDescriptor->getMetadata()->getAttributeByPath("LAS/Thinning Options/Grid Size").getValue(gridSize);
 
-    mCustomOptions.getDropDown()->setCurrentIndex(thinningOption);
-    mCustomOptions.getInputGridSize()->setText(QString::number(gridSize));
-    mCustomOptions.getInputMaxPoints()->setText(QString::number(maxPoints));
-    return mCustomOptions.getWidget();
+    if (mpCustomOptions == NULL)
+    {
+       mpCustomOptions = new OptionLasImporter();
+    }
+    VERIFYRV(mpCustomOptions, NULL);
+    mpCustomOptions->getDropDown()->setCurrentIndex(thinningOption);
+    mpCustomOptions->getInputGridSize()->setText(QString::number(gridSize));
+    mpCustomOptions->getInputMaxPoints()->setText(QString::number(maxPoints));
+    return mpCustomOptions->getWidget();
 }
 
 bool LasImporter::validate(const DataDescriptor* pDescriptor,
