@@ -491,7 +491,6 @@ void AnimationToolBarImp::setFrameSpeed(const QString& strSpeed)
       }
 
       mpController->setIntervalMultiplier(intervalMultiplier);
-      updateFrameRange();
    }
 }
 
@@ -513,17 +512,11 @@ void AnimationToolBarImp::updateFrameRange()
       // Get the range from the animation controller
       double startFrame = mpController->getStartFrame();
       double stopFrame = mpController->getStopFrame();
-      double intervalMultiplier = mpController->getIntervalMultiplier();
       const int frequency = mpController->getFrequency();
       currentFrame = mpController->getCurrentFrame();
 
-      if (intervalMultiplier == 0.0)
-      {
-         intervalMultiplier = 1.0;
-      }
-
       // Calculate the total number of steps, adding 0.5 to round to the nearest number
-      double dNumSteps = (stopFrame - startFrame) * frequency / intervalMultiplier;
+      double dNumSteps = (stopFrame - startFrame) * frequency;
 
       // make sure reasonable number and prevent very large number from becoming a negative on cast to int
       if (dNumSteps > 100000.0)
@@ -539,7 +532,7 @@ void AnimationToolBarImp::updateFrameRange()
       }
 
       // Define the line step size as one frame or one second
-      lineStep = frequency / intervalMultiplier;
+      lineStep = frequency;
    }
 
    // Update the slider range
@@ -626,7 +619,6 @@ void AnimationToolBarImp::updateFrameSpeed(double speed)
       mpFrameSpeedCombo->setCurrentIndex(i);
    }
 
-   updateFrameRange();
    mpFrameSpeedCombo->blockSignals(false);
 }
 

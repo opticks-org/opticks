@@ -282,11 +282,6 @@ bool ShapeFileImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
    const ArcProxyLib::ConnectionParameters& connect = mpFeatureClass->getConnectionParameters();
    pStep->addProperty("connectionParameters", connect.toString());
 
-   vector<ArcProxyLib::ConnectionType> availableConnections = getAvailableConnectionTypes();
-   FAIL_IF(find(availableConnections.begin(), availableConnections.end(), 
-      connect.getConnectionType()) == availableConnections.end(), 
-      "The selected connection type is not available.", return false)
-
    // Create annotation element, incrementing requested name by 1, until
    // annotation element can be created.
    Service<ModelServices> pModel;
