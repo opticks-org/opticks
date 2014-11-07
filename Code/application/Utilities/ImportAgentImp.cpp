@@ -488,7 +488,7 @@ bool ImportAgentImp::execute()
       }
 
       if ((pImporter != NULL) && ((mEditType == ImportAgent::ALWAYS_EDIT) ||
-         ((mEditType == ImportAgent::AS_NEEDED_EDIT) && (numValidDescriptors < numImportedDatasets))))
+         ((mEditType == ImportAgent::AS_NEEDED_EDIT) && ((numValidDescriptors < numImportedDatasets) || (numValidDescriptors == 0)))))
       {
          Service<DesktopServices> pDesktop;
          vector<ImportDescriptor*> originalDescriptors = importDescriptors;
@@ -523,9 +523,15 @@ bool ImportAgentImp::execute()
          {
             createProgressDialog();
             pProgress->updateProgress(errorMessage, 0, ERRORS);
+            return false;
          }
-
-         return false;
+         else if((pProgress != NULL) && (errorMessage.empty() == true))
+         {
+            createProgressDialog();
+            pProgress->updateProgress("No image segments were imported", 100, ERRORS);
+         }else{
+            return false;
+         }
       }
    }
 
