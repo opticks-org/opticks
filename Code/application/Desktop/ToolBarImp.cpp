@@ -7,6 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include <QtGui/QApplication>
+#include <QtGui/QKeyEvent>
 #include <QtGui/QLayout>
 
 #include "ToolBarImp.h"
@@ -23,7 +25,8 @@ using namespace std;
 ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
    QToolBar(QString::fromStdString(name), parent),
    WindowImp(id, name),
-   mpMenuBar(new MenuBarImp(QString::fromStdString(name), this))
+   mpMenuBar(new MenuBarImp(QString::fromStdString(name), this)),
+   mMinToolBarWidth(0)
 {
    mpShowAction = new QAction("&Show", this);
    mpShowAction->setAutoRepeat(false);
@@ -40,6 +43,7 @@ ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
 
    VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
    VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
+   VERIFYNR(connect(this, SIGNAL(topLevelChanged(bool)), this, SLOT(floatToolBar(bool))));
 
    // Prevent the menu bar from stretching
    QLayout* pLayout = layout();
@@ -210,4 +214,43 @@ list<ContextMenuAction> ToolBarImp::getContextMenuActions() const
 bool ToolBarImp::isShown() const
 {
    return isVisible();
+}
+
+void ToolBarImp::floatToolBar(bool floated)
+{
+   if (floated)
+   {
+      this->setWindowOpacity(0.5);
+
+      mMinToolBarWidth = this->minimumWidth();
+      if (QApplication::keyboardModifiers() == Qt::ControlModifier)
+      {
+         // This allows for toolbars to be wider when floated.  This
+         // capability is very useful when toolbars contain sliders
+         // (ie: Animation Toolbar, Brightness Toolbar) and user wants
+         // the toolbar floated, but doesn't want to give up slider
+         // fidelity.
+         int width = this->geometry().width();
+         this->setMinimumWidth( width * 0.9);
+      }
+   }
+   else
+   {
+      if (this->minimumWidth() != mMinToolBarWidth)
+      {
+         this->setMinimumWidth(mMinToolBarWidth);
+      }
+   }
+}
+
+void ToolBarImp::moveEvent(QMoveEvent* pEvent)
+{
+   if (QApplication::keyboardModifiers() != Qt::ControlModifier)
+   {
+      if (this->minimumWidth() != mMinToolBarWidth)
+      {
+         this->setMinimumWidth(mMinToolBarWidth);
+      }
+   }
+   QToolBar::moveEvent(pEvent);
 }

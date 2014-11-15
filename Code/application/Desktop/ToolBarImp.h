@@ -51,8 +51,13 @@ public:
 
    bool isShown() const;
 
+   virtual void moveEvent(QMoveEvent* pEvent);
+
 signals:
    void visibilityChanged(bool bVisible);
+
+public slots:
+   void floatToolBar(bool floated);
 
 protected:
    void showEvent(QShowEvent* pEvent);
@@ -65,6 +70,7 @@ private:
    MenuBarImp* mpMenuBar;
    QAction* mpShowAction;
    QAction* mpHideAction;
+   int mMinToolBarWidth;
 
    WINDOWIMPDROP_METHODS(WindowImp);
 };
