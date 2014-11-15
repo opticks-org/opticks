@@ -6669,3 +6669,100 @@ void ApplicationWindow::showToolbarsMenu()
       }
    }
 }
+
+QMenu * ApplicationWindow::createPopupMenu()
+{
+   QMenu* pMenu = new QMenu(this);
+   VERIFYRV(NULL != pMenu, NULL);
+
+   // Get alphabetized lists of default dock window names and non default dock window names.
+   Service<DesktopServices> pDesktop;
+   vector<Window*> windows;
+   pDesktop->getWindows(DOCK_WINDOW, windows);
+   vector<string> nonDefaultWindowNames;
+   vector<string> defaultWindowNames;
+   for (vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++iter)
+   {
+      DockWindow* pWindow = dynamic_cast<DockWindow*>(*iter);
+      VERIFYRV(NULL != pWindow, pMenu);
+      string name = pWindow->getName();
+
+      if (isDefaultWindow(pWindow))
+      {
+         defaultWindowNames.push_back(name);
+      }
+      else
+      {
+         nonDefaultWindowNames.push_back(name);
+      }
+   }
+   std::sort(defaultWindowNames.begin(), defaultWindowNames.end());
+   std::sort(nonDefaultWindowNames.begin(), nonDefaultWindowNames.end());
+
+   // Create and add QActions, in alphabetical fashion, for each of the non default dock windows.
+   // Dock windows created by extensions are non default dock windows.
+   // Want non default dock windows to be displayed near top of window, as some extensions add plots
+   // as dock windows, and want those dock windows to be most readily accessible.
+   for (vector<string>::const_iterator iter = nonDefaultWindowNames.begin(); iter != nonDefaultWindowNames.end(); ++iter)
+   {
+      string windowName = *iter;
+
+      DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pDesktop->getWindow(windowName, DOCK_WINDOW));
+      VERIFYRV(NULL != pDockWindow, NULL);
+      QAction* pAction = pDockWindow->toggleViewAction();
+      VERIFYRV(NULL != pAction, NULL);
+      pMenu->addAction(pAction);
+   }
+
+   // Add a separator between non default dock windows and default dock windows.
+   if (! nonDefaultWindowNames.empty())
+   {
+      pMenu->addSeparator();
+   }
+
+   // Create and add QActions, in alphabetical fashion, for each of the default dock windows.
+   for (vector<string>::const_iterator iter = defaultWindowNames.begin(); iter != defaultWindowNames.end(); ++iter)
+   {
+      string windowName = *iter;
+
+      DockWindowImp* pDockWindow = dynamic_cast<DockWindowImp*>(pDesktop->getWindow(windowName, DOCK_WINDOW));
+      VERIFYRV(NULL != pDockWindow, NULL);
+      QAction* pAction = pDockWindow->toggleViewAction();
+      VERIFYRV(NULL != pAction, NULL);
+      pMenu->addAction(pAction);
+   }
+
+   // Add a separator between default dock windows and toolbars.
+   if (! defaultWindowNames.empty())
+   {
+      pMenu->addSeparator();
+   }
+
+   // Get alphabetized list of toolbar names.
+   vector<Window*> toolbars;
+   pDesktop->getWindows(TOOLBAR, toolbars);
+   vector<string> toolbarNames;
+   for (vector<Window*>::const_iterator iter = toolbars.begin(); iter != toolbars.end(); ++iter)
+   {
+      ToolBar* pToolBar = dynamic_cast<ToolBar*>(*iter);
+      VERIFYRV(NULL != pToolBar, pMenu);
+      string name = pToolBar->getName();
+      toolbarNames.push_back(name);
+   }
+   std::sort(toolbarNames.begin(), toolbarNames.end());
+
+   // Create and add QActions, in alphabetical fashion, for each of the toolbars.
+   for (vector<string>::const_iterator iter = toolbarNames.begin(); iter != toolbarNames.end(); ++iter)
+   {
+      string toolbarName = *iter;
+
+      ToolBarImp* pToolbar = dynamic_cast<ToolBarImp*>(pDesktop->getWindow(toolbarName, TOOLBAR));
+      VERIFYRV(NULL != pToolbar, NULL);
+      QAction* pAction = pToolbar->toggleViewAction();
+      VERIFYRV(NULL != pAction, NULL);
+      pMenu->addAction(pAction);
+   }
+
+   // Qt documentation states: 'Ownership of the popup menu is transferred to the caller'.
+   return pMenu;
+}

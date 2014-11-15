@@ -490,6 +490,7 @@ private:
    void removeMenuCommands(const QList<QAction*>& commands);
    const std::vector<PlugInDescriptor*> &getAvailableExporters(const SessionItem *pItem) const;
    AnnotationLayer* getClipboardLayer() const;
+   virtual QMenu * createPopupMenu();
 
 private slots:
    void constructFileMenu();
