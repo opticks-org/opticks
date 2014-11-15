@@ -544,7 +544,7 @@ void AnimationServicesImp::destroySelectedControllers()
    {
       QMessageBox::StandardButton button = QMessageBox::question(Service<DesktopServices>()->getMainWidget(),
          "Confirm Delete", "Are you sure that you want to delete the selected animation controllers?",
-         QMessageBox::Yes | QMessageBox::No);
+         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
       if (button == QMessageBox::No)
       {
          return;
