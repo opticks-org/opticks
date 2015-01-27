@@ -77,19 +77,24 @@ AnimationToolBarImp::AnimationToolBarImp(const std::string& id, QWidget* parent)
    mpStopAction->setAutoRepeat(false);
    mpStopAction->setCheckable(true);
    pDesktop->initializeAction(mpStopAction, shortcutContext);
+   QWidget* pMainWidget = pDesktop->getMainWidget();
+   pMainWidget->addAction(mpStopAction); // Want this shortcut available, even when toolbar is floated and not active.
 
    mpPlayPauseAction = addAction(QIcon(":/icons/PlayForward"), "Play//Pause", this, SLOT(playPause()));
    mpPlayPauseAction->setAutoRepeat(false);
    mpPlayPauseAction->setShortcut(QKeySequence(Qt::Key_Space));
    pDesktop->initializeAction(mpPlayPauseAction, shortcutContext);
+   pMainWidget->addAction(mpPlayPauseAction); // Want this shortcut available, even when toolbar is floated and not active.
 
    mpStepBackwardAction = addAction(QIcon(":/icons/AdvanceBackward"), "Step Backward", this, SLOT(stepBackward()));
    mpStepBackwardAction->setAutoRepeat(true);
    pDesktop->initializeAction(mpStepBackwardAction, shortcutContext);
+   pMainWidget->addAction(mpStepBackwardAction); // Want this shortcut available, even when toolbar is floated and not active.
 
    mpStepForwardAction = addAction(QIcon(":/icons/AdvanceForward"), "Step Forward", this, SLOT(stepForward()));
    mpStepForwardAction->setAutoRepeat(true);
    pDesktop->initializeAction(mpStepForwardAction, shortcutContext);
+   pMainWidget->addAction(mpStepForwardAction); // Want this shortcut available, even when toolbar is floated and not active.
 
    addSeparator();
 

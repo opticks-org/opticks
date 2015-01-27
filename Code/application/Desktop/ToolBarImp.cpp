@@ -220,8 +220,6 @@ void ToolBarImp::floatToolBar(bool floated)
 {
    if (floated)
    {
-      this->setWindowOpacity(0.5);
-
       mMinToolBarWidth = this->minimumWidth();
       if (QApplication::keyboardModifiers() == Qt::ControlModifier)
       {
