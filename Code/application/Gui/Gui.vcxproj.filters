@@ -899,6 +899,12 @@
     <ClCompile Include="Undo\ViewUndo.cpp">
       <Filter>Undo</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsFullScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsFullScreen.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AoiToolBarAdapter.h">
@@ -1556,6 +1562,9 @@
     </CustomBuild>
     <CustomBuild Include="Undo\UndoStack.h">
       <Filter>Undo</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsFullScreen.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

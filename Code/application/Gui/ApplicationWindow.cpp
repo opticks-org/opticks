@@ -104,6 +104,7 @@
 #include "MruFile.h"
 #include "ObjectResource.h"
 #include "OptionsDlg.h"
+#include "OptionsFullScreen.h"
 #include "PaperSizeDlg.h"
 #include "PlotSetGroup.h"
 #include "PlugIn.h"
@@ -184,7 +185,9 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpGcpEditor(NULL),
    mpUndoGroup(new QUndoGroup(this)),
    mClearingUndoStacks(false),
-   mDropNewSession(false)
+   mDropNewSession(false),
+   mpFullScreenAction(NULL),
+   mFullScreen(false)
 {
    // make sure we have enough colors
    checkColorDepth(pSplash);
@@ -713,6 +716,15 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpTileSelectedAction->setToolTip("Tile Selected");
    mpTileSelectedAction->setStatusTip("Select which Windows to tile and how to display");
    VERIFYNR(connect(mpTileSelectedAction, SIGNAL(triggered()), this, SLOT(tileSelectedWindows())));
+
+   // Toggle pseudo full screen mode.
+   QString text = "Toggle Full Screen";
+   mpFullScreenAction = new QAction(text, this);
+   mpFullScreenAction->setAutoRepeat(false);
+   mpFullScreenAction->setToolTip(text);
+   mpFullScreenAction->setStatusTip(text);
+   mpFullScreenAction->setEnabled(true); // Always enabled, as this is not dependent on any context (ie: spatial data window displayed).
+   VERIFYNR(connect(mpFullScreenAction, SIGNAL(triggered()), this, SLOT(togglePseudoFullScreen())));
 
    // Help
    QAction* pHelp_Topics_Action = new QAction(QIcon(":/icons/HelpTopics"), "Application &Help...", this);
@@ -1317,6 +1329,10 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
 
    Service<ApplicationServices> pApp;
    attach(SIGNAL_NAME(ApplicationWindow, Closed), Signal(pApp.get(), SIGNAL_NAME(ApplicationServices, ApplicationClosed)));
+
+   // Force construction of window menu, so that shortcuts will be available prior
+   // to clicking Window menu.
+   constructWindowMenu();
 
    ////////////////////////
    // Check the message log
@@ -2158,6 +2174,8 @@ void ApplicationWindow::constructWindowMenu()
    mpMenuBar->insertCommand(mpTileHorizontalAction, m_pWindow, context);
    mpMenuBar->insertCommand(mpTileVerticalAction, m_pWindow, context);
    mpMenuBar->insertCommand(mpTileSelectedAction, m_pWindow, context);
+   m_pWindow->addSeparator();
+   mpMenuBar->insertCommand(mpFullScreenAction, m_pWindow, context);
 
    QList<QMdiSubWindow*> windowList = mpWorkspace->subWindowList(); // uses the default of CreationOrder
 
@@ -3695,6 +3713,134 @@ void ApplicationWindow::linkAllSpatialDataWindows()
          }
       }
    }
+}
+
+void ApplicationWindow::togglePseudoFullScreen()
+{
+   mFullScreen = ! mFullScreen;
+
+   std::vector<Window*> windows;
+   Service<DesktopServices> pDesktop;
+   pDesktop->getWindows(TOOLBAR, windows);
+   std::vector<std::string> defaults;
+   const std::vector<std::string>* pToolBarsStayVisible = OptionsFullScreen::getSettingToolBarsStayVisible();
+   if (NULL == pToolBarsStayVisible)
+   {
+      pToolBarsStayVisible = &defaults;
+   }
+   if (mFullScreen)
+   {
+      for (std::vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++ iter)
+      {
+         ToolBar* pWindow = dynamic_cast<ToolBar*>(*iter);
+         VERIFYNRV(NULL != pWindow);
+
+         std::string windowName = pWindow->getName();
+         if (pToolBarsStayVisible->end() == std::find(pToolBarsStayVisible->begin(), pToolBarsStayVisible->end(), windowName))
+         {
+            if (pWindow->isShown())
+            {
+               std::string id = pWindow->getId();
+               mToolbarDisplayStatus.push_back(id);
+               pWindow->hide();
+            }
+         }
+      }
+   }
+   else
+   {
+      Service<SessionManager> pSession;
+      for (std::vector<std::string>::const_iterator iter = mToolbarDisplayStatus.begin(); iter != mToolbarDisplayStatus.end(); ++iter)
+      {
+         ToolBar* pWindow = dynamic_cast<ToolBar*>(pSession->getSessionItem(*iter));
+         if (NULL != pWindow)
+         {
+            pWindow->show();
+         }
+      }
+      mToolbarDisplayStatus.clear();
+   }
+
+   windows.clear();
+
+   const std::vector<std::string>* pDockWindowsStayVisible = OptionsFullScreen::getSettingDockWindowsStayVisible();
+   if (NULL == pDockWindowsStayVisible)
+   {
+      pDockWindowsStayVisible = &defaults;
+   }
+   pDesktop->getWindows(DOCK_WINDOW, windows);
+   if (mFullScreen)
+   {
+      for (std::vector<Window*>::const_iterator iter = windows.begin(); iter != windows.end(); ++ iter)
+      {
+         DockWindow* pWindow = dynamic_cast<DockWindow*>(*iter);
+         VERIFYNRV(NULL != pWindow);
+
+         std::string windowName = pWindow->getName();
+         if (pDockWindowsStayVisible->end() == std::find(pDockWindowsStayVisible->begin(), pDockWindowsStayVisible->end(), windowName))
+         {
+            if (pWindow->isShown())
+            {
+               std::string id = pWindow->getId();
+               mDockWindowDisplayStatus.push_back(id);
+
+               pWindow->hide();
+            }
+         }
+      }
+   }
+   else
+   {
+      Service<SessionManager> pSession;
+      for (std::vector<std::string>::const_iterator iter = mDockWindowDisplayStatus.begin(); iter != mDockWindowDisplayStatus.end(); ++iter)
+      {
+         DockWindow* pWindow = dynamic_cast<DockWindow*>(pSession->getSessionItem(*iter));
+         if (NULL != pWindow)
+         {
+            pWindow->show();
+         }
+      }
+      mDockWindowDisplayStatus.clear();
+   }
+
+   const std::string defaultWindowLayout = "Maximize Active";
+   const std::string* pWindowLayout = &defaultWindowLayout;
+   if (OptionsFullScreen::hasSettingWorkspaceWindowLayout())
+   {
+      pWindowLayout = OptionsFullScreen::getSettingWorkspaceWindowLayout();
+   }
+   VERIFYNRV(NULL != pWindowLayout);
+   std::string windowLayout = *pWindowLayout;
+
+   QApplication::processEvents();
+   if ("Maximize Active" == windowLayout)
+   {
+      WorkspaceWindow* pWindow = pDesktop->getCurrentWorkspaceWindow();
+      if (NULL != pWindow)
+      {
+         pWindow->maximize();
+         View* pView = pWindow->getView();
+         if (NULL != pView)
+         {
+            pView->refresh();
+            pDesktop->getCurrentWorkspaceWindow()->getView()->refresh();
+         }
+      }
+   }
+   else
+   {
+      TilingType tileMethod = TILE_GRID;
+      if ("Tile Horizontally" == windowLayout)
+      {
+         tileMethod = TILE_HORIZONTAL;
+      }
+      else if ("Tile Vertically" == windowLayout)
+      {
+         tileMethod = TILE_VERTICAL;
+      }
+      tileWorkspaceWindows(tileMethod);
+   }
+   QApplication::processEvents();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

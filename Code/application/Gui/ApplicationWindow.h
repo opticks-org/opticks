@@ -270,6 +270,7 @@ protected slots:
    // Window actions
    void linkWindows();
    void linkAllSpatialDataWindows();
+   void togglePseudoFullScreen();
 
    // Help actions
    void helpTopics();
@@ -408,6 +409,7 @@ private:
    QAction* mpTileVerticalAction;
    QAction* mpTileAction;
    QAction* mpTileSelectedAction;
+   QAction* mpFullScreenAction;
 
    // SessionItem context menu actions
    QAction* mpUnlinkAction;
@@ -479,6 +481,10 @@ private:
    DropFilesType mDropFilesType;
    ImportAgent::EditType mDropEditType;
    bool mDropNewSession;
+
+   std::vector<std::string> mToolbarDisplayStatus;
+   std::vector<std::string> mDockWindowDisplayStatus;
+   bool mFullScreen;
 
 private:
    void updateActiveWindow(QMdiSubWindow* pWindow);

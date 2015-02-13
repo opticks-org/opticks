@@ -17,6 +17,7 @@
 #include "OptionsAnnotationLayer.h"
 #include "OptionsAoiLayer.h"
 #include "OptionsFileLocations.h"
+#include "OptionsFullScreen.h"
 #include "OptionsGcpLayer.h"
 #include "OptionsGeneral.h"
 #include "OptionsGeoreference.h"
@@ -106,6 +107,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsAnimation, OptionQWidgetWrapper<OptionsAnima
 REGISTER_PLUGIN(OpticksCore, OptionsAnnotationLayer, OptionQWidgetWrapper<OptionsAnnotationLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsAoiLayer, OptionQWidgetWrapper<OptionsAoiLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsFileLocations, OptionQWidgetWrapper<OptionsFileLocations>());
+REGISTER_PLUGIN(OpticksCore, OptionsFullScreen, OptionQWidgetWrapper<OptionsFullScreen>());
 REGISTER_PLUGIN(OpticksCore, OptionsGcpLayer, OptionQWidgetWrapper<OptionsGcpLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsGeneral, OptionQWidgetWrapper<OptionsGeneral>());
 REGISTER_PLUGIN(OpticksCore, OptionsGeoreference, OptionQWidgetWrapper<OptionsGeoreference>());
