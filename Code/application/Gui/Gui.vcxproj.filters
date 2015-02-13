@@ -905,6 +905,24 @@
     <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsFullScreen.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsDockWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsPropertiesDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsToolBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsDockWindow.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsPropertiesDialog.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
+    <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsToolBar.cpp">
+      <Filter>moc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AoiToolBarAdapter.h">
@@ -1564,6 +1582,15 @@
       <Filter>Undo</Filter>
     </CustomBuild>
     <CustomBuild Include="OptionsFullScreen.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsDockWindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsPropertiesDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsToolBar.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

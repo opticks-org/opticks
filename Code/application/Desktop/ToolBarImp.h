@@ -67,6 +67,8 @@ private:
    ToolBarImp(const ToolBarImp& rhs);
    ToolBarImp& operator=(const ToolBarImp& rhs);
 
+   void optionsModified(Subject &subject, const std::string &signal, const boost::any &v);
+
    MenuBarImp* mpMenuBar;
    QAction* mpShowAction;
    QAction* mpHideAction;

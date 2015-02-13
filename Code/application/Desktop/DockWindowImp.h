@@ -102,6 +102,8 @@ private:
    DockWindowImp(const DockWindowImp& rhs);
    DockWindowImp& operator=(const DockWindowImp& rhs);
 
+   void optionsModified(Subject &subject, const std::string &signal, const boost::any &v);
+
    QAction* mpDockAction;
    QAction* mpUndockAction;
    QAction* mpShowAction;

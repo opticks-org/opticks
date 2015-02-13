@@ -10,6 +10,7 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
+#include "ConfigurationSettings.h"
 #include "Window.h"
 
 #include <string>
@@ -41,6 +42,8 @@ class QWidget;
 class ToolBar : public Window
 {
 public:
+   SETTING(Opacity, ToolBar, int, 100);
+
    /**
     *  Emitted when the toolbar is shown.
     */

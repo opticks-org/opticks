@@ -10,6 +10,7 @@
 #ifndef DOCKWINDOW_H
 #define DOCKWINDOW_H
 
+#include "ConfigurationSettings.h"
 #include "ViewWindow.h"
 
 class QMenu;
@@ -34,6 +35,8 @@ class QMenu;
 class DockWindow : public ViewWindow
 {
 public:
+   SETTING(Opacity, DockWindow, int, 100);
+
    /**
     *  Emitted when the window is docked.
     */

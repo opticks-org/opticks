@@ -16,6 +16,7 @@
 #include "OptionsAnimation.h"
 #include "OptionsAnnotationLayer.h"
 #include "OptionsAoiLayer.h"
+#include "OptionsDockWindow.h"
 #include "OptionsFileLocations.h"
 #include "OptionsFullScreen.h"
 #include "OptionsGcpLayer.h"
@@ -26,6 +27,7 @@
 #include "OptionsMeasurementLayer.h"
 #include "OptionsOverviewWindow.h"
 #include "OptionsPseudocolorLayer.h"
+#include "OptionsPropertiesDialog.h"
 #include "OptionsRasterLayer.h"
 #include "OptionsSession.h"
 #include "OptionsShortcuts.h"
@@ -34,6 +36,7 @@
 #include "OptionsSuppressibleMsg.h"
 #include "OptionsThresholdLayer.h"
 #include "OptionsTiePointLayer.h"
+#include "OptionsToolBar.h"
 #include "OptionsView.h"
 #include "OptionQWidgetWrapper.h"
 #include "PlugIn.h"
@@ -106,6 +109,7 @@ REGISTER_PLUGIN_BASIC(OpticksCore, PointCloudMemoryMappedPager);
 REGISTER_PLUGIN(OpticksCore, OptionsAnimation, OptionQWidgetWrapper<OptionsAnimation>());
 REGISTER_PLUGIN(OpticksCore, OptionsAnnotationLayer, OptionQWidgetWrapper<OptionsAnnotationLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsAoiLayer, OptionQWidgetWrapper<OptionsAoiLayer>());
+REGISTER_PLUGIN(OpticksCore, OptionsDockWindow, OptionQWidgetWrapper<OptionsDockWindow>());
 REGISTER_PLUGIN(OpticksCore, OptionsFileLocations, OptionQWidgetWrapper<OptionsFileLocations>());
 REGISTER_PLUGIN(OpticksCore, OptionsFullScreen, OptionQWidgetWrapper<OptionsFullScreen>());
 REGISTER_PLUGIN(OpticksCore, OptionsGcpLayer, OptionQWidgetWrapper<OptionsGcpLayer>());
@@ -115,6 +119,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsLatLonLayer, OptionQWidgetWrapper<OptionsLat
 REGISTER_PLUGIN(OpticksCore, OptionsLayer, OptionQWidgetWrapper<OptionsLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsMeasurementLayer, OptionQWidgetWrapper<OptionsMeasurementLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsOverviewWindow, OptionQWidgetWrapper<OptionsOverviewWindow>());
+REGISTER_PLUGIN(OpticksCore, OptionsPropertiesDialog, OptionQWidgetWrapper<OptionsPropertiesDialog>());
 REGISTER_PLUGIN(OpticksCore, OptionsPseudocolorLayer, OptionQWidgetWrapper<OptionsPseudocolorLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsRasterLayer, OptionQWidgetWrapper<OptionsRasterLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsSession, OptionQWidgetWrapper<OptionsSession>());
@@ -124,6 +129,7 @@ REGISTER_PLUGIN(OpticksCore, OptionsStatusBar, OptionQWidgetWrapper<OptionsStatu
 REGISTER_PLUGIN(OpticksCore, OptionsSuppressibleMsg, OptionQWidgetWrapper<OptionsSuppressibleMsg>());
 REGISTER_PLUGIN(OpticksCore, OptionsThresholdLayer, OptionQWidgetWrapper<OptionsThresholdLayer>());
 REGISTER_PLUGIN(OpticksCore, OptionsTiePointLayer, OptionQWidgetWrapper<OptionsTiePointLayer>());
+REGISTER_PLUGIN(OpticksCore, OptionsToolBar, OptionQWidgetWrapper<OptionsToolBar>());
 REGISTER_PLUGIN(OpticksCore, OptionsView, OptionQWidgetWrapper<OptionsView>());
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesClassification);
 REGISTER_PLUGIN_BASIC(OpticksCore, PropertiesDataDescriptor);

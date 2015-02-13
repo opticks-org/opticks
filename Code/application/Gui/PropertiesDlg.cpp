@@ -14,10 +14,13 @@
 #include <QtGui/QTabWidget>
 
 #include "AppVerify.h"
+#include "GraphicObject.h"
+#include "Layer.h"
 #include "PlugInManagerServices.h"
 #include "PlugInResource.h"
 #include "Properties.h"
 #include "PropertiesDlg.h"
+#include "View.h"
 
 #include <string>
 using namespace std;
@@ -50,6 +53,12 @@ PropertiesDlg::PropertiesDlg(SessionItem* pSessionItem, const vector<string>& di
    // Initialization
    setWindowTitle("Properties");
    setModal(true);
+
+   // Set opacity for layers, views, and graphic objects.
+   if (NULL != dynamic_cast<Layer*>(mpSessionItem) || NULL != dynamic_cast<View*>(mpSessionItem) || NULL != dynamic_cast<GraphicObject*>(mpSessionItem))
+   {
+      this->setWindowOpacity(PropertiesDlg::getSettingOpacity() / 100.0);
+   }
 
    if (mpSessionItem != NULL)
    {

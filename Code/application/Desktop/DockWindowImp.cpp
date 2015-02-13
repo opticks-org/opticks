@@ -13,6 +13,7 @@
 #include "AppAssert.h"
 #include "AppVerify.h"
 #include "DockWindowImp.h"
+#include "ConfigurationSettings.h"
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"
 #include "ContextMenuImp.h"
@@ -65,6 +66,7 @@ DockWindowImp::DockWindowImp(const string& id, const string& windowName, QWidget
    setFeatures(QDockWidget::AllDockWidgetFeatures);
    setFocusPolicy(Qt::StrongFocus);
    setContextMenuPolicy(Qt::DefaultContextMenu);
+   setWindowOpacity(DockWindow::getSettingOpacity() / 100.0);
 
    // Connections
    VERIFYNR(connect(mpDockAction, SIGNAL(triggered()), this, SLOT(dock())));
@@ -72,6 +74,10 @@ DockWindowImp::DockWindowImp(const string& id, const string& windowName, QWidget
    VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
    VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
    VERIFYNR(connect(this, SIGNAL(topLevelChanged(bool)), this, SLOT(undocked(bool))));
+
+   Service<ConfigurationSettings> pSettings;
+   pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &DockWindowImp::optionsModified));
 }
 
 DockWindowImp::~DockWindowImp()
@@ -79,6 +85,10 @@ DockWindowImp::~DockWindowImp()
    Service<DesktopServices> pDesktop;
    detach(SIGNAL_NAME(DockWindow, AboutToShowContextMenu),
       Signal(pDesktop.get(), SIGNAL_NAME(DesktopServices, AboutToShowContextMenu)));
+
+   Service<ConfigurationSettings> pSettings;
+   pSettings->detach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &DockWindowImp::optionsModified));
 }
 
 const string& DockWindowImp::getObjectType() const
@@ -194,6 +204,7 @@ void DockWindowImp::undocked(bool isUndocked)
 {
    if (isUndocked == true)
    {
+      setWindowOpacity(DockWindow::getSettingOpacity() / 100.0);
       notify(SIGNAL_NAME(DockWindow, Undocked));
    }
    else
@@ -303,6 +314,19 @@ void DockWindowImp::restoreState()
          string stateData = dv_cast<string>(dockGeom);
          QByteArray dockState(stateData.c_str(), stateData.size());
          restoreGeometry(QByteArray::fromBase64(dockState));
+      }
+   }
+}
+
+void DockWindowImp::optionsModified(Subject &subject, const string &signal, const boost::any &v)
+{
+   if (NN(dynamic_cast<ConfigurationSettings*>(&subject)))
+   {
+      VERIFYNR(signal == SIGNAL_NAME(ConfigurationSettings, SettingModified));
+      string key = boost::any_cast<string>(v);
+      if (key.find("DockWindow/Opacity") == 0)
+      {
+         setWindowOpacity(DockWindow::getSettingOpacity() / 100.0);
       }
    }
 }

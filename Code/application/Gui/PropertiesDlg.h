@@ -13,6 +13,8 @@
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
 
+#include "ConfigurationSettings.h"
+
 #include <vector>
 
 class Properties;
@@ -23,6 +25,8 @@ class PropertiesDlg : public QDialog
    Q_OBJECT
 
 public:
+   SETTING(Opacity, PropertiesDlg, int, 100);
+
    PropertiesDlg(SessionItem* pSessionItem, const std::vector<std::string>& displayedPages, QWidget* pParent = NULL);
    ~PropertiesDlg();
 

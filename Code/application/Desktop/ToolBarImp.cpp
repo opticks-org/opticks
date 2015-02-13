@@ -40,10 +40,15 @@ ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
    setIconSize(QSize(16, 16));
    addWidget(mpMenuBar);
    setContextMenuPolicy(Qt::DefaultContextMenu);
+   setWindowOpacity(ToolBar::getSettingOpacity() / 100.0);
 
    VERIFYNR(connect(mpShowAction, SIGNAL(triggered()), this, SLOT(show())));
    VERIFYNR(connect(mpHideAction, SIGNAL(triggered()), this, SLOT(hide())));
    VERIFYNR(connect(this, SIGNAL(topLevelChanged(bool)), this, SLOT(floatToolBar(bool))));
+
+   Service<ConfigurationSettings> pSettings;
+   pSettings->attach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &ToolBarImp::optionsModified));
 
    // Prevent the menu bar from stretching
    QLayout* pLayout = layout();
@@ -55,6 +60,9 @@ ToolBarImp::ToolBarImp(const string& id, const string& name, QWidget* parent) :
 
 ToolBarImp::~ToolBarImp()
 {
+   Service<ConfigurationSettings> pSettings;
+   pSettings->detach(SIGNAL_NAME(ConfigurationSettings, SettingModified),
+      Slot(this, &ToolBarImp::optionsModified));
 }
 
 const string& ToolBarImp::getObjectType() const
@@ -220,6 +228,8 @@ void ToolBarImp::floatToolBar(bool floated)
 {
    if (floated)
    {
+      this->setWindowOpacity(ToolBar::getSettingOpacity() / 100.0);
+
       mMinToolBarWidth = this->minimumWidth();
       if (QApplication::keyboardModifiers() == Qt::ControlModifier)
       {
@@ -251,4 +261,17 @@ void ToolBarImp::moveEvent(QMoveEvent* pEvent)
       }
    }
    QToolBar::moveEvent(pEvent);
+}
+
+void ToolBarImp::optionsModified(Subject &subject, const string &signal, const boost::any &v)
+{
+   if (NN(dynamic_cast<ConfigurationSettings*>(&subject)))
+   {
+      VERIFYNR(signal == SIGNAL_NAME(ConfigurationSettings, SettingModified));
+      string key = boost::any_cast<string>(v);
+      if (key.find("ToolBar/Opacity") == 0)
+      {
+         setWindowOpacity(ToolBar::getSettingOpacity() / 100.0);
+      }
+   }
 }
