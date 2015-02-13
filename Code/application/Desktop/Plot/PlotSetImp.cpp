@@ -8,6 +8,9 @@
  */
 
 #include <QtGui/QAction>
+#include <QtGui/QIcon>
+#include <QtGui/QMenu>
+#include <QtGui/QPushButton>
 #include <QtGui/QInputDialog>
 #include <QtGui/QMessageBox>
 
@@ -35,11 +38,27 @@ PlotSetImp::PlotSetImp(const string& id, const string& plotSetName, QWidget* pPa
    SessionItemImp(id, plotSetName),
    mpExplorer(Service<SessionExplorer>().get(), SIGNAL_NAME(SessionExplorer, AboutToShowSessionItemContextMenu),
       Slot(this, &PlotSetImp::updateContextMenu)),
-   mpAssociatedView(SIGNAL_NAME(View, Renamed), Slot(this, &PlotSetImp::viewRenamed))
+   mpAssociatedView(SIGNAL_NAME(View, Renamed), Slot(this, &PlotSetImp::viewRenamed)),
+   mpSelector(NULL)
 {
    // Initialization
    setTabPosition(QTabWidget::South);
    setTabShape(QTabWidget::Triangular);
+
+   // Make this a little taller than default, as combobox and pushbutton was not fully vertically displayed otherwise.
+   this->setStyleSheet("QTabBar::tab { height: 5ex;}");
+
+   QPushButton* pSelectorButton = new QPushButton(QIcon(":/icons/PlotSelection"),"", this);
+   VERIFYNRV(NULL != pSelectorButton);
+   this->setCornerWidget(pSelectorButton, Qt::BottomLeftCorner);
+
+   // Get rid of extra horizontal border.
+   pSelectorButton->setMaximumWidth(20);
+
+   // Add menu to be displayed when button pressed.
+   mpSelector = new QMenu(pSelectorButton);
+   VERIFYNR(connect(mpSelector, SIGNAL(triggered(QAction*)), this, SLOT(handlePlotSelected(QAction*))));
+   pSelectorButton->setMenu(mpSelector);
 
    // Connections
    VERIFYNR(connect(this, SIGNAL(currentChanged(int)), this, SLOT(activatePlot(int))));
@@ -55,6 +74,7 @@ PlotSetImp::~PlotSetImp()
    VERIFYNR(disconnect(this, SIGNAL(currentChanged(int)), this, SLOT(activatePlot(int))));
    VERIFYNR(Service<DesktopServices>()->detach(SIGNAL_NAME(DesktopServices, AboutToShowContextMenu),
       Slot(this, &PlotSetImp::updateContextMenu)));
+   VERIFYNR(disconnect(mpSelector, SIGNAL(triggered(QAction*)), this, SLOT(handlePlotSelected(QAction*))));
 
    clear();
 }
@@ -402,8 +422,22 @@ bool PlotSetImp::renamePlot(PlotWidget* pPlot, const QString& strNewName)
    if (pPlotWidgetImp != NULL)
    {
       pPlotWidgetImp->setName(newName);
-   }
 
+      int index = indexOf(pPlotWidgetImp);
+      bool found = false;
+      QList<QAction*> selectorActions = mpSelector->actions();
+      for (QList<QAction*>::const_iterator iter = selectorActions.begin(); (iter != selectorActions.end()) && (! found); ++iter)
+      {
+         QAction* pSelectorAction = *iter;
+         VERIFY(NULL != pSelectorAction);
+         int selectorIdx = pSelectorAction->data().toInt();
+         if (selectorIdx == index)
+         {
+            pSelectorAction->setText(strNewName);
+            found = true;
+         }
+      }
+   }
    return true;
 }
 
@@ -481,6 +515,29 @@ bool PlotSetImp::deletePlot(PlotWidget* pPlot)
    }
 
    removeTab(tabIndex);
+
+   bool found = false;
+   QList<QAction*> selectorActions = mpSelector->actions();
+   QList<QAction*>::const_iterator iter = selectorActions.begin();
+   while ((iter != selectorActions.end()) && (! found) )
+   {
+      QAction* pSelectorAction = *iter;
+      VERIFY(NULL != pSelectorAction);
+      int selectorIdx = pSelectorAction->data().toInt();
+      if (selectorIdx == tabIndex)
+      {
+         found = true;
+      }
+      else
+      {
+         ++iter;
+      }
+   }
+   if (found)
+   {
+      mpSelector->removeAction(*iter);
+   }
+
    emit plotDeleted(pPlot);
    notify(SIGNAL_NAME(PlotSet, PlotDeleted), boost::any(pPlot));
    delete pPlotImp;
@@ -585,6 +642,13 @@ void PlotSetImp::clear()
    }
 }
 
+void PlotSetImp::handlePlotSelected(QAction* pAction)
+{
+   VERIFYNRV(NULL != pAction);
+   int index = pAction->data().toInt();
+   this->activatePlot(index);
+}
+
 void PlotSetImp::viewRenamed(Subject& subject, const string& signal, const boost::any& value)
 {
    if (&subject == mpAssociatedView.get())
@@ -629,6 +693,12 @@ void PlotSetImp::addPlot(PlotWidget* pPlot)
    {
       VERIFYNR(connect(pView, SIGNAL(renamed(const QString&)), this, SLOT(updatePlotName())));
       addTab(pPlotImp, QString::fromStdString(plotName));
+
+      QString text = QString::fromStdString(plotName);
+      QAction* pAction = mpSelector->addAction(text);
+      QVariant variant(indexOf(pPlotImp));
+      pAction->setData(variant);
+
       emit plotAdded(pPlot);
       notify(SIGNAL_NAME(PlotSet, PlotAdded), boost::any(pPlot));
       setCurrentPlot(pPlot);
@@ -655,6 +725,20 @@ void PlotSetImp::updatePlotName()
                   if (index != -1)
                   {
                      setTabText(index, QString::fromStdString(name));
+
+                     bool found = false;
+                     QList<QAction*> selectorActions = mpSelector->actions();
+                     for (QList<QAction*>::const_iterator iter = selectorActions.begin(); (iter != selectorActions.end()) && (! found); ++iter)
+                     {
+                        QAction* pSelectorAction = *iter;
+                        VERIFYNRV(NULL != pSelectorAction);
+                        int selectorIdx = pSelectorAction->data().toInt();
+                        if (selectorIdx == index)
+                        {
+                           pSelectorAction->setText(QString::fromStdString(name));
+                           found = true;
+                        }
+                     }
                   }
                }
 

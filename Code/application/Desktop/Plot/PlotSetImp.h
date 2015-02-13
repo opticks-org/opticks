@@ -10,6 +10,7 @@
 #ifndef PLOTSETIMP_H
 #define PLOTSETIMP_H
 
+#include <QtGui/QMenu>
 #include <QtGui/QTabWidget>
 
 #include "AttachmentPtr.h"
@@ -77,6 +78,7 @@ public slots:
    void renameSelectedPlot();
    void destroySelectedPlots();
    void clear();
+   void handlePlotSelected(QAction* pAction);
 
 signals:
    void plotAdded(PlotWidget* pPlot);
@@ -97,6 +99,7 @@ private:
 
    AttachmentPtr<SessionExplorer> mpExplorer;
    AttachmentPtr<View> mpAssociatedView;
+   QMenu* mpSelector;
 
 private slots:
    void activatePlot(int iIndex);
