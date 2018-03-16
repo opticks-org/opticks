@@ -81,6 +81,7 @@ set (MOC_HEADERS
     PixelAspectRatioGui.h
     PlotPropertiesDlg.h
     PlugInSelectorDlg.h
+    SampleGeorefGui.h
 )
 set (UI_FILES
     DynamicColormap.ui 
@@ -100,3 +101,4 @@ target_link_libraries(PlugInSamplerQt
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS PlugInSamplerQt RUNTIME DESTINATION PlugIns)

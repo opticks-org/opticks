@@ -25,3 +25,4 @@ target_link_libraries(AnnotationImagePalette
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS AnnotationImagePalette RUNTIME DESTINATION PlugIns)

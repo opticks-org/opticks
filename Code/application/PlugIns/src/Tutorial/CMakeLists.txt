@@ -24,3 +24,4 @@ target_link_libraries(Tutorial
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS Tutorial RUNTIME DESTINATION PlugIns)

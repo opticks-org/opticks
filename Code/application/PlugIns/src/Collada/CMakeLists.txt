@@ -30,5 +30,6 @@ if(OpenCollada_FOUND)
     if(MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4201" CACHE STRING "Compiler flags" FORCE)
     endif()
+    install(TARGETS Collada RUNTIME DESTINATION PlugIns)
 
 endif()

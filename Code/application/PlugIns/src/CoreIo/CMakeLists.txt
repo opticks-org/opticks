@@ -28,3 +28,4 @@ target_link_libraries(CoreIo
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS CoreIo RUNTIME DESTINATION PlugIns)

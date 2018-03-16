@@ -32,3 +32,4 @@ target_link_libraries(Kml
     ${pcre_LIBRARIES}
     ${pme_LIBRARIES}
 )
+install(TARGETS Kml RUNTIME DESTINATION PlugIns)

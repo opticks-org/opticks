@@ -32,3 +32,4 @@ target_link_libraries(ShapeFileExporter
     ${shapelib_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
+install(TARGETS ShapeFileExporter RUNTIME DESTINATION PlugIns)

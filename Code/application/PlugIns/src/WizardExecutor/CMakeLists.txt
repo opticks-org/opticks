@@ -19,3 +19,4 @@ target_link_libraries(WizardExecutor
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS WizardExecutor RUNTIME DESTINATION PlugIns)

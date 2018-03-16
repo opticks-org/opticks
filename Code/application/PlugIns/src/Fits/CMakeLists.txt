@@ -18,3 +18,4 @@ target_link_libraries(Fits
     ${Xerces_LIBRARIES}
     ${PTHREADS_LIBRARY}
 )
+install(TARGETS Fits RUNTIME DESTINATION PlugIns)

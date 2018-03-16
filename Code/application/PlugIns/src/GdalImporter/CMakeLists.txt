@@ -19,3 +19,4 @@ target_link_libraries(GdalImporter
     ${Xerces_LIBRARIES}
 	${PTHREADS_LIBRARY}
 )
+install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns)

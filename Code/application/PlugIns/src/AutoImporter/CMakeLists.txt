@@ -14,3 +14,4 @@ target_link_libraries(AutoImporter
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}    
 )
+install(TARGETS AutoImporter RUNTIME DESTINATION PlugIns)

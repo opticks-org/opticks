@@ -24,3 +24,4 @@ target_link_libraries(Covariance
     ${Xerces_LIBRARIES}
     ${Ossim_LIBRARIES}
 )
+install(TARGETS Covariance RUNTIME DESTINATION PlugIns)

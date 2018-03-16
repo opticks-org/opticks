@@ -16,3 +16,4 @@ target_link_libraries(Generic
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS Generic RUNTIME DESTINATION PlugIns)

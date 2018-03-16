@@ -69,9 +69,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${geotiff_INCLUDE_DIRS})
 include_directories(${proj_INCLUDE_DIRS})
 include_directories(${tiff_INCLUDE_DIRS})
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-    include_directories({$JPEG_INCLUDE_DIRS})
-endif()
 if(OpenJpeg_FOUND)
     include_directories(${OpenJpeg_INCLUDE_DIRS})
 endif()
@@ -87,10 +84,8 @@ target_link_libraries(Pictures
     ${tiff_LIBRARIES}
     ${PTHREADS_LIBRARY}
 )
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-    target_link_libraries(Pictures ${JPEG_LIBRARIES})
-endif()
 if(OpenJpeg_FOUND)
     target_link_libraries(Pictures
         ${OpenJpeg_LIBRARIES})
 endif()
+install(TARGETS Pictures RUNTIME DESTINATION PlugIns)

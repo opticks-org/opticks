@@ -25,3 +25,4 @@ target_link_libraries(BandBinning
     ${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
+install(TARGETS BandBinning RUNTIME DESTINATION PlugIns)

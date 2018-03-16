@@ -100,6 +100,13 @@ endif()
 Message(STATUS "Setting Build Revision To ${Opticks_Build_Revision}")
 configure_file(cmake/Templates/BuildRevision.h "${Opticks_SOURCE_DIR}/Utilities")
 
+# runtime configurations
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+configure_file(cmake/Templates/Opticks.vcxproj.user "${CMAKE_BINARY_DIR}")
+configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
+configure_file(cmake/Templates/opticks-release.dep "${CMAKE_BINARY_DIR}/bin")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/ApplicationUserSettings")
+
 #----- Required packages -----
 #add pthreads library on all platforms and verify it works at configure time
 include(CheckCXXSourceCompiles)
@@ -182,7 +189,7 @@ add_subdirectory(ApiDocs)
 #----- Adding public libraries -----
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PlugIns")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns/release")
 set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/lib")
@@ -204,7 +211,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/LibPrivate")
 #for windows, .dll go into "PlugIns" and .lib go into "LibPrivate"
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PlugIns")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns/release")
 set(OLD_SHARED_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
@@ -273,14 +280,6 @@ if(Opticks_ServerUtilities_FOUND)
 endif()
 set(CMAKE_SHARED_LIBRARY_PREFIX "${OLD_SHARED_LIBRARY_PREFIX}")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PlugIns")
-if(WIN32) 
-   install(DIRECTORY ${CMAKE_BINARY_DIR}/PlugIns DESTINATION . FILES_MATCHING
-   PATTERN "*.dll" PATTERN "src" EXCLUDE)
-else()
-   install(DIRECTORY ${CMAKE_BINARY_DIR}/PlugIns DESTINATION . FILES_MATCHING
-   PATTERN "*.so" PATTERN "src" EXCLUDE)
-endif()
 #----- Done adding plug-ins -----
 #----- Adding private libraries and Opticks executables -----
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

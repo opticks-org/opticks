@@ -9,9 +9,6 @@ include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Hdf4_INCLUDE_DIRS})
 include_directories(${Opticks_HdfPlugInLib_INCLUDE_DIR})
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-    include_directories(${JPEG_INCLUDE_DIRS})
-endif()
 add_library(PlugInSamplerHdf SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(PlugInSamplerHdf
     ${Opticks_LIBRARIES}
@@ -20,10 +17,4 @@ target_link_libraries(PlugInSamplerHdf
     ${Xerces_LIBRARIES}
     ${Hdf4_LIBRARIES}
 )
-if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-    target_link_libraries(PlugInSamplerHdf
-        ${szip_LIBRARIES}
-        ${Hdf4_LIBRARIES}
-        ${JPEG_LIBRARIES}
-    )
-endif()
+install(TARGETS PlugInSamplerHdf RUNTIME DESTINATION PlugIns)

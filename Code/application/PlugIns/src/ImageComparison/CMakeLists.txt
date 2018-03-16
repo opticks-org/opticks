@@ -16,3 +16,4 @@ target_link_libraries(ImageComparison
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
+install(TARGETS ImageComparison RUNTIME DESTINATION PlugIns)
