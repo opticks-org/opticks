@@ -29,4 +29,8 @@ target_link_libraries(Wavelength
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Wavelength RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Wavelength RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Wavelength LIBRARY DESTINATION PlugIns)
+endif()

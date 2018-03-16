@@ -26,4 +26,8 @@ target_link_libraries(Dted
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Dted RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Dted RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Dted LIBRARY DESTINATION PlugIns)
+endif()

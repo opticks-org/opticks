@@ -16,4 +16,8 @@ target_link_libraries(ImageComparison
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS ImageComparison RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS ImageComparison RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS ImageComparison LIBRARY DESTINATION PlugIns)
+endif()

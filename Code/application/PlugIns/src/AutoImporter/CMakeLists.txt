@@ -14,4 +14,8 @@ target_link_libraries(AutoImporter
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}    
 )
-install(TARGETS AutoImporter RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS AutoImporter RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS AutoImporter LIBRARY DESTINATION PlugIns)
+endif()

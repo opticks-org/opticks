@@ -33,4 +33,8 @@ target_link_libraries(Georeference
     ${Ossim_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Georeference RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Georeference RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Georeference LIBRARY DESTINATION PlugIns)
+endif()

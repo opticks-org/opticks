@@ -24,4 +24,8 @@ target_link_libraries(SpatialResampler
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS SpatialResampler RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS SpatialResampler RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS SpatialResampler LIBRARY DESTINATION PlugIns)
+endif()

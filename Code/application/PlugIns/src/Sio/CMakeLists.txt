@@ -13,4 +13,8 @@ target_link_libraries(Sio
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Sio RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Sio RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Sio LIBRARY DESTINATION PlugIns)
+endif()

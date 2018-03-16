@@ -18,4 +18,8 @@ target_link_libraries(Fits
     ${Xerces_LIBRARIES}
     ${PTHREADS_LIBRARY}
 )
-install(TARGETS Fits RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Fits RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Fits LIBRARY DESTINATION PlugIns)
+endif()

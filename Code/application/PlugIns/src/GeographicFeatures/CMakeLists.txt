@@ -48,4 +48,8 @@ target_link_libraries(GeographicFeatures
     ${shapelib_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS GeographicFeatures RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS GeographicFeatures RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS GeographicFeatures LIBRARY DESTINATION PlugIns)
+endif()

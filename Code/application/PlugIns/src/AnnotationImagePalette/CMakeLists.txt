@@ -25,4 +25,8 @@ target_link_libraries(AnnotationImagePalette
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS AnnotationImagePalette RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS AnnotationImagePalette RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS AnnotationImagePalette LIBRARY DESTINATION PlugIns)
+endif()

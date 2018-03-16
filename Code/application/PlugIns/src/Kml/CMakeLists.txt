@@ -32,4 +32,8 @@ target_link_libraries(Kml
     ${pcre_LIBRARIES}
     ${pme_LIBRARIES}
 )
-install(TARGETS Kml RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Kml RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Kml LIBRARY DESTINATION PlugIns)
+endif()

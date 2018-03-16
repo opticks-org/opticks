@@ -15,4 +15,8 @@ target_link_libraries(LegacyModule
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS LegacyModule RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS LegacyModule RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS LegacyModule LIBRARY DESTINATION PlugIns)
+endif()

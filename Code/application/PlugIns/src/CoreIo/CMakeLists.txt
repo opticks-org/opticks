@@ -28,4 +28,8 @@ target_link_libraries(CoreIo
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS CoreIo RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS CoreIo RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS CoreIo LIBRARY DESTINATION PlugIns)
+endif()

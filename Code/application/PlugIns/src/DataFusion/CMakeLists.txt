@@ -45,4 +45,8 @@ target_link_libraries(DataFusion
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS DataFusion RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS DataFusion RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS DataFusion LIBRARY DESTINATION PlugIns)
+endif()

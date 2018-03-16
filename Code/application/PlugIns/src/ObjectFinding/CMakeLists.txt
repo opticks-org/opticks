@@ -26,4 +26,8 @@ target_link_libraries(ObjectFinding
     ${Xerces_LIBRARIES}
     ${OpenCv_LIBRARIES}
 )
-install(TARGETS ObjectFinding RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS ObjectFinding RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS ObjectFinding LIBRARY DESTINATION PlugIns)
+endif()

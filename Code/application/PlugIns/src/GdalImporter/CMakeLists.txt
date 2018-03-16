@@ -19,4 +19,8 @@ target_link_libraries(GdalImporter
     ${Xerces_LIBRARIES}
 	${PTHREADS_LIBRARY}
 )
-install(TARGETS GdalImporter RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS GdalImporter RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS GdalImporter LIBRARY DESTINATION PlugIns)
+endif()

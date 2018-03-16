@@ -32,4 +32,8 @@ target_link_libraries(PlugInSampler
     ${Xerces_LIBRARIES}
 	${PTHREADS_LIBRARY}
 )
-install(TARGETS PlugInSampler RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS PlugInSampler RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS PlugInSampler LIBRARY DESTINATION PlugIns)
+endif()

@@ -28,4 +28,8 @@ target_link_libraries(ENVI
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS ENVI RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS ENVI RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS ENVI LIBRARY DESTINATION PlugIns)
+endif()

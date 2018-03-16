@@ -26,4 +26,8 @@ target_link_libraries(BandMath
     ${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS BandMath RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS BandMath RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS BandMath LIBRARY DESTINATION PlugIns)
+endif()

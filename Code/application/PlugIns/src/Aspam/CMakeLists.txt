@@ -32,4 +32,8 @@ target_link_libraries(Aspam
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Aspam RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Aspam RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Aspam LIBRARY DESTINATION PlugIns)
+endif()

@@ -19,4 +19,8 @@ target_link_libraries(WizardExecutor
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS WizardExecutor RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS WizardExecutor RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS WizardExecutor LIBRARY DESTINATION PlugIns)
+endif()

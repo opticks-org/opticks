@@ -101,4 +101,8 @@ target_link_libraries(PlugInSamplerQt
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS PlugInSamplerQt RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS PlugInSamplerQt RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS PlugInSamplerQt LIBRARY DESTINATION PlugIns)
+endif()

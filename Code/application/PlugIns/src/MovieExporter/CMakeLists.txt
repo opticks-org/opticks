@@ -45,4 +45,8 @@ target_link_libraries(MovieExporter
     ${avformat_LIBRARIES}
     ${avcodec_LIBRARIES}
 )
-install(TARGETS MovieExporter RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS MovieExporter RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS MovieExporter LIBRARY DESTINATION PlugIns)
+endif()

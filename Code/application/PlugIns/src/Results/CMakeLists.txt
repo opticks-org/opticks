@@ -22,4 +22,8 @@ target_link_libraries(Results
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Results RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Results RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Results LIBRARY DESTINATION PlugIns)
+endif()

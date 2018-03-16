@@ -36,4 +36,8 @@ target_link_libraries(ConvolutionFilter
     ${OpenCv_LIBRARIES}
     ${PTHREADS_LIBRARY}
 )
-install(TARGETS ConvolutionFilter RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS ConvolutionFilter RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS ConvolutionFilter LIBRARY DESTINATION PlugIns)
+endif()

@@ -53,4 +53,8 @@ target_link_libraries(Ice
     ${Hdf5_LIBRARIES}
 	${PTHREADS_LIBRARY}
 )
-install(TARGETS Ice RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS Ice RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS Ice LIBRARY DESTINATION PlugIns)
+endif()

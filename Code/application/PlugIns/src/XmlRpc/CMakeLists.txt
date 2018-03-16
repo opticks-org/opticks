@@ -38,4 +38,8 @@ target_link_libraries(XmlRpc
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS XmlRpc RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS XmlRpc RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS XmlRpc LIBRARY DESTINATION PlugIns)
+endif()

@@ -25,4 +25,8 @@ target_link_libraries(BandBinning
     ${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS BandBinning RUNTIME LIBRARY DESTINATION PlugIns)
+if(WIN32)
+    install(TARGETS BandBinning RUNTIME DESTINATIONS PlugIns)
+else()
+    install(TARGETS BandBinning LIBRARY DESTINATION PlugIns)
+endif()
