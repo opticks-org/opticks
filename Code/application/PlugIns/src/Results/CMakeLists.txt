@@ -23,7 +23,7 @@ target_link_libraries(Results
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Results RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Results RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Results LIBRARY DESTINATION PlugIns)
 endif()

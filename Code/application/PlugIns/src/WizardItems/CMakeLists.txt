@@ -79,7 +79,7 @@ target_link_libraries(WizardItems
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS WizardItems RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS WizardItems RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS WizardItems LIBRARY DESTINATION PlugIns)
 endif()

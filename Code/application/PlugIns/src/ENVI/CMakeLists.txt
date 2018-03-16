@@ -29,7 +29,7 @@ target_link_libraries(ENVI
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ENVI RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS ENVI RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS ENVI LIBRARY DESTINATION PlugIns)
 endif()

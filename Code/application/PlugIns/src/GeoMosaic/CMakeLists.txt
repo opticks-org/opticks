@@ -26,7 +26,7 @@ target_link_libraries(GeoMosaic
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS GeoMosaic RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS GeoMosaic RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS GeoMosaic LIBRARY DESTINATION PlugIns)
 endif()

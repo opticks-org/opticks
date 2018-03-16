@@ -20,7 +20,7 @@ target_link_libraries(GdalImporter
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS GdalImporter RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS GdalImporter LIBRARY DESTINATION PlugIns)
 endif()

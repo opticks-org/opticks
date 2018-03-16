@@ -29,7 +29,7 @@ target_link_libraries(CoreIo
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS CoreIo RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS CoreIo RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS CoreIo LIBRARY DESTINATION PlugIns)
 endif()

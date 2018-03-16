@@ -54,7 +54,7 @@ target_link_libraries(Ice
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Ice RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Ice RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Ice LIBRARY DESTINATION PlugIns)
 endif()

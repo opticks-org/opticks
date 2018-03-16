@@ -30,7 +30,7 @@ target_link_libraries(Pca
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Pca RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Pca RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Pca LIBRARY DESTINATION PlugIns)
 endif()

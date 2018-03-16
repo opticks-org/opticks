@@ -14,7 +14,7 @@ target_link_libraries(Sio
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Sio RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Sio RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Sio LIBRARY DESTINATION PlugIns)
 endif()

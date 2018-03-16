@@ -27,7 +27,7 @@ target_link_libraries(BandMath
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS BandMath RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS BandMath RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS BandMath LIBRARY DESTINATION PlugIns)
 endif()

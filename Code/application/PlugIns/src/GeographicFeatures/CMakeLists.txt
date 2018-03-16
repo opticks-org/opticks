@@ -49,7 +49,7 @@ target_link_libraries(GeographicFeatures
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS GeographicFeatures RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS GeographicFeatures LIBRARY DESTINATION PlugIns)
 endif()

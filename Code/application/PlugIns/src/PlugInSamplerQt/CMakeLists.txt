@@ -102,7 +102,7 @@ target_link_libraries(PlugInSamplerQt
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS PlugInSamplerQt RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS PlugInSamplerQt RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS PlugInSamplerQt LIBRARY DESTINATION PlugIns)
 endif()

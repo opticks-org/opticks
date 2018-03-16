@@ -34,7 +34,7 @@ target_link_libraries(Georeference
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Georeference RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Georeference RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Georeference LIBRARY DESTINATION PlugIns)
 endif()

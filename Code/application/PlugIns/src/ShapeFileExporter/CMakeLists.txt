@@ -33,7 +33,7 @@ target_link_libraries(ShapeFileExporter
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ShapeFileExporter RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS ShapeFileExporter RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS ShapeFileExporter LIBRARY DESTINATION PlugIns)
 endif()

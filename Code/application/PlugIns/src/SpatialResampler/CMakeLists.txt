@@ -25,7 +25,7 @@ target_link_libraries(SpatialResampler
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS SpatialResampler RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS SpatialResampler RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS SpatialResampler LIBRARY DESTINATION PlugIns)
 endif()

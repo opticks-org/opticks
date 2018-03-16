@@ -39,7 +39,7 @@ target_link_libraries(XmlRpc
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS XmlRpc RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS XmlRpc RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS XmlRpc LIBRARY DESTINATION PlugIns)
 endif()

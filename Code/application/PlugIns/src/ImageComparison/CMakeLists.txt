@@ -17,7 +17,7 @@ target_link_libraries(ImageComparison
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ImageComparison RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS ImageComparison RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS ImageComparison LIBRARY DESTINATION PlugIns)
 endif()

@@ -18,7 +18,7 @@ target_link_libraries(PlugInSamplerHdf
     ${Hdf4_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS PlugInSamplerHdf RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS PlugInSamplerHdf RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS PlugInSamplerHdf LIBRARY DESTINATION PlugIns)
 endif()

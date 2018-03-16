@@ -19,7 +19,7 @@ target_link_libraries(Fits
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Fits RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Fits RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Fits LIBRARY DESTINATION PlugIns)
 endif()

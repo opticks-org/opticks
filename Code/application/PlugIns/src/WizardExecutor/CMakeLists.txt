@@ -20,7 +20,7 @@ target_link_libraries(WizardExecutor
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS WizardExecutor RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS WizardExecutor RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS WizardExecutor LIBRARY DESTINATION PlugIns)
 endif()

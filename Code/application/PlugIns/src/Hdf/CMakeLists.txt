@@ -22,7 +22,7 @@ target_link_libraries(Hdf
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Hdf RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Hdf RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Hdf LIBRARY DESTINATION PlugIns)
 endif()

@@ -33,7 +33,7 @@ target_link_libraries(PlugInSampler
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS PlugInSampler RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS PlugInSampler RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS PlugInSampler LIBRARY DESTINATION PlugIns)
 endif()

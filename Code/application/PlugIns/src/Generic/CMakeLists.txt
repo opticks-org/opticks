@@ -17,7 +17,7 @@ target_link_libraries(Generic
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Generic RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Generic RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Generic LIBRARY DESTINATION PlugIns)
 endif()

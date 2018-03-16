@@ -37,7 +37,7 @@ target_link_libraries(ConvolutionFilter
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS ConvolutionFilter RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS ConvolutionFilter RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS ConvolutionFilter LIBRARY DESTINATION PlugIns)
 endif()

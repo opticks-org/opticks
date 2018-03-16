@@ -15,7 +15,7 @@ target_link_libraries(AutoImporter
     ${Xerces_LIBRARIES}    
 )
 if(WIN32)
-    install(TARGETS AutoImporter RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS AutoImporter RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS AutoImporter LIBRARY DESTINATION PlugIns)
 endif()

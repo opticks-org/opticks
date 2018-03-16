@@ -46,7 +46,7 @@ target_link_libraries(DataFusion
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS DataFusion RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS DataFusion RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS DataFusion LIBRARY DESTINATION PlugIns)
 endif()

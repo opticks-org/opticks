@@ -30,7 +30,7 @@ target_link_libraries(Wavelength
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Wavelength RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS Wavelength RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS Wavelength LIBRARY DESTINATION PlugIns)
 endif()

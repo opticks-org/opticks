@@ -26,7 +26,7 @@ target_link_libraries(AnnotationImagePalette
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS AnnotationImagePalette RUNTIME DESTINATIONS PlugIns)
+    install(TARGETS AnnotationImagePalette RUNTIME DESTINATION PlugIns)
 else()
     install(TARGETS AnnotationImagePalette LIBRARY DESTINATION PlugIns)
 endif()
