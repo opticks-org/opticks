@@ -106,7 +106,6 @@
    #include <endian.h>
    #define UNIX_API
    #define LINUX
-   #define CG_SUPPORTED
    #define EXPORT_SYMBOL 
 
    #if __BYTE_ORDER == __LITTLE_ENDIAN

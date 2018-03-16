@@ -15,6 +15,7 @@
 #include "Sio.h"
 
 #include <sstream>
+#include <string.h>
 using namespace std;
 
 Attribute_Metadata gpzAttribute_Descriptor[INVALID_LAST_ENUM_ITEM_FLAG] =

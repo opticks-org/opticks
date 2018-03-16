@@ -1,6 +1,0 @@
-import glob
-
-Import('env')
-objs = env.Object(glob.glob("*.cpp"))
-lib = env.Library("PlugInLib",objs)
-Return('lib')

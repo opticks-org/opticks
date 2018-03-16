@@ -10,6 +10,7 @@
 #include "AppAssert.h"
 #include "AppConfig.h"
 #include "ColorBuffer.h"
+#include "DependencyConfigs.h"
 #include "DesktopServicesImp.h"
 #include "FrameBuffer.h"
 #include "GpuResourceManager.h"

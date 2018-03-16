@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <limits>
 
+#include "DependencyConfigs.h"
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"
 #include "GpuImage.h"

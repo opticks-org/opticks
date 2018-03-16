@@ -13,6 +13,7 @@
 #include "DynamicObject.h"
 #include "GpuProgram.h"
 
+#include "DependencyConfigs.h"
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"
 #endif

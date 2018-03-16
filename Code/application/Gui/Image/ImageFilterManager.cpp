@@ -20,6 +20,7 @@
 #include "MessageLogResource.h"
 #include "xmlreader.h"
 
+#include "DependencyConfigs.h"
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"
 #endif

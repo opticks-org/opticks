@@ -14,6 +14,7 @@
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"
 #endif
+#include "DependencyConfigs.h"
 #include "DynamicObject.h"
 #include "GpuProgramDescriptor.h"
 #include "ImageBuffer.h"

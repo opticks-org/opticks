@@ -279,6 +279,8 @@ class CommonBuilder:
         if self.opticks_code_dir is None:
             if os.environ.has_key("OPTICKS_CODE_DIR"):
                 self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
+            elif os.path.exists("../../Code"):
+                self.opticks_code_dir = os.path.abspath("../../Code")
             else:
                 raise ScriptException("The path to the "\
                     "Opticks source code was not provided, see "\
@@ -439,8 +441,9 @@ class WixBuilder(CommonBuilder):
 
         if self.opticks_dependencies_dir is None:
             if os.environ.has_key("OPTICKSDEPENDENCIES"):
-                self.opticks_dependencies_dir = \
-                    os.environ["OPTICKSDEPENDENCIES"]
+                self.opticks_dependencies_dir = os.environ["OPTICKSDEPENDENCIES"]
+            elif os.path.exists("../../Dependencies"):
+                self.opticks_dependencies_dir = os.path.abspath("../../Dependencies")
             else:
                 raise ScriptException("The path to the Opticks "\
                     "dependencies was not provided, see -d or "\
@@ -477,8 +480,7 @@ class WixBuilder(CommonBuilder):
             msi_name = "Opticks-%s-64bit" % (version_number)
             ivars["Is64Bit"] = "True"
             ivars["OpticksBinariesDir"] = \
-                os.path.join(self.opticks_code_dir, "Build",
-                "Binaries-x64-Release")
+                os.path.join(self.opticks_code_dir, "Build64/Release/Binaries")
             output_path = os.path.join(self.output_dir, "64")
             ivars["OpticksDependenciesDir"] = \
                 self.get_dependencies(True, output_path)
@@ -491,8 +493,7 @@ class WixBuilder(CommonBuilder):
             msi_name = "Opticks-%s-32bit" % (version_number)
             ivars["Is32Bit"] = "True"
             ivars["OpticksBinariesDir"] = \
-                os.path.join(self.opticks_code_dir, "Build",
-                "Binaries-Win32-Release")
+                os.path.join(self.opticks_code_dir, "Build32/Release/Binaries")
             output_path = os.path.join(self.output_dir, "32")
             ivars["OpticksDependenciesDir"] = \
                 self.get_dependencies(False, output_path)
@@ -708,7 +709,7 @@ class PackageBuilder(CommonBuilder):
         ivars = dict()
         ivars["OpticksCodeDir"] = self.opticks_code_dir
         ivars["OpticksBinariesDir"] = os.path.join(self.opticks_code_dir,
-            "Build", "Binaries-solaris-sparc-release")
+            "Build64/Release/Binaries")
         ivars["OpticksDependenciesDir"] = \
             self.get_dependencies(self.output_dir)
         ivars["OpticksHelpDir"] = self.get_help()
@@ -907,7 +908,7 @@ class SConsBuilder(CommonBuilder):
         scons_args = list()
         scons_args.append('scons')
         scons_args.append('CODEDIR=%s' % self.opticks_code_dir)
-        scons_args.append('BUILDDIR=%s' % os.path.join(self.opticks_code_dir,"Build"))
+        scons_args.append('BUILDDIR=%s' % os.path.join(self.opticks_code_dir,"Build64"))
         scons_args.append('OPTICKSDEPENDENCIES=%s' % self.opticks_dependencies_dir)
         scons_args.append('VERSION=%s' % version)
         scons_args.append('OUTPUT_DIR=%s' % self.output_dir)

@@ -10,8 +10,14 @@
 #ifndef GPUPROGRAM_H
 #define GPUPROGRAM_H
 
+#include "DependencyConfigs.h"
 #include "glCommon.h"
 #include "GpuProgramDescriptor.h"
+
+#if defined(CG_SUPPORTED)
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
+#endif
 
 #include <string>
 #include <map>

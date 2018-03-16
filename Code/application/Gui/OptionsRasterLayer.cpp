@@ -7,6 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "DependencyConfigs.h"
 #include "AppConfig.h"
 #if defined(CG_SUPPORTED)
 #include "CgContext.h"

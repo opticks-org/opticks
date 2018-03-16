@@ -1,0 +1,29 @@
+set(HEADER_FILES
+    BatchFile.h
+    BatchFileParser.h
+    BatchFileset.h
+    BatchWizard.h
+    Value.h
+    WizardItemImp.h
+    WizardNodeImp.h
+    WizardObjectAdapter.h
+    WizardObjectImp.h
+    WizardUtilities.h
+)
+set(SOURCE_FILES
+    BatchFile.cpp
+    BatchFileParser.cpp
+    BatchFileset.cpp
+    BatchWizard.cpp
+    Value.cpp
+    WizardItemImp.cpp
+    WizardNodeImp.cpp
+    WizardObjectAdapter.cpp
+    WizardObjectImp.cpp
+    WizardUtilities.cpp
+)
+if(ONE_OPTICKS_LIB)
+    set_property(DIRECTORY PROPERTY ALL_SOURCES ${SOURCE_FILES} ${HEADER_FILES})
+else()
+    add_library(Wizard STATIC ${SOURCE_FILES} ${HEADER_FILES})
+endif()

@@ -54,7 +54,7 @@ namespace
       // The next best option is to call TIFFGetField, which does not act the same for every tag.
       // Because of this, there are many special cases below which are meant to mimic the behavior of TIFFGetField.
       // When upgrading libtiff, check if a better method exists and use it if feasible.
-      #error Check for libtiff compatibility.
+      #pragma message("Check for libtiff compatibility.")
    #endif
 
    bool setMetadata(const string& name, DataVariant& value, DynamicObject* pMetadata)

@@ -1,63 +1,155 @@
-Instructions on building the Opticks source code in windows 32-bit/64-bit.
----------------------------------------------------------------------------
+=====================================================================
+Building and running the Opticks source code in Windows 32-bit/64-bit
+=====================================================================
 
-Programs that need to be installed before building the source code:
------------------------------------------------------------------------
-- Visual Studio 2010 (specifically Visual C++)
-     - Please note that this can be any edition of Visual C++: Express
-       Edition, Professional Edition, and Team Edition will all work.
-     - Also note that Visual C++ 2010 must be used.
-- Python 2.5 or later (http://www.python.org/download/)
-- Java 1.4.X or later
-- Subversion Command Line Client
-  (http://downloads.open.collab.net/collabnet-subversion.html)
+=================
+Required Programs
+=================
+The following software must be installed in order to build Opticks:
+   - Visual Studio 2010 (specifically Visual C++)
+      - Please note that this can be any edition of Visual C++: Express
+        Edition, Professional Edition, and Team Edition will all work.
+      - Also note that Visual C++ 2010 must be used.
+      - Must be registered as the default program for opening .sln files.
+   - Python 2.5 or later
+      - Must be in PATH
+   - Java 1.4.X or later
+      - Must be in PATH
+   - CMake 2.8.3 or later
+      - Must be in PATH
+   - Subversion Command Line Client
+      - Must be in PATH
 
-Download these required dependencies:
----------------------------------------------------
-The Dependencies folder in the checkout folder contains a system which
-automatically downloads the appropriate dependencies.  This system requires
-Java 1.4.X or later.
-> dependencies.bat -p 
-will provide a usage summary.  Most of the time, you should use 
-retrieve-dependencies.
+
+===================
+Simple Instructions
+===================
+These are simple instructions intended for beginners.
+These instructions should take about an hour to complete,
+depending on the speed of the internet connection and the machine being used.
+More detailed instructions can be found below.
+
+The easiest way to get started is to run the appropriate batch file:
+- init-win32.bat
+   - 32-bit Opticks
+   - Users of 32-bit Windows should choose init-win32.bat.
+   - Users of Visual Studio Express should choose init-win32.bat.
+- init-win64.bat
+   - 64-bit Opticks
+   - Must be using 64-bit Windows
+This batch file will retrieve third-party dependencies from the Opticks
+website, generate Visual Studio projects and solutions, and open Opticks.sln
+in Visual Studio. Once Visual Studio has started and Opticks.sln is loaded,
+choose "Build\Build Solution" from the main menu. After the build finishes,
+you can run Opticks by selecting "Debug\Start Debugging".
+
+
+=====================
+Detailed Instructions
+=====================
+These are detailed instructions intended for advanced users.
+Less detailed instructions can be found above.
+
+
+Environment variables
+---------------------
+The following environment variables are optional and are used to override default behavior:
+
+- OPTICKSDEPENDENCIES
+   - A directory containing pre-built, third-party dependencies for the software.
+   - Used for building the Opticks binaries, installers, and SDK.
+
+- OPTICKS_CODE_DIR
+   - A directory containing the source code for the software.
+   - Used for building the Opticks installers and SDK.
+
+
+Download Dependencies
+---------------------
+The Dependencies folder contains a system which automatically downloads
+dependencies from the Opticks website. This system requires Java 1.4.X or later.
+
+To delete existing dependencies and download the latest
+dependencies for your platform, run this command:
 > retrieve-dependencies.bat
-This will download the appropriate dependencies builds and will install them
-in the proper directories.
 
-Point the OPTICKSDEPENDENCIES variable at the Dependencies folder so the
-build system can find the installed dependencies.
+To see details for using the dependencies system, run this command:
+> dependencies.bat -p
 
-How to compile Opticks in Visual Studio
----------------------------------------------------
-1. Open the Opticks solution.  To get to the Opticks source code in Visual
-   Studio, open the Opticks.sln file in Visual Studio.  This should be located
-   in the application folder.
-2. To build Opticks first select your desired configuration, either
-   "Debug|Win32", "Release|Win32", "Debug|x64", "Release|x64" in the
-   Visual Studio Configuration Manager.  If you are using the Express edition
-   of Visual C++, you will not able to see the "Debug|x64" or "Release|x64"
-   configurations because of inherent limitations in the Express edition.
-   Select to build the entire Solution.  You may encounter build warnings,
-   but there should not be any build errors.
 
-How to run Opticks in Visual Studio
----------------------------------------------------
-1. If you want to run interactive Opticks, make sure that the "Opticks"
+-------------------
+Using Visual Studio
+-------------------
+This section describes how to build and run Opticks using the Visual Studio IDE.
+This is recommended for all beginning and most advanced users. Some advanced
+users may choose to use the build script directly (see "Using the Build Script" below).
+
+
+Generate Visual Studio Project and Solution Files
+-------------------------------------------------
+Opticks uses CMake to generate Visual Studio project and solution files.
+While it is possible to run cmake directly, it is strongly discouraged and not
+officially supported due to the complex nature of the Opticks build system.
+The Code folder contains a build script which should be used to generate these files.
+
+To generate the project and solution files, run this command:
+> build.py --build-opticks=cmake --arch=<32 or 64>
+
+This will create either a Build32 or Build64 subdirectory containing all
+project files as well as the Opticks solution (Opticks.sln). Unlike the dependencies
+system, this will not delete existing Build32 or Build64 directories before running,
+so you may need to do so manually prior to running this command.
+
+
+Compile Opticks Inside Visual Studio
+------------------------------------
+Open the Opticks solution.  To get to the Opticks source code in Visual
+Studio, open the Opticks.sln file in Visual Studio.  This should be located
+in the Build32 or Build64 folder.
+
+To build Opticks first select your desired configuration, either
+"Debug", "Release", "MinSizeRel", or "RelWithDebInfo" in the
+Visual Studio Configuration Manager. Build the entire Solution.
+It should build without any compiler warnings or errors. There may
+be linker warnings due to missing symbols in third party dependencies.
+
+
+Run Opticks Inside Visual Studio
+--------------------------------
+Opticks has two primary executables: Opticks and OpticksBatch.
+   - If you want to run Opticks, make sure that the "Opticks"
    project is set as your start-up project and then select either
    "Debug\Start Debugging" or "Debug\Start Without Debugging" to start
    the application.
-2. If you want to run batch Opticks, make sure that the "OpticksBatch"
+   - If you want to run OpticksBatch, make sure that the "OpticksBatch"
    project is set as your start-up project and then select either
    "Debug\Start Debugging" or "Debug\Start Without Debugging" to start
    the application.
 
-How to run Opticks outside Visual Studio
----------------------------------------------------
-1. Once you have built Opticks, you can go into one of the following
-   directories:
-      "Build\Binaries-Win32-Debug\Bin", "Build\Binaries-Win32-Release\Bin",
-      "Build\Binaries-x64-Debug\Bin", "Build\Binaries-x64-Release\Bin"
-   depending on what build of Opticks you would like to run.
-2. Double-click on "Opticks.exe" to start the interactive version of Opticks.
-3. Open a command window and run "OpticksBatch.exe" to start the batch
-   version of Opticks.
+----------------------
+Using the Build Script
+----------------------
+This section briefly describes how to build and run Opticks using the
+Opticks build script. This is only recommended for advanced users.
+Here is a short list of some useful examples of running the build script:
+
+To query the build script for help, run this command:
+> build.py -h
+
+To build Opticks in 32-bit release mode using 8 threads, run this command:
+> build.py --concurrency=8 --build-opticks=core --mode=release --arch=32
+
+To update the version number of Opticks for a release candidate, run this command:
+> build.py --update-version=rc --new-version=3.1.4rc159
+
+To use doxygen to build HTML documentation for Opticks, run this command:
+> build.py --build-doxygen=html
+
+Build output is stored in the following locations:
+   - Build32\Debug
+   - Build32\Release
+   - Build64\Debug
+   - Build64\Release
+
+To run Opticks after building it, run Opticks.exe (or OpticksBatch.exe) from the Bin directory.
+To view the HTML documentation for Opticks, open index.html from the DoxygenOutput directory.

@@ -34,6 +34,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWhatsThis>
 
+#include "DependencyConfigs.h"
 #include "AboutDlg.h"
 #include "Aeb.h"
 #include "AebIo.h"

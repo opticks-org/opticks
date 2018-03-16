@@ -14,6 +14,8 @@
 #include "ObjectResource.h"
 #include "SimpleApiErrors.h"
 
+#include <string.h>
+
 extern "C"
 {
    DynamicObject* createDynamicObject()

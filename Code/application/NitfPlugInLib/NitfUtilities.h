@@ -26,6 +26,7 @@ class DateTime;
 #include <set>
 #include <string>
 #include <vector>
+#include <string.h>
 
 #include <boost/lexical_cast.hpp>
 

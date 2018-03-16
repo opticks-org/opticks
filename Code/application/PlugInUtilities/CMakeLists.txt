@@ -1,0 +1,304 @@
+set (HEADER_FILES
+    Interfaces/DataVariant.h
+    Interfaces/AlgorithmPattern.h
+    Interfaces/AppAssert.h
+    Interfaces/AppVerify.h
+    Interfaces/AttachmentPtr.h
+    Interfaces/BitMaskIterator.h
+    Interfaces/CachedPage.h
+    Interfaces/CachedPager.h
+    Interfaces/ColorMap.h
+    Interfaces/DataVariant.h
+    Interfaces/DataVariantAnyData.h
+    Interfaces/DataVariantValidator.h
+    Interfaces/Endian.h
+    Interfaces/FileResource.h
+    Interfaces/GeoPoint.h
+    Interfaces/GlContextSave.h
+    Interfaces/GlTextureResource.h
+    Interfaces/InterpreterUtilities.h
+    Interfaces/IntValidator.h
+    Interfaces/MatrixFunctions.h
+    Interfaces/MessageLogResource.h
+    Interfaces/MultiThreadedAlgorithm.h
+    Interfaces/ObjectResource.h
+    Interfaces/OptionQWidgetWrapper.h
+    Interfaces/PageCache.h
+    Interfaces/PlugInResource.h
+    Interfaces/ProgressResource.h
+    Interfaces/ProgressTracker.h
+    Interfaces/PropertiesQWidgetWrapper.h
+    Interfaces/RasterUtilities.h
+    Interfaces/Resource.h
+    Interfaces/SafePtr.h
+    Interfaces/Service.h
+    Interfaces/SessionResource.h
+    Interfaces/SignalBlocker.h
+    Interfaces/StringUtilities.h
+    Interfaces/StringUtilitiesMacros.h
+    Interfaces/SubjectAdapter.h
+    Interfaces/SubjectImp.h
+    Interfaces/switchOnEncoding.h
+    Interfaces/TestUtilities.h
+    Interfaces/TimeUtilities.h
+    Interfaces/TypeConverter.h
+    Interfaces/Undo.h
+    Interfaces/XercesIncludes.h
+    Interfaces/xmlbase.h
+    Interfaces/xmlreader.h
+    Interfaces/xmlwriter.h
+    pthreads-wrapper/bmutex.h
+    pthreads-wrapper/bthread.h
+    pthreads-wrapper/bthread_signal.h
+    pthreads-wrapper/DMutex.h
+    pthreads-wrapper/mutex.h
+    pthreads-wrapper/thread.h
+    pthreads-wrapper/thread_signal.h
+    AppVersion.h
+    FilterWidget.h
+    GeoAlgorithms.h
+    MathUtil.h
+    Mgrs.h
+    MgrsDatum.h
+    MgrsEngine.h
+    MipMappedTextures.h
+    Rdf.h
+    SubjectImpPrivate.h
+    SystemServices.h
+    SystemServicesImp.h
+)
+#BandUtilities.h, BandUtilities.cpp - Not currently compiled
+set (SOURCE_FILES
+    pthreads-wrapper/bmutex.cpp
+    pthreads-wrapper/bthread.cpp
+    pthreads-wrapper/bthread_signal.cpp
+    AlgorithmDialog.cpp
+    AlgorithmPattern.cpp
+    AnimationFrameSpinBox.cpp
+    AnimationFrameSubsetWidget.cpp
+    AppAssert.cpp
+    AppVerify.cpp
+    ArcRegionComboBox.cpp
+    BitMaskIterator.cpp
+    CachedPage.cpp
+    CachedPager.cpp
+    ClassificationWidget.cpp
+    ColorGrid.cpp
+    ColorMap.cpp
+    ColorMenu.cpp
+    ComplexComponentComboBox.cpp
+    CustomColorButton.cpp
+    CustomTreeWidget.cpp
+    DataVariant.cpp
+    DataVariantEditor.cpp
+    DmsFormatTypeComboBox.cpp
+    ElidedButton.cpp
+    ElidedLabel.cpp
+    Endian.cpp
+    FileBrowser.cpp
+    FillStyleComboBox.cpp
+    FilterWidget.cpp
+    FloatingLabel.cpp
+    FontSizeComboBox.cpp
+    GcpSymbolGrid.cpp
+    GeoAlgorithms.cpp
+    GeoPoint.cpp
+    GlContextSave.cpp
+    GraphicArcWidget.cpp
+    GraphicFillWidget.cpp
+    GraphicImageWidget.cpp
+    GraphicLineWidget.cpp
+    GraphicMeasurementWidget.cpp
+    GraphicObjectWidget.cpp
+    GraphicScaleWidget.cpp
+    GraphicSymbolWidget.cpp
+    GraphicTextWidget.cpp
+    GraphicTriangleWidget.cpp
+    GraphicUnitsWidget.cpp
+    GraphicViewWidget.cpp
+    ImageResolutionWidget.cpp
+    InfoBar.cpp
+    InterpreterUtilities.cpp
+    IntValidator.cpp
+    LabeledSection.cpp
+    LabeledSectionGroup.cpp
+    LatLonLineEdit.cpp
+    LatLonStyleComboBox.cpp
+    LineStyleComboBox.cpp
+    LineWidthComboBox.cpp
+    MatrixFunctions.cpp
+    Mgrs.cpp
+    MgrsDatum.cpp
+    MgrsEngine.cpp
+    MipMappedTextures.cpp
+    MultiThreadedAlgorithm.cpp
+    MutuallyExclusiveListWidget.cpp
+    NameTypeValueDlg.cpp
+    PageCache.cpp
+    PanLimitTypeComboBox.cpp
+    PassAreaComboBox.cpp
+    PixmapGrid.cpp
+    PixmapGridButton.cpp
+    PlugInSelectDlg.cpp
+    PrintPixmap.cpp
+    ProgressTracker.cpp
+    RasterUtilities.cpp
+    Rdf.cpp
+    RegionUnitsComboBox.cpp
+    ResolutionWidget.cpp
+    SearchDlg.cpp
+    SelectionGrid.cpp
+    Service.cpp
+    SignatureFilterDlg.cpp
+    SignaturePropertiesDlg.cpp
+    SignatureSelector.cpp
+    StretchTypeComboBox.cpp
+    StringUtilities.cpp
+    SubjectAdapter.cpp
+    SubjectImp.cpp
+    SubjectImpPrivate.cpp
+    SuppressibleMsgDlg.cpp
+    SymbolTypeGrid.cpp
+    SystemServicesImp.cpp
+    TestUtilities.cpp
+    TimeUtilities.cpp
+    TypeConverter.cpp
+    Undo.cpp
+    UndoAction.cpp
+    WavelengthUnitsComboBox.cpp
+    xmlbase.cpp
+    xmlreader.cpp
+    xmlwriter.cpp
+) 
+#ImageHandler.cpp
+#MuHttpServer.cpp
+#Interfaces/ImageHandler.h
+#Interfaces/MuHttpServer.h
+set (MOC_HEADERS
+    Interfaces/AlgorithmDialog.h
+    Interfaces/AnimationFrameSpinBox.h
+    Interfaces/AnimationFrameSubsetWidget.h
+    Interfaces/ClassificationWidget.h
+    Interfaces/CustomColorButton.h
+    Interfaces/CustomTreeWidget.h
+    Interfaces/ElidedButton.h
+    Interfaces/ElidedLabel.h
+    Interfaces/FileBrowser.h
+    Interfaces/FontSizeComboBox.h
+    Interfaces/GraphicTextWidget.h
+    Interfaces/LabeledSection.h
+    Interfaces/LabeledSectionGroup.h
+    Interfaces/LatLonLineEdit.h
+    Interfaces/Modifier.h
+    Interfaces/MutuallyExclusiveListWidget.h
+    Interfaces/SignaturePropertiesDlg.h
+    Interfaces/SignatureSelector.h
+    Interfaces/SuppressibleMsgDlg.h
+    Interfaces/UndoAction.h
+    Interfaces/WavelengthUnitsComboBox.h
+    ArcRegionComboBox.h
+    ColorGrid.h
+    ColorMenu.h
+    ComplexComponentComboBox.h
+    DataVariantEditor.h
+    DmsFormatTypeComboBox.h
+    FillStyleComboBox.h
+    FloatingLabel.h
+    GcpSymbolGrid.h
+    GraphicArcWidget.h
+    GraphicFillWidget.h
+    GraphicImageWidget.h
+    GraphicLineWidget.h
+    GraphicMeasurementWidget.h
+    GraphicObjectWidget.h
+    GraphicScaleWidget.h
+    GraphicSymbolWidget.h
+    GraphicTriangleWidget.h
+    GraphicUnitsWidget.h
+    GraphicViewWidget.h
+    ImageResolutionWidget.h
+    InfoBar.h
+    LatLonStyleComboBox.h
+    LineStyleComboBox.h
+    LineWidthComboBox.h
+    NameTypeValueDlg.h
+    PanLimitTypeComboBox.h
+    PassAreaComboBox.h
+    PixmapGrid.h
+    PixmapGridButton.h
+    PlugInSelectDlg.h
+    RegionUnitsComboBox.h
+    ResolutionWidget.h
+    SearchDlg.h
+    SelectionGrid.h
+    SignatureFilterDlg.h
+    StretchTypeComboBox.h
+    SymbolTypeGrid.h
+)
+if(MSVC)
+    set_source_files_properties(StringUtilities.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+endif()
+if(WIN32)
+    find_package(MessageCompiler REQUIRED)
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/EventMessages.h ${CMAKE_CURRENT_BINARY_DIR}/EventMessages.rc
+	COMMAND ${MessageCompiler_EXECUTABLE} -h ${CMAKE_CURRENT_BINARY_DIR} -r ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/EventMessages.mc
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/EventMessages.mc
+    )
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    list(APPEND HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/EventMessages.h)
+endif()
+include(${QT_USE_FILE})
+include_directories(${Opticks_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
+add_definitions(-DAPPLICATION_XERCES)
+include_directories(${Xerces_INCLUDE_DIRS})
+include_directories(${Raptor_INCLUDE_DIRS})
+include_directories(${Glew_INCLUDE_DIRS})
+include_directories(${Ossim_INCLUDE_DIRS})
+include_directories(
+    ${Opticks_SOURCE_DIR}/Desktop
+    ${Opticks_SOURCE_DIR}/Desktop/Plot
+    ${Opticks_SOURCE_DIR}/Gui/GLView
+    ${Opticks_SOURCE_DIR}/Utilities
+)
+qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+source_group(moc FILES ${MOC_OUTFILES})
+add_library(PlugInUtilities STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
+set_target_properties(PlugInUtilities PROPERTIES OUTPUT_NAME opticks-pluginutilities)
+if(NOT MSVC)
+    #these libraries should be fixed so that they are not circular
+    target_link_libraries(PlugInUtilities PlugInLib)
+endif()
+
+if(ehs_FOUND AND pcre_FOUND AND pme_FOUND)
+    set (SERVER_MOC_HEADERS
+	Interfaces/ImageHandler.h
+	Interfaces/MuHttpServer.h
+    )
+    set (SERVER_SOURCE_FILES
+	ImageHandler.cpp
+	MuHttpServer.cpp
+    ) 
+    qt4_wrap_cpp(SERVER_MOC_OUTFILES ${SERVER_MOC_HEADERS})
+    source_group(moc FILES ${SERVER_MOC_OUTFILES})
+    include_directories(${ehs_INCLUDE_DIRS} ${pcre_INCLUDE_DIRS} ${pme_INCLUDE_DIRS})
+    add_library(ServerUtilities STATIC ${SERVER_SOURCE_FILES} ${SERVER_MOC_HEADERS} ${SERVER_MOC_OUTFILES})
+    set_target_properties(ServerUtilities PROPERTIES OUTPUT_NAME opticks-serverutilities)
+    if(NOT MSVC)
+	target_link_libraries(ServerUtilities PlugInLib)
+	target_link_libraries(ServerUtilities PlugInUtilities)
+    endif()
+    target_link_libraries(ServerUtilities
+        ${ehs_LIBRARIES}
+        ${pcre_LIBRARIES}
+        ${pme_LIBRARIES}
+    )
+    set(Opticks_ServerUtilities_FOUND 1 CACHE BOOL "Was ServerUtilities built")
+    set(Opticks_ServerUtilities_INCLUDE_DIR "${Opticks_SOURCE_DIR}/PlugInUtilities/Interfaces" CACHE PATH "ServerUtilities include path")
+    set(Opticks_ServerUtilities_LIBRARY ServerUtilities CACHE STRING "ServerUtilities library")
+    mark_as_advanced(Opticks_ServerUtilities_FOUND)
+    mark_as_advanced(Opticks_ServerUtilities_INCLUDE_DIR)
+    mark_as_advanced(Opticks_ServerUtilities_LIBRARY)
+endif()
+install(TARGETS PlugInUtilities DESTINATION lib)

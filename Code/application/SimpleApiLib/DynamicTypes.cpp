@@ -14,6 +14,8 @@
 #include "PlugInManagerServices.h"
 #include "SimpleApiErrors.h"
 
+#include <string.h>
+
 extern "C"
 {
    DataVariant* createDataVariant(const char* pType, const void* pValue)

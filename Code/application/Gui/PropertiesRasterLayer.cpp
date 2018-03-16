@@ -21,6 +21,7 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QStackedWidget>
 
+#include "DependencyConfigs.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
 #if defined (CG_SUPPORTED)

@@ -11,6 +11,7 @@ import datetime
 import time
 import zipfile
 import re
+import codecs
 import commonutils
 
 def execute_process(args, bufsize=0, executable=None, preexec_fn=None,
@@ -34,6 +35,32 @@ def execute_process(args, bufsize=0, executable=None, preexec_fn=None,
     returncode = process.wait()
     return returncode
 
+
+def set_sln_startup_project(solution_file, project):
+    # Read the sln file.
+    file = open(solution_file, "r")
+    lines = file.readlines()
+    file.close()
+
+    # Move the specified project to the beginning of the file.
+    # Need to track the index due to duplicates in the list (i.e.: project dependencies).
+    if (lines[0] == "Microsoft Visual Studio Solution File, Format Version 11.00\n"):
+        begin = -1
+        end = -1
+        for i in range(len(lines)):
+            line = lines[i]
+            if (begin < 0 and line.find(project) >= 0):
+               begin = i
+            if (begin >= 0 and line == "EndProject\n"):
+               end = i + 1
+               break
+
+    # Write the sln file to disk.
+    if (begin >= 0 and end > begin):
+        new_file = open(solution_file, "w")
+        new_file.writelines(lines[0:2] + lines[begin:end] + lines[2:begin] + lines[end:])
+        new_file.close()
+
 class ScriptException(Exception):
     """Report error while running script"""
 
@@ -55,6 +82,8 @@ class Builder:
             self.mode = "debug"
         else:
             self.mode = "release"
+        self.initial_cmake_config = None
+        self.make_program = "make"
 
     def get_app_version_only(self):
         return commonutils.get_app_version_only(".")
@@ -74,56 +103,6 @@ class Builder:
         if build_revision_match is not None:
             build_revision = build_revision_match.group(1)
         return build_revision
-
-    def build_doxygen(self, build, artifacts_dir):
-        if self.verbosity > 1:
-            print "Generating HTML..."
-        current_app_version = self.get_current_app_version()
-        doc_path = os.path.abspath(join("Build", "DoxygenOutput"))
-        if os.path.exists(doc_path):
-            #delete any already generated documentation
-            shutil.rmtree(doc_path, True)
-        os.makedirs(doc_path)
-        doxygen_cmd = self.get_doxygen_path()
-        config_dir = os.path.abspath(join("application", "ApiDocs"))
-        args = [doxygen_cmd, join(config_dir, "application.dox")]
-        env = os.environ
-        env["SOURCE"] = os.path.abspath("application")
-        env["VERSION"] = current_app_version
-        env["OUTPUT_DIR"] = doc_path
-        env["CONFIG_DIR"] = config_dir
-        if is_windows():
-            dot_exe = "dot.exe"
-        else:
-            dot_exe = "dot"
-        graphviz_dir = os.path.abspath(join(self.depend_path,
-            "64", "tools", "graphviz", "bin"))
-        if not(os.path.exists(join(graphviz_dir, dot_exe))):
-            graphviz_dir = os.path.abspath(join(self.depend_path,
-                "32", "tools", "graphviz", "bin"))
-        env["DOT_DIR"] = graphviz_dir
-        self.other_doxygen_prep(build, env)
-        retcode = execute_process(args, env=env)
-        if retcode != 0:
-            raise ScriptException("Unable to run doxygen generation script")
-        if self.verbosity > 1:
-            print "Done generating HTML"
-        if artifacts_dir is not None:
-            if self.verbosity > 1:
-                print "Compressing Doxygen because --artifact-dir "\
-                    "was provided."
-            html_path = join(doc_path, "html")
-            zip_name = "doxygen.zip"
-            zip_path = os.path.abspath(join(artifacts_dir, zip_name))
-            the_zip = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED)
-            for cur_dir, dirs, files in os.walk(html_path):
-                arc_dir = cur_dir[len(html_path):]
-                for the_file in files:
-                    the_zip.write(join(cur_dir, the_file),
-                        join(arc_dir,the_file))
-            the_zip.close()
-            if self.verbosity > 1:
-                print "Done compressing Doxygen"
 
     def __update_h_file(self, h_file, fields_to_replace):
         h_handle = open(h_file, "rt")
@@ -151,11 +130,13 @@ class Builder:
             "ConfigurationSettingsImp.cpp"), None)
 
     def __update_build_revision_h(self):
-        command_prefix = "./"
-        if is_windows():
-            command_prefix = ""
-        execute_process(["python",
-            "%supdate-build-revision.py" % (command_prefix)], shell=False)
+        #command_prefix = "./"
+        #if is_windows():
+        #    command_prefix = ""
+        #execute_process(["python",
+        #    "%supdate-build-revision.py" % (command_prefix)], shell=False)
+        #### TODO: deal with this, probably just remove it since cmake handles this
+        pass
 
     def get_current_app_version(self):
         # Try to update the build revision, since it might be stale
@@ -243,22 +224,41 @@ class Builder:
         if self.arcsdk_path:
             env["ARCSDK"] = self.arcsdk_path
 
-    def run_scons(self, path, debug, concurrency, environ,
-                  clean, extra_args=None):
-        scons_exec = "scons"
-        if is_windows():
-            scons_exec = scons_exec + ".bat"
-        arguments = [scons_exec]
-        arguments.append("-j%s" % (concurrency))
-        if clean:
-            arguments.append("-c")
-        if not debug:
-            arguments.append("RELEASE=yes")
-        if extra_args:
+    def run_cmake(self, debug, environ, extra_args=None):
+        path = self.get_build_path()
+        if self.verbosity > 1:
+            print "Determining if build is configured..."
+        if self.check_if_configured(path):
+            # already configured...the build will determine if cmake needs to run again
+            return
+        if self.verbosity > 1:
+            print "Configuring build with cmake..."
+        arguments = ["cmake", "-G", self.generator_name]
+        if debug:
+            arguments.append("-DCMAKE_BUILD_TYPE=debug")
+        else:
+            arguments.append("-DCMAKE_BUILD_TYPE=release")
+        if self.initial_cmake_config:
+            arguments.extend(["-C",self.initial_cmake_config])
+        if extra_args is not None:
             arguments.extend(extra_args)
+        arguments.append(os.path.abspath("application"))
         retcode = execute_process(arguments, cwd=path, env=environ)
         if retcode != 0:
-            raise ScriptException("Scons did not compile project")
+            raise ScriptException("CMake configuration failed")
+
+    def run_make(self, environ, target=None, concurrency=None, extra_args=None):
+        path = self.get_build_path()
+        arguments = [self.make_program]
+        if concurrency is not None:
+            arguments.append("-j%s" % concurrency)
+        if extra_args is not None:
+            arguments.extend(extra_args)
+        if target is not None:
+            arguments.append(target)
+        retcode = execute_process(arguments, cwd=path, env=environ)
+        if retcode != 0:
+            raise ScriptException("Make did not compile project")
 
     def build_executable(self, clean_build_first, build_opticks, concurrency):
         #No return code, throw exception or ScriptException
@@ -270,7 +270,7 @@ class Builder:
         buildenv = os.environ
         self.populate_environ_for_dependencies(buildenv)
 
-        if build_opticks != "core":
+        if build_opticks in ["arcproxy", "all"]:
             if not "ARCSDK" in buildenv:
                 raise ScriptException("ARCSDK is not provided")
             if not os.path.exists(buildenv.get("ARCSDK")):
@@ -278,20 +278,24 @@ class Builder:
 
         if self.verbosity >= 1:
             print_env(buildenv)
+        if build_opticks in ["core","all"]:
+           if self.verbosity > 1:
+               print "Configuring with cmake..."
+           self.run_cmake(self.build_debug_mode, buildenv)
 
-        if clean_build_first:
-            if self.verbosity > 1:
-                print "Cleaning compilation..."
-            self.compile_code(buildenv, True, build_opticks, concurrency)
-            if self.verbosity > 1:
-                print "Done cleaning compilation"
+           if clean_build_first:
+               if self.verbosity > 1:
+                   print "Cleaning compilation..."
+               self.compile_code(buildenv, True, build_opticks, concurrency)
+               if self.verbosity > 1:
+                   print "Done cleaning compilation"
 
-        self.compile_code(buildenv, False, build_opticks, concurrency)
-        if self.verbosity > 1:
-            print "Done building executable"
+           self.compile_code(buildenv, False, build_opticks, concurrency)
+           if self.verbosity > 1:
+               print "Done building executable"
 
     def gather_artifacts(self, artifacts_dir):
-        binaries_dir = os.path.abspath(self.get_binaries_dir("Build"))
+        binaries_dir = os.path.abspath(self.get_binaries_dir(self.get_build_path()))
         zip_name = self.get_zip_name()
         zip_path = os.path.abspath(join(artifacts_dir, zip_name))
         if self.verbosity > 1:
@@ -308,6 +312,19 @@ class Builder:
         the_zip.close()
         if self.verbosity > 1:
             print "Done gathering Build artifacts"
+
+    def update_testbed_cfg_file(self, cfgfile, test_data_path):
+        def importpath_repl(matchobj):
+            return test_data_path
+        # Update the import path setting in the .cfg file
+        # to the est data location
+        cfgfileHandle = codecs.open(cfgfile, "r", "utf-8")
+        contents = cfgfileHandle.read()
+        cfgfileHandle.close()
+        contents = re.sub("TESTDATAPATH", importpath_repl, contents)
+        cfgfileHandle = codecs.open(cfgfile, "w+", "utf-8")
+        cfgfileHandle.write(contents)
+        cfgfileHandle.close()
 
     def generic_prep_to_run(self, build_dir, os_spec, arch):
         bin_path = os.path.abspath(join(self.get_binaries_dir(build_dir),
@@ -333,7 +350,7 @@ class Builder:
                 print "Done removing Temp directory"
 
         if build_dir is None:
-            build_dir = "Build"
+            build_dir = self.get_build_path()
 
         app_setting_dir = os.path.abspath(join(build_dir,
             "ApplicationUserSettings"))
@@ -350,6 +367,30 @@ class Builder:
         if self.verbosity > 1:
             print "Done creating Temp directory folder"
 
+        testbed_settings_dir = os.path.abspath(join(build_dir, "TestBedUserSettings"))
+        if not os.path.exists(testbed_settings_dir):
+            if self.verbosity > 1:
+                print "Creating TestBedUserSettings folder at %s..." % testbed_settings_dir
+            os.makedirs(testbed_settings_dir)
+            if self.verbosity > 1:
+                print "Done creating TestBedUserSettings folder"
+
+        defaults_dir = os.path.abspath(join(build_dir, "TestBedDefaultSettings"))
+        if not os.path.exists(defaults_dir):
+            if self.verbosity > 1:
+                print "Creating TestBedDefaultSettings folder at %s..." % defaults_dir
+            os.makedirs(defaults_dir)
+            if self.verbosity > 1:
+                print "Done creating TestBedDefaultsSettings folder"
+
+        if self.verbosity > 1:
+            print "Creating TestBed defaults config file..."
+        shutil.copy2(os.path.abspath("TestBed-defaults.cfg"),
+            join(defaults_dir, "50-TestBed-defaults.cfg"))
+        self.update_testbed_cfg_file(join(defaults_dir, "50-TestBed-defaults.cfg"), self.test_data_path)
+        if self.verbosity > 1:
+            print "Done creating TestBed defaults config file..."
+
         dep_file_path = join(bin_path, "opticks.dep")
         if not(os.path.exists(dep_file_path)):
             if self.verbosity > 1:
@@ -357,72 +398,86 @@ class Builder:
             dep_file = open(dep_file_path, "w")
             dep_file.write("!depV1 { deployment: { "\
                 "AppHomePath: ../../../Release, "\
-                "UserConfigPath: ../../ApplicationUserSettings } }")
+                "UserConfigPath: ../../ApplicationUserSettings, "\
+                "PlugInPath: ../plugins } }")
             dep_file.close()
             if self.verbosity > 1:
                 print "Done creating opticks.dep file"
+
+        dep_file_path = join(bin_path, "testBed.dep")
+        if not(os.path.exists(dep_file_path)):
+            if self.verbosity > 1:
+                print "Creating testBed.dep file..."
+            dep_file = open(dep_file_path, "w")
+            dep_file.write("!depV1 { deployment: { "\
+                "AppHomePath: ../../../Release, "\
+                "UserConfigPath: ../../TestBedUserSettings, "\
+                "AdditionalDefaultPath: "\
+                " ../../TestBedDefaultSettings } }")
+            dep_file.close()
+            if self.verbosity > 1:
+                print "Done creating testBed.dep file"
 
         return bin_path
 
 class WindowsBuilder(Builder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, msbuild, use_scons, ms_help_compiler):
+                 verbosity, msbuild, ms_help_compiler, test_data_path):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
         self.msbuild_path = msbuild 
         self.ms_help_compiler = ms_help_compiler
-        self.use_scons = use_scons
+        if test_data_path is not None:
+            self.test_data_path = test_data_path
+        else:
+            self.test_data_path = "T:/cppTestData"
+
+    def run_cmake(self, debug, environ, extra_args=None):
+        # Run the generic process then modify the generated Opticks.sln to force Opticks to be the startup project.
+        solution_file = os.path.join(self.get_build_path(), "Opticks.sln")
+        new_sln = not os.path.exists(solution_file)
+        Builder.run_cmake(self, debug, environ, extra_args)
+        if new_sln:
+            if (self.verbosity > 1):
+                print "Setting the sln file startup project."
+            set_sln_startup_project(solution_file, "Opticks.vcxproj")
 
     def compile_code(self, env, clean, build_opticks, concurrency):
-        if self.use_scons:
+        if build_opticks in ["core","all"]:
+           if self.verbosity > 1:
+               print "Building Opticks and plug-ins"
+           solution_file = os.path.join(self.get_build_path(), "Opticks.sln")
+           if clean:
+               self.build_in_msbuild(solution_file,
+                   self.build_debug_mode, self.is_64_bit, concurrency,
+                   self.msbuild_path, env, target="clean")
+           else:
+               self.build_in_msbuild(solution_file,
+                   self.build_debug_mode, self.is_64_bit, concurrency,
+                   self.msbuild_path, env)
+           if self.verbosity > 1:
+               print "Done building Opticks and plug-ins"
+        if build_opticks in ["arcproxy","all"]:
             if self.verbosity > 1:
-                print "Building Opticks"
-
-            extra_args = ["all"]
-            arch_args = []
-            if self.is_64_bit:
-                arch_args.append("BITS=64")
-            else:
-                arch_args.append("BITS=32")
-            self.run_scons(os.path.abspath("application"),
-               self.build_debug_mode, concurrency, env, clean, extra_args+arch_args)
-            if self.verbosity > 1:
-                print "Done building Opticks"
-                print "Building Opticks plug-ins"
-            self.run_scons(os.path.abspath(r"application\PlugIns\src"),
-               self.build_debug_mode, concurrency, env, clean, arch_args)
-            if self.verbosity > 1:
-                print "Done building Opticks plug-ins"
-            if build_opticks != "core":
-               if self.verbosity > 1:
-                   print "Building ArcProxy"
-               self.run_scons(os.path.abspath("application"),
-                   self.build_debug_mode, "1", env, clean, ["arcProxy", "BITS=32"])
-               if self.is_64_bit:
-                   self.run_scons(os.path.abspath("application"),
-                       self.build_debug_mode, "1", env, clean, ["arcProxy", "BITS=64"])
-               if self.verbosity > 1:
-                   print "Done building ArcProxy"
-        else:
-            if self.verbosity > 1:
-                print "Building Opticks and plug-ins"
-            solution_file = os.path.abspath("Application\\Opticks.sln")
-            self.build_in_msbuild(solution_file,
-                self.build_debug_mode, self.is_64_bit, concurrency,
-                self.msbuild_path, env, clean)
-            if self.verbosity > 1:
-                print "Done building Opticks and plug-ins"
-            if build_opticks != "core":
-                if self.verbosity > 1:
-                    print "Building ArcProxy"
-                solution_file = os.path.abspath("Application\\ArcIntegration.sln")
+                print "Building ArcProxy"
+            # This sln is separate from Opticks.sln for two reasons:
+            #    1. ArcProxy is only built for 32-bit
+            #       - The 64-bit parts of the sln are just to put it into the right build directory.
+            #    2. ArcProxy uses the #import directive, which is incompatible with the /MP flag.
+            #       - See http://msdn.microsoft.com/en-us/library/bb385193.aspx
+            solution_file = os.path.join(self.get_build_path(), "../application/ArcIntegration.sln")
+            if clean:
                 self.build_in_msbuild(solution_file,
                     self.build_debug_mode, self.is_64_bit,
-                    concurrency, self.msbuild_path, env, clean)
-                if self.verbosity > 1:
-                    print "Done building ArcProxy"
+                    concurrency, self.msbuild_path, env, target="clean")
+            else:
+                self.build_in_msbuild(solution_file,
+                    self.build_debug_mode, self.is_64_bit,
+                    concurrency, self.msbuild_path, env)
+            if self.verbosity > 1:
+                print "Done building ArcProxy"
 
     def get_binaries_dir(self, build_dir):
-        return join(build_dir,"Binaries-%s-%s" % (self.platform, self.mode))
+        return join(get_build_path(),"Binaries")
 
     def get_zip_name(self):
         return "Binaries-%s-%s.zip" % (self.platform, self.mode)
@@ -449,9 +504,16 @@ class WindowsBuilder(Builder):
         chm_file = "OpticksSDK-%s.chm" % (self.get_app_version_only())
         env["CHM_NAME"] = chm_file
 
+    def check_if_configured(self, path):
+        if os.path.exists(os.path.join(path, "Opticks.sln")):
+            return True
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return False
+
     def prep_to_run(self, build_dir):
         if build_dir is None:
-            build_dir = "Build"
+            build_dir = self.get_build_path()
 
         bin_path = self.generic_prep_to_run(build_dir, "Windows",
             "64" if self.is_64_bit else "32")
@@ -480,7 +542,7 @@ class WindowsBuilder(Builder):
 
     def build_in_msbuild(self, solutionfile, debug,
                          build_64_bit, concurrency,
-                         msbuildpath, environ, clean):
+                         msbuildpath, environ, target=None):
         if not os.path.exists(msbuildpath):
             raise ScriptException("MS Build path is invalid")
     
@@ -495,8 +557,8 @@ class WindowsBuilder(Builder):
 
         msbuild_exec = join(msbuildpath, "msbuild.exe")
         arguments = [msbuild_exec, solutionfile]
-        if clean:
-            arguments.append("/target:clean")
+        if target is not None:
+            arguments.append("/target:%s" % target)
         arguments.append("/m:%s" % concurrency)
         arguments.append("/p:Platform=%s" % platform)
         arguments.append("/p:Configuration=%s" % config)
@@ -506,23 +568,43 @@ class WindowsBuilder(Builder):
 
 class Windows32bitBuilder(WindowsBuilder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, msbuild, use_scons, ms_help_compiler):
+                 verbosity, msbuild, ms_help_compiler, test_data_path):
         WindowsBuilder.__init__(self, dependencies, arcsdk,
-            build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
+            build_in_debug, verbosity, msbuild, ms_help_compiler, test_data_path)
         self.is_64_bit = False
         self.platform = "Win32"
+        self.generator_name = 'Visual Studio 10'
+
+    def get_build_path(self):
+        return os.path.abspath("Build32")
 
 class Windows64bitBuilder(WindowsBuilder):
     def __init__(self, dependencies, arcsdk, build_in_debug,
-                 verbosity, msbuild, use_scons, ms_help_compiler):
+                 verbosity, msbuild, ms_help_compiler, test_data_path):
         WindowsBuilder.__init__(self, dependencies, arcsdk,
-            build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
+            build_in_debug, verbosity, msbuild, ms_help_compiler, test_data_path)
         self.is_64_bit = True
         self.platform = "x64"
+        self.generator_name = 'Visual Studio 10 Win64'
+
+    def get_build_path(self):
+        return os.path.abspath("Build64")
 
 class SolarisBuilder(Builder):
-    def __init__(self, dependencies, arcsdk, build_in_debug, verbosity):
+    def __init__(self, dependencies, arcsdk, build_in_debug, verbosity, test_data_path):
         Builder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
+        self.generator_name = 'Unix Makefiles'
+        self.initial_cmake_config = os.path.abspath("application/SunOS-64-cmake-cache.txt")
+        self.make_program = "gmake"
+        if test_data_path is not None:
+            self.test_data_path = test_data_path
+        else:
+            self.test_data_path = "/TestData/cppTestData"
+
+    def get_build_path(self):
+        if self.build_debug_mode:
+           return os.path.abspath("build-debug")
+        return os.path.abspath("build-release")
 
     def get_doxygen_path(self):
         return join(self.depend_path, "64", "bin", "doxygen")
@@ -536,44 +618,49 @@ class SolarisBuilder(Builder):
             new_value = new_value + ":" + env["LD_LIBRARY_PATH_32"]
         env["LD_LIBRARY_PATH_32"] = new_value
 
+    def check_if_configured(self, path):
+        if os.path.exists(os.path.join(path, "Makefile")):
+            return True
+        if not os.path.exists(path):
+            os.makedirs(path)
+        return False
+
     def compile_code(self, env, clean, build_opticks, concurrency):
         #Build Opticks Core
-        if self.verbosity > 1:
-            print "Building Opticks Core"
-        self.run_scons(os.path.abspath("application"),
-            self.build_debug_mode, concurrency, env, clean, ["core"])
-        if self.verbosity > 1:
-            print "Done building Opticks Core"
-        #Build PlugIns
-        if self.verbosity > 1:
-            print "Building Opticks PlugIns"
-        self.run_scons(os.path.abspath("application/PlugIns/src"),
-            self.build_debug_mode, concurrency, env, clean, [])
-        if self.verbosity > 1:
-            print "Done building Opticks PlugIns"
-        if build_opticks != "core":
+        if build_opticks in ["core","all"]:
+           if clean:
+               if self.verbosity > 1:
+                   print "Cleaning build directory"
+               self.run_make(env, target="clean", concurrency=concurrency)
+           if self.verbosity > 1:
+               print "Building Opticks Core"
+           self.run_make(env, concurrency=concurrency)
+           if self.verbosity > 1:
+               print "Done building Opticks Core"
+        if build_opticks in ["arcproxy","all"]:
             if self.verbosity > 1:
                 print "Building ArcProxy"
-            self.run_scons(os.path.abspath("application"),
-                self.build_debug_mode, concurrency, env, clean, ["arcproxy"])
+            self.run_make(env, target="ArcProxy", concurrency=concurrency)
             if self.verbosity > 1:
                 print "Done building ArcProxy"
 
     def get_binaries_dir(self, build_dir):
-        return join(build_dir,"Binaries-solaris-sparc-%s" % (self.mode))
+        return join(self.get_build_path(), "Binaries")
 
     def get_zip_name(self):
         return "Binaries-solaris-sparc-%s.zip" % (self.mode)
 
     def prep_to_run(self, build_dir):
         if build_dir is None:
-            build_dir = "Build"
-
+            build_dir = self.get_build_path()
+ 
         return self.generic_prep_to_run(build_dir, "Solaris", "64")
 
 class LinuxBuilder(SolarisBuilder):
-    def __init__(self, dependencies, arcsdk, build_in_debug, verbosity):
-        SolarisBuilder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity)
+    def __init__(self, dependencies, arcsdk, build_in_debug, verbosity, test_data_path):
+        SolarisBuilder.__init__(self, dependencies, arcsdk, build_in_debug, verbosity, test_data_path)
+        self.initial_cmake_config = None
+        self.make_program = "make"
 
     def other_doxygen_prep(self, build, env):
         graphviz_dir = os.path.abspath(join("/", "usr", "bin"))
@@ -587,45 +674,34 @@ class LinuxBuilder(SolarisBuilder):
     def get_doxygen_path(self):
         return join("/","usr","bin","doxygen")
 
-    def get_binaries_dir(self, build_dir):
-        return join(build_dir,"Binaries-linux-x86_64-%s" % (self.mode))
-
     def get_zip_name(self):
         return "Binaries-linux-x86_64-%s.zip" % (self.mode)
 
     def prep_to_run(self, build_dir):
         if build_dir is None:
-            build_dir = "Build"
+            build_dir = self.get_build_path()
 
         return self.generic_prep_to_run(build_dir, "Linux", "64")
 
 def create_builder(opticks_depends, arcsdk, build_in_debug,
-                   msbuild, use_scons, ms_help_compiler, arch, verbosity):
+                   msbuild, ms_help_compiler, arch, verbosity, test_data_path):
     builder = None
     if is_windows():
         if arch == "32":
             builder = Windows32bitBuilder(opticks_depends, arcsdk,
-                build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
+                build_in_debug, verbosity, msbuild, ms_help_compiler,
+                test_data_path)
         if arch == "64":
             builder = Windows64bitBuilder(opticks_depends, arcsdk,
-                build_in_debug, verbosity, msbuild, use_scons, ms_help_compiler)
+                build_in_debug, verbosity, msbuild, ms_help_compiler,
+                test_data_path)
     elif sys.platform.startswith("linux"):
-        builder = LinuxBuilder(opticks_depends, arcsdk, build_in_debug, verbosity)
+        builder = LinuxBuilder(opticks_depends, arcsdk, build_in_debug, verbosity,
+            test_data_path)
     else:
         builder = SolarisBuilder(opticks_depends, arcsdk,
-            build_in_debug, verbosity)
+            build_in_debug, verbosity, test_data_path)
     return builder
-
-def prep_to_run(opticks_depends, build_debug, arch,
-                msbuild, build_dir, verbosity):
-    try:
-        builder = create_builder(opticks_depends, False,
-            build_debug, msbuild, False, None, arch, verbosity)
-        if builder is not None:
-            return builder.prep_to_run(build_dir)
-    except ScriptException, se:
-        return None
-
 
 def print_env(environ):
     print "Environment is currently set to"
@@ -664,24 +740,17 @@ def main(args):
             ms_help_compiler_path = "C:\\Program Files\\HTML Help Workshop"
         options.add_option("--ms-help-compiler",
             dest="ms_help_compiler", action="store", type="string")
-        options.add_option("--use-scons", action="store_true",
-            dest="use_scons",
-            help="If provided, compile using Scons "\
-                 "on Windows instead of using vcbuild. Use "\
-                 "if you don't have Visual C++ installed. "\
-                 "The default is to use vcbuild")
         options.add_option("--arch", dest="arch", action="store",
             type="choice", choices=["32","64"], help="Use 32 or 64.")
         options.set_defaults(msbuild=msbuild_path,
-            ms_help_compiler=ms_help_compiler_path, arch="64",
-            use_scons=False)
+            ms_help_compiler=ms_help_compiler_path, arch="64")
     options.add_option("-m", "--mode", dest="mode",
         action="store", type="choice", choices=["debug", "release"],
         help="Use debug or release.")
     options.add_option("--clean", dest="clean", action="store_true")
     options.add_option("--build-opticks", dest="build_opticks",
-        action="store", type="choice", choices=["all","core","none"],
-        help="Use all, core or none.")
+        action="store", type="choice", choices=["all","arcproxy","core","none"],
+        help="Use all, arcproxy, core or none.")
     options.add_option("--update-version", dest="update_version_scheme",
         action="store", type="choice",
         choices=["milestone", "nightly", "none", "production",
@@ -702,8 +771,7 @@ def main(args):
         help="Use YYYY-MM-DD or the special value, today")
     options.add_option("--prep", dest="prep", action="store_true")
     options.add_option("--artifact-dir", dest="artifact_dir", action="store")
-    options.add_option("--build-doxygen", dest="build_doxygen",
-        action="store", type="choice", choices=["none", "html", "all"])
+    options.add_option("--test-data-path", dest="test_data_path", action="store")
     options.add_option("--concurrency", dest="concurrency", action="store")
     options.add_option("-q", "--quiet", help="Print fewer messages",
         action="store_const",dest="verbosity", const=0)
@@ -711,14 +779,13 @@ def main(args):
         action="store_const", dest="verbosity", const=2)
     options.set_defaults(mode="release",
        clean=False, build_opticks="none", update_version_scheme="none",
-       prep=False, build_doxygen="none", concurrency=1, verbosity=1)
+       prep=False, test_data_path=None, concurrency=1, verbosity=1)
 
     options = options.parse_args(args[1:])[0]
     if not is_windows():
         options.msbuild = None
         options.ms_help_compiler = None
         options.arch = "64"
-        options.use_scons = True 
 
     builder = None
     try:
@@ -727,6 +794,10 @@ def main(args):
         if options.dependencies:
             #allow the -d command-line option to override environment variable
             opticks_depends = options.dependencies
+        if not opticks_depends:
+            if os.path.exists(os.path.abspath("../Dependencies")):
+                opticks_depends = os.path.abspath("../Dependencies")
+                print "Using %s for dependencies" % opticks_depends
         if not opticks_depends:
             #didn't use -d option, nor is an environment variable
             #set so consider that an error
@@ -741,28 +812,21 @@ def main(args):
 
         builder = create_builder(opticks_depends, options.arcsdk,
             build_in_debug, options.msbuild,
-            options.use_scons,
-            options.ms_help_compiler, options.arch, options.verbosity)
+            options.ms_help_compiler, options.arch, options.verbosity,
+            options.test_data_path)
         if builder is None:
             raise ScriptException("Unable to create builder for platform")
 
         builder.update_app_version_number(options.update_version_scheme,
             options.new_version, options.release_date)
 
-        if options.build_opticks != "none" or options.build_doxygen != "none":
+        if options.build_opticks != "none":
             #Force BuildRevision.h to be up-to-date, after AppVersion.h
             #might have been changed but before we do anything else.
             builder.get_current_app_version()
 
         builder.build_executable(options.clean, options.build_opticks,
             options.concurrency)
-
-        if options.build_doxygen != "none":
-            if options.verbosity > 1:
-                print "Building Doxygen..."
-            builder.build_doxygen(options.build_doxygen, options.artifact_dir)
-            if options.verbosity > 1:
-                print "Done building Doxygen"
 
         if options.prep:
             if options.verbosity > 1:

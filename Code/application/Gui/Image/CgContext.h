@@ -14,6 +14,9 @@
 
 #include "glCommon.h"
 
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
+
 #include <map>
 #include <string>
 #include <vector>

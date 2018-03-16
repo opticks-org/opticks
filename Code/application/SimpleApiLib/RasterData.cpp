@@ -27,6 +27,8 @@
 
 #include <vector>
 
+#include <string.h>
+
 namespace
 {
    template<typename T>

@@ -80,7 +80,7 @@ vector<ImportDescriptor*> SampleHdf4Importer::getImportDescriptors(const string&
                      pFileDescriptor->setFilename(filename);
 
                      Hdf4DatasetResource pDataHandle(*pFile, pDataset->getName().c_str());
-                     int32 dimSizes[MAX_VAR_DIMS] = {0};
+                     int32 dimSizes[H4_MAX_VAR_DIMS] = {0};
                      if (pDataHandle != NULL && *pDataHandle != FAIL)
                      {
                         pFileDescriptor->setDatasetLocation(pDataset->getName());

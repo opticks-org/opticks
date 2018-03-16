@@ -26,6 +26,8 @@
 #include "RasterFileDescriptor.h"
 #include "Service.h"
 
+#include <string.h>
+
 using namespace HdfUtilities;
 using namespace std;
 

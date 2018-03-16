@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <Qt3Support/Q3MimeSourceFactory>
+//#include <Qt3Support/Q3MimeSourceFactory>
 #include <QtGui/QBitmap>
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
@@ -70,7 +70,7 @@ WizardGraphicsItem::WizardGraphicsItem(WizardItem* pItem, QGraphicsItem* pParent
 
          // Store a pixmap for the wizard node to use in the tool tip
          QPixmap nodePix = getNodePixmap(nodeType);
-         Q3MimeSourceFactory::defaultFactory()->setPixmap(nodeType, nodePix);
+         //Q3MimeSourceFactory::defaultFactory()->setPixmap(nodeType, nodePix);
       }
    }
 
@@ -699,10 +699,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    if (originalType.isEmpty() == false)
    {
       QString imageType = originalType;
-      if (Q3MimeSourceFactory::defaultFactory()->data(originalType) == NULL)
-      {
-         imageType = "Unknown";
-      }
+      //if (Q3MimeSourceFactory::defaultFactory()->data(originalType) == NULL)
+      //{
+      //   imageType = "Unknown";
+      //}
 
       imageType = Qt::escape(imageType);
       originalType = Qt::escape(originalType);
@@ -714,10 +714,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    if (type.isEmpty() == false)
    {
       QString imageType = type;
-      if (Q3MimeSourceFactory::defaultFactory()->data(type) == NULL)
-      {
-         imageType = "Unknown";
-      }
+      //if (Q3MimeSourceFactory::defaultFactory()->data(type) == NULL)
+      //{
+      //   imageType = "Unknown";
+      //}
 
       imageType = Qt::escape(imageType);
       type = Qt::escape(type);
@@ -734,10 +734,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       if (validType.isEmpty() == false)
       {
          QString imageType = validType;
-         if (Q3MimeSourceFactory::defaultFactory()->data(validType) == NULL)
-         {
-            imageType = "Unknown";
-         }
+         //if (Q3MimeSourceFactory::defaultFactory()->data(validType) == NULL)
+         //{
+         //   imageType = "Unknown";
+         //}
 
          imageType = Qt::escape(imageType);
          validType = Qt::escape(validType);

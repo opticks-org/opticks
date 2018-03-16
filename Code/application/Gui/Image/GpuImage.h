@@ -15,6 +15,9 @@
 #include "glCommon.h"
 #include "TypesFile.h"
 
+#include <Cg/cg.h>
+#include <Cg/cgGL.h>
+
 #include <vector>
 
 class BadValues;

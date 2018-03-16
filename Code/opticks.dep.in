@@ -1,0 +1,8 @@
+!depV1
+{
+    deployment:
+    {
+        AppHomePath: @APP_HOME_PATH@,
+        UserConfigPath: @USER_CONFIG_PATH@
+    }
+}

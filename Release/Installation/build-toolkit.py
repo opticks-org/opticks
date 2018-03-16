@@ -138,7 +138,7 @@ def copy_windows_build(opticks_code_dir, sdk_dest_dir,
         mode = "debug"
     else:
         mode = "release"
-    binaries_dir = join("Build", "Binaries-%s-%s" % (arch, mode))
+    binaries_dir = join("build/Binaries")
 
     executables = ["Opticks.exe", "OpticksBatch.exe", "SimpleApiLib.dll"]
     for the_exec in executables:
@@ -311,23 +311,9 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         print "Done exporting dependencies"
 
     ##### Run Doxygen to generate the html documentation
-    if verbosity > 1:
-        print "Generating Doxygen..."
-    build_doxygen_args = ["python", join(os.path.abspath(opticks_code_dir),
-        "build.py"),
-        "--build-doxygen=all",
-        "-d", opticks_dependencies_dir]
-    if is_windows():
-        build_doxygen_args.append("--ms-help-compiler=%s" % (ms_help_compiler))
-    if verbosity == 2:
-        build_doxygen_args.append("-v")
-    if verbosity == 0:
-        build_doxygen_args.append("-q")
-    retcode = execute_process(build_doxygen_args)
-    if retcode != 0:
-        raise ScriptException("Error occurred while building "\
-            "on-line help")
-    s_doxygen_output = join(opticks_code_dir, "Build", "DoxygenOutput")
+    s_doxygen_output = join(opticks_code_dir, "build-release", "DoxygenOutput")
+    if not os.path.exists(s_doxygen_output):
+       raise ScriptException("Doxygen has not been built. Please run \"make ApiDocs\" in the \"build_release\" folder or build the \"ApiDocs\" project in Release mode.")
     d_doc_output = join(out_dir, "doc")
     cp_dir2(s_doxygen_output, d_doc_output, "html", recursive_copy = True)
     if is_windows():
@@ -360,14 +346,14 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
                 win_debug_code_dir, static_libs,plugins, True, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "32")
-            bin_dir = join(out_dir, "Build", "Binaries-win32-debug", "Bin")
+            bin_dir = join(out_dir, "build", "Binaries", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
         if release32:
             copy_windows_build(opticks_code_dir, out_dir,
                 win_debug_code_dir, static_libs, plugins, True, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "32")
-            bin_dir = join(out_dir, "Build", "Binaries-win32-release", "Bin")
+            bin_dir = join(out_dir, "build", "Binaries", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
 
         #Win64 Build
@@ -376,26 +362,27 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
                 win_debug_code_dir, static_libs, plugins, False, True, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", True, "64")
-            bin_dir = join(out_dir, "Build", "Binaries-x64-debug", "Bin")
+            bin_dir = join(out_dir, "build", "Binaries", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
         if release64:
             copy_windows_build(opticks_code_dir, out_dir,
                 win_debug_code_dir, static_libs, plugins, False, False, verbosity)
             dp_list = commonutils.get_dependencies(opticks_dependencies_dir,
                 "Windows", False, "64")
-            bin_dir = join(out_dir, "Build", "Binaries-x64-release", "Bin")
+            bin_dir = join(out_dir, "build", "Binaries", "Bin")
             commonutils.copy_dependencies(dp_list, bin_dir)
     else:
         cp_file2(s_app, d_app, join("PlugIns", "src"), "SConstruct")
         if sys.platform == "linux2":
-            binaries_dir = join("Build", "Binaries-linux-x86_64-release")
+            binaries_dir = join("build-release", "Binaries")
         else:
-            binaries_dir = join("Build", "Binaries-solaris-sparc-release")
+            binaries_dir = join("build-release", "Binaries")
         lib_dir = join(binaries_dir,"Lib")
         for the_lib in static_libs:
-            cp_file2(opticks_code_dir, out_dir, lib_dir, "lib%s.a" % (the_lib))
-        cp_file2(opticks_code_dir, out_dir, lib_dir, "libSimpleApiLib.so")
-        cp_file2(opticks_code_dir, out_dir, lib_dir, "ModuleShell.os")
+            cp_file2(opticks_code_dir, out_dir, lib_dir, "libopticks-%s.a" % (the_lib.lower()))
+            os.symlink(join(out_dir, lib_dir, "libopticks-%s.a" % (the_lib.lower())), join(out_dir, lib_dir, "lib%s.a" % (the_lib)))
+        #cp_file2(opticks_code_dir, out_dir, lib_dir, "libSimpleApiLib.so")
+        #cp_file2(opticks_code_dir, out_dir, lib_dir, "ModuleShell.os")
 
         for the_plugin in sample_plugins:
             cp_file2(opticks_code_dir, out_dir,
