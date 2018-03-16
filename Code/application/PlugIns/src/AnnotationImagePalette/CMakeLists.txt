@@ -26,7 +26,9 @@ target_link_libraries(AnnotationImagePalette
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS AnnotationImagePalette RUNTIME DESTINATION PlugIns)
+    install(TARGETS AnnotationImagePalette RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS AnnotationImagePalette RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS AnnotationImagePalette LIBRARY DESTINATION PlugIns)
+    install(TARGETS AnnotationImagePalette LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS AnnotationImagePalette LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

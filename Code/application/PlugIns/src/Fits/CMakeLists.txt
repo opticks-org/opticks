@@ -19,7 +19,9 @@ target_link_libraries(Fits
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Fits RUNTIME DESTINATION PlugIns)
+    install(TARGETS Fits RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Fits RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Fits LIBRARY DESTINATION PlugIns)
+    install(TARGETS Fits LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Fits LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

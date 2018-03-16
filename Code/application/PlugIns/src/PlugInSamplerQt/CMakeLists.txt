@@ -102,7 +102,9 @@ target_link_libraries(PlugInSamplerQt
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS PlugInSamplerQt RUNTIME DESTINATION PlugIns)
+    install(TARGETS PlugInSamplerQt RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS PlugInSamplerQt RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS PlugInSamplerQt LIBRARY DESTINATION PlugIns)
+    install(TARGETS PlugInSamplerQt LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS PlugInSamplerQt LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

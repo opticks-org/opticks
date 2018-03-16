@@ -102,9 +102,17 @@ configure_file(cmake/Templates/BuildRevision.h "${Opticks_SOURCE_DIR}/Utilities"
 
 # runtime configurations
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-configure_file(cmake/Templates/Opticks.vcxproj.user "${CMAKE_BINARY_DIR}")
-configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
-configure_file(cmake/Templates/opticks-release.dep "${CMAKE_BINARY_DIR}/bin")
+if(WIN32)
+    configure_file(cmake/Templates/Opticks.vcxproj.user "${CMAKE_BINARY_DIR}")
+    configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
+    configure_file(cmake/Templates/opticks-debug.dep "${CMAKE_BINARY_DIR}/bin")
+    install(FILES "${CMAKE_BINARY_DIR}/bin/opticks-debug.dep" DESTINATION bin CONFIGURATIONS Debug)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
+else()
+    configure_file(cmake/Templates/opticks-debug.dep "${CMAKE_BINARY_DIR}/bin/opticks.dep")
+    install(FILES "${CMAKE_BINARY_DIR}/bin/opticks.dep" DESTINATION bin CONFIGURATIONS Debug RENAME opticks-debug.dep)
+endif()
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/ApplicationUserSettings")
 
 #----- Required packages -----
@@ -188,8 +196,8 @@ add_subdirectory(ApiDocs)
 
 #----- Adding public libraries -----
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns/release")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns/debug")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns")
 set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/lib")
@@ -210,8 +218,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/LibPrivate")
 
 #for windows, .dll go into "PlugIns" and .lib go into "LibPrivate"
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns/release")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/PlugIns/debug")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/PlugIns")
 set(OLD_SHARED_LIBRARY_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 

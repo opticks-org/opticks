@@ -37,7 +37,9 @@ target_link_libraries(ConvolutionFilter
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS ConvolutionFilter RUNTIME DESTINATION PlugIns)
+    install(TARGETS ConvolutionFilter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ConvolutionFilter RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS ConvolutionFilter LIBRARY DESTINATION PlugIns)
+    install(TARGETS ConvolutionFilter LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ConvolutionFilter LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

@@ -17,7 +17,9 @@ target_link_libraries(Generic
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Generic RUNTIME DESTINATION PlugIns)
+    install(TARGETS Generic RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Generic RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Generic LIBRARY DESTINATION PlugIns)
+    install(TARGETS Generic LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Generic LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

@@ -17,7 +17,9 @@ target_link_libraries(ImageComparison
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ImageComparison RUNTIME DESTINATION PlugIns)
+    install(TARGETS ImageComparison RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ImageComparison RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS ImageComparison LIBRARY DESTINATION PlugIns)
+    install(TARGETS ImageComparison LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ImageComparison LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

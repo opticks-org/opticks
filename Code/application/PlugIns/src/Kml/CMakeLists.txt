@@ -33,7 +33,9 @@ target_link_libraries(Kml
     ${pme_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Kml RUNTIME DESTINATION PlugIns)
+    install(TARGETS Kml RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Kml RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Kml LIBRARY DESTINATION PlugIns)
+    install(TARGETS Kml LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Kml LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

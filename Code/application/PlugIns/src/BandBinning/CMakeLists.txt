@@ -26,7 +26,9 @@ target_link_libraries(BandBinning
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS BandBinning RUNTIME DESTINATION PlugIns)
+    install(TARGETS BandBinning RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS BandBinning RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS BandBinning LIBRARY DESTINATION PlugIns)
+    install(TARGETS BandBinning LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS BandBinning LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

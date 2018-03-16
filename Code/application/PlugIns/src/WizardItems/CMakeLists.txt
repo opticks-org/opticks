@@ -79,7 +79,9 @@ target_link_libraries(WizardItems
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS WizardItems RUNTIME DESTINATION PlugIns)
+    install(TARGETS WizardItems RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS WizardItems RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS WizardItems LIBRARY DESTINATION PlugIns)
+    install(TARGETS WizardItems LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS WizardItems LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

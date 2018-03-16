@@ -16,7 +16,9 @@ target_link_libraries(LegacyModule
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS LegacyModule RUNTIME DESTINATION PlugIns)
+    install(TARGETS LegacyModule RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS LegacyModule RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS LegacyModule LIBRARY DESTINATION PlugIns)
+    install(TARGETS LegacyModule LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS LegacyModule LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

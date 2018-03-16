@@ -54,7 +54,9 @@ target_link_libraries(Ice
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Ice RUNTIME DESTINATION PlugIns)
+    install(TARGETS Ice RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Ice RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Ice LIBRARY DESTINATION PlugIns)
+    install(TARGETS Ice LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Ice LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

@@ -34,7 +34,9 @@ target_link_libraries(Georeference
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Georeference RUNTIME DESTINATION PlugIns)
+    install(TARGETS Georeference RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Georeference RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Georeference LIBRARY DESTINATION PlugIns)
+    install(TARGETS Georeference LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Georeference LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

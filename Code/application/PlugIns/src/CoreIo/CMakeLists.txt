@@ -29,7 +29,9 @@ target_link_libraries(CoreIo
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS CoreIo RUNTIME DESTINATION PlugIns)
+    install(TARGETS CoreIo RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS CoreIo RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS CoreIo LIBRARY DESTINATION PlugIns)
+    install(TARGETS CoreIo LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS CoreIo LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

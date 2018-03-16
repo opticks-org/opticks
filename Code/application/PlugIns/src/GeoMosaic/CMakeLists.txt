@@ -26,7 +26,9 @@ target_link_libraries(GeoMosaic
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS GeoMosaic RUNTIME DESTINATION PlugIns)
+    install(TARGETS GeoMosaic RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GeoMosaic RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS GeoMosaic LIBRARY DESTINATION PlugIns)
+    install(TARGETS GeoMosaic LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GeoMosaic LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

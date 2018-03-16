@@ -22,7 +22,9 @@ target_link_libraries(SecondMoment
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS SecondMoment RUNTIME DESTINATION PlugIns)
+    install(TARGETS SecondMoment RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS SecondMoment RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS SecondMoment LIBRARY DESTINATION PlugIns)
+    install(TARGETS SecondMoment LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS SecondMoment LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

@@ -25,7 +25,9 @@ target_link_libraries(Tutorial
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Tutorial RUNTIME DESTINATION PlugIns)
+    install(TARGETS Tutorial RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Tutorial RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Tutorial LIBRARY DESTINATION PlugIns)
+    install(TARGETS Tutorial LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Tutorial LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

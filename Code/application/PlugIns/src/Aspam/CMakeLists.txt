@@ -33,7 +33,9 @@ target_link_libraries(Aspam
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Aspam RUNTIME DESTINATION PlugIns)
+    install(TARGETS Aspam RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Aspam RUNTIME DESTINATION "PlugIns/debug" CONFIGURATIONS Debug)
 else()
-    install(TARGETS Aspam LIBRARY DESTINATION PlugIns)
+    install(TARGETS Aspam LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Aspam LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

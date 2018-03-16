@@ -30,7 +30,9 @@ target_link_libraries(Pca
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Pca RUNTIME DESTINATION PlugIns)
+    install(TARGETS Pca RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Pca RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Pca LIBRARY DESTINATION PlugIns)
+    install(TARGETS Pca LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Pca LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

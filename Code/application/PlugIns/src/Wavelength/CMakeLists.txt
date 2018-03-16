@@ -30,7 +30,9 @@ target_link_libraries(Wavelength
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Wavelength RUNTIME DESTINATION PlugIns)
+    install(TARGETS Wavelength RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Wavelength RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Wavelength LIBRARY DESTINATION PlugIns)
+    install(TARGETS Wavelength LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Wavelength LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

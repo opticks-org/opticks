@@ -27,7 +27,9 @@ target_link_libraries(ObjectFinding
     ${OpenCv_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ObjectFinding RUNTIME DESTINATION PlugIns)
+    install(TARGETS ObjectFinding RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ObjectFinding RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS ObjectFinding LIBRARY DESTINATION PlugIns)
+    install(TARGETS ObjectFinding LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ObjectFinding LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

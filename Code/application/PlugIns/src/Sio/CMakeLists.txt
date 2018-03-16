@@ -14,7 +14,9 @@ target_link_libraries(Sio
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Sio RUNTIME DESTINATION PlugIns)
+    install(TARGETS Sio RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Sio RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Sio LIBRARY DESTINATION PlugIns)
+    install(TARGETS Sio LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Sio LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

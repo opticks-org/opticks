@@ -27,7 +27,9 @@ target_link_libraries(Dted
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Dted RUNTIME DESTINATION PlugIns)
+    install(TARGETS Dted RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Dted RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Dted LIBRARY DESTINATION PlugIns)
+    install(TARGETS Dted LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Dted LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

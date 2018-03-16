@@ -22,7 +22,9 @@ target_link_libraries(Hdf
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS Hdf RUNTIME DESTINATION PlugIns)
+    install(TARGETS Hdf RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Hdf RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Hdf LIBRARY DESTINATION PlugIns)
+    install(TARGETS Hdf LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Hdf LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

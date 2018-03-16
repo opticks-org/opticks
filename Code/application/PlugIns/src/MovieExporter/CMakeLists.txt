@@ -46,7 +46,9 @@ target_link_libraries(MovieExporter
     ${avcodec_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns)
+    install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS MovieExporter LIBRARY DESTINATION PlugIns)
+    install(TARGETS MovieExporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS MovieExporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

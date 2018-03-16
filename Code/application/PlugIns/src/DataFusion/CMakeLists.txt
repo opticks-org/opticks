@@ -46,7 +46,9 @@ target_link_libraries(DataFusion
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS DataFusion RUNTIME DESTINATION PlugIns)
+    install(TARGETS DataFusion RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS DataFusion RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS DataFusion LIBRARY DESTINATION PlugIns)
+    install(TARGETS DataFusion LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS DataFusion LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

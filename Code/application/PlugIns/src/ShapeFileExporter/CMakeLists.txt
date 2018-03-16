@@ -33,7 +33,9 @@ target_link_libraries(ShapeFileExporter
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS ShapeFileExporter RUNTIME DESTINATION PlugIns)
+    install(TARGETS ShapeFileExporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ShapeFileExporter RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS ShapeFileExporter LIBRARY DESTINATION PlugIns)
+    install(TARGETS ShapeFileExporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS ShapeFileExporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

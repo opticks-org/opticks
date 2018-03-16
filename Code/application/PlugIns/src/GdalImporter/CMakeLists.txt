@@ -20,7 +20,9 @@ target_link_libraries(GdalImporter
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)
-    install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns)
+    install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS GdalImporter LIBRARY DESTINATION PlugIns)
+    install(TARGETS GdalImporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GdalImporter LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

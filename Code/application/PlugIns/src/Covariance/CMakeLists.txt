@@ -25,7 +25,9 @@ target_link_libraries(Covariance
     ${Ossim_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS Covariance RUNTIME DESTINATION PlugIns)
+    install(TARGETS Covariance RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Covariance RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS Covariance LIBRARY DESTINATION PlugIns)
+    install(TARGETS Covariance LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS Covariance LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()

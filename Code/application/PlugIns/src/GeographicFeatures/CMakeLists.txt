@@ -49,7 +49,9 @@ target_link_libraries(GeographicFeatures
     ${Xerces_LIBRARIES}
 )
 if(WIN32)
-    install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns)
+    install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
-    install(TARGETS GeographicFeatures LIBRARY DESTINATION PlugIns)
+    install(TARGETS GeographicFeatures LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    install(TARGETS GeographicFeatures LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
 endif()
