@@ -1,0 +1,9 @@
+*.ncb
+*.opensdf
+*.sdf
+*.suo
+*.user
+.parasoft.dat
+.sconsign.dblite
+Ankh.NoLoad
+ipch

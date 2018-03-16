@@ -1,0 +1,7 @@
+.sconsign
+*.user
+*.suo
+*.ncb
+Messages_ENU.bin
+EventMessages.h
+EventMessages.rc

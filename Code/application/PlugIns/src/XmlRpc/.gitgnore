@@ -1,0 +1,4 @@
+.sconsign
+*.user
+*.suo
+*.ncb
