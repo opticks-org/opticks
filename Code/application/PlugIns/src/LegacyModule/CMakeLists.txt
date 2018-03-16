@@ -15,4 +15,4 @@ target_link_libraries(LegacyModule
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS LegacyModule RUNTIME DESTINATION PlugIns)
+install(TARGETS LegacyModule RUNTIME LIBRARY DESTINATION PlugIns)

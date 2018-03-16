@@ -21,4 +21,4 @@ target_link_libraries(Hdf
     ${Hdf5_LIBRARIES}
     ${PTHREADS_LIBRARY}
 )
-install(TARGETS Hdf RUNTIME DESTINATION PlugIns)
+install(TARGETS Hdf RUNTIME LIBRARY DESTINATION PlugIns)

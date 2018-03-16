@@ -29,4 +29,4 @@ target_link_libraries(Wavelength
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Wavelength RUNTIME DESTINATION PlugIns)
+install(TARGETS Wavelength RUNTIME LIBRARY DESTINATION PlugIns)

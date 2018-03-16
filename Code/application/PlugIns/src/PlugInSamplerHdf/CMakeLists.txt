@@ -17,4 +17,4 @@ target_link_libraries(PlugInSamplerHdf
     ${Xerces_LIBRARIES}
     ${Hdf4_LIBRARIES}
 )
-install(TARGETS PlugInSamplerHdf RUNTIME DESTINATION PlugIns)
+install(TARGETS PlugInSamplerHdf RUNTIME LIBRARY DESTINATION PlugIns)

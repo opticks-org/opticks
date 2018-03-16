@@ -88,4 +88,4 @@ if(OpenJpeg_FOUND)
     target_link_libraries(Pictures
         ${OpenJpeg_LIBRARIES})
 endif()
-install(TARGETS Pictures RUNTIME DESTINATION PlugIns)
+install(TARGETS Pictures RUNTIME LIBRARY DESTINATION PlugIns)

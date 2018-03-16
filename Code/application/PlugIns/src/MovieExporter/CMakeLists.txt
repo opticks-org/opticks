@@ -45,4 +45,4 @@ target_link_libraries(MovieExporter
     ${avformat_LIBRARIES}
     ${avcodec_LIBRARIES}
 )
-install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns)
+install(TARGETS MovieExporter RUNTIME LIBRARY DESTINATION PlugIns)

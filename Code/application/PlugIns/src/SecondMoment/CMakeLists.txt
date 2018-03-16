@@ -21,4 +21,4 @@ target_link_libraries(SecondMoment
     ${Ossim_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS SecondMoment RUNTIME DESTINATION PlugIns)
+install(TARGETS SecondMoment RUNTIME LIBRARY DESTINATION PlugIns)

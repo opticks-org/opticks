@@ -45,4 +45,4 @@ target_link_libraries(DataFusion
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS DataFusion RUNTIME DESTINATION PlugIns)
+install(TARGETS DataFusion RUNTIME LIBRARY DESTINATION PlugIns)

@@ -78,4 +78,4 @@ target_link_libraries(WizardItems
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS WizardItems RUNTIME DESTINATION PlugIns)
+install(TARGETS WizardItems RUNTIME LIBRARY DESTINATION PlugIns)

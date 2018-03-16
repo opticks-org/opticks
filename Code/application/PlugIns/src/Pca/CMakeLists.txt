@@ -29,4 +29,4 @@ target_link_libraries(Pca
     ${Ossim_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Pca RUNTIME DESTINATION PlugIns)
+install(TARGETS Pca RUNTIME LIBRARY DESTINATION PlugIns)

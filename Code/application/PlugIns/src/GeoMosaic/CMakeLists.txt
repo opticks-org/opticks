@@ -25,4 +25,4 @@ target_link_libraries(GeoMosaic
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS GeoMosaic RUNTIME DESTINATION PlugIns)
+install(TARGETS GeoMosaic RUNTIME LIBRARY DESTINATION PlugIns)

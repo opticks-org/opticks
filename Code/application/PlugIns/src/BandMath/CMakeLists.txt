@@ -26,4 +26,4 @@ target_link_libraries(BandMath
     ${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS BandMath RUNTIME DESTINATION PlugIns)
+install(TARGETS BandMath RUNTIME LIBRARY DESTINATION PlugIns)

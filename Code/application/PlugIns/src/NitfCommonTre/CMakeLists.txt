@@ -89,4 +89,4 @@ if(MSVC)
     set_target_properties(NitfCommonTre PROPERTIES
         LINK_FLAGS "/ignore:4006 /force:multiple")
 endif()
-install(TARGETS NitfCommonTre RUNTIME DESTINATION PlugIns)
+install(TARGETS NitfCommonTre RUNTIME LIBRARY DESTINATION PlugIns)

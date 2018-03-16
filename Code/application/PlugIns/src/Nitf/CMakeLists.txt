@@ -47,4 +47,4 @@ if(MSVC)
     set_target_properties(Nitf PROPERTIES
         LINK_FLAGS "/ignore:4006 /force:multiple")
 endif()
-install(TARGETS Nitf RUNTIME DESTINATION PlugIns)
+install(TARGETS Nitf RUNTIME LIBRARY DESTINATION PlugIns)

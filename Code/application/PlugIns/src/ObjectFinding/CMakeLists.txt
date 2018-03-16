@@ -26,4 +26,4 @@ target_link_libraries(ObjectFinding
     ${Xerces_LIBRARIES}
     ${OpenCv_LIBRARIES}
 )
-install(TARGETS ObjectFinding RUNTIME DESTINATION PlugIns)
+install(TARGETS ObjectFinding RUNTIME LIBRARY DESTINATION PlugIns)

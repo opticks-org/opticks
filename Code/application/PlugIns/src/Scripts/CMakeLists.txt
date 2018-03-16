@@ -14,4 +14,4 @@ target_link_libraries(Scripts
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Scripts RUNTIME DESTINATION PlugIns)
+install(TARGETS Scripts RUNTIME LIBRARY DESTINATION PlugIns)

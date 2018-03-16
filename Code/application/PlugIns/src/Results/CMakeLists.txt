@@ -22,4 +22,4 @@ target_link_libraries(Results
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )
-install(TARGETS Results RUNTIME DESTINATION PlugIns)
+install(TARGETS Results RUNTIME LIBRARY DESTINATION PlugIns)
