@@ -35,7 +35,7 @@ if(OpenCollada_FOUND)
     install(TARGETS Collada RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)
 else()
     install(TARGETS Collada LIBRARY DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    install(TARGETS Collada LIBRARY DESTINATION PlugIns CONFIGURATIONS Debug)
+    install(TARGETS Collada LIBRARY DESTINATION "PlugIns/debug" CONFIGURATIONS Debug)
 endif()
 
 endif()
