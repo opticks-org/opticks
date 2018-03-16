@@ -4,6 +4,8 @@ set (HEADER_FILES
     GeoTIFFImporter.h
     GeoTiffPage.h
     GeoTiffPager.h
+    Jpeg2000Exporter.h
+    Jpeg2000Utilities.h
     JpegDetails.h
     JpegExportOptionsWidget.h
     PicturesExporter.h
@@ -21,6 +23,8 @@ set (SOURCE_FILES
     GeoTIFFImporter.cpp
     GeoTiffPage.cpp
     GeoTiffPager.cpp
+    Jpeg2000Exporter.cpp
+    Jpeg2000Utilities.cpp
     JpegDetails.cpp
     JpegExportOptionsWidget.cpp
     ModuleManager.cpp

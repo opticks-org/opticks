@@ -7,6 +7,11 @@ if(DEFINED CMAKE_BUILD_TYPE)
 ELSE()
    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. options are: None, Debug, Release, RelWithDebInfo, MinSizeRel")
 ENDIF()
+if(CMAKE_INSTALL_PREFIX)
+   set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "Location to install Opticks" FORCE)
+else()
+   set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/../install CACHE PATH "Location to install Opticks" FORCE)
+endif()
 
 project (Opticks)
 
@@ -354,6 +359,7 @@ set(INTERFACE_HEADER_FILES
     Interfaces/Arrow.h
     Interfaces/ArrowObject.h
     Interfaces/Axis.h
+    Interfaces/BadValues.h
     Interfaces/BitMask.h
     Interfaces/BitMaskObject.h
     Interfaces/Blob.h
@@ -370,6 +376,7 @@ set(INTERFACE_HEADER_FILES
     Interfaces/ContextMenuActions.h
     Interfaces/Curve.h
     Interfaces/CurveCollection.h
+    Interfaces/CustomLayer.h
     Interfaces/DataAccessor.h
     Interfaces/DataAccessorImpl.h
     Interfaces/DataDescriptor.h
@@ -401,6 +408,7 @@ set(INTERFACE_HEADER_FILES
     Interfaces/GcpLayer.h
     Interfaces/GcpList.h
     Interfaces/Georeference.h
+    Interfaces/GeoreferenceDescriptor.h
     Interfaces/GpuProgramDescriptor.h
     Interfaces/GraphicElement.h
     Interfaces/GraphicGroup.h
@@ -487,6 +495,8 @@ set(INTERFACE_HEADER_FILES
     Interfaces/SessionManager.h
     Interfaces/SettableSessionItem.h
     Interfaces/Signature.h
+    Interfaces/SignatureDataDescriptor.h
+    Interfaces/SignatureFileDescriptor.h
     Interfaces/SignatureLibrary.h
     Interfaces/SignaturePlot.h
     Interfaces/SignatureSet.h

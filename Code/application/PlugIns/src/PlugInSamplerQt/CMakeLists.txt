@@ -1,5 +1,7 @@
 set (HEADER_FILES
     CloseNotificationTest.h
+    CustomLayerDrawObject.h
+    CustomLayerPlugIn.h
     DataPlotterPlugIn.h
     Demo.h
     DemoAlgorithm.h
@@ -23,6 +25,8 @@ set (SOURCE_FILES
     AnimationTest.cpp
     AnimationTimingTest.cpp
     CloseNotificationTest.cpp
+    CustomLayerDrawObject.cpp
+    CustomLayerPlugIn.cpp
     DataPlotterDlg.cpp
     DataPlotterPlugIn.cpp
     Demo.cpp

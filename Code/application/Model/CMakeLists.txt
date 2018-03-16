@@ -44,6 +44,10 @@ set (HEADER_FILES
     RasterFileDescriptorAdapter.h
     RasterFileDescriptorImp.h
     SignatureAdapter.h
+    SignatureDataDescriptorAdapter.h
+    SignatureDataDescriptorImp.h
+    SignatureFileDescriptorAdapter.h
+    SignatureFileDescriptorImp.h
     SignatureImp.h
     SignatureLibraryAdapter.h
     SignatureLibraryImp.h
@@ -52,6 +56,7 @@ set (HEADER_FILES
     StatisticsImp.h
     TiePointListAdapter.h
     TiePointListImp.h
+    UnitsAdapter.h
     UnitsImp.h
 ) 
 set (SOURCE_FILES
@@ -100,6 +105,10 @@ set (SOURCE_FILES
     RasterFileDescriptorAdapter.cpp
     RasterFileDescriptorImp.cpp
     SignatureAdapter.cpp
+    SignatureDataDescriptorAdapter.cpp
+    SignatureDataDescriptorImp.cpp
+    SignatureFileDescriptorAdapter.cpp
+    SignatureFileDescriptorImp.cpp
     SignatureImp.cpp
     SignatureLibraryAdapter.cpp
     SignatureLibraryImp.cpp
@@ -108,6 +117,7 @@ set (SOURCE_FILES
     StatisticsImp.cpp
     TiePointListAdapter.cpp
     TiePointListImp.cpp
+    UnitsAdapter.cpp
     UnitsImp.cpp
 ) 
 if(ONE_OPTICKS_LIB)

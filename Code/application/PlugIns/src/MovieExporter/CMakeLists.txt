@@ -1,6 +1,7 @@
 set (HEADER_FILES
     AdvancedOptionsWidget.h
     AviExporter.h
+    MjpegExporter.h
     MovieExporter.h
     MovieExportOptionsWidget.h
     Mpeg1Exporter.h
@@ -11,6 +12,7 @@ set (SOURCE_FILES
     AviExporter.cpp
     BitrateWidget.cpp
     FramerateWidget.cpp
+    MjpegExporter.cpp
     ModuleManager.cpp
     MovieExporter.cpp
     MovieExportOptionsWidget.cpp

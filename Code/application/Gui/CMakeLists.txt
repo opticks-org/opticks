@@ -79,7 +79,7 @@ set (HEADER_FILES
     Undo/TiePointLayerUndo.h
     Undo/TiePointListUndo.h
     Undo/ViewUndo.h
-    BandBadValuesValidator.h
+    BadValuesDlg.h
     DynamicObjectItemModel.h
     GuiFunctors.h
     PropertiesAoiLayer.h
@@ -170,8 +170,7 @@ set (SOURCE_FILES
     AoiToolBarImp.cpp
     ApplicationWindow.cpp
     BackgroundPluginWindow.cpp
-    BandBadValuesDlg.cpp
-    BandBadValuesValidator.cpp
+    BadValuesDlg.cpp
     BatchEditorDlg.cpp
     BatchExportDlg.cpp
     BrightnessToolBar.cpp
@@ -234,6 +233,7 @@ set (SOURCE_FILES
     PropertiesFileDescriptor.cpp
     PropertiesGcpLayer.cpp
     PropertiesGraphicObject.cpp
+    PropertiesGeoreference.cpp
     PropertiesHistogramPlot.cpp
     PropertiesLatLonLayer.cpp
     PropertiesMeasurementLayer.cpp
@@ -293,7 +293,7 @@ set (MOC_HEADERS
     AoiToolBarImp.h
     ApplicationWindow.h
     BackgroundPluginWindow.h
-    BandBadValuesDlg.h
+    BadValuesDlg.h
     BatchEditorDlg.h
     BatchExportDlg.h
     BrightnessToolBar.h
@@ -349,6 +349,7 @@ set (MOC_HEADERS
     ProgressDlg.h
     PropertiesAnnotationLayer.h
     PropertiesDlg.h
+    PropertiesGeoreference.h
     PropertiesGraphicObject.h
     PropertiesLatLonLayer.h
     PropertiesMeasurementLayer.h

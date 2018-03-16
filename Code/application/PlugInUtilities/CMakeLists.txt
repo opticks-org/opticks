@@ -11,11 +11,15 @@ set (HEADER_FILES
     Interfaces/DataVariant.h
     Interfaces/DataVariantAnyData.h
     Interfaces/DataVariantValidator.h
+    Interfaces/DrawObject.h
     Interfaces/Endian.h
     Interfaces/FileResource.h
+    Interfaces/GeoAlgorithms.h
+    Interfaces/GeocoordTypeComboBox.h
     Interfaces/GeoPoint.h
     Interfaces/GlContextSave.h
     Interfaces/GlTextureResource.h
+    Interfaces/InterpolationComboBox.h
     Interfaces/InterpreterUtilities.h
     Interfaces/IntValidator.h
     Interfaces/MatrixFunctions.h
@@ -56,7 +60,7 @@ set (HEADER_FILES
     pthreads-wrapper/thread_signal.h
     AppVersion.h
     FilterWidget.h
-    GeoAlgorithms.h
+    GeoreferenceWidget.h
     MathUtil.h
     Mgrs.h
     MgrsDatum.h
@@ -67,7 +71,6 @@ set (HEADER_FILES
     SystemServices.h
     SystemServicesImp.h
 )
-#BandUtilities.h, BandUtilities.cpp - Not currently compiled
 set (SOURCE_FILES
     pthreads-wrapper/bmutex.cpp
     pthreads-wrapper/bthread.cpp
@@ -92,6 +95,7 @@ set (SOURCE_FILES
     DataVariant.cpp
     DataVariantEditor.cpp
     DmsFormatTypeComboBox.cpp
+    DrawObject.cpp
     ElidedButton.cpp
     ElidedLabel.cpp
     Endian.cpp
@@ -102,7 +106,9 @@ set (SOURCE_FILES
     FontSizeComboBox.cpp
     GcpSymbolGrid.cpp
     GeoAlgorithms.cpp
+    GeocoordTypeComboBox.cpp
     GeoPoint.cpp
+    GeoreferenceWidget.cpp
     GlContextSave.cpp
     GraphicArcWidget.cpp
     GraphicFillWidget.cpp
@@ -118,6 +124,7 @@ set (SOURCE_FILES
     GraphicViewWidget.cpp
     ImageResolutionWidget.cpp
     InfoBar.cpp
+    InterpolationComboBox.cpp
     InterpreterUtilities.cpp
     IntValidator.cpp
     LabeledSection.cpp
@@ -168,6 +175,7 @@ set (SOURCE_FILES
     WavelengthUnitsComboBox.cpp
     xmlbase.cpp
     xmlreader.cpp
+    XmlUtilities.cpp
     xmlwriter.cpp
 ) 
 #ImageHandler.cpp
@@ -185,7 +193,9 @@ set (MOC_HEADERS
     Interfaces/ElidedLabel.h
     Interfaces/FileBrowser.h
     Interfaces/FontSizeComboBox.h
+    Interfaces/GeocoordTypeComboBox.h
     Interfaces/GraphicTextWidget.h
+    Interfaces/InterpolationComboBox.h
     Interfaces/LabeledSection.h
     Interfaces/LabeledSectionGroup.h
     Interfaces/LatLonLineEdit.h
@@ -196,6 +206,7 @@ set (MOC_HEADERS
     Interfaces/SuppressibleMsgDlg.h
     Interfaces/UndoAction.h
     Interfaces/WavelengthUnitsComboBox.h
+    Interfaces/XmlUtilities.h
     ArcRegionComboBox.h
     ColorGrid.h
     ColorMenu.h
@@ -205,6 +216,7 @@ set (MOC_HEADERS
     FillStyleComboBox.h
     FloatingLabel.h
     GcpSymbolGrid.h
+    GeoreferenceWidget.h
     GraphicArcWidget.h
     GraphicFillWidget.h
     GraphicImageWidget.h

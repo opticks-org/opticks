@@ -5,6 +5,8 @@ set (HEADER_FILES
     Layer/AnnotationLayerAdapter.h
     Layer/AoiLayerAdapter.h
     Layer/ClassificationLayerAdapter.h
+    Layer/CustomLayerAdapter.h
+    Layer/CustomLayerImp.h
     Layer/GcpLayerAdapter.h
     Layer/GraphicLayerAdapter.h
     Layer/LatLonLayerAdapter.h
@@ -74,6 +76,8 @@ set (SOURCE_FILES
     Layer/AoiLayerImp.cpp
     Layer/ClassificationLayerAdapter.cpp
     Layer/ClassificationLayerImp.cpp
+    Layer/CustomLayerAdapter.cpp
+    Layer/CustomLayerImp.cpp
     Layer/GcpLayerAdapter.cpp
     Layer/GcpLayerImp.cpp
     Layer/GraphicLayerAdapter.cpp
@@ -183,6 +187,7 @@ set (MOC_HEADERS
     Layer/AnnotationLayerImp.h
     Layer/AoiLayerImp.h
     Layer/ClassificationLayerImp.h
+    Layer/CustomLayerImp.h
     Layer/GcpLayerImp.h
     Layer/GraphicLayerImp.h
     Layer/LatLonLayerImp.h

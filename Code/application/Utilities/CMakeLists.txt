@@ -1,5 +1,7 @@
 set(HEADER_FILES
     ApplicationServicesImp.h
+    BadValuesAdapter.h
+    BadValuesImp.h
     ConfigurationSettingsImp.h
     DataValueWrapper.h
     DynamicObjectAdapter.h
@@ -10,6 +12,8 @@ set(HEADER_FILES
     FileFinderImp.h
     FilenameImp.h
     GeocoordLinkFunctor.h
+    GeoreferenceDescriptorAdapter.h
+    GeoreferenceDescriptorImp.h
     ImportAgentAdapter.h
     ImportAgentImp.h
     ImportDescriptorImp.h
@@ -33,6 +37,8 @@ set(HEADER_FILES
 )
 set(SOURCE_FILES
     ApplicationServicesImp.cpp
+    BadValuesAdapter.cpp
+    BadValuesImp.cpp
     ConfigurationSettingsImp.cpp
     DataVariantFactoryImp.cpp
     DateTimeImp.cpp
@@ -42,6 +48,8 @@ set(SOURCE_FILES
     FileFinderImp.cpp
     FilenameImp.cpp
     GeocoordLinkFunctor.cpp
+    GeoreferenceDescriptorAdapter.cpp
+    GeoreferenceDescriptorImp.cpp
     ImportAgentImp.cpp
     ImportDescriptorImp.cpp
     MessageLogAdapter.cpp
