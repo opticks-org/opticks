@@ -1,0 +1,7 @@
+WixOutput
+ApiDocs
+*.pyc
+PackageOutput
+Toolkit
+.sconsign.dblite
+DEBIAN
