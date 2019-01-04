@@ -1351,3 +1351,53 @@ bool Nitf::updateSpecialMetadata(DynamicObject* pMetadata, vector<double>& cente
 
    return pWavelengths->applyToDynamicObject(pMetadata);
 }
+
+EncodingType Nitf::nitfImageTypeToEncodingType(unsigned int bitsPerPixel, const std::string& pixelValueType)
+{
+   if (bitsPerPixel <= 8)
+   {
+      if ((pixelValueType == "B") || (pixelValueType == "INT"))
+      {
+         return INT1UBYTE;
+      }
+      else if (pixelValueType == "SI")
+      {
+         return INT1SBYTE;
+      }
+   }
+   else if (bitsPerPixel <= 16)
+   {
+      if (pixelValueType == "INT")
+      {
+         return INT2UBYTES;
+      }
+      else if (pixelValueType == "SI")
+      {
+         return INT2SBYTES;
+      }
+   }
+   else if (bitsPerPixel <= 32)
+   {
+      if (pixelValueType == "R")
+      {
+         return FLT4BYTES;
+      }
+      else if (pixelValueType == "INT")
+      {
+         return INT4UBYTES;
+      }
+      else if (pixelValueType == "SI")
+      {
+         return INT4SBYTES;
+      }
+   }
+   else if (bitsPerPixel <= 64)
+   {
+      if (pixelValueType == "R")
+      {
+         return FLT8BYTES;
+      }
+   }
+
+   return EncodingType();
+}

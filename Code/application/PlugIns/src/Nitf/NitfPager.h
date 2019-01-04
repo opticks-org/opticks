@@ -13,6 +13,7 @@
 #include "CachedPager.h"
 #include "NitfResource.h"
 #include "PlugInArg.h"
+#include "TypesFile.h"
 
 #include <vector>
 
@@ -52,6 +53,10 @@ namespace Nitf
       unsigned int mSegment; // 0-based segment number
       Nitf::OssimImageHandlerResource mpImageHandler;
       Step* mpStep;
+      EncodingType mFileEncoding;
+      EncodingType mEncoding;
+      float mScaleFactor;
+      float mAdditiveFactor;
    };
 }
 
