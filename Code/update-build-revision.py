@@ -24,7 +24,7 @@ def main():
         stdout=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout = process.communicate()[0]
     if process.returncode == 0:
-        version_number = stdout.split()[0]
+        version_number = stdout.split()[0].decode()
     else:
         version_number = "NoRev"
     if existing_build_rev != version_number:
@@ -32,7 +32,7 @@ def main():
         build_rev_handle.write('#define BUILD_REVISION "%s"' % \
             (version_number))
         build_rev_handle.close()
-        print("New Build Revision # is", version_number)
+        print("New Build Revision # is %s" % (version_number,))
     else:
         print("Build Revision # %s is up-to-date" % version_number)
     return 0
