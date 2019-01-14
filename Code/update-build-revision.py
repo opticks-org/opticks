@@ -38,6 +38,6 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     retcode = main()
     sys.exit(retcode)
