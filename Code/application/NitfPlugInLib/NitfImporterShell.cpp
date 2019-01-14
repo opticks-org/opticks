@@ -560,12 +560,25 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
       return NULL;
    }
 
+   string ftitle = pFileHeader->getTitle().trim();
+   string iid1 = pImageSubheader->getImageId().trim();
    stringstream imageNameStream;
-   imageNameStream << "I" << imageSegment + 1;
+   if (ftitle.empty())
+   {
+      imageNameStream << filename;
+   }
+   else
+   {
+      imageNameStream << ftitle;
+   }
+   imageNameStream << " [" << imageSegment + 1 << "]";
+   if (!iid1.empty())
+   {
+      imageNameStream << " " << iid1;
+   }
    string imageName = imageNameStream.str();
 
-   ImportDescriptorResource pImportDescriptor(filename + "-" + imageName,
-      TypeConverter::toString<RasterElement>(), NULL);
+   ImportDescriptorResource pImportDescriptor(imageName, TypeConverter::toString<RasterElement>(), NULL);
    VERIFYRV(pImportDescriptor.get() != NULL, NULL);
    pImportDescriptor->setImported(pImageSubheader->getRepresentation() != "NODISPLY");
 
