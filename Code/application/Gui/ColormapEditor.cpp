@@ -615,10 +615,10 @@ std::vector<ColorType> ColormapEditor::makeCubeHelix() const
        * Bulletin of the Astronomical Society of India, 39, 289.
        **/
       float angle = 2 * 3.14159 * (start / 3. + 1 + rots * frac);
-      float c_angle = std::cosf(angle);
-      float s_angle = std::sinf(angle);
+      float c_angle = std::cos(angle);
+      float s_angle = std::sin(angle);
 
-      frac = std::powf(frac, gamma);
+      frac = std::pow(frac, gamma);
       float amp = hue * frac * (1 - frac) / 2.;
 
       float r = frac + amp * (-0.14861 * c_angle + 1.78277 * s_angle);
