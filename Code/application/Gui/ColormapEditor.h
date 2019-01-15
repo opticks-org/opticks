@@ -12,7 +12,9 @@
 
 #include "ColorMap.h"
 
+#include <QtGui/QCheckBox>
 #include <QtGui/QDialog>
+#include <QtGui/QDoubleSpinBox>
 #include <QtGui/QFrame>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
@@ -20,6 +22,7 @@
 #include <QtGui/QSlider>
 #include <QtGui/QSpacerItem>
 #include <QtGui/QSpinBox>
+#include <QtGui/QTabWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QGridLayout>
 #include <string>
@@ -61,7 +64,9 @@ private:
    ColormapEditor& operator=(const ColormapEditor& rhs);
    void histogramDeleted(Subject &subject, const std::string &signal, const boost::any& v);
    ColorMap::Gradient makeGradient() const;
+   std::vector<ColorType> makeCubeHelix() const;
 
+   QTabWidget* mpTabWidget;
    QVBoxLayout* mpVboxLayout;
    QHBoxLayout* mpHboxLayout;
    QLabel* mpPrimariesLabel;
@@ -82,6 +87,12 @@ private:
    QPushButton* mpCloseButton;
    QGridLayout* mpPrimaryLayout;
    QPushButton* mpUniformButton;
+
+   QDoubleSpinBox* mpCHStart;
+   QDoubleSpinBox* mpCHRotations;
+   QDoubleSpinBox* mpCHHue;
+   QDoubleSpinBox* mpCHGamma;
+   QCheckBox* mpCHReverse;
 
    struct Primary
    {

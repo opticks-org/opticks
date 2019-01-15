@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The information in this file is
  * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
@@ -14,7 +14,10 @@
 
 #include <QtGui/QColorDialog>
 #include <QtGui/QFileDialog>
+#include <QtGui/QFormLayout>
 #include <QtGui/QMessageBox>
+
+#include <vector>
 
 using namespace std;
 
@@ -31,7 +34,12 @@ ColormapEditor::ColormapEditor(HistogramPlotImp& parent) :
 
    mHistogram.attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &ColormapEditor::histogramDeleted));
 
-   mpVboxLayout = new QVBoxLayout(this);
+   QVBoxLayout *pTopLayout = new QVBoxLayout(this);
+   mpTabWidget = new QTabWidget(this);
+   pTopLayout->addWidget(mpTabWidget);
+
+   QWidget* pGradientWidget = new QWidget();
+   mpVboxLayout = new QVBoxLayout(pGradientWidget);
    mpVboxLayout->setSpacing(6);
    mpVboxLayout->setMargin(9);
    mpVboxLayout->setObjectName("mpVboxLayout");
@@ -157,7 +165,43 @@ ColormapEditor::ColormapEditor(HistogramPlotImp& parent) :
 
    mpHboxLayout1->addWidget(mpCloseButton);
 
-   mpVboxLayout->addLayout(mpHboxLayout1);
+   pTopLayout->addLayout(mpHboxLayout1);
+
+   mpTabWidget->addTab(pGradientWidget, "Gradient");
+   
+   QWidget* pCubeHelixWidget = new QWidget();
+   QFormLayout* pCHLayout = new QFormLayout(pCubeHelixWidget);
+   
+   mpCHStart = new QDoubleSpinBox(pCubeHelixWidget);
+   mpCHStart->setSingleStep(0.1);
+   mpCHStart->setRange(0., 3.);
+   mpCHStart->setValue(0.5);
+   pCHLayout->addRow("Start Color", mpCHStart);
+
+   mpCHRotations = new QDoubleSpinBox(pCubeHelixWidget);
+   mpCHRotations->setSingleStep(0.1);
+   mpCHRotations->setRange(-15., 15.);
+   mpCHRotations->setValue(-1.5);
+   pCHLayout->addRow("Rotations", mpCHRotations);
+   
+   mpCHHue = new QDoubleSpinBox(pCubeHelixWidget);
+   mpCHHue->setSingleStep(0.1);
+   mpCHHue->setRange(0., 2.);
+   mpCHHue->setValue(1.0);
+   pCHLayout->addRow("Hue Parameter (Saturation)", mpCHHue);
+   
+   mpCHGamma = new QDoubleSpinBox(pCubeHelixWidget);
+   mpCHGamma->setSingleStep(0.1);
+   mpCHGamma->setRange(0., 3.);
+   mpCHGamma->setValue(1.0);
+   pCHLayout->addRow("Gamma Factor", mpCHGamma);
+
+   mpCHReverse = new QCheckBox(pCubeHelixWidget);
+   pCHLayout->addRow("Reverse", mpCHReverse);
+
+   mpTabWidget->addTab(pCubeHelixWidget, "Cube Helix");
+   
+   numPrimariesChanged(2);
 
    connect(mpOkButton, SIGNAL(clicked()), this, SLOT(accept()));
    connect(mpCloseButton, SIGNAL(clicked()), this, SLOT(reject()));
@@ -170,7 +214,13 @@ ColormapEditor::ColormapEditor(HistogramPlotImp& parent) :
    connect(mpLoadButton, SIGNAL(clicked()), this, SLOT(loadColormap()));
    connect(mpUniformButton, SIGNAL(clicked()), this, SLOT(distributeUniformly()));
 
-   numPrimariesChanged(2);
+   connect(mpCHStart, SIGNAL(valueChanged(double)), this, SLOT(updateColormap()));
+   connect(mpCHRotations, SIGNAL(valueChanged(double)), this, SLOT(updateColormap()));
+   connect(mpCHHue, SIGNAL(valueChanged(double)), this, SLOT(updateColormap()));
+   connect(mpCHGamma, SIGNAL(valueChanged(double)), this, SLOT(updateColormap()));
+   connect(mpCHReverse, SIGNAL(stateChanged(int)), this, SLOT(updateColormap()));
+
+   connect(mpTabWidget, SIGNAL(currentChanged(int)), this, SLOT(updateColormap()));
 }
 
 ColormapEditor::~ColormapEditor()
@@ -468,7 +518,14 @@ void ColormapEditor::updateColormap()
 {
    try
    {
-      mColormap = ColorMap("Custom", makeGradient());
+      if (mpTabWidget->currentIndex() == 0)
+      {
+         mColormap = ColorMap("Custom", makeGradient());
+      }
+      else
+      {
+         mColormap = ColorMap("Custom", makeCubeHelix());
+      }
    }
    catch (const std::runtime_error&)
    {
@@ -526,4 +583,54 @@ ColorMap::Gradient ColormapEditor::makeGradient() const
    }
 
    return gradient;
+}
+
+std::vector<ColorType> ColormapEditor::makeCubeHelix() const
+{
+   std::vector<ColorType> colors;
+   colors.reserve(256);
+
+   // start = H / 360. * 3 + 1.  (/ 120 + 1)
+   float start = mpCHStart->value();     // range 0.0-3.0
+   float rots = mpCHRotations->value();  // range infinite, but usually +/- 4.0 or so. sign is the direction
+   float hue = mpCHHue->value();         // this would be better termed as saturation, but the paper uses hue. range 0.0-2.0
+   float gamma = mpCHGamma->value();     // typical gamma factor, usually about 0.2-2.0
+
+   for (size_t i = 0; i < 256; ++i)
+   { 
+      // code works in 0.0-1.0 not 0-255
+      float frac;
+      if (mpCHReverse->isChecked())
+      {
+         frac = (255 - i) / 256.;
+      }
+      else
+      {
+         frac = i / 256.;
+      }
+      
+      /**
+       * Calculations from: Green, D. A., 2011,
+       * `A colour scheme for the display of astronomical intensity images',
+       * Bulletin of the Astronomical Society of India, 39, 289.
+       **/
+      float angle = 2 * 3.14159 * (start / 3. + 1 + rots * frac);
+      float c_angle = std::cosf(angle);
+      float s_angle = std::sinf(angle);
+
+      frac = std::powf(frac, gamma);
+      float amp = hue * frac * (1 - frac) / 2.;
+
+      float r = frac + amp * (-0.14861 * c_angle + 1.78277 * s_angle);
+      float g = frac + amp * (-0.29227 * c_angle - 0.90649 * s_angle);
+      float b = frac + amp * ( 1.97294 * c_angle);
+
+      r = std::max(std::min(r, 1.f), 0.f);
+      g = std::max(std::min(g, 1.f), 0.f);
+      b = std::max(std::min(b, 1.f), 0.f);
+
+      ColorType c(255*r, 255*g, 255*b);
+      colors.push_back(c);
+   }
+   return colors;
 }
