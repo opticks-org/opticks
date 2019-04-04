@@ -4,6 +4,8 @@ import glob
 # import the environment
 ####
 Import('env extra_obj variant_dir TOOLPATH')
+env = env.Clone()
+env.Tool('eigen3',toolpath=[TOOLPATH])
 
 ####
 # build sources

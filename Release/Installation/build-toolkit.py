@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 import os
 from os.path import join
 import os.path
@@ -313,7 +313,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     ##### Run Doxygen to generate the html documentation
     if verbosity > 1:
         print "Generating Doxygen..."
-    build_doxygen_args = ["python", join(os.path.abspath(opticks_code_dir),
+    build_doxygen_args = ["python2.7", join(os.path.abspath(opticks_code_dir),
         "build.py"),
         "--build-doxygen=all",
         "-d", opticks_dependencies_dir]
