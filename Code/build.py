@@ -77,7 +77,7 @@ class Builder:
 
     def build_doxygen(self, build, artifacts_dir):
         if self.verbosity > 1:
-            print "Generating HTML..."
+            print("Generating HTML...")
         current_app_version = self.get_current_app_version()
         doc_path = os.path.abspath(join("Build", "DoxygenOutput"))
         if os.path.exists(doc_path):
@@ -107,11 +107,11 @@ class Builder:
         if retcode != 0:
             raise ScriptException("Unable to run doxygen generation script")
         if self.verbosity > 1:
-            print "Done generating HTML"
+            print("Done generating HTML")
         if artifacts_dir is not None:
             if self.verbosity > 1:
-                print "Compressing Doxygen because --artifact-dir "\
-                    "was provided."
+                print("Compressing Doxygen because --artifact-dir "\
+                    "was provided.")
             html_path = join(doc_path, "html")
             zip_name = "doxygen.zip"
             zip_path = os.path.abspath(join(artifacts_dir, zip_name))
@@ -123,7 +123,7 @@ class Builder:
                         join(arc_dir,the_file))
             the_zip.close()
             if self.verbosity > 1:
-                print "Done compressing Doxygen"
+                print("Done compressing Doxygen")
 
     def __update_h_file(self, h_file, fields_to_replace):
         h_handle = open(h_file, "rt")
@@ -175,7 +175,7 @@ class Builder:
             return
 
         if self.verbosity > 1:
-            print "Updating app version..."
+            print("Updating app version...")
 
         # Read the app version directly from the file
         self.__update_build_revision_h()
@@ -185,11 +185,11 @@ class Builder:
                 "current app version while attempting to update "\
                 "the app version")
         if self.verbosity >= 1: \
-            print "Original version # of Opticks was", version_number
+            print("Original version # of Opticks was", version_number)
         version_number = commonutils.update_app_version(version_number,
             scheme, new_version, self.__get_build_revision_only())
         if self.verbosity >= 1:
-            print "Setting version # of Opticks to", version_number
+            print("Setting version # of Opticks to", version_number)
 
         # Update AppVersion.h
         fields_to_replace = dict()
@@ -197,36 +197,36 @@ class Builder:
         if scheme == "production":
             fields_to_replace["APP_IS_PRODUCTION_RELEASE"] = "true"
             if self.verbosity >= 1:
-                print "Making Opticks a production release"
+                print("Making Opticks a production release")
         else:
             fields_to_replace["APP_IS_PRODUCTION_RELEASE"] = "false"
             if self.verbosity >= 1:
-                print "Making Opticks a not for production release"
+                print("Making Opticks a not for production release")
 
         date_obj = None
         if scheme == "nightly" or release_date == "today":
             date_obj = datetime.date.today()
         elif release_date is not None:
             if self.verbosity >= 1:
-                print release_date
+                print(release_date)
             date_obj = None
             try:
                 date_tuple = time.strptime(release_date, "%Y-%m-%d")
                 date_obj = datetime.date(*date_tuple[0:3])
-            except Exception, e:
-                print "ERROR: The release date is not in the proper "\
-                    "format, use YYYY-MM-DD."
+            except Exception as e:
+                print("ERROR: The release date is not in the proper "\
+                    "format, use YYYY-MM-DD.")
 
         if date_obj is not None:
             fields_to_replace["APP_RELEASE_DATE_YEAR"] = str(date_obj.year)
             fields_to_replace["APP_RELEASE_DATE_MONTH"] = str(date_obj.month)
             fields_to_replace["APP_RELEASE_DATE_DAY"] = str(date_obj.day)
             if self.verbosity >= 1:
-                print "Updating the release date to %s" % \
-                    (date_obj.isoformat())
+                print("Updating the release date to %s" % \
+                    (date_obj.isoformat()))
         else:
             if self.verbosity >= 1:
-                print "The release date has not been updated"
+                print("The release date has not been updated")
 
         self.__update_app_version_h(fields_to_replace)
 
@@ -236,7 +236,7 @@ class Builder:
             opticks_version_fields)
 
         if self.verbosity > 1:
-            print "Done updating app version"
+            print("Done updating app version")
 
     def populate_environ_for_dependencies(self, env):
         env["OPTICKSDEPENDENCIES"] = self.depend_path
@@ -266,7 +266,7 @@ class Builder:
             return
 
         if self.verbosity > 1:
-            print "Building executable..."
+            print("Building executable...")
         buildenv = os.environ
         self.populate_environ_for_dependencies(buildenv)
 
@@ -281,33 +281,33 @@ class Builder:
 
         if clean_build_first:
             if self.verbosity > 1:
-                print "Cleaning compilation..."
+                print("Cleaning compilation...")
             self.compile_code(buildenv, True, build_opticks, concurrency)
             if self.verbosity > 1:
-                print "Done cleaning compilation"
+                print("Done cleaning compilation")
 
         self.compile_code(buildenv, False, build_opticks, concurrency)
         if self.verbosity > 1:
-            print "Done building executable"
+            print("Done building executable")
 
     def gather_artifacts(self, artifacts_dir):
         binaries_dir = os.path.abspath(self.get_binaries_dir("Build"))
         zip_name = self.get_zip_name()
         zip_path = os.path.abspath(join(artifacts_dir, zip_name))
         if self.verbosity > 1:
-            print "Gathering Build artifacts from %s into %s.." % \
-                (binaries_dir, zip_path)
+            print("Gathering Build artifacts from %s into %s.." % \
+                (binaries_dir, zip_path))
         the_zip = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED)
         for cur_dir, dirs, files in os.walk(binaries_dir):
             root = cur_dir[len(binaries_dir):]
             if os.path.isabs(root):
-                root = apply(join, root.split(os.path.sep)[1:])
+                root = join(*root.split(os.path.sep)[1:])
             for the_file in files:
                 the_zip.write(join(cur_dir, the_file), join(root, the_file))
 
         the_zip.close()
         if self.verbosity > 1:
-            print "Done gathering Build artifacts"
+            print("Done gathering Build artifacts")
 
     def generic_prep_to_run(self, build_dir, os_spec, arch):
         bin_path = os.path.abspath(join(self.get_binaries_dir(build_dir),
@@ -317,20 +317,20 @@ class Builder:
             os.makedirs(bin_path)
 
         if self.verbosity > 1:
-            print "Gathering dependency libraries..."
+            print("Gathering dependency libraries...")
         dp_list = commonutils.get_dependencies(self.depend_path,
             os_spec, self.build_debug_mode, arch)
         commonutils.copy_dependencies(dp_list, bin_path)
         if self.verbosity > 1:
-            print "Done gathering dependency libraries"
+            print("Done gathering dependency libraries")
 
         temp_dir = join("Release", "Temp")
         if os.path.exists(temp_dir):
             if self.verbosity > 1:
-                print "Removing Temp directory folder at %s..." % (temp_dir)
+                print("Removing Temp directory folder at %s..." % (temp_dir))
             shutil.rmtree(temp_dir)
             if self.verbosity > 1:
-                print "Done removing Temp directory"
+                print("Done removing Temp directory")
 
         if build_dir is None:
             build_dir = "Build"
@@ -339,28 +339,28 @@ class Builder:
             "ApplicationUserSettings"))
         if not os.path.exists(app_setting_dir):
             if self.verbosity > 1:
-                print "Creating ApplicationUserSettings folder at %s..." % \
-                    (app_setting_dir)
+                print("Creating ApplicationUserSettings folder at %s..." % \
+                    (app_setting_dir))
             os.makedirs(app_setting_dir)
             if self.verbosity > 1:
-                print "Done creating ApplicationUserSettings folder"
+                print("Done creating ApplicationUserSettings folder")
         if self.verbosity > 1:
-            print "Creating Temp directory folder at %s..." % (temp_dir)
+            print("Creating Temp directory folder at %s..." % (temp_dir))
         os.makedirs(temp_dir)
         if self.verbosity > 1:
-            print "Done creating Temp directory folder"
+            print("Done creating Temp directory folder")
 
         dep_file_path = join(bin_path, "opticks.dep")
         if not(os.path.exists(dep_file_path)):
             if self.verbosity > 1:
-                print "Creating opticks.dep file..."
+                print("Creating opticks.dep file...")
             dep_file = open(dep_file_path, "w")
             dep_file.write("!depV1 { deployment: { "\
                 "AppHomePath: ../../../Release, "\
                 "UserConfigPath: ../../ApplicationUserSettings } }")
             dep_file.close()
             if self.verbosity > 1:
-                print "Done creating opticks.dep file"
+                print("Done creating opticks.dep file")
 
         return bin_path
 
@@ -375,7 +375,7 @@ class WindowsBuilder(Builder):
     def compile_code(self, env, clean, build_opticks, concurrency):
         if self.use_scons:
             if self.verbosity > 1:
-                print "Building Opticks"
+                print("Building Opticks")
 
             extra_args = ["all"]
             arch_args = []
@@ -386,40 +386,40 @@ class WindowsBuilder(Builder):
             self.run_scons(os.path.abspath("application"),
                self.build_debug_mode, concurrency, env, clean, extra_args+arch_args)
             if self.verbosity > 1:
-                print "Done building Opticks"
-                print "Building Opticks plug-ins"
+                print("Done building Opticks")
+                print("Building Opticks plug-ins")
             self.run_scons(os.path.abspath(r"application\PlugIns\src"),
                self.build_debug_mode, concurrency, env, clean, arch_args)
             if self.verbosity > 1:
-                print "Done building Opticks plug-ins"
+                print("Done building Opticks plug-ins")
             if build_opticks != "core":
                if self.verbosity > 1:
-                   print "Building ArcProxy"
+                   print("Building ArcProxy")
                self.run_scons(os.path.abspath("application"),
                    self.build_debug_mode, "1", env, clean, ["arcProxy", "BITS=32"])
                if self.is_64_bit:
                    self.run_scons(os.path.abspath("application"),
                        self.build_debug_mode, "1", env, clean, ["arcProxy", "BITS=64"])
                if self.verbosity > 1:
-                   print "Done building ArcProxy"
+                   print("Done building ArcProxy")
         else:
             if self.verbosity > 1:
-                print "Building Opticks and plug-ins"
+                print("Building Opticks and plug-ins")
             solution_file = os.path.abspath("Application\\Opticks.sln")
             self.build_in_msbuild(solution_file,
                 self.build_debug_mode, self.is_64_bit, concurrency,
                 self.msbuild_path, env, clean)
             if self.verbosity > 1:
-                print "Done building Opticks and plug-ins"
+                print("Done building Opticks and plug-ins")
             if build_opticks != "core":
                 if self.verbosity > 1:
-                    print "Building ArcProxy"
+                    print("Building ArcProxy")
                 solution_file = os.path.abspath("Application\\ArcIntegration.sln")
                 self.build_in_msbuild(solution_file,
                     self.build_debug_mode, self.is_64_bit,
                     concurrency, self.msbuild_path, env, clean)
                 if self.verbosity > 1:
-                    print "Done building ArcProxy"
+                    print("Done building ArcProxy")
 
     def get_binaries_dir(self, build_dir):
         return join(build_dir,"Binaries-%s-%s" % (self.platform, self.mode))
@@ -438,7 +438,7 @@ class WindowsBuilder(Builder):
         if build != "all":
             return
         if self.verbosity > 1:
-            print "Enabling CHM generation"
+            print("Enabling CHM generation")
         hhc_path = os.path.abspath(join(self.ms_help_compiler, "hhc.exe"))
         if not(os.path.exists(hhc_path)):
             raise ScriptException("MS Help Compiler path of %s is "\
@@ -458,7 +458,7 @@ class WindowsBuilder(Builder):
 
         # Qt DLLs for ArcProxy
         if self.verbosity > 1:
-            print "Gathering Qt dll's needed for ArcProxy..."
+            print("Gathering Qt dll's needed for ArcProxy...")
         proxy_dir = join(self.get_binaries_dir(build_dir),
             "PlugIns", "ArcProxy")
         if not os.path.exists(proxy_dir):
@@ -474,7 +474,7 @@ class WindowsBuilder(Builder):
                 "lib", proxy_dll_name),
                 join(proxy_dir, proxy_dll_name))
         if self.verbosity > 1:
-            print "Done gathering Qt dll's needed for ArcProxy"
+            print("Done gathering Qt dll's needed for ArcProxy")
 
         return bin_path
 
@@ -532,32 +532,32 @@ class SolarisBuilder(Builder):
             "graphviz", "app"))
         env["GVBINDIR"] = join(graphviz_dir, "lib", "graphviz")
         new_value = join(graphviz_dir, "lib")
-        if env.has_key("LD_LIBRARY_PATH_32"):
+        if "LD_LIBRARY_PATH_32" in env:
             new_value = new_value + ":" + env["LD_LIBRARY_PATH_32"]
         env["LD_LIBRARY_PATH_32"] = new_value
 
     def compile_code(self, env, clean, build_opticks, concurrency):
         #Build Opticks Core
         if self.verbosity > 1:
-            print "Building Opticks Core"
+            print("Building Opticks Core")
         self.run_scons(os.path.abspath("application"),
             self.build_debug_mode, concurrency, env, clean, ["core"])
         if self.verbosity > 1:
-            print "Done building Opticks Core"
+            print("Done building Opticks Core")
         #Build PlugIns
         if self.verbosity > 1:
-            print "Building Opticks PlugIns"
+            print("Building Opticks PlugIns")
         self.run_scons(os.path.abspath("application/PlugIns/src"),
             self.build_debug_mode, concurrency, env, clean, [])
         if self.verbosity > 1:
-            print "Done building Opticks PlugIns"
+            print("Done building Opticks PlugIns")
         if build_opticks != "core":
             if self.verbosity > 1:
-                print "Building ArcProxy"
+                print("Building ArcProxy")
             self.run_scons(os.path.abspath("application"),
                 self.build_debug_mode, concurrency, env, clean, ["arcproxy"])
             if self.verbosity > 1:
-                print "Done building ArcProxy"
+                print("Done building ArcProxy")
 
     def get_binaries_dir(self, build_dir):
         return join(build_dir,"Binaries-solaris-sparc-%s" % (self.mode))
@@ -580,7 +580,7 @@ class LinuxBuilder(SolarisBuilder):
         env["DOT_DIR"] = join(graphviz_dir)
         env["GVBINDIR"] = join("/", "usr", "lib", "graphviz")
         new_value = join(graphviz_dir, "lib")
-        if env.has_key("LD_LIBRARY_PATH"):
+        if "LD_LIBRARY_PATH" in env:
             new_value = new_value + ":" + env["LD_LIBRARY_PATH"]
         env["LD_LIBRARY_PATH"] = new_value
 
@@ -623,14 +623,14 @@ def prep_to_run(opticks_depends, build_debug, arch,
             build_debug, msbuild, False, None, arch, verbosity)
         if builder is not None:
             return builder.prep_to_run(build_dir)
-    except ScriptException, se:
+    except ScriptException as se:
         return None
 
 
 def print_env(environ):
-    print "Environment is currently set to"
-    for key in environ.iterkeys():
-        print key, "=", environ[key]
+    print("Environment is currently set to")
+    for key in environ.keys():
+        print(key, "=", environ[key])
 
 def copy_files_in_dir(src_dir, dst_dir, with_extension=None):
     for filename in os.listdir(src_dir):
@@ -759,35 +759,35 @@ def main(args):
 
         if options.build_doxygen != "none":
             if options.verbosity > 1:
-                print "Building Doxygen..."
+                print("Building Doxygen...")
             builder.build_doxygen(options.build_doxygen, options.artifact_dir)
             if options.verbosity > 1:
-                print "Done building Doxygen"
+                print("Done building Doxygen")
 
         if options.prep:
             if options.verbosity > 1:
-                print "Prepping to Run..."
+                print("Prepping to Run...")
             builder.prep_to_run(None)
             if options.verbosity > 1:
-                print "Done prepping to run"
+                print("Done prepping to run")
 
         if options.artifact_dir:
             if options.verbosity > 1:
-                print "Gathering artifacts"
+                print("Gathering artifacts")
             builder.gather_artifacts(options.artifact_dir)
             if options.verbosity > 1:
-                print "Done gathering artifacts"
+                print("Done gathering artifacts")
 
-    except Exception, e:
-        print "--------------------------"
+    except Exception as e:
+        print("--------------------------")
         traceback.print_exc()
-        print "--------------------------"
+        print("--------------------------")
         return 2000
 
     return 0
 
 if __name__ == "__main__":
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    #sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     retcode = main(sys.argv)
-    print "Return code is", retcode
+    print("Return code is", retcode)
     sys.exit(retcode)
