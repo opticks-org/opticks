@@ -97,10 +97,8 @@ are defined in Opticks-Version.wxi, so include that file now -->
                <File Name="glew32.dll" Id="F__glew32_Dependency" DiskId="1" KeyPath="yes" />
             </Component>
             <Component Id="C__hdf5dll_Dependency" Guid="$(var.C__hdf5dll_DependencyGuid)" Win64="$(var.64Bit)">
-               <File Name="hdf5dll.dll" Id="F__hdf5dll_Dependency" DiskId="1" KeyPath="yes" />
-               <File Name="hdf5.dll" Id="F__hdf5_Dependency" DiskId="1" KeyPath="yes" />
-               <File Name="zlib.dll" Id="F__zlib_Dependency" DiskId="1" KeyPath="yes" />
-               <File Name="szip.dll" Id="F__szip_Dependency" DiskId="1" KeyPath="yes" />
+               <File Name="hdf5dll.dll" Id="F__hdf5dll_Dependency" DiskId="1" />
+               <File Name="hdf5.dll" Id="F__hdf5_Dependency" DiskId="1" />
             </Component>
             <Component Id="C__libexpat_Dependency" Guid="$(var.C__libexpat_DependencyGuid)" Win64="$(var.64Bit)">
                <File Name="libexpat.dll" Id="F__libexpat_Dependency" DiskId="1" KeyPath="yes" />
@@ -239,21 +237,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
             </Component>
          </Directory>
          <Directory Id="D__PlugIns" Name="PlugIns" FileSource="$(var.OpticksBinariesDir)\PlugIns">
-            <Directory Id="D__ArcProxy" Name="ArcProxy" FileSource="$(var.OpticksBinariesDir)\PlugIns\ArcProxy">
-               <Component Id="C__ArcProxy" Guid="$(var.C__ArcProxyGuid)" Win64="no">
-                  <File Name="ArcProxy.exe" Id="F__ArcProxy" DiskId="1" KeyPath="yes" />
-               </Component>
-               <Component Id="C__ArcProxyQtCore" Guid="$(var.C__ArcProxyQtCoreGuid)" Win64="no">
-                  <File Name="QtCore4.dll" Id="F__ArcProxyQtCore" DiskId="1" KeyPath="yes" Source="$(var.Opticks32BitDependenciesDir)\QtCore4.dll" />
-               </Component>
-               <Component Id="C__ArcProxyQtNetwork" Guid="$(var.C__ArcProxyQtNetworkGuid)" Win64="no">
-                  <File Name="QtNetwork4.dll" Id="F__ArcProxyQtNetwork" DiskId="1" KeyPath="yes" Source="$(var.Opticks32BitDependenciesDir)\QtNetwork4.dll" />
-               </Component>
-               <Component Id="C__VC100_CRT_For_ArcProxy" Guid="$(var.C__VC100_CRT_For_ArcProxy_Guid)" Win64="$(var.64Bit)">
-                  <File Name="msvcp100.dll" Id="F__msvcp100_For_ArcProxy" DiskId="1" KeyPath="yes" Source="$(var.VisualStudio32BitRuntimeDir)\msvcp100.dll" />
-                  <File Name="msvcr100.dll" Id="F__msvcr100_For_ArcProxy" DiskId="1" Source="$(var.VisualStudio32BitRuntimeDir)\msvcr100.dll" />
-               </Component>
-            </Directory>
             <Component Id="C__VC100_CRT_For_PlugIns" Guid="$(var.C__VC100_CRT_For_PlugIns_Guid)" Win64="$(var.64Bit)">
                <File Name="msvcp100.dll" Id="F__msvcp100_For_PlugIns" DiskId="1" KeyPath="yes" Source="$(var.VisualStudioRuntimeDir)\msvcp100.dll" />
                <File Name="msvcr100.dll" Id="F__msvcr100_For_PlugIns" DiskId="1" Source="$(var.VisualStudioRuntimeDir)\msvcr100.dll" />
@@ -399,7 +382,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          </Directory>
          <Component Id="C__OpticksEventLogKeys" Guid="$(var.C__OpticksEventLogKeysGuid)" Win64="no">
             <Condition>ALLUSERS = 1</Condition>
-            <RegistryKey Id="R__OpticksEventLog" Action="createAndRemoveOnUninstall" Key="SYSTEM\CurrentControlSet\Services\Eventlog\Application\Opticks" Root="HKLM">
+            <RegistryKey Id="R__OpticksEventLog" ForceCreateOnInstall="yes" ForceDeleteOnUninstall="yes" Key="SYSTEM\CurrentControlSet\Services\Eventlog\Application\Opticks" Root="HKLM">
                <RegistryValue Id="R__EventLogTypesSupported" Action="write" Name="TypesSupported" KeyPath="yes" Type="integer" Value="7" />
                <RegistryValue Id="R__EventLogCategoryCount" Action="write" Name="CategoryCount" Type="integer" Value="1" />
                <RegistryValue Id="R__EventLogEventMessageFile" Action="write" Name="EventMessageFile" Type="expandable" Value="[TARGETDIR]\Bin\Opticks.exe" />
@@ -467,9 +450,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__QtImageFormatMng" />
          <ComponentRef Id="C__QtImageFormatSvg" />
          <ComponentRef Id="C__QtImageFormatTiff" />
-         <ComponentRef Id="C__ArcProxy" />
-         <ComponentRef Id="C__ArcProxyQtCore" />
-         <ComponentRef Id="C__ArcProxyQtNetwork" />
          <ComponentRef Id="C__OpticksEventLogKeys" />
          <ComponentRef Id="C__SaveTempDataDirSelection" />
          <ComponentRef Id="C__ClassSettings" />
@@ -478,7 +458,6 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__VC100_CRT_For_imageformats"/>
          <ComponentRef Id="C__VC100_CRT_For_PlugIns"/>
          <ComponentRef Id="C__VC100_OpenMP_For_PlugIns"/>
-         <ComponentRef Id="C__VC100_CRT_For_ArcProxy"/>
          <ComponentRef Id="C__Templates" />
          <ComponentRef Id="C__AutoInstall" />
 
@@ -514,6 +493,7 @@ are defined in Opticks-Version.wxi, so include that file now -->
          <ComponentRef Id="C__Help_options" />
          <ComponentRef Id="C__Help_geo" />
          <ComponentRef Id="C__Help_animation" />
+         <ComponentRef Id="C__Help_pointcloud" />
          <ComponentRef Id="C__Help_products" />
          <ComponentRef Id="C__Help_wizard_builder" />
          <ComponentRef Id="C__Help_skinbluegov" />

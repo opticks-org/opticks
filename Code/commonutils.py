@@ -56,8 +56,8 @@ def update_app_version(old_version, scheme, new_version, build_revision):
             version_number = version_number + \
                 "Nightly%s.%s" % (today_str, build_revision)
     elif new_version is None:
-        print "You need to use --new-version to provide the version "\
-            "# when using the production, rc, or milestone scheme"
+        print("You need to use --new-version to provide the version "\
+            "# when using the production, rc, or milestone scheme")
 
     return version_number
 
@@ -66,7 +66,7 @@ def get_app_version_only(opticks_code_folder):
         "PlugInUtilities", "AppVersion.h")
     if not(os.path.exists(app_version_path)):
         return None
-    app_version = open(app_version_path, "rt")
+    app_version = open(app_version_path, "rt", encoding='latin_1')
     version_info = app_version.read()
     app_version.close()
 
@@ -84,11 +84,11 @@ def is_subversion_soft_link(srcname):
     if file_size < 500:
         #open this file and determine if it was a soft link
         #when it was checked into Subversion
-        the_file_contents = open(srcname)
+        the_file_contents = open(srcname, mode="rb")
         first_line = the_file_contents.readline()
         the_file_contents.close()
-        if first_line.startswith("link"):
-            the_linked_file = first_line.split(" ", 2)[1]
+        if first_line.startswith(b"link"):
+            the_linked_file = first_line.decode().split(" ", 2)[1]
             the_dir = os.path.split(srcname)[0]
             the_file = os.path.abspath(join(the_dir, the_linked_file))
     return the_file
@@ -287,10 +287,10 @@ def create_qt_conf(path, verbosity):
         if not(os.path.exists(path)):
             os.makedirs(path)
         if verbosity > 1:
-            print "Creating qt.conf file..."
+            print("Creating qt.conf file...")
         qt_conf_file = open(qt_conf_file_path, "w")
         qt_conf_file.write("[Paths]\n"\
             "Plugins = .")
         qt_conf_file.close()
         if verbosity > 1:
-            print "Done creating qt.conf file"
+            print("Done creating qt.conf file")
