@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Generate installation packages for Opticks on both Windows and Solaris.
 
@@ -923,7 +923,7 @@ class SConsBuilder(CommonBuilder):
                 os.mkdir(self.package_dir)
             except OSError: # already exists...ignore the error
                 pass
-            shutil.copy2(os.path.abspath(os.path.join(self.output_dir,"opticks_%s_amd64.deb" % version)), self.package_dir)
+            #shutil.copy2(os.path.abspath(os.path.join(self.output_dir,"opticks_%s_amd64.deb" % version)), self.package_dir)
         if self.verbosity > 1:
             print("Done creating debian format of package")
 
@@ -935,23 +935,6 @@ class SConsBuilder(CommonBuilder):
             os.chdir(self.package_dir)
         else:
             os.chdir(self.output_dir)
-        alien_args = list()
-        alien_args.append('fakeroot')
-        alien_args.append('alien')
-        alien_args.append('--to-rpm')
-        alien_args.append('--scripts')
-        alien_args.append('opticks_%s_amd64.deb' % version)
-
-        if self.verbosity > 1:
-            print("Execute:"," ".join(alien_args))
-        retcode = execute_process(alien_args)
-        os.chdir(oldpath)
-        if retcode != 0:
-            raise ScriptException("Running alien failed with "\
-                "an error code of %s" % (retcode))
-
-        if self.verbosity > 1:
-            print("Done creating RPM format of package")
 
         if self.verbosity > 1:
             print("Done generating Linux package")

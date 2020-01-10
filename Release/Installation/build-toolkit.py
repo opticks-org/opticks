@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 from os.path import join
 import os.path
@@ -393,7 +393,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             commonutils.copy_dependencies(dp_list, bin_dir)
     else:
         cp_file2(s_app, d_app, join("PlugIns", "src"), "SConstruct")
-        if sys.platform == "linux2":
+        if sys.platform.startswith("linux"):
             binaries_dir = join("Build", "Binaries-linux-x86_64-release")
         else:
             binaries_dir = join("Build", "Binaries-solaris-sparc-release")
@@ -406,7 +406,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         for the_plugin in sample_plugins:
             cp_file2(opticks_code_dir, out_dir,
                 join(binaries_dir,"PlugIns"), "%s.so" % (the_plugin))
-        if sys.platform != "linux2":
+        if not sys.platform.startswith("linux"):
            #Make copy of the "application" dir but with an upper-case
            #first letter to maintain compatibility with earlier SDKs
            cp_dir(d_app, join(out_dir, "Application"), recursive_copy = True)
@@ -439,7 +439,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             if verbosity > 1:
                 print("Done creating compressed archive")
         else:
-            if sys.platform == "linux2":
+            if sys.platform.startswith("linux"):
                output_tar_bz2 = os.path.abspath(join(package_dir,
                    "opticks-sdk-%s-linux-x86_64.tar.bz2" % (app_version)))
             else:
