@@ -84,11 +84,11 @@ def is_subversion_soft_link(srcname):
     if file_size < 500:
         #open this file and determine if it was a soft link
         #when it was checked into Subversion
-        the_file_contents = open(srcname)
+        the_file_contents = open(srcname, mode="rb")
         first_line = the_file_contents.readline()
         the_file_contents.close()
-        if first_line.startswith("link"):
-            the_linked_file = first_line.split(" ", 2)[1]
+        if first_line.startswith(b"link"):
+            the_linked_file = first_line.decode().split(" ", 2)[1]
             the_dir = os.path.split(srcname)[0]
             the_file = os.path.abspath(join(the_dir, the_linked_file))
     return the_file
