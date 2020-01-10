@@ -118,7 +118,7 @@ if OPTICKSPLATFORM == "solaris-sparc":
               LIBPATH=[env["LIBDIR"]],
               LIBS=env["QT_MODULES"] + ["PlugInLib","PlugInUtilities","PlugInLib","nsl","dl","GLU","GL","Xm","Xext","X11","m"])
 elif OPTICKSPLATFORM == "linux-x86_64":
-   env.Append(CXXFLAGS="-std=c++0x -m64 -fpic -w",
+   env.Append(CXXFLAGS="-std=c++03 -m64 -fpic -w",
               SHLINKFLAGS="-Wl,-E -fpic",
               CPPDEFINES=["_USRDLL","APPLICATION_XERCES"],
               LIBPATH=[env["LIBDIR"]],
