@@ -149,7 +149,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
-      <Command>c:\python27\python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=32 -v</Command>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=32 -v</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -176,7 +176,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
-      <Command>c:\python27\python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=64 -v</Command>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=64 -v</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -205,7 +205,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
-      <Command>c:\python27\python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=32 -v</Command>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=32 -v</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -234,7 +234,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
-      <Command>c:\python27\python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=64 -v</Command>
+      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=64 -v</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

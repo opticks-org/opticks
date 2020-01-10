@@ -160,14 +160,14 @@ def copy_windows_build(opticks_code_dir, sdk_dest_dir,
     if is_debug:
         #Copy the pdbs for the static_libs
         if verbosity > 1:
-            print "Gathering pdb's for %s..." % (arch)
-        all_pdbs = map(lambda x: os.path.splitext(x)[0], executables) + static_libs + plugins
+            print("Gathering pdb's for %s..." % (arch))
+        all_pdbs = [os.path.splitext(x)[0] for x in executables] + static_libs + plugins
         for the_file in all_pdbs:
             pdbs_dir = join(binaries_dir,"pdbs")
             cp_file2(opticks_code_dir, win_debug_dest_dir,
                 pdbs_dir, the_file + ".pdb")
         if verbosity > 1:
-            print "Done gathering pdb's for %s..." % (arch)
+            print("Done gathering pdb's for %s..." % (arch))
 
 def copy_dir_into_zip(zip_file, parent_src_dir, the_dir,
                       prefix_dir, keep_the_dir=True):
@@ -199,7 +199,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
       verbosity):
 
     if opticks_dependencies_dir is None:
-        if os.environ.has_key("OPTICKSDEPENDENCIES"):
+        if "OPTICKSDEPENDENCIES" in os.environ:
             opticks_dependencies_dir = os.environ["OPTICKSDEPENDENCIES"]
         else:
             raise ScriptException("The path to the Opticks "\
@@ -210,7 +210,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             "does not exist %s, see -d")
 
     if verbosity >= 1:
-        print "Removing output from previous runs..."
+        print("Removing output from previous runs...")
     out_dir = os.path.abspath(join("Toolkit", "SDK-Temp"))
     win_debug_dir = os.path.abspath(join("Toolkit", "WinDebug-Temp"))
     if os.path.exists(out_dir):
@@ -220,17 +220,17 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         shutil.rmtree(win_debug_dir, False)
 
     if verbosity >= 1:
-        print "Done removing output from previous runs"
+        print("Done removing output from previous runs")
 
     if verbosity >= 1:
-        print "Creating SDK..."
+        print("Creating SDK...")
     app_version = commonutils.get_app_version_only(opticks_code_dir)
     ##### Create all the output directories
     os.makedirs(out_dir)
     os.makedirs(win_debug_dir)
 
     if verbosity > 1:
-        print "Gathering files for SDK..."
+        print("Gathering files for SDK...")
     cp_file3("README-sdk.txt", join(out_dir, "README.txt"))
     s_app = os.path.abspath(join(opticks_code_dir, "application"))
     s_release = os.path.abspath(join(opticks_code_dir, "Release"))
@@ -272,12 +272,12 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     cp_file2(s_app, d_app, join("PlugIns", "src", "Aspam"), "Aspam.h")
 
     if verbosity > 1:
-        print "Done gathering files for SDK"
+        print("Done gathering files for SDK")
 
     win_debug_code_dir = join(win_debug_dir, "Code")
     if is_windows():
         if verbosity > 1:
-            print "Exporting Opticks source code..."
+            print("Exporting Opticks source code...")
         svn_export_code_args = list()
         svn_export_code_args.append("svn")
         svn_export_code_args.append("export")
@@ -285,18 +285,21 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         svn_export_code_args.append("BASE")
         svn_export_code_args.append(os.path.abspath(opticks_code_dir))
         svn_export_code_args.append(win_debug_code_dir)
-        retcode = execute_process(svn_export_code_args)
+        print(svn_export_code_args)
+        input('> ')
+        retcode = 0
+        #retcode = execute_process(svn_export_code_args)
         if retcode != 0:
             raise ScriptException("Unable to export code.")
         if verbosity > 1:
-            print "Done exporting Opticks source code"
+            print("Done exporting Opticks source code")
 
         cp_file3("README-pdb-source.txt",
             join(win_debug_dir, "README.txt"))
 
     #Copy dependencies
     if verbosity > 1:
-        print "Exporting dependencies..."
+        print("Exporting dependencies...")
     svn_export_args = list()
     svn_export_args.append("svn")
     svn_export_args.append("export")
@@ -304,16 +307,19 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
     svn_export_args.append("BASE")
     svn_export_args.append(os.path.abspath(opticks_dependencies_dir))
     svn_export_args.append(join(out_dir, "Dependencies"))
-    retcode = execute_process(svn_export_args)
+    print(svn_export_args)
+    input('> ')
+    #retcode = execute_process(svn_export_args)
+    retcode = 0
     if retcode != 0:
         raise ScriptException("Unable to export dependencies")
     if verbosity > 1:
-        print "Done exporting dependencies"
+        print("Done exporting dependencies")
 
     ##### Run Doxygen to generate the html documentation
     if verbosity > 1:
-        print "Generating Doxygen..."
-    build_doxygen_args = ["python2.7", join(os.path.abspath(opticks_code_dir),
+        print("Generating Doxygen...")
+    build_doxygen_args = ["python", join(os.path.abspath(opticks_code_dir),
         "build.py"),
         "--build-doxygen=all",
         "-d", opticks_dependencies_dir]
@@ -334,10 +340,10 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
         cp_file2(s_doxygen_output, d_doc_output, "",
             "OpticksSDK-%s.chm" % (app_version))
     if verbosity > 1:
-        print "Done generating Doxygen"
+        print("Done generating Doxygen")
 
     if verbosity > 1:
-        print "Acquiring Opticks binaries..."
+        print("Acquiring Opticks binaries...")
     static_libs = ["PlugInLib", "PlugInUtilities", "HdfPlugInLib", "NitfPlugInLib"]
     if is_windows():
        static_libs.append("SimpleApiLib")
@@ -405,33 +411,33 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
            #first letter to maintain compatibility with earlier SDKs
            cp_dir(d_app, join(out_dir, "Application"), recursive_copy = True)
     if verbosity > 1:
-        print "Done acquiring Opticks binaries"
+        print("Done acquiring Opticks binaries")
     if verbosity >= 1:
-        print "Done building SDK"
+        print("Done building SDK")
 
     if package_dir is not None and os.path.exists(package_dir):
         if is_windows():
             zip_name = join(package_dir,
                 "opticks-sdk-%s-windows.zip" % (app_version))
             if verbosity > 1:
-                print "Creating compressed archive %s..." % (zip_name)
+                print("Creating compressed archive %s..." % (zip_name))
             zip_obj = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
             copy_dir_into_zip(zip_obj, os.path.abspath("Toolkit"),
                 "SDK-Temp", ".", False)
             zip_obj.close()
             if verbosity > 1:
-                print "Done creating compressed archive"
+                print("Done creating compressed archive")
 
             zip_name = join(package_dir,
                 "opticks-pdb-sourcecode-%s-windows.zip" % (app_version))
             if verbosity > 1:
-                print "Creating compressed archive %s..." % (zip_name)
+                print("Creating compressed archive %s..." % (zip_name))
             zip_obj = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
             copy_dir_into_zip(zip_obj, os.path.abspath("Toolkit"),
                 "WinDebug-Temp", ".", False)
             zip_obj.close()
             if verbosity > 1:
-                print "Done creating compressed archive"
+                print("Done creating compressed archive")
         else:
             if sys.platform == "linux2":
                output_tar_bz2 = os.path.abspath(join(package_dir,
@@ -440,7 +446,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
                output_tar_bz2 = os.path.abspath(join(package_dir,
                    "opticks-sdk-%s-sol10-sparc.tar.bz2" % (app_version)))
             if verbosity > 1:
-                print "Creating compressed archive %s..." % (output_tar_bz2)
+                print("Creating compressed archive %s..." % (output_tar_bz2))
             tar_args = list()
             tar_args.append("tar")
             tar_args.append("-cvf")
@@ -464,7 +470,7 @@ def create_toolkit_zip(opticks_code_dir, opticks_dependencies_dir,
             if bzip_ret != 0:
                 raise ScriptException("Running bzip2 failed.")
             if verbosity > 1:
-                print "Done creating compressed archive"
+                print("Done creating compressed archive")
 
 def is_windows():
     """Determine if this script is executing on the Windows operating system.
@@ -537,7 +543,7 @@ def main(args):
     options = parse_args(args)
     try:
         if options.opticks_code_dir is None:
-            if os.environ.has_key("OPTICKS_CODE_DIR"):
+            if "OPTICKS_CODE_DIR" in os.environ:
                 options.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
             else:
                 raise ScriptException("The path to the Opticks "\
@@ -557,17 +563,17 @@ def main(args):
            options.package_dir, options.ms_help_compiler,
            options.release32, options.debug32, options.release64,
            options.debug64, options.verbosity)
-    except Exception, e:
-        print "--------------------------"
+    except Exception as e:
+        print("--------------------------")
         traceback.print_exc()
-        print "--------------------------"
+        print("--------------------------")
         return 2000
     return 0
 
 #Main execution path when script is run
 if __name__ == "__main__":
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    #sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     retcode = main(sys.argv)
     if retcode != 0:
-        print "ERROR: Return code is %s" % (retcode)
+        print("ERROR: Return code is %s" % (retcode))
     sys.exit(retcode)

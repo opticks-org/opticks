@@ -110,7 +110,6 @@
     <Link>
       <Version>
       </Version>
-      <AdditionalLibraryDirectories>C:\Program Files\PCL 1.6.0\lib;E:\checkouts\Opticks\branches\future\OPTICKS-1042\trunk\Dependencies\32\liblas\lib\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <ClCompile>
@@ -132,7 +131,6 @@
     <Link>
       <Version>
       </Version>
-      <AdditionalLibraryDirectories>C:\Program Files\PCL 1.6.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <ClCompile />
@@ -158,7 +156,6 @@
     <Link>
       <Version>
       </Version>
-      <AdditionalLibraryDirectories>C:\Program Files\PCL 1.6.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -183,9 +180,8 @@
     <Link>
       <Version>
       </Version>
-      <AdditionalLibraryDirectories>C:\Program Files\PCL 1.6.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>pcl_common_debug.lib;pcl_segmentation_debug.lib;pcl_sample_consensus_debug.lib;gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>gdal_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
