@@ -126,7 +126,7 @@ class Builder:
                 print("Done compressing Doxygen")
 
     def __update_h_file(self, h_file, fields_to_replace):
-        h_handle = open(h_file, "rt")
+        h_handle = open(h_file, "rt", encoding='latin_1')
         contents = h_handle.readlines()
         h_handle.close()
         h_handle = open(h_file, "wt")
