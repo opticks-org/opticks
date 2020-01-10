@@ -66,7 +66,7 @@ def get_app_version_only(opticks_code_folder):
         "PlugInUtilities", "AppVersion.h")
     if not(os.path.exists(app_version_path)):
         return None
-    app_version = open(app_version_path, "rt")
+    app_version = open(app_version_path, "rt", encoding='latin_1')
     version_info = app_version.read()
     app_version.close()
 

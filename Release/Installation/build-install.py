@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Generate installation packages for Opticks on both Windows and Solaris.
 
