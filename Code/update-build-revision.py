@@ -34,10 +34,10 @@ def main():
         build_rev_handle.close()
         print("New Build Revision # is %s" % (version_number,))
     else:
-        print("Build Revision # %s is up-to-date" % version_number)
+        print("Build Revision # %s is up-to-date" % (version_number,))
     return 0
 
 if __name__ == "__main__":
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
+    #sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     retcode = main()
     sys.exit(retcode)

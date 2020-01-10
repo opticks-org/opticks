@@ -8,6 +8,7 @@
  */
 
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DataAccessor.h"
 #include "DataAccessorImpl.h"
 #include "DataRequest.h"
@@ -58,7 +59,7 @@ NGA::Mudslide::Mudslide()
    setCreator("NGA");
    setVersion("0.1");
    setCopyright("Copyright (C) 2014, Ball Aerospace & Technologies Corp. & Copyright (C) 2011, ITT Geospatial Systems and Booz Allen Hamilton");
-   setProductionStatus(false);
+   setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setName("NGA Mudslide");
    setShortDescription("Calculate mudslide risk from a LIDAR point cloud.");
    setDescription("This plugin generates a DEM from a LIDAR point cloud and then calculates mudslide risk areas and classifies that data based on risk.");
