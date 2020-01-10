@@ -87,10 +87,10 @@ if OPTICKSPLATFORM == "solaris-sparc":
               CPPDEFINES=["APPLICATION_XERCES"],
               LIBS=env["QT_MODULES"] + ["nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m"])
 elif OPTICKSPLATFORM == "linux-x86_64":
-   env.Append(CXXFLAGS="-m64 -fpic -Wall -Wno-unused-value -Wno-comment",
-              LINKFLAGS="-melf_x86_64 -Wl,-E",
+   env.Append(CXXFLAGS="-std=c++03 -m64 -fpic -Wall -Wno-unused-value -Wno-comment",
+              LINKFLAGS="-Wl,-E",
               CPPDEFINES=["APPLICATION_XERCES"],
-              LIBS=env["QT_MODULES"] + ["dl","GLU","GL","Xext","Xrender","X11","m"])
+              LIBS=env["QT_MODULES"] + ["dl","GLU","GL","Xext","Xrender","X11","m","pthread"])
 elif OS == "windows":
    if OPTICKSPLATFORM == "Win32":
       env.AppendUnique(CXXFLAGS=["/arch:SSE"], LINKFLAGS=['/MACHINE:X86'])

@@ -245,6 +245,43 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Release\DefaultSettings\1-ApplicationDefaults.cfg" />
+    <None Include="..\Release\DefaultSettings\2-ApplicationMode.cfg" />
+    <None Include="..\Release\DefaultSettings\25-XmlRpc.cfg" />
+    <None Include="..\Release\DefaultSettings\40-PicturesExporters.cfg" />
+    <None Include="..\Release\DefaultSettings\41-MovieExporter.cfg" />
+    <None Include="..\Release\DefaultSettings\42-Nitf.cfg" />
+    <None Include="..\Release\DefaultSettings\43-IceExporter.cfg" />
+    <None Include="..\Release\DefaultSettings\44-AnnotationImagePalette.cfg" />
+    <None Include="..\Release\DefaultSettings\45-ConvolutionFilters.cfg" />
+    <None Include="..\Release\DefaultSettings\46-GeographicFeatures.cfg" />
+    <None Include="..\Release\DefaultSettings\50-KmlServer.cfg" />
+    <None Include="..\Release\DefaultSettings\55-Modis.cfg" />
+    <None Include="..\Release\DefaultSettings\60-SpatialResampler.cfg" />
+    <None Include="..\Release\SupportFiles\Annotation\default.cgm" />
+    <None Include="..\Release\SupportFiles\Annotation\East.ano" />
+    <None Include="..\Release\SupportFiles\Annotation\North.ano" />
+    <None Include="..\Release\SupportFiles\Cg\ByPass.cg" />
+    <None Include="..\Release\SupportFiles\Cg\ColormapDisplay.cg" />
+    <None Include="..\Release\SupportFiles\Cg\EdgeDetection.cg" />
+    <None Include="..\Release\SupportFiles\Cg\GrayscaleDisplay.cg" />
+    <None Include="..\Release\SupportFiles\Cg\RgbDisplay.cg" />
+    <None Include="..\Release\SupportFiles\ColorTables\autocolor.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\CubeHelix_Default.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\HotIron.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\HotIronAlpha.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\Primaries.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\RedTemp.cgr" />
+    <None Include="..\Release\SupportFiles\ColorTables\Spectrum.cgr" />
+    <None Include="..\Release\SupportFiles\ColorTables\SpectrumAlpha.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\StopLight.clu" />
+    <None Include="..\Release\SupportFiles\ColorTables\WeatherMap.clu" />
+    <None Include="..\Release\SupportFiles\ImageFilters\FilterDefaults.gic" />
+    <None Include="..\Release\SupportFiles\SecurityMarkings\1-SecurityValues.sec" />
+    <None Include="..\Release\SupportFiles\SecurityMarkings\ClassificationLevels.txt" />
+    <None Include="..\Release\Templates\MultipleImages.spg" />
+    <None Include="..\Release\Templates\SingleImage.spg" />
+    <None Include="..\Release\Templates\ZoomedImages.spg" />
     <None Include="Gui\res\application.ico" />
   </ItemGroup>
   <ItemGroup>

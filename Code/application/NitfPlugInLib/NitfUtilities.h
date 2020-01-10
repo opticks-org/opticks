@@ -1073,6 +1073,19 @@ namespace Nitf
    bool updateSpecialMetadata(DynamicObject* pMetadata, std::vector<double>& centerWavelengths,
       std::vector<double>& startWavelengths, std::vector<double>& endWavelengths,
       const std::vector<double>& fwhms, bool convertFromInverseCentimeters = false);
+
+   /**
+      *  Returns the data type given NITF NBPP and PVTYPE values.
+      *
+      *  @param   bitsPerPixel
+      *           The NBPP field value.
+      *
+      *  @param   pixelValueType
+      *           The PVTYPE field value.
+      *
+      *  @return  The ::EncodingType to use for the specified values.
+      */
+   EncodingType nitfImageTypeToEncodingType(unsigned int bitsPerPixel, const std::string& pixelValueType);
 }
 
 #endif
