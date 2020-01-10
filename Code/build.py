@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 import sys
 import subprocess
 import os
@@ -154,7 +154,7 @@ class Builder:
         command_prefix = "./"
         if is_windows():
             command_prefix = ""
-        execute_process(["python2.7",
+        execute_process(["python",
             "%supdate-build-revision.py" % (command_prefix)], shell=False)
 
     def get_current_app_version(self):
