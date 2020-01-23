@@ -53,7 +53,10 @@ bool ProgressImp::isKindOf(const string& className) const
 void ProgressImp::updateProgress(const string& text, int percent, ReportingLevel gran)
 {
    mProgressText = text;
-   mPercentComplete = percent;
+   if (percent >= 0 && percent <= 100)
+   {
+      mPercentComplete = percent;
+   }
    mGranularity = gran;
 
    notify(SIGNAL_NAME(Subject, Modified));

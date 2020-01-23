@@ -62,6 +62,11 @@ InstallWizard::InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgres
 InstallWizard::~InstallWizard()
 {}
 
+std::vector<std::string> InstallWizard::getPendingInstalls() const
+{
+   return mPendingInstalls;
+}
+
 void InstallWizard::install()
 {
    if (mPackageDescriptors.isEmpty())
@@ -96,7 +101,7 @@ void InstallWizard::install()
       }
       if (!Service<InstallerServices>()->installExtension(pDescriptor->getFilename(), mpProgress))
       {
-         if (mpProgress != NULL)
+         if (mpProgress != NULL && !Service<InstallerServices>()->useLaunchHelper())
          {
             mpProgress->updateProgress("Unable to install " + pDescriptor->getName(), 0, ERRORS);
          }
@@ -105,6 +110,11 @@ void InstallWizard::install()
       {
          success = true;
       }
+   }
+   if (!success)
+   {
+      mPendingInstalls.reserve(mPendingInstalls.size() + pendingInstall.size());
+      mPendingInstalls.insert(mPendingInstalls.end(), pendingInstall.begin(), pendingInstall.end());
    }
    Service<InstallerServices>()->setPendingInstall();
    if (success && mpProgress != NULL)

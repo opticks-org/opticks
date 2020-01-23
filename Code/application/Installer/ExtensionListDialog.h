@@ -22,6 +22,9 @@ public:
    ExtensionListDialog(QWidget* pParent = NULL);
    virtual ~ExtensionListDialog();
 
+public slots:
+   virtual void accept();
+
 private slots:
    void install();
    void reloadExtensions();
@@ -30,6 +33,7 @@ private:
    ExtensionListDialog(const ExtensionListDialog& rhs);
    ExtensionListDialog& operator=(const ExtensionListDialog& rhs);
    QListWidget* mpExtensionList;
+   std::vector<std::string> mPendingInstalls;
 };
 
 #endif

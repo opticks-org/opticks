@@ -26,6 +26,7 @@ class ExtensionListItem : public QWidget
    Q_PROPERTY(QString id READ getId WRITE setId)
    Q_PROPERTY(QString updateInfo READ getUpdateInfo WRITE setUpdateInfo)
    Q_PROPERTY(bool uninstallable READ getUninstallable WRITE setUninstallable)
+   Q_PROPERTY(bool useUninstallHelper READ getUseUninstallHelper WRITE setUseUninstallHelper)
 
 public:
    ExtensionListItem(bool editor, bool showUpdateInfo, QWidget* pParent = NULL);
@@ -38,6 +39,7 @@ public:
    QString getId() const;
    QString getUpdateInfo() const;
    bool getUninstallable() const;
+   bool getUseUninstallHelper() const;
 
    void setName(const QString& v);
    void setDescription(const QString& v);
@@ -47,14 +49,14 @@ public:
    void setUpdateInfo(const QString& v);
 
    void setUninstallable(bool v);
-
-signals:
-   void finished(QWidget* pEditor);
+   void setUseUninstallHelper(bool v);
 
 private slots:
-   void accepted();
    void about();
    void uninstall();
+
+signals:
+   void modified();
 
 private:
    ExtensionListItem(const ExtensionListItem& rhs);
@@ -67,6 +69,7 @@ private:
    QDialogButtonBox* mpButtons;
    QPushButton* mpUninstallButton;
    QString mExtensionId;
+   bool mUseUninstallHelper;
 };
 
 #endif

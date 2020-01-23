@@ -25,6 +25,8 @@ public:
    InstallWizard(QList<Aeb*>& packageDescriptors, Progress* pProgress = NULL, QWidget* pParent = NULL);
    virtual ~InstallWizard();
 
+   std::vector<std::string> getPendingInstalls() const;
+
 public slots:
    void reject();
 
@@ -39,6 +41,7 @@ private:
    InstallWizard& operator=(const InstallWizard& rhs);
    QList<Aeb*> mPackageDescriptors;
    Progress* mpProgress;
+   std::vector<std::string> mPendingInstalls;
 };
 
 #endif

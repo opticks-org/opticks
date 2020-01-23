@@ -132,6 +132,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Modis", "PlugIns\src\Modis\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NGAtda", "PlugIns\src\NGAtda\NGAtda.vcxproj", "{8DAD9744-C539-463C-A996-A2623F43E4EC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowsAEBInstall", "WindowsAEBInstall\WindowsAEBInstall.vcxproj", "{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -648,6 +650,14 @@ Global
 		{8DAD9744-C539-463C-A996-A2623F43E4EC}.Release|Win32.Build.0 = Release|Win32
 		{8DAD9744-C539-463C-A996-A2623F43E4EC}.Release|x64.ActiveCfg = Release|x64
 		{8DAD9744-C539-463C-A996-A2623F43E4EC}.Release|x64.Build.0 = Release|x64
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Debug|Win32.Build.0 = Debug|Win32
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Debug|x64.ActiveCfg = Debug|x64
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Debug|x64.Build.0 = Debug|x64
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Release|Win32.ActiveCfg = Release|Win32
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Release|Win32.Build.0 = Release|Win32
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Release|x64.ActiveCfg = Release|x64
+		{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
