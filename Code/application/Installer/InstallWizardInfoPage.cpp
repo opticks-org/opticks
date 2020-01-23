@@ -42,6 +42,7 @@ InstallWizardInfoPage::InstallWizardInfoPage(const QList<Aeb*>& packageDescripto
       pItem->setData(ExtensionListDelegate::ExtensionIdRole, QString::fromStdString(pDescriptor->getId()));
       pItem->setData(ExtensionListDelegate::IconRole, pDescriptor->getIcon());
       pItem->setData(ExtensionListDelegate::UninstallPendingRole, false);
+      pItem->setData(ExtensionListDelegate::UseUninstallHelperRole, false);
       pItem->setFlags(Qt::ItemIsEnabled);
    }
 }

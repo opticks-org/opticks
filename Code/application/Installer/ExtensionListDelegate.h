@@ -22,7 +22,8 @@ public:
                VersionRole = Qt::UserRole + 1,
                ExtensionIdRole = Qt::UserRole + 2,
                IconRole = Qt::DecorationRole,
-               UninstallPendingRole = Qt::UserRole + 3 };
+               UninstallPendingRole = Qt::UserRole + 3,
+               UseUninstallHelperRole = Qt::UserRole + 4 };
 
    ExtensionListDelegate(QObject* pParent = NULL, bool allowEditing = true);
    virtual ~ExtensionListDelegate();
@@ -33,6 +34,9 @@ public:
    virtual void updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
    virtual void paint(QPainter* pPainter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+
+public slots:
+   void commit();
 
 private:
    ExtensionListDelegate(const ExtensionListDelegate& rhs);
