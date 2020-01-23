@@ -132,7 +132,7 @@ int WindowsAEBInstallApplication::run(int argc, char** argv)
       string errMsg;
       if(!ConfigurationSettingsImp::instance()->loadSettings(errMsg))
       {
-         mpProgress->updateProgress("Warning: unable to reload application settings.\n" + errMsg, -1, WARNING);
+         mpProgress->updateProgress("Warning: unable to reload application settings.\n" + errMsg, DONT_UPDATE, WARNING);
       }
 
       // Initialization
@@ -187,7 +187,7 @@ int WindowsAEBInstallApplication::run(int argc, char** argv)
             {
                cap += "\nDeleting the file.";
             }
-            mpProgress->updateProgress("Installation error: " + *autoIter, -1, ERRORS);
+            mpProgress->updateProgress("Installation error: " + *autoIter, DONT_UPDATE, ERRORS);
             qApplication.processEvents();
          }
          else
