@@ -620,6 +620,33 @@
     <Filter Include="Interfaces">
       <UniqueIdentifier>{adbc7bf7-8bc5-411c-970f-f25e2ff0c26d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Release">
+      <UniqueIdentifier>{a0b158f1-82b7-4b58-a9d8-4d667f0f43bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\DefaultSettings">
+      <UniqueIdentifier>{a8716b08-c77e-4a3d-bd05-055914963833}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\Templates">
+      <UniqueIdentifier>{8aea0110-f992-4e3d-a92e-5120b3b431a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles">
+      <UniqueIdentifier>{ebc05d0b-4171-42af-8831-76ccf7c381d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles\Annotation">
+      <UniqueIdentifier>{881a47ee-27e6-4bc2-9d41-1138dcf7f0f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles\Cg">
+      <UniqueIdentifier>{b79d02ff-1455-477c-91a2-ccc533ea58b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles\ColorTables">
+      <UniqueIdentifier>{5e13dfca-91c1-498c-a69f-10f32f8b16e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles\ImageFilters">
+      <UniqueIdentifier>{20788150-3925-48b0-8054-2efb11d9a3e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Release\SupportFiles\SecurityMarkings">
+      <UniqueIdentifier>{c5c3ca38-e028-4f9a-9dbf-e385bcb06321}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="App.rc">
@@ -637,6 +664,117 @@
   <ItemGroup>
     <None Include="Gui\res\application.ico">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\1-ApplicationDefaults.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\2-ApplicationMode.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\25-XmlRpc.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\40-PicturesExporters.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\41-MovieExporter.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\42-Nitf.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\43-IceExporter.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\44-AnnotationImagePalette.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\45-ConvolutionFilters.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\46-GeographicFeatures.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\50-KmlServer.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\55-Modis.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\DefaultSettings\60-SpatialResampler.cfg">
+      <Filter>Release\DefaultSettings</Filter>
+    </None>
+    <None Include="..\Release\Templates\MultipleImages.spg">
+      <Filter>Release\Templates</Filter>
+    </None>
+    <None Include="..\Release\Templates\SingleImage.spg">
+      <Filter>Release\Templates</Filter>
+    </None>
+    <None Include="..\Release\Templates\ZoomedImages.spg">
+      <Filter>Release\Templates</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Annotation\default.cgm">
+      <Filter>Release\SupportFiles\Annotation</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Annotation\East.ano">
+      <Filter>Release\SupportFiles\Annotation</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Annotation\North.ano">
+      <Filter>Release\SupportFiles\Annotation</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Cg\EdgeDetection.cg">
+      <Filter>Release\SupportFiles\Cg</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Cg\GrayscaleDisplay.cg">
+      <Filter>Release\SupportFiles\Cg</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Cg\RgbDisplay.cg">
+      <Filter>Release\SupportFiles\Cg</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Cg\ByPass.cg">
+      <Filter>Release\SupportFiles\Cg</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\Cg\ColormapDisplay.cg">
+      <Filter>Release\SupportFiles\Cg</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\RedTemp.cgr">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\Spectrum.cgr">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\SpectrumAlpha.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\StopLight.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\WeatherMap.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\autocolor.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\CubeHelix_Default.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\HotIron.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\HotIronAlpha.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ColorTables\Primaries.clu">
+      <Filter>Release\SupportFiles\ColorTables</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\ImageFilters\FilterDefaults.gic">
+      <Filter>Release\SupportFiles\ImageFilters</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\SecurityMarkings\1-SecurityValues.sec">
+      <Filter>Release\SupportFiles\SecurityMarkings</Filter>
+    </None>
+    <None Include="..\Release\SupportFiles\SecurityMarkings\ClassificationLevels.txt">
+      <Filter>Release\SupportFiles\SecurityMarkings</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

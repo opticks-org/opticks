@@ -349,7 +349,8 @@ void ProgressDlg::updateWindowsTaskbar(int percentage, ReportingLevel level)
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
+      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
       if (pWin != NULL)
       {
          if (level != ERRORS)
@@ -377,7 +378,8 @@ void ProgressDlg::setWindowsTaskbarPaused()
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
+      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
       if (pWin != NULL)
       {
          pTask->SetProgressState(pWin, TBPF_PAUSED);
@@ -393,7 +395,8 @@ void ProgressDlg::resetWindowsTaskbar()
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      HWND pWin = Service<DesktopServices>()->getMainWidget()->winId();
+      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
+      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
       if (pWin != NULL)
       {
          pTask->SetProgressState(pWin, TBPF_NOPROGRESS);

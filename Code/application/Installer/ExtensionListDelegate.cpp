@@ -28,7 +28,7 @@ ExtensionListDelegate::~ExtensionListDelegate()
 QWidget* ExtensionListDelegate::createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
    ExtensionListItem* pEditor = new ExtensionListItem(true, mAllowEditing, pParent);
-   connect(pEditor, SIGNAL(finished(QWidget*)), this, SIGNAL(closeEditor(QWidget*)));
+   connect(pEditor, SIGNAL(modified()), this, SLOT(commit()));
    return pEditor;
 }
 
@@ -47,12 +47,15 @@ void ExtensionListDelegate::setEditorData(QWidget* pEditor, const QModelIndex& i
    {
       pEditor->setProperty("uninstallable", true);
    }
+   pEditor->setProperty("useUninstallHelper", qvariant_cast<bool>(index.model()->data(index, UseUninstallHelperRole)));
 }
 
 void ExtensionListDelegate::setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const
 {
    bool uninstallable = pEditor->property("uninstallable").toBool();
+   bool useHelper = pEditor->property("useUninstallHelper").toBool();
    pModel->setData(index, !uninstallable, UninstallPendingRole);
+   pModel->setData(index, useHelper, UseUninstallHelperRole);
 }
 
 void ExtensionListDelegate::updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const
@@ -83,4 +86,10 @@ void ExtensionListDelegate::paint(QPainter* pPainter, const QStyleOptionViewItem
    pPainter->setPen(QPen(option.palette.mid(), 1.0, Qt::DashLine));
    pPainter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
    pPainter->restore();
+}
+
+void ExtensionListDelegate::commit()
+{
+   QWidget* pEditor = qobject_cast<QWidget*>(sender());
+   emit commitData(pEditor);
 }

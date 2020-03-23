@@ -45,7 +45,9 @@
    #define DEG_CHAR std::string("°")
    #define OPENCOLLADA_SUPPORT
 
+#if _MSC_VER < 1900
    #define snprintf _snprintf
+#endif
 
    #include <stddef.h>
    #define DISAMBIGUATE_TEMPLATE

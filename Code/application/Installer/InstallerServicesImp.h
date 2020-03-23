@@ -36,8 +36,11 @@ public:
    virtual std::map<std::string, std::string> getHelpEntries() const;
    virtual ReferenceCountDatabase& getReferenceCountDatabase() { return mRefCount; }
    virtual bool isPendingUninstall(const AebId& extension) const;
-
+   virtual bool launchHelper(const std::vector<std::string> installList,
+                             const std::vector<std::string> uninstallList);
+   
    QDir getExtensionDir(const Aeb& extension) const;
+   virtual bool useLaunchHelper() const;
 
 protected:
    InstallerServicesImp();

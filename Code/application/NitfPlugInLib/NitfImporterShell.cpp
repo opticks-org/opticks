@@ -209,6 +209,7 @@ bool Nitf::NitfImporterShell::createRasterPager(RasterElement* pRaster) const
       };
 
       imageCompression = pMetadata->getAttributeByPath(attributePath).toDisplayString();
+
    }
 
    if ((imageCompression == Nitf::ImageSubheaderFieldValues::IC_C8) ||
@@ -255,52 +256,7 @@ EncodingType Nitf::NitfImporterShell::ossimImageHeaderToEncodingType(const ossim
    // Use NBPP not ABPP as is done in ossimNitfTileSource.cpp.
    const ossim_int32 bitsPerPixel = pImgHeader->getBitsPerPixelPerBand();
    const ossimString pixelValueType = pImgHeader->getPixelValueType().upcase();
-   if (bitsPerPixel <= 8)
-   {
-      if ((pixelValueType == "B") || (pixelValueType == "INT"))
-      {
-         return INT1UBYTE;
-      }
-      else if (pixelValueType == "SI")
-      {
-         return INT1SBYTE;
-      }
-   }
-   else if (bitsPerPixel <= 16)
-   {
-      if (pixelValueType == "INT")
-      {
-         return INT2UBYTES;
-      }
-      else if (pixelValueType == "SI")
-      {
-         return INT2SBYTES;
-      }
-   }
-   else if (bitsPerPixel <= 32)
-   {
-      if (pixelValueType == "R")
-      {
-         return FLT4BYTES;
-      }
-      else if (pixelValueType == "INT")
-      {
-         return INT4UBYTES;
-      }
-      else if (pixelValueType == "SI")
-      {
-         return INT4SBYTES;
-      }
-   }
-   else if (bitsPerPixel <= 64)
-   {
-      if (pixelValueType == "R")
-      {
-         return FLT8BYTES;
-      }
-   }
-
-   return EncodingType();
+   return Nitf::nitfImageTypeToEncodingType(bitsPerPixel, pixelValueType);
 }
 
 bool Nitf::NitfImporterShell::validate(const DataDescriptor* pDescriptor,
@@ -604,12 +560,25 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
       return NULL;
    }
 
+   string ftitle = pFileHeader->getTitle().trim();
+   string iid1 = pImageSubheader->getImageId().trim();
    stringstream imageNameStream;
-   imageNameStream << "I" << imageSegment + 1;
+   if (ftitle.empty())
+   {
+      imageNameStream << filename;
+   }
+   else
+   {
+      imageNameStream << ftitle;
+   }
+   imageNameStream << " [" << imageSegment + 1 << "]";
+   if (!iid1.empty())
+   {
+      imageNameStream << " " << iid1;
+   }
    string imageName = imageNameStream.str();
 
-   ImportDescriptorResource pImportDescriptor(filename + "-" + imageName,
-      TypeConverter::toString<RasterElement>(), NULL);
+   ImportDescriptorResource pImportDescriptor(imageName, TypeConverter::toString<RasterElement>(), NULL);
    VERIFYRV(pImportDescriptor.get() != NULL, NULL);
    pImportDescriptor->setImported(pImageSubheader->getRepresentation() != "NODISPLY");
 
@@ -800,6 +769,44 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
       const DynamicObject* pBandsB = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(bandsbPath));
       if (pBandsB != NULL)
       {
+         bool validScaleFactor = false;
+         float scaleFactorValue;
+
+         const DataVariant& scaleFactor = pBandsB->getAttribute(Nitf::TRE::BANDSB::SCALE_FACTOR);
+         if (scaleFactor.isValid() == true)
+         {
+            validScaleFactor = scaleFactor.getValue(scaleFactorValue);
+            if (fabs(scaleFactorValue - 1.) < 1e-6)  // ignore if it's 1.0, no scaling occurs
+            {
+               validScaleFactor = false;
+            }
+         }
+
+         bool validAdditiveFactor = false;
+         float additiveFactorValue;
+
+         const DataVariant& additiveFactor = pBandsB->getAttribute(Nitf::TRE::BANDSB::ADDITIVE_FACTOR);
+         if (additiveFactor.isValid() == true)
+         {
+            validAdditiveFactor = additiveFactor.getValue(additiveFactorValue);
+            if (fabs(additiveFactorValue) < 1e-6)  // ignore if it's 0.0, no offsetting occurs
+            {
+               validAdditiveFactor = false;
+            }
+         }
+
+         if (validScaleFactor || validAdditiveFactor)
+         {
+            // need to scale and offset. this requires changing the data type unless the data type can already accomodate the scaling
+            if (dataType != FLT4BYTES && dataType != FLT8COMPLEX && dataType != FLT8BYTES)
+            {
+               // store for easy access in the pager
+               dataType = FLT4BYTES;
+               pDescriptor->setValidDataTypes(vector<EncodingType>(1, dataType));
+               pDescriptor->setDataType(dataType);
+            }
+         }
+
          bool validRowGsd = false;
 
          const DataVariant& rowGsd = pBandsB->getAttribute(Nitf::TRE::BANDSB::ROW_GSD);

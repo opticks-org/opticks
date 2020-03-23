@@ -1,6 +1,6 @@
 <ivysettings>
    <include file="${ivy.settings.dir}/opticks-settings.xml" />
-   <property name="opticks.public.publish.root" value="ssh://node.opticks.org:22/opt/website-content/downloads/ivy-repo/" override="false"/>
+   <property name="opticks.public.publish.root" value="ssh://opticks:22/var/www/website-content/downloads/ivy-repo/" override="false"/>
    <resolvers>
       <ssh name="opticks-public-publish" publishPermissions="0664">
          <ivy pattern="${opticks.public.publish.root}/${opticks.public.ivy.pattern}"/>

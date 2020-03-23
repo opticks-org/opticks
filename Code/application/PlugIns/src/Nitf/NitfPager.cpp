@@ -11,11 +11,16 @@
 #include "AppVersion.h"
 #include "CachedPage.h"
 #include "DataRequest.h"
+#include "DynamicObject.h"
 #include "NitfPager.h"
 #include "NitfUtilities.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
+#include "RasterDataDescriptor.h"
+#include "RasterElement.h"
+#include "RasterUtilities.h"
+#include "SpecialMetadata.h"
 #include "switchOnEncoding.h"
 
 #include <ossim/base/ossimFilename.h>
@@ -31,9 +36,31 @@
 
 REGISTER_PLUGIN(OpticksNitf, Pager, Nitf::Pager);
 
+namespace
+{
+   template<typename T, typename U>
+   void apply_gain_offset2(U* pDst, const T* pSrc, size_t length, float scaleFactor, float additiveFactor)
+   {
+      for (size_t idx = 0; idx < length; ++idx)
+      {
+         pDst[idx] = static_cast<float>(pSrc[idx]) * scaleFactor + additiveFactor;
+      }
+   }
+
+   template<typename T>
+   void apply_gain_offset(const T* pSrc, char* pDst, EncodingType dataType, size_t length, float scaleFactor, float additiveFactor)
+   {
+      switchOnEncoding(dataType, apply_gain_offset2<T>, pDst, pSrc, length, scaleFactor, additiveFactor);
+   }
+}
+
 Nitf::Pager::Pager() :
    mSegment(0),
-   mpStep(NULL)
+   mpStep(NULL),
+   mFileEncoding(),
+   mEncoding(),
+   mScaleFactor(1.),
+   mAdditiveFactor(0.)
 {
    setCopyright(APP_COPYRIGHT);
    setName("NitfPager");
@@ -54,8 +81,61 @@ bool Nitf::Pager::getInputSpecification(PlugInArgList*& pArgList)
 
 bool Nitf::Pager::parseInputArgs(PlugInArgList* pInputArgList)
 {
-   return (CachedPager::parseInputArgs(pInputArgList) &&
+   bool rval = (CachedPager::parseInputArgs(pInputArgList) &&
       pInputArgList != NULL && pInputArgList->getPlugInArgValue<unsigned int>("Segment Number", mSegment));
+   if (rval)
+   {
+      mEncoding = dynamic_cast<const RasterDataDescriptor*>(getRasterElement()->getDataDescriptor())->getDataType();
+      try
+      {
+         const DynamicObject* pMetadata = getRasterElement()->getDataDescriptor()->getMetadata();
+         VERIFYRV(pMetadata, NULL);
+
+         const std::string nbppAttributePath[] =
+         {
+            Nitf::NITF_METADATA,
+            Nitf::IMAGE_SUBHEADER,
+            Nitf::ImageSubheaderFieldNames::BITS_PER_PIXEL,
+            END_METADATA_NAME
+         };
+         unsigned int nbpp = dv_cast<unsigned int>(pMetadata->getAttributeByPath(nbppAttributePath));
+
+         const std::string pvtypeAttributePath[] =
+         {
+            Nitf::NITF_METADATA,
+            Nitf::IMAGE_SUBHEADER,
+            Nitf::ImageSubheaderFieldNames::PIXEL_VALUE_TYPE,
+            END_METADATA_NAME
+         };
+         std::string pvtype = dv_cast<std::string>(pMetadata->getAttributeByPath(pvtypeAttributePath));
+
+         mFileEncoding = Nitf::nitfImageTypeToEncodingType(nbpp, pvtype);
+         const string bandsbPath[] =
+         {
+            Nitf::NITF_METADATA,
+            Nitf::TRE_METADATA,
+            "BANDSB",
+            "0",
+            END_METADATA_NAME
+         };
+
+         const DynamicObject* pBandsB = dv_cast<DynamicObject>(&pMetadata->getAttributeByPath(bandsbPath));
+         if (pBandsB != NULL)
+         {
+            const DataVariant& scaleFactor = pBandsB->getAttribute(Nitf::TRE::BANDSB::SCALE_FACTOR);
+            mScaleFactor = dv_cast<float>(scaleFactor);
+
+            const DataVariant& additiveFactor = pBandsB->getAttribute(Nitf::TRE::BANDSB::ADDITIVE_FACTOR);
+            mAdditiveFactor = dv_cast<float>(additiveFactor);
+         }
+      }
+      catch (std::bad_cast&)
+      {
+         // metadata not present, we'll open without conversion
+         ;;
+      }
+   }
+   return rval;
 }
 
 bool Nitf::Pager::openFile(const string& filename)
@@ -115,7 +195,13 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
                      colNumber + minx + concurrentColumns-1, rowNumber + miny + concurrentRows-1);
 
    const int dstSize = concurrentRows * concurrentColumns * concurrentBands * getBytesPerBand();
-   ArrayResource<char> pData(dstSize, true);
+   int loadSize = concurrentRows * concurrentColumns * concurrentBands * RasterUtilities::bytesInEncoding(mFileEncoding);
+   if (loadSize == 0)
+   {
+      loadSize = dstSize;
+   }
+   ArrayResource<char> pData(loadSize, true);
+
    if (pData.get() == NULL)
    {
       return CachedPage::UnitPtr();
@@ -143,7 +229,7 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
       // accepts single-band VQ. In all other cases, the call to setOutputBandList will have restricted cubeData to a
       // single band, meaning that the only valid parameter to cubeData->getBuf is a 0. This parameter cannot be
       // bandNumber because of the earlier call to setOutputBandList (setting it to bandNumber returns a NULL pointer).
-      memcpy(pData.get(), cubeData->getBuf(0), dstSize);
+      memcpy(pData.get(), cubeData->getBuf(0), loadSize);
    }
    else
    {
@@ -168,6 +254,23 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
       cubeData->unloadTile(pData.get(), region, interleave);
    }
 
+   // do we need to apply gain and offset?
+   if (loadSize != dstSize)
+   {
+      ArrayResource<char> pDstData(dstSize, true);
+   
+      if (pDstData.get() == NULL)
+      {
+         return CachedPage::UnitPtr();
+      }
+
+      switchOnEncoding(mFileEncoding, apply_gain_offset,
+                       pData.get(), pDstData.get(),
+                       mEncoding, (concurrentRows * concurrentColumns * concurrentBands),
+                       mScaleFactor, mAdditiveFactor);
+      return CachedPage::UnitPtr(new CachedPage::CacheUnit(pDstData.release(), startRow, concurrentRows,
+         dstSize, concurrentBands == 1 ? startBand : CachedPage::CacheUnit::ALL_BANDS));
+   }
    return CachedPage::UnitPtr(new CachedPage::CacheUnit(pData.release(), startRow, concurrentRows,
       dstSize, concurrentBands == 1 ? startBand : CachedPage::CacheUnit::ALL_BANDS));
 }

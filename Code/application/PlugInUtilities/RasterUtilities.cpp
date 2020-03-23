@@ -731,6 +731,7 @@ RasterDataDescriptor *RasterUtilities::generateUnchippedRasterDataDescriptor(
    pNewDescriptor->setDataType(pOrigDescriptor->getDataType());
    pNewDescriptor->setValidDataTypes(pOrigDescriptor->getValidDataTypes());
    pNewDescriptor->setProcessingLocation(ON_DISK_READ_ONLY);
+   pNewDescriptor->setMetadata(pOrigDescriptor->getMetadata());
 
    FactoryResource<RasterFileDescriptor> pNewFileDescriptor(
       dynamic_cast<RasterFileDescriptor*>(pOrigFileDescriptor->copy()));

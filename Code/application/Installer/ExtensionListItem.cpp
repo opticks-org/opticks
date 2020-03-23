@@ -18,7 +18,9 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QVBoxLayout>
 
-ExtensionListItem::ExtensionListItem(bool editor, bool showUpdateInfo, QWidget* pParent) : QWidget(pParent)
+ExtensionListItem::ExtensionListItem(bool editor, bool showUpdateInfo, QWidget* pParent) :
+      QWidget(pParent),
+      mUseUninstallHelper(false)
 {
    //KIP - Fix up the layout of this widget.
    QVBoxLayout* pTopLevel = new QVBoxLayout(this);
@@ -126,6 +128,11 @@ bool ExtensionListItem::getUninstallable() const
    return mpUninstallButton->isEnabled();
 }
 
+bool ExtensionListItem::getUseUninstallHelper() const
+{
+   return mUseUninstallHelper;
+}
+
 void ExtensionListItem::setName(const QString& v)
 {
    mpName->setText(v);
@@ -167,11 +174,6 @@ void ExtensionListItem::setUpdateInfo(const QString& v)
    }
 }
 
-void ExtensionListItem::accepted()
-{
-   emit finished(this);
-}
-
 void ExtensionListItem::about()
 {
    const Aeb* pExtension = Service<InstallerServices>()->getAeb(mExtensionId.toStdString());
@@ -204,23 +206,45 @@ void ExtensionListItem::uninstall()
    }
    else
    {
-      QMessageBox::warning(this, "Can't uninstall extension", "Can't uninstall extension.\n" + QString::fromStdString(errMsg));
+      setUseUninstallHelper(true);
+      setUninstallable(false);
    }
 }
 
 void ExtensionListItem::setUninstallable(bool v)
 {
+   if (mpUninstallButton == NULL)
+   {
+      return;
+   }
+   bool cur = mpUninstallButton->isEnabled();
    if (mpUninstallButton != NULL)
    {
       mpUninstallButton->setEnabled(v);
    }
    if (!v)
    {
-      setUpdateInfo("This extension will be uninstalled when Opticks is restarted.");
+      if (mUseUninstallHelper)
+      {
+         setUpdateInfo("This extension will be uninstalled when this dialog is closed.");
+      }
+      else
+      {
+         setUpdateInfo("This extension will be uninstalled when Opticks is restarted.");
+      }
    }
    else
    {
       setUpdateInfo("");
    }
+   if (cur != v)
+   {
+      emit modified();
+   }
    update();
+}
+
+void ExtensionListItem::setUseUninstallHelper(bool v)
+{
+   mUseUninstallHelper = v;
 }

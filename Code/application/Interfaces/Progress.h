@@ -19,6 +19,12 @@
 #include <string>
 
 /**
+ *  When calling Progress::updateProgress() don't change the progress percentage.
+ *  This is often used when reporting a warning or error.
+ **/
+#define DONT_UPDATE -1
+
+/**
  *  Specifies the state of the status message.
  *
  *  The reporting level indicates the circumstances surrounding the current
@@ -66,7 +72,9 @@ public:
     *  @param   percent
     *           For partial completion status changes, this figure represents
     *           what percent (0-100) of the activity has cumulatively been
-    *           completed.
+    *           completed. If a value <0 or >100 is specified, the current
+    *           value remains unchanged. The convenience macro DONT_UPDATE
+    *           can be used for better self-documenting code.
     *  @param   gran
     *           Reporting level granularity, allowing clients to filter out
     *           activity changes they are not interested in. For example,

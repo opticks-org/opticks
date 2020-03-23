@@ -8,6 +8,7 @@
  */
 
 #include "AebIo.h"
+#include "AppConfig.h"
 #include "ConfigurationSettings.h"
 #include "InstallerServicesImp.h"
 #include "ObjectResource.h"
@@ -18,11 +19,17 @@
 
 #include <memory>
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QDirIterator>
 #include <QtCore/QSet>
 #include <QtCore/QStack>
 #include <QtCore/QUrl>
+
+#ifdef WIN_API
+#include <windows.h>
+#include <shellapi.h>
+#endif
 
 InstallerServicesImp* InstallerServicesImp::spInstance = NULL;
 bool InstallerServicesImp::sDestroyed = false;
@@ -312,10 +319,17 @@ bool InstallerServicesImp::installExtension(const std::string& aebFile, Progress
    }
    if (!log.execute(extensionDir.absoluteFilePath("transactionlog.txt").toStdString(), "Installing " + pExtension->getName()))
    {
-      log.rollback();
+      if (useLaunchHelper())
+      {
+         log.rollback(std::string());
+      }
+      else
+      {
+         log.rollback();
+      }
       extensionDir.remove("transactionlog.txt");
       extensionDir.rmdir(".");
-      if (pProgress != NULL)
+      if (pProgress != NULL && !useLaunchHelper())
       {
          pProgress->updateProgress("Error installing the extension.", 0, ERRORS);
       }
@@ -554,6 +568,15 @@ QDir InstallerServicesImp::getExtensionDir(const Aeb& extension) const
    return extensionDir;
 }
 
+bool InstallerServicesImp::useLaunchHelper() const
+{
+#ifdef WIN_API
+   return true;
+#else
+   return false;
+#endif
+}
+
 bool InstallerServicesImp::processPending(Progress* pProgress)
 {
    QDir extensionDir(QString::fromStdString(Service<ConfigurationSettings>()->getSettingExtensionFilesPath()->getFullPathAndName()));
@@ -650,4 +673,32 @@ std::map<std::string, std::string> InstallerServicesImp::getHelpEntries() const
 bool InstallerServicesImp::isPendingUninstall(const AebId& extension) const
 {
    return mPendingUninstall.find(extension) != mPendingUninstall.end();
+}
+
+bool InstallerServicesImp::launchHelper(const std::vector<std::string> installList,
+                                        const std::vector<std::string> uninstallList)
+{
+#ifdef WIN_API
+   QString path(QCoreApplication::applicationDirPath());
+   path.replace("/", "\\");
+   path += "\\WindowsAEBInstall.exe";
+   QString cmdline;
+   for (auto it = uninstallList.begin(); it != uninstallList.end(); ++it)
+   {
+      cmdline += QString(" /remove:%1").arg(QString::fromStdString(*it));
+   }
+   for (auto it = installList.begin(); it != installList.end(); ++it)
+   {
+      cmdline += " " + QString::fromStdString(*it);
+   }
+   int rval = reinterpret_cast<int>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
+   if (rval <= 32)
+   {
+      return false;
+   }
+
+   return true;
+#else
+   return false;
+#endif
 }

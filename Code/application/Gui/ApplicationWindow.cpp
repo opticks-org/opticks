@@ -6763,6 +6763,17 @@ void ApplicationWindow::processDropFiles()
       {
          InstallWizard wiz(extensions, pProgress.get(), this);
          wiz.exec();
+         if (Service<InstallerServices>()->useLaunchHelper() && !wiz.getPendingInstalls().empty())
+         {
+            if (Service<DesktopServices>()->showMessageBox("Elevate Privileges",
+               std::string("Installing and uninstalling extensions requires Administrator privileges.\n")
+               + APP_NAME + " will exit and update the extensions.\n"
+               + "Are you sure you want to proceed?", "&Yes", "&No") == 0)
+            {
+               Service<InstallerServices>()->launchHelper(wiz.getPendingInstalls(), std::vector<std::string>());
+               QCoreApplication::instance()->quit();
+            }
+         }
       }
    }
    else if (mDropFilesType == SESSION_FILE)

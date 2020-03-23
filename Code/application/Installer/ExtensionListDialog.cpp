@@ -10,6 +10,7 @@
 #include "Aeb.h"
 #include "AebIo.h"
 #include "AppVerify.h"
+#include "AppVersion.h"
 #include "DesktopServices.h"
 #include "ExtensionListDelegate.h"
 #include "ExtensionListDialog.h"
@@ -18,6 +19,7 @@
 #include "InstallWizard.h"
 #include "ProgressResource.h"
 
+#include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QHeaderView>
@@ -48,6 +50,35 @@ ExtensionListDialog::~ExtensionListDialog()
 {
 }
 
+void ExtensionListDialog::accept()
+{
+   QDialog::accept();
+   if (Service<InstallerServices>()->useLaunchHelper())
+   {
+      std::vector<std::string> uninstallIds;
+      for (int idx = 0; idx < mpExtensionList->count(); ++idx)
+      {
+         QListWidgetItem* pItem = mpExtensionList->item(idx);
+         if (pItem != NULL && qvariant_cast<bool>(pItem->data(ExtensionListDelegate::UseUninstallHelperRole)))
+         {
+            QString extensionId(qvariant_cast<QString>(pItem->data(ExtensionListDelegate::ExtensionIdRole)));
+            uninstallIds.push_back(extensionId.toStdString());
+         }
+      }
+      if (!uninstallIds.empty() || !mPendingInstalls.empty())
+      {
+         if (Service<DesktopServices>()->showMessageBox("Elevate Privileges",
+            std::string("Installing and uninstalling extensions requires Administrator privileges.\n")
+            + APP_NAME + " will exit and update the extensions.\n"
+            + "Are you sure you want to proceed?", "&Yes", "&No") == 0)
+         {
+            Service<InstallerServices>()->launchHelper(mPendingInstalls, uninstallIds);
+            QCoreApplication::instance()->quit();
+         }
+      }
+   }
+}
+
 void ExtensionListDialog::reloadExtensions()
 {
    mpExtensionList->clear();
@@ -66,7 +97,9 @@ void ExtensionListDialog::reloadExtensions()
       pItem->setData(ExtensionListDelegate::ExtensionIdRole, QString::fromStdString(pExtension->getId()));
       pItem->setData(ExtensionListDelegate::IconRole, pExtension->getIcon());
       pItem->setData(ExtensionListDelegate::UninstallPendingRole, Service<InstallerServices>()->isPendingUninstall(pExtension->getId()));
+      pItem->setData(ExtensionListDelegate::UseUninstallHelperRole, false);
       pItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+      mpExtensionList->openPersistentEditor(pItem);
    }
 }
 
@@ -121,6 +154,9 @@ void ExtensionListDialog::install()
       ProgressResource progress("Install extensions");
       InstallWizard wiz(extensions, progress.get(), this);
       wiz.exec();
+      std::vector<std::string> newPending = wiz.getPendingInstalls();
+      mPendingInstalls.reserve(mPendingInstalls.size() + newPending.size());
+      mPendingInstalls.insert(mPendingInstalls.end(), newPending.begin(), newPending.end());
    }
    reloadExtensions();
 }

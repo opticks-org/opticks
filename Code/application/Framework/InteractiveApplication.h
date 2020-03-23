@@ -19,9 +19,9 @@ class InteractiveApplication : public Application
 {
 public:
    InteractiveApplication(QCoreApplication& app);
-   ~InteractiveApplication();
+   virtual ~InteractiveApplication();
 
-   int run(int argc, char** argv);
+   virtual int run(int argc, char** argv);
 
    void reportWarning(const std::string& warningMessage) const;
    void reportError(const std::string& errorMessage) const;

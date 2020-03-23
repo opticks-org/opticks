@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Generate installation packages for Opticks on both Windows and Solaris.
 
@@ -87,7 +87,7 @@ def run_wix(input_files, wix_path, variables, extensions, culture,
         return 1
     candle_args = list()
     candle_args.append(os.path.join(wix_path,"candle.exe"))
-    for key in variables.iterkeys():
+    for key in variables.keys():
         candle_args.append("-d%s=%s" % (key, variables[key]))
     if output_name is None:
         output_name = os.path.splitext(os.path.basename(input_files[0]))[0]
@@ -105,14 +105,14 @@ def run_wix(input_files, wix_path, variables, extensions, culture,
             candle_args.append(ext)
     for the_file in input_files:
         candle_args.append(the_file)
-    print "Compiling...", " ".join(candle_args)
+    print("Compiling...", " ".join(candle_args))
     retcode = execute_process(candle_args)
     if retcode != 0:
         return retcode
 
     light_args = list()
     light_args.append(os.path.join(wix_path,"light.exe"))
-    for key in variables.iterkeys():
+    for key in variables.keys():
         light_args.append("-d%s=%s" % (key, variables[key]))
     light_args.append("-out")
     msi_file = os.path.join(abs_output_path, output_name) + ".msi"
@@ -131,7 +131,7 @@ def run_wix(input_files, wix_path, variables, extensions, culture,
         wix_obj_file = os.path.join(abs_output_path,
             os.path.splitext(os.path.basename(the_file))[0] + ".wixobj")
         light_args.append(wix_obj_file)
-    print "Linking...", " ".join(light_args)
+    print("Linking...", " ".join(light_args))
     retcode = execute_process(light_args)
     return retcode
 
@@ -210,11 +210,11 @@ class HelpGenerator(WixDirectoryGenerator):
 </Wix>""")
         output.close()
         self.extra_output.write("Component IDs\n")
-        for key in self.component_ids.keys():
+        for key in list(self.component_ids.keys()):
             self.extra_output.write('<ComponentRef Id="%s" />' % (key))
             self.extra_output.write("\n")
         self.extra_output.write("\nComponent GUIDs\n")
-        for guid in self.component_guids.keys():
+        for guid in list(self.component_guids.keys()):
             self.extra_output.write('<?define %s = "" ?>' % (guid))
             self.extra_output.write("\n")
 
@@ -226,7 +226,7 @@ class HelpGenerator(WixDirectoryGenerator):
         last_path_element = last_path_element.replace("&", "")
         last_path_element = last_path_element.lower()
 
-        if self.path_identifier.has_key(last_path_element):
+        if last_path_element in self.path_identifier:
             path_list = self.path_identifier[last_path_element]
             try:
                 index = path_list.index(path)
@@ -277,10 +277,8 @@ class CommonBuilder:
 
     def require_code_dir(self):
         if self.opticks_code_dir is None:
-            if os.environ.has_key("OPTICKS_CODE_DIR"):
+            if "OPTICKS_CODE_DIR" in os.environ:
                 self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
-            elif os.path.exists("../../Code"):
-                self.opticks_code_dir = os.path.abspath("../../Code")
             else:
                 raise ScriptException("The path to the "\
                     "Opticks source code was not provided, see "\
@@ -316,14 +314,14 @@ class CommonBuilder:
             new_version = \
                 commonutils.get_app_version_only(self.opticks_code_dir)
             if self.verbosity >= 1:
-                print "Detected application version as %s" % (new_version)
+                print("Detected application version as %s" % (new_version))
 
         if self.verbosity > 1:
-            print "Updating MSI version #..."
+            print("Updating MSI version #...")
         if self.verbosity > 1:
-            print "Setting MSI Display Version # to %s" % (new_version)
+            print("Setting MSI Display Version # to %s" % (new_version))
         if self.verbosity > 1:
-            print "Setting MSI Internal Version # to %s" % (msi_version)
+            print("Setting MSI Internal Version # to %s" % (msi_version))
         version_file = open("Opticks-Version.wxi", "r")
         version_file_contents = version_file.read()
         version_file.close()
@@ -338,7 +336,7 @@ class CommonBuilder:
             re.compile('<\?\s*?define\s*?\S+?Guid\s*?\=\s*?"(?P<guid>.*?)"')
         current_pos = 0
         if self.verbosity > 1:
-            print "Updating GUID's..."
+            print("Updating GUID's...")
         while True:
             match_obj = guid_matcher.search(version_file_contents, current_pos)
             if match_obj:
@@ -350,23 +348,23 @@ class CommonBuilder:
             else:
                 break
         if self.verbosity > 1:
-            print "Done updating GUIDs"
+            print("Done updating GUIDs")
 
         version_file = open("Opticks-Version.wxi", "w")
         version_file.write(version_file_contents)
         version_file.close()
 
         if self.verbosity >= 1:
-            print "Opticks-Version.wxi has been updated to reference "\
+            print("Opticks-Version.wxi has been updated to reference "\
                 "the new version. You must re-run this script with "\
                 "--32 or --64 to generate a .msi that uses the "\
                 "new version number.  Please commit the "\
-                "Opticks-Version.wxi change to Subversion."
+                "Opticks-Version.wxi change to Subversion.")
         if self.verbosity > 1:
-            print "Done updating MSI version #"
+            print("Done updating MSI version #")
 
         if self.verbosity > 1:
-            print "Updating pkg version #..."
+            print("Updating pkg version #...")
         pkginfo_file = open("pkginfo", "r")
         pkginfo = pkginfo_file.read()
         pkginfo_file.close()
@@ -376,12 +374,12 @@ class CommonBuilder:
         pkginfo_file.write(pkginfo)
         pkginfo_file.close()
         if self.verbosity >= 1:
-            print "pkginfo has been updated to reference the new version. "\
+            print("pkginfo has been updated to reference the new version. "\
             "You must re-run this script to generate a Solaris Package "\
             "that uses the new version number.  Please commit the pkginfo "\
-            "change to Subversion."
+            "change to Subversion.")
         if self.verbosity > 1:
-            print "Done updating pkg version #"
+            print("Done updating pkg version #")
 
 
 class WixBuilder(CommonBuilder):
@@ -427,7 +425,7 @@ class WixBuilder(CommonBuilder):
 
         """
         if self.verbosity > 1:
-            print "Generating MSI..."
+            print("Generating MSI...")
 
         if self.wix_path is None:
             raise ScriptException("The path to the Windows "\
@@ -440,10 +438,9 @@ class WixBuilder(CommonBuilder):
         self.require_code_dir()
 
         if self.opticks_dependencies_dir is None:
-            if os.environ.has_key("OPTICKSDEPENDENCIES"):
-                self.opticks_dependencies_dir = os.environ["OPTICKSDEPENDENCIES"]
-            elif os.path.exists("../../Dependencies"):
-                self.opticks_dependencies_dir = os.path.abspath("../../Dependencies")
+            if "OPTICKSDEPENDENCIES" in os.environ:
+                self.opticks_dependencies_dir = \
+                    os.environ["OPTICKSDEPENDENCIES"]
             else:
                 raise ScriptException("The path to the Opticks "\
                     "dependencies was not provided, see -d or "\
@@ -480,7 +477,8 @@ class WixBuilder(CommonBuilder):
             msi_name = "Opticks-%s-64bit" % (version_number)
             ivars["Is64Bit"] = "True"
             ivars["OpticksBinariesDir"] = \
-                os.path.join(self.opticks_code_dir, "Build64/Release/Binaries")
+                os.path.join(self.opticks_code_dir, "Build",
+                "Binaries-x64-Release")
             output_path = os.path.join(self.output_dir, "64")
             ivars["OpticksDependenciesDir"] = \
                 self.get_dependencies(True, output_path)
@@ -493,7 +491,8 @@ class WixBuilder(CommonBuilder):
             msi_name = "Opticks-%s-32bit" % (version_number)
             ivars["Is32Bit"] = "True"
             ivars["OpticksBinariesDir"] = \
-                os.path.join(self.opticks_code_dir, "Build32/Release/Binaries")
+                os.path.join(self.opticks_code_dir, "Build",
+                "Binaries-Win32-Release")
             output_path = os.path.join(self.output_dir, "32")
             ivars["OpticksDependenciesDir"] = \
                 self.get_dependencies(False, output_path)
@@ -509,8 +508,8 @@ class WixBuilder(CommonBuilder):
             os.path.abspath(self.opticks_release_dir)
 
         if self.verbosity > 1:
-            print "Generating other ClassificationLevel files by "\
-            "using ClassificationLevels-T.txt as the base..."
+            print("Generating other ClassificationLevel files by "\
+            "using ClassificationLevels-T.txt as the base...")
         self.generate_classification_file(os.path.join(self.output_dir,
             "ClassificationLevels-U.txt"), 1)
         self.generate_classification_file(os.path.join(self.output_dir,
@@ -519,7 +518,7 @@ class WixBuilder(CommonBuilder):
             "ClassificationLevels-S.txt"), 3)
         ivars["OpticksClassificationDir"] = self.output_dir
         if self.verbosity > 1:
-            print "Done generating other ClassificationLevel files"
+            print("Done generating other ClassificationLevel files")
 
         installer_created = run_wix(["Opticks.wxs", "Opticks-Help.wxs",
             "Opticks-UI.wxs"],
@@ -562,8 +561,8 @@ class WixBuilder(CommonBuilder):
         import commonutils
         if not(os.path.exists(dependencies_output)):
             if self.verbosity > 1:
-                print "Gathering dependency libraries for %s "\
-                "platform..." % (platform)
+                print("Gathering dependency libraries for %s "\
+                "platform..." % (platform))
 
             dependencies_list = \
                 commonutils.get_dependencies(self.opticks_dependencies_dir,
@@ -571,17 +570,17 @@ class WixBuilder(CommonBuilder):
             commonutils.copy_dependencies(dependencies_list,
                 dependencies_output)
             if self.verbosity > 1:
-                print "Done gathering dependency libraries"
+                print("Done gathering dependency libraries")
         return dependencies_output
 
     def generate_wix_for_help(self):
         if self.verbosity > 1:
-            print "Generating Opticks-Help.wxs from checked-in help..."
+            print("Generating Opticks-Help.wxs from checked-in help...")
         self.get_help()
         help_output = os.path.join(self.output_dir, "Help")
         if self.verbosity > 1:
-            print "Creating Opticks-Help.wxs by traversing "\
-            "contents of Help dir at %s..." % (help_output)
+            print("Creating Opticks-Help.wxs by traversing "\
+            "contents of Help dir at %s..." % (help_output))
         generator = HelpGenerator(self.output_dir, "Help", "1",
             "Opticks-Help.wxs", sys.stdout)
         retcode = generator.generate()
@@ -589,15 +588,15 @@ class WixBuilder(CommonBuilder):
             raise ScriptException("There was an error while generating "\
                 "the Opticks-Help.wxs")
         if self.verbosity >= 1:
-            print "The Opticks-Help.wxs has been replaced by recursively "\
+            print("The Opticks-Help.wxs has been replaced by recursively "\
             "walking the directory structure of the unzipped Help.  "\
             "Above you will see the Component IDs that you be "\
             "inserted into Opticks.wxs.  You will also see the "\
             "Component GUIDs that should be inserted into "\
             "Opticks-Version.wxi and then this script should be "\
-            "re-run with the --update-version argument."
+            "re-run with the --update-version argument.")
         if self.verbosity > 1:
-            print "Done generating Opticks-Help.wxs"
+            print("Done generating Opticks-Help.wxs")
 
 
     def get_help(self):
@@ -607,11 +606,11 @@ class WixBuilder(CommonBuilder):
                 "Help", "Opticks.zip")
             total_help_output = os.path.join(help_output, "Opticks")
             if self.verbosity > 1:
-                print "Unpacking Help located at %s "\
-                 "to %s..." % (help_zip_path, total_help_output)
+                print("Unpacking Help located at %s "\
+                 "to %s..." % (help_zip_path, total_help_output))
             unzip_file(help_zip_path, total_help_output)
             if self.verbosity > 1:
-                print "Done unpacking Help"
+                print("Done unpacking Help")
         return help_output
 
 def run_pkgmk(variables, output_path):
@@ -634,12 +633,12 @@ def run_pkgmk(variables, output_path):
     pkgmk_args.append("-o")
     pkgmk_args.append("-d")
     pkgmk_args.append(output_path)
-    for key in variables.iterkeys():
+    for key in variables.keys():
         pkgmk_args.append("%s=%s" % (key, variables[key]))
 
     if not(os.path.exists(output_path)):
         os.makedirs(output_path)
-    print "Building Package", " ".join(pkgmk_args)
+    print("Building Package", " ".join(pkgmk_args))
     ret_code = execute_process(pkgmk_args)
     if ret_code != 0:
         return ret_code
@@ -670,9 +669,9 @@ class PackageBuilder(CommonBuilder):
 
         """
         if self.verbosity > 1:
-            print "Generating Solaris package..."
+            print("Generating Solaris package...")
         if self.opticks_code_dir is None:
-            if os.environ.has_key("OPTICKS_CODE_DIR"):
+            if "OPTICKS_CODE_DIR" in os.environ:
                 self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
             else:
                 raise ScriptException("The path to the Opticks source "\
@@ -684,7 +683,7 @@ class PackageBuilder(CommonBuilder):
                 "--code-dir" % (self.opticks_code_dir))
 
         if self.opticks_dependencies_dir is None:
-            if os.environ.has_key("OPTICKSDEPENDENCIES"):
+            if "OPTICKSDEPENDENCIES" in os.environ:
                 self.opticks_dependencies_dir = \
                     os.environ["OPTICKSDEPENDENCIES"]
             else:
@@ -709,7 +708,7 @@ class PackageBuilder(CommonBuilder):
         ivars = dict()
         ivars["OpticksCodeDir"] = self.opticks_code_dir
         ivars["OpticksBinariesDir"] = os.path.join(self.opticks_code_dir,
-            "Build64/Release/Binaries")
+            "Build", "Binaries-solaris-sparc-release")
         ivars["OpticksDependenciesDir"] = \
             self.get_dependencies(self.output_dir)
         ivars["OpticksHelpDir"] = self.get_help()
@@ -725,7 +724,7 @@ class PackageBuilder(CommonBuilder):
         output_pkg_name = "opticks-%s-sol10-sparc.pkg" % (version)
 
         if self.verbosity > 1:
-            print "Creating datastream format of package..."
+            print("Creating datastream format of package...")
         pkgtrans_args = list()
         pkgtrans_args.append("pkgtrans")
         pkgtrans_args.append("-s")
@@ -738,13 +737,13 @@ class PackageBuilder(CommonBuilder):
             raise ScriptException("Running pkgtrans failed with "\
                 "an error code of %s" % (retcode))
         if self.verbosity > 1:
-            print "Done creating datastream format of package"
+            print("Done creating datastream format of package")
 
         if self.package_dir is not None and os.path.exists(self.package_dir):
             output_tar_bz2 = os.path.abspath(os.path.join(self.package_dir,
                 "opticks-%s-sol10-sparc.tar.bz2" % (version)))
             if self.verbosity > 1:
-                print "Creating compressed archive at %s..." % (output_tar_bz2)
+                print("Creating compressed archive at %s..." % (output_tar_bz2))
             tar_input = os.path.abspath(os.path.join(self.output_dir,
                 "tar-input"))
             if os.path.exists(tar_input):
@@ -780,15 +779,15 @@ class PackageBuilder(CommonBuilder):
 
             shutil.rmtree(tar_input, True)
             if self.verbosity > 1:
-                print "Done creating compressed archive"
+                print("Done creating compressed archive")
         if self.verbosity > 1:
-            print "Done generating Solaris package"
+            print("Done generating Solaris package")
 
     def get_dependencies(self, output_path):
         dependencies_output = os.path.join(output_path, "Dependencies")
         if not(os.path.exists(dependencies_output)):
             if self.verbosity > 1:
-                print "Gathering dependency libraries..."
+                print("Gathering dependency libraries...")
             sys.path.append(self.opticks_code_dir)
             import commonutils
 
@@ -798,7 +797,7 @@ class PackageBuilder(CommonBuilder):
             commonutils.copy_dependencies(dependencies_list,
                 dependencies_output)
             if self.verbosity > 1:
-                print "Done gathering dependency libraries"
+                print("Done gathering dependency libraries")
         return dependencies_output
 
     def get_help(self):
@@ -808,17 +807,17 @@ class PackageBuilder(CommonBuilder):
                 "Help", "Opticks.zip")
             total_help_output = os.path.join(help_output, "Opticks")
             if self.verbosity > 1:
-                print "Unpacking Help located at %s to "\
-                    "%s..." % (help_zip_path, total_help_output)
+                print("Unpacking Help located at %s to "\
+                    "%s..." % (help_zip_path, total_help_output))
             unzip_file(help_zip_path, total_help_output)
             if self.verbosity > 1:
-                print "Done unpacking Help"
+                print("Done unpacking Help")
 
         help_prototype_path = os.path.join(self.output_dir, "help-prototype")
         if self.verbosity > 1:
-            print "Generating help-prototype in %s by traversing "\
+            print("Generating help-prototype in %s by traversing "\
                 "contents of Help dir at "\
-                "%s..." % (help_prototype_path, help_output)
+                "%s..." % (help_prototype_path, help_output))
         help_prototype = open(help_prototype_path, "w")
         for dirpath, dirnames, filenames in os.walk(help_output):
             for the_dir in dirnames:
@@ -833,7 +832,7 @@ class PackageBuilder(CommonBuilder):
                     "$OpticksHelpDir%s 0644 root "\
                     "$GROUP\n" % (total_path, total_path))
         if self.verbosity > 1:
-            print "Done generating help-prototype"
+            print("Done generating help-prototype")
         return help_output
 
 
@@ -858,12 +857,12 @@ class SConsBuilder(CommonBuilder):
 
         """
         if self.verbosity > 1:
-            print "Cleaning out old PackageOutput temporary directory..."
+            print("Cleaning out old PackageOutput temporary directory...")
         self.clean()
         if self.verbosity > 1:
-            print "Generating Linux package..."
+            print("Generating Linux package...")
         if self.opticks_code_dir is None:
-            if os.environ.has_key("OPTICKS_CODE_DIR"):
+            if "OPTICKS_CODE_DIR" in os.environ:
                 self.opticks_code_dir = os.environ["OPTICKS_CODE_DIR"]
             else:
                 raise ScriptException("The path to the Opticks source "\
@@ -875,7 +874,7 @@ class SConsBuilder(CommonBuilder):
                 "--code-dir" % (self.opticks_code_dir))
 
         if self.opticks_dependencies_dir is None:
-            if os.environ.has_key("OPTICKSDEPENDENCIES"):
+            if "OPTICKSDEPENDENCIES" in os.environ:
                 self.opticks_dependencies_dir = \
                     os.environ["OPTICKSDEPENDENCIES"]
             else:
@@ -898,7 +897,7 @@ class SConsBuilder(CommonBuilder):
                 "--release-dir" % (self.opticks_release_dir))
 
         if self.verbosity > 1:
-            print "Creating debian format of package"
+            print("Creating debian format of package")
 
         sys.path.append(self.opticks_code_dir)
         import commonutils
@@ -908,13 +907,13 @@ class SConsBuilder(CommonBuilder):
         scons_args = list()
         scons_args.append('scons')
         scons_args.append('CODEDIR=%s' % self.opticks_code_dir)
-        scons_args.append('BUILDDIR=%s' % os.path.join(self.opticks_code_dir,"Build64"))
+        scons_args.append('BUILDDIR=%s' % os.path.join(self.opticks_code_dir,"Build"))
         scons_args.append('OPTICKSDEPENDENCIES=%s' % self.opticks_dependencies_dir)
         scons_args.append('VERSION=%s' % version)
         scons_args.append('OUTPUT_DIR=%s' % self.output_dir)
 
         if self.verbosity > 1:
-            print "Execute:"," ".join(scons_args)
+            print("Execute:"," ".join(scons_args))
         retcode = execute_process(scons_args)
         if retcode != 0:
             raise ScriptException("Running scons failed with "\
@@ -924,44 +923,27 @@ class SConsBuilder(CommonBuilder):
                 os.mkdir(self.package_dir)
             except OSError: # already exists...ignore the error
                 pass
-            shutil.copy2(os.path.abspath(os.path.join(self.output_dir,"opticks_%s_amd64.deb" % version)), self.package_dir)
+            #shutil.copy2(os.path.abspath(os.path.join(self.output_dir,"opticks_%s_amd64.deb" % version)), self.package_dir)
         if self.verbosity > 1:
-            print "Done creating debian format of package"
+            print("Done creating debian format of package")
 
         if self.verbosity > 1:
-            print "Creating RPM format of package"
+            print("Creating RPM format of package")
         
         oldpath = os.path.abspath(os.curdir)
         if self.package_dir is not None:
             os.chdir(self.package_dir)
         else:
             os.chdir(self.output_dir)
-        alien_args = list()
-        alien_args.append('fakeroot')
-        alien_args.append('alien')
-        alien_args.append('--to-rpm')
-        alien_args.append('--scripts')
-        alien_args.append('opticks_%s_amd64.deb' % version)
 
         if self.verbosity > 1:
-            print "Execute:"," ".join(alien_args)
-        retcode = execute_process(alien_args)
-        os.chdir(oldpath)
-        if retcode != 0:
-            raise ScriptException("Running alien failed with "\
-                "an error code of %s" % (retcode))
-
-        if self.verbosity > 1:
-            print "Done creating RPM format of package"
-
-        if self.verbosity > 1:
-            print "Done generating Linux package"
+            print("Done generating Linux package")
 
     def get_dependencies(self, output_path):
         dependencies_output = os.path.join(output_path, "Dependencies")
         if not(os.path.exists(dependencies_output)):
             if self.verbosity > 1:
-                print "Gathering dependency libraries..."
+                print("Gathering dependency libraries...")
             sys.path.append(self.opticks_code_dir)
             import commonutils
 
@@ -971,7 +953,7 @@ class SConsBuilder(CommonBuilder):
             commonutils.copy_dependencies(dependencies_list,
                 dependencies_output)
             if self.verbosity > 1:
-                print "Done gathering dependency libraries"
+                print("Done gathering dependency libraries")
         return dependencies_output
 
     def get_help(self):
@@ -981,14 +963,14 @@ class SConsBuilder(CommonBuilder):
                 "Help", "Opticks.zip")
             total_help_output = os.path.join(help_output, "Opticks")
             if self.verbosity > 1:
-                print "Unpacking Help located at %s to "\
-                    "%s..." % (help_zip_path, total_help_output)
+                print("Unpacking Help located at %s to "\
+                    "%s..." % (help_zip_path, total_help_output))
             unzip_file(help_zip_path, total_help_output)
             if self.verbosity > 1:
-                print "Done unpacking Help"
+                print("Done unpacking Help")
 
         if self.verbosity > 1:
-            print "Done generating help-prototype"
+            print("Done generating help-prototype")
         return help_output
 
 def is_windows():
@@ -1145,10 +1127,10 @@ def main(args):
 
         if options.clean_output:
             if options.verbosity > 1:
-                print "Cleaning previous output..."
+                print("Cleaning previous output...")
             builder.clean()
             if options.verbosity > 1:
-                print "Done cleaning"
+                print("Done cleaning")
 
         if options.version:
             builder.update_version(options.version)
@@ -1166,17 +1148,17 @@ def main(args):
                 builder.generate_installer(True)
         else:
             builder.generate_installer()
-    except Exception, e:
-        print "--------------------------"
+    except Exception as e:
+        print("--------------------------")
         traceback.print_exc()
-        print "--------------------------"
+        print("--------------------------")
         return 2000
 
     return 0
 
 if __name__ == "__main__":
-    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    #sys.stdout = os.fdopen(sys.stdout.fileno(), 'wb', 0)
     retcode = main(sys.argv)
     if retcode != 0:
-        print "ERROR: Return code is %s" % (retcode)
+        print("ERROR: Return code is %s" % (retcode))
     sys.exit(retcode)
