@@ -475,4 +475,95 @@ protected:
    virtual ~PlotView() {}
 };
 
+#define PLOT_VIEW_EXT_EXISTS
+
+/**
+ * Extends the PlotView class.
+ *
+ * @see PlotView
+ */
+class PlotViewExt : public PlotView
+{
+public:
+   /**
+    *	Creates a new object but doesn't add it to	the plot.	The created object
+    *	will not have most of its signals attached. Only the	ones relating to
+    *  extents will be attached. This can be a significant performance boost
+    *	when there are many objects being created.	This method only works with
+    *	the objectType set to POINT_OBJECT.
+    *
+    *	This method creates a new object of the given type.
+    *	The object can be created as a primary object or secondary
+    *	object. A primary plot object is one that appears in the foreground of
+    *	the plot and has an entry in the legend. Most objects added to a plot
+    *	will be primary objects, but sometimes objects such as gridlines can be
+    *	created as secondary objects so that they will not be included with the
+    *	main data objects in the plot.
+    *
+    *	@param	objectType
+    *	The type	of	plot	object	to add.
+    *	@param	bPrimary
+    *	Set this value to TRUE to create a primary object or FALSE to
+    *	create a	secondary	object.
+    *
+    *	@return	A pointer to the new plot object. NULL is returned if an error
+    *	occurred and the object could not be added.
+    */
+    virtual PlotObject* createQuietObject(const PlotObjectType& objectType, bool bPrimary) = 0;
+
+   /**
+	 *	Adds a new object to the plot. The created object will not have most of
+	 *	its signals attached. Only the ones relating to extents will be
+	 *	attached. This can be a significant performance boost when there are
+	 *	many objects being created. This method only works with the objectType
+	 *	set to POINT_OBJECT.
+	 *
+	 *	This method adds a new object of the given type to the plot with the
+	 *	given type. The object can be created as a primary object or secondary
+	 *	object. A primary plot object is one that appears in the foreground of
+	 *	the plot and has an entry in the legend. Most objects added to a plot
+	 *	will be primary objects, but sometimes objects such as gridlines can be
+	 *	created as secondary objects so that they will not be included with the
+	 *	main data objects in the plot.
+	 *
+	 *	@param	objectType
+	 *		The type of plot object to add.
+	 *	@param	bPrimary
+	 *		Set this value to TRUE to create a primary object or FALSE to
+	 *		create a secondary object.
+	 *		
+	 *	@return	A pointer to the new plot object. NULL is returned if an error
+	 *		occurred and the object could not be added.
+    *
+	 *	@notify	This method will notify	signalObjectAdded() with
+	 *	any<PlotObject*>.
+	 */
+    virtual PlotObject* addQuietObject(const PlotObjectType& objectType, bool bPrimary) = 0;
+
+    /**
+	  * Removes objects from the plot and deletes them.
+	  *
+	  *	@param	objects
+	  *	The annotation objects to delete. Note that this	vector	will
+	  *	get re-sorted during the	execution of the	method
+	  *
+	  *	@return	TRUE if the objects were	all successfully	removed	and	deleted,
+	  *	otherwise	FALSE.
+	  *
+	  * @see	clear()
+	  *
+	  * @notify This	method	will	notify	signalObjectDeleted() with
+	  *	any<PlotObject*>	for	each	object	deleted.
+	  */
+    virtual bool deleteObjects(std::vector<PlotObject*>& objects) = 0;
+
+protected:
+   /**
+    * This object should be destroyed by calling DesktopServices::deleteView().
+    */
+   virtual ~PlotViewExt() {}
+};
+
+
+
 #endif

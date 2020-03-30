@@ -185,7 +185,7 @@ PlotObject* PlotGroupImp::addObject(const PlotObjectType& eType)
          break;
 
       case POINT_OBJECT:
-         pObject = new PointAdapter(pPlot, bPrimary);
+         pObject = new PointAdapter(pPlot, bPrimary, false);
          break;
 
       case POINT_SET:

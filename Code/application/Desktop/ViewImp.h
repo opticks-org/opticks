@@ -132,7 +132,7 @@ public:
    bool isMousePanEnabled() const;
    void setMousePanPos(const QPoint& globalScreenCoord);
 
-   void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
+   virtual void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
    void getVisibleCorners(LocationType& lowerLeft, LocationType& upperLeft, LocationType& upperRight,
       LocationType& lowerRight) const;
    LocationType getVisibleCenter() const;

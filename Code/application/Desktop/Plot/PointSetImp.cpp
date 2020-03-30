@@ -25,13 +25,15 @@ XERCES_CPP_NAMESPACE_USE
 
 PointSetImp::PointSetImp(PlotViewImp* pPlot, bool bPrimary) : 
    PlotObjectImp(pPlot, bPrimary),
+   mExtents(),
    mSymbols(false),
    mLine(true),
    mLineColor(Qt::black),
    mLineWidth(1),
    mLineStyle(SOLID_LINE),
    mInteractive(true),
-   mDirty(false)
+   mDirty(false),
+   mExtentsDirty(false)
 {
    connect(this, SIGNAL(pointAdded(Point*)), this, SIGNAL(extentsChanged()));
    connect(this, SIGNAL(pointRemoved(Point*)), this, SIGNAL(extentsChanged()));
@@ -60,7 +62,7 @@ PointSetImp& PointSetImp::operator= (const PointSetImp& object)
          if (pPoint != NULL)
          {
             PointAdapter* pNewPoint = NULL;
-            pNewPoint = static_cast<PointAdapter*> (addPoint());
+            pNewPoint = static_cast<PointAdapter*> (addPoint(false));
             if (pNewPoint != NULL)
             {
                *pNewPoint = *(static_cast<PointAdapter*> (pPoint));
@@ -210,16 +212,16 @@ void PointSetImp::draw()
    }
 }
 
-Point* PointSetImp::addPoint()
+Point* PointSetImp::addPoint(bool bQuiet)
 {
    PlotViewImp* pPlot = getPlot();
    bool bPrimary = isPrimary();
 
    Point* pPoint = NULL;
-   pPoint = new PointAdapter(pPlot, bPrimary);
+   pPoint = new PointAdapter(pPlot, bPrimary, bQuiet);
    if (pPoint != NULL)
    {
-      insertPoint(pPoint);
+      insertPointSafe(pPoint);
    }
 
    return pPoint;
@@ -228,7 +230,7 @@ Point* PointSetImp::addPoint()
 Point* PointSetImp::addPoint(double dX, double dY)
 {
    Point* pPoint = NULL;
-   pPoint = addPoint();
+   pPoint = addPoint(false);
    if (pPoint != NULL)
    {
       pPoint->setLocation(dX, dY);
@@ -249,9 +251,15 @@ bool PointSetImp::insertPoint(Point* pPoint)
       return false;
    }
 
+   return insertPointSafe(pPoint);
+}
+
+bool PointSetImp::insertPointSafe(Point* pPoint)
+{
    pPoint->setPointSet(dynamic_cast<PointSet*>(this));
    pPoint->attach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
    mPoints.push_back(pPoint);
+   mExtentsDirty = true;
    if (getInteractive())
    {
       emit pointAdded(pPoint);
@@ -280,6 +288,8 @@ void PointSetImp::setPoints(const vector<Point*>& points)
          mPoints.push_back(pPoint);
       }
    }
+
+   mExtentsDirty = true;
 
    if (getInteractive())
    {
@@ -344,6 +354,7 @@ bool PointSetImp::removePoint(Point* pPoint, bool bDelete)
          {
             pPointImp->detach(SIGNAL_NAME(Point, LocationChanged), Slot(this, &PointSetImp::propagateLocationChanged));
             mPoints.erase(iter);
+            mExtentsDirty = true;
             if (getInteractive())
             {
                emit pointRemoved(pPoint);
@@ -395,6 +406,8 @@ void PointSetImp::clear(bool bDelete)
          }
       }
    }
+
+   mExtentsDirty = true;
 
    mPoints.clear();
    if (getInteractive())
@@ -528,6 +541,14 @@ bool PointSetImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double
       return false;
    }
 
+   if (!mExtentsDirty)
+   {
+      dMinX = mExtents[ 0 ];
+      dMinY = mExtents[ 1 ];
+      dMaxX = mExtents[ 2 ];
+      dMaxY = mExtents[ 3 ];
+   }
+
    dMinX = DBL_MAX;
    dMinY = DBL_MAX;
    dMaxX = -DBL_MAX;
@@ -580,6 +601,13 @@ bool PointSetImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double
 
       ++iter;
    }
+
+   mExtents[ 0 ] = dMinX;
+   mExtents[ 1 ] = dMinY;
+   mExtents[ 2 ] = dMaxX;
+   mExtents[ 3 ] = dMaxY;
+
+   mExtentsDirty = false;
 
    return true;
 }
@@ -871,6 +899,9 @@ void PointSetImp::deleteSelectedPoints(bool filterVisible)
          }
       }
    }
+   
+   mExtentsDirty = true;
+
    mPoints = newPoints;
    emit pointsSet(mPoints);
    notify(SIGNAL_NAME(PointSet, PointsSet), boost::any(mPoints));
@@ -921,13 +952,15 @@ bool PointSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    {
       if (XMLString::equals(pChld->getNodeName(), X("Point")))
       {
-         PointImp* pPoint = dynamic_cast<PointImp*>(addPoint());
+         PointImp* pPoint = dynamic_cast<PointImp*>(addPoint(false));
          if (pPoint == NULL || !pPoint->fromXml(pChld, version))
          {
             return false;
          }
       }
    }
+
+   mExtentsDirty = true;
 
    return true;
 }

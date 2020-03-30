@@ -18,6 +18,7 @@
 #include "TypesFile.h"
 #include "Point.h"
 
+#include <array>
 #include <boost/any.hpp>
 #include <string>
 #include <vector>
@@ -36,7 +37,7 @@ public:
    void draw();
 
    // Points
-   Point* addPoint();
+   Point* addPoint(bool bQuiet);
    Point* addPoint(double dX, double dY);
    bool insertPoint(Point* pPoint);
    void setPoints(const std::vector<Point*>& points);
@@ -94,12 +95,14 @@ signals:
 
 protected:
    void propagateLocationChanged(Subject& subject, const std::string& signal, const boost::any& value);
+   bool insertPointSafe(Point* pPoint);
 
 private:
    PointSetImp(const PointSetImp& rhs);
 
    // Points
    std::vector<Point*> mPoints;
+   std::array<double, 4> mExtents;
 
    // Symbols
    bool mSymbols;
@@ -112,6 +115,7 @@ private:
 
    bool mInteractive;
    bool mDirty;
+   bool mExtentsDirty;
 };
 
 #define POINTSETADAPTEREXTENSION_CLASSES \
@@ -121,7 +125,11 @@ private:
    PLOTOBJECTADAPTER_METHODS(impClass) \
    virtual Point* addPoint() \
    { \
-      return impClass::addPoint(); \
+      return impClass::addPoint(false); \
+   } \
+   virtual Point* addQuietPoint() \
+   { \
+      return impClass::addPoint(true); \
    } \
    Point* addPoint(double dX, double dY) \
    { \

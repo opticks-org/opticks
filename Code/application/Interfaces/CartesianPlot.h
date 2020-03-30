@@ -28,7 +28,7 @@ class CartesianGridlines;
  *
  *  @see     PlotView
  */
-class CartesianPlot : public PlotView
+class CartesianPlot : public PlotViewExt
 {
 public:
    /**

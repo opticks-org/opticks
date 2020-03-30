@@ -22,7 +22,7 @@ class PolarGridlines;
  *
  *  @see     PlotView
  */
-class PolarPlot : public PlotView
+class PolarPlot : public PlotViewExt
 {
 public:
    /**

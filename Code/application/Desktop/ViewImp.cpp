@@ -1400,7 +1400,12 @@ void ViewImp::panTo(const LocationType& worldCoord)
 
 void ViewImp::panToCenter()
 {
-   LocationType worldCenter((mMaxX + mMinX) / 2.0, (mMaxY - mMinY) / 2.0);
+   double dMinX = 0.0;
+   double dMinY = 0.0;
+   double dMaxX = 0.0;
+   double dMaxY = 0.0;
+   getExtents(dMinX, dMinY, dMaxX, dMaxY);
+   LocationType worldCenter((dMaxX + dMinX) / 2.0, (dMaxY - dMinY) / 2.0);
    panTo(worldCenter);
 }
 

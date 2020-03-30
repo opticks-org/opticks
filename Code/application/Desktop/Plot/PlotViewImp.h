@@ -48,8 +48,8 @@ public:
    virtual PlotType getPlotType() const = 0;
 
    // Objects
-   PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary);
-   PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary);
+   PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet = false);
+   PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet = false);
    bool insertObject(PlotObject* pObject);
    std::list<PlotObject*> getObjects() const;
    std::list<PlotObject*> getObjects(const PlotObjectType& objectType) const;
@@ -57,6 +57,7 @@ public:
    bool containsObject(PlotObject* pObject) const;
    unsigned int getNumObjects() const;
    bool deleteObject(PlotObject* pObject);
+   bool deleteObjects(std::vector<PlotObject*>& objects);
 
    bool moveObjectToFront(PlotObject* pObject);
    bool moveObjectToBack(PlotObject* pObject);
@@ -76,6 +77,7 @@ public:
    bool isShadingEnabled() const;
    void setExtentsMargin(double marginFactor);
    double getExtentsMargin() const;
+   void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
 
    // Annotation
    AnnotationLayer* getAnnotationLayer() const;
@@ -119,6 +121,9 @@ protected:
    void drawContents();
    virtual void drawGridlines() = 0;
    void initializeDisplayList();
+   bool insertObjectSafe(PlotObject* pObject);
+   void selectObjectsSafe(const std::list<PlotObject*>& objects, bool select);
+   bool selectObjectSafe(PlotObject* pObject, bool select);
 
 protected slots:
    void setMouseMode(QAction* pAction);
@@ -153,9 +158,11 @@ private:
    PointSelectionDisplayType mSelectionDisplayMode;
    bool mEnableShading;
    double mExtentsMargin;
+   bool mExtentsDirty;
 
 private:
    QRegion getObjectRegion(const PlotObject* pObject) const;
+   void calculateExtents();
 };
 
 #define PLOTVIEWADAPTEREXTENSION_CLASSES \
@@ -169,11 +176,19 @@ private:
    } \
    PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary) \
    { \
-      return impClass::createObject(objectType, bPrimary); \
+      return impClass::createObject(objectType, bPrimary, false); \
+   } \
+   PlotObject* createQuietObject(const PlotObjectType& objectType, bool bPrimary) \
+   { \
+      return impClass::createObject(objectType, bPrimary, true); \
    } \
    PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary) \
    { \
-      return impClass::addObject(objectType, bPrimary); \
+      return impClass::addObject(objectType, bPrimary, false); \
+   } \
+   PlotObject* addQuietObject(const PlotObjectType& objectType, bool bPrimary) \
+   { \
+      return impClass::addObject(objectType, bPrimary, true); \
    } \
    void getObjects(std::list<PlotObject*>& objects) const \
    { \
@@ -194,6 +209,10 @@ private:
    bool deleteObject(PlotObject* pObject) \
    { \
       return impClass::deleteObject(pObject); \
+   } \
+   bool deleteObjects(std::vector<PlotObject*>& objects) \
+   { \
+      return impClass::deleteObjects(objects); \
    } \
    void clear() \
    { \

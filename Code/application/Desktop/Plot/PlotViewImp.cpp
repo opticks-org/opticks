@@ -67,7 +67,8 @@ PlotViewImp::PlotViewImp(const string& id, const string& viewName, QGLContext* d
    mSelectionMode(NORMAL_SELECTION), 
    mSelectionDisplayMode(SYMBOL_SELECTION),
    mEnableShading(false),
-   mExtentsMargin(0.0)
+   mExtentsMargin(0.0),
+   mExtentsDirty(true)
 {
    Service<DesktopServices> pDesktop;
    string shortcutContext = "Plot";
@@ -369,7 +370,7 @@ ViewType PlotViewImp::getViewType() const
    return PLOT_VIEW;
 }
 
-PlotObject* PlotViewImp::createObject(const PlotObjectType& objectType, bool bPrimary)
+PlotObject* PlotViewImp::createObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet)
 {
    PlotObject* pObject = NULL;
 
@@ -407,7 +408,7 @@ PlotObject* PlotViewImp::createObject(const PlotObjectType& objectType, bool bPr
    }
    else if (objectType == POINT_OBJECT)
    {
-      pObject = new PointAdapter(this, bPrimary);
+      pObject = new PointAdapter(this, bPrimary, bQuiet);
    }
    else if (objectType == POLYGON_OBJECT_TYPE)
    {
@@ -421,12 +422,12 @@ PlotObject* PlotViewImp::createObject(const PlotObjectType& objectType, bool bPr
    return pObject;
 }
 
-PlotObject* PlotViewImp::addObject(const PlotObjectType& objectType, bool bPrimary)
+PlotObject* PlotViewImp::addObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet)
 {
-   PlotObject* pObject = createObject(objectType, bPrimary);
+   PlotObject* pObject = createObject(objectType, bPrimary, bQuiet);
    if (pObject != NULL)
    {
-      insertObject(pObject);
+      insertObjectSafe(pObject);
    }
 
    return pObject;
@@ -445,6 +446,11 @@ bool PlotViewImp::insertObject(PlotObject* pObject)
       return false;
    }
 
+   return insertObjectSafe(pObject);
+}
+
+bool PlotViewImp::insertObjectSafe(PlotObject* pObject)
+{
    if (pObject->isPrimary())
    {
       PlotObjectImp* pObjectImp = dynamic_cast<PlotObjectImp*>(pObject);
@@ -458,6 +464,7 @@ bool PlotViewImp::insertObject(PlotObject* pObject)
    emit objectAdded(pObject);
    notify(SIGNAL_NAME(PlotView, ObjectAdded), boost::any(pObject));
    updateExtents();
+
    return true;
 }
 
@@ -570,7 +577,9 @@ bool PlotViewImp::deleteObject(PlotObject* pObject)
          mObjects.erase(iter);
          emit objectDeleted(pObject);
          notify(SIGNAL_NAME(PlotView, ObjectDeleted), boost::any(pObject));
+
          updateExtents();
+
          delete dynamic_cast<PlotObjectImp*>(pObject);
          return true;
       }
@@ -579,6 +588,36 @@ bool PlotViewImp::deleteObject(PlotObject* pObject)
    }
 
    return false;
+}
+
+bool PlotViewImp::deleteObjects(std::vector<PlotObject*>& objects)
+{
+   std::sort(objects.begin(), objects.end());
+   int countToDelete = objects.size();
+
+   int countDeleted = 0;
+   std::list<PlotObject*>::iterator iter = mObjects.begin();
+   while (iter != mObjects.end() && countDeleted < countToDelete)
+   {
+      PlotObject* pCurrentObject = *iter;
+      if (std::binary_search(objects.begin(), objects.end(), pCurrentObject))
+      {
+         iter = mObjects.erase(iter);
+         emit objectDeleted(pCurrentObject);
+         notify(SIGNAL_NAME(PlotView, ObjectDeleted), boost::any(pCurrentObject));
+
+         updateExtents();
+
+         delete dynamic_cast<PlotObjectImp*>(pCurrentObject);
+         ++countDeleted;
+      }
+      else
+      {
+         ++iter;
+      }
+   }
+
+   return countDeleted == countToDelete;
 }
 
 bool PlotViewImp::moveObjectToFront(PlotObject* pObject)
@@ -631,6 +670,18 @@ void PlotViewImp::selectObjects(const list<PlotObject*>& objects, bool bSelect)
    }
 }
 
+void PlotViewImp::selectObjectsSafe(const list<PlotObject*>& objects, bool bSelect)
+{
+   for (list<PlotObject*>::const_iterator iter = objects.begin(); iter != objects.end(); ++iter)
+   {
+      PlotObject* pObject = *iter;
+      if (pObject != NULL)
+      {
+         selectObjectSafe(pObject, bSelect);
+      }
+   }
+}
+
 void PlotViewImp::selectObjects(const QRegion& selectionRegion, bool bSelect)
 {
    if (selectionRegion.isEmpty() == true)
@@ -672,7 +723,7 @@ void PlotViewImp::selectObjects(const QRegion& selectionRegion, bool bSelect)
    }
 
    // Select the objects
-   selectObjects(objects, bSelect);
+   selectObjectsSafe(objects, bSelect);
 }
 
 void PlotViewImp::selectObjects(const QRegion& selectionRegion, const PointSet* pPointSet, bool bSelect)
@@ -811,6 +862,11 @@ bool PlotViewImp::selectObject(PlotObject* pObject, bool bSelect)
       return false;
    }
 
+   return selectObjectSafe(pObject, bSelect);
+}
+
+bool PlotViewImp::selectObjectSafe(PlotObject* pObject, bool bSelect)
+{
    if (pObject->isPrimary() == true)
    {
       if ((pObject->isSelected() != bSelect) || (mSelectionMode == DEEP_SELECTION) ||
@@ -829,7 +885,7 @@ bool PlotViewImp::selectObject(PlotObject* pObject, bool bSelect)
 
 void PlotViewImp::selectObjects(bool bSelect)
 {
-   selectObjects(mObjects, bSelect);
+   selectObjectsSafe(mObjects, bSelect);
 }
 
 void PlotViewImp::deleteSelectedObjects(bool filterVisible)
@@ -910,6 +966,7 @@ void PlotViewImp::clear()
       ++iter;
    }
 
+   mExtentsDirty = true;
    zoomExtents();
 }
 
@@ -1011,7 +1068,7 @@ void PlotViewImp::mousePressEvent(QMouseEvent* e)
                else
                {
                   bool bSelected = pObject->isSelected();
-                  selectObject(pObject, !bSelected);
+                  selectObjectSafe(pObject, !bSelected);
                }
             }
 
@@ -1604,6 +1661,21 @@ void PlotViewImp::updateMouseModeAction(const MouseMode* pMouseMode)
 
 void PlotViewImp::updateExtents()
 {
+   mExtentsDirty = true;
+}
+
+void PlotViewImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const
+{
+   if (mExtentsDirty)
+   {
+      const_cast<PlotViewImp*>(this)->calculateExtents();
+   }
+
+   ViewImp::getExtents(dMinX, dMinY, dMaxX, dMaxY);
+}
+
+void PlotViewImp::calculateExtents()
+{
    double dMinX = DBL_MAX;
    double dMinY = DBL_MAX;
    double dMaxX = -DBL_MAX;
@@ -1681,6 +1753,8 @@ void PlotViewImp::updateExtents()
    double dYMargin = (dMaxY - dMinY) * mExtentsMargin;
 
    setExtents(dMinX - dXMargin, dMinY - dYMargin, dMaxX + dXMargin, dMaxY + dYMargin);
+
+   mExtentsDirty = !bExtentsSet;
 }
 
 void PlotViewImp::updateAnnotationObjects()
@@ -2201,6 +2275,7 @@ void PlotViewImp::setExtentsMargin(double marginFactor)
    if (marginFactor != mExtentsMargin)
    {
       mExtentsMargin = marginFactor;
+      mExtentsDirty = true;
       updateExtents();
    }
 }
@@ -2320,6 +2395,8 @@ bool PlotViewImp::fromXml(DOMNode* pDocument, unsigned int version)
          }
       }
    }
+
+   mExtentsDirty = true;
 
    refresh();
 

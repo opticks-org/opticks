@@ -13,7 +13,7 @@
 #include "PointSet.h"
 #include "PointSetImp.h"
 
-class PointSetAdapter : public PointSet, public PointSetImp POINTSETADAPTEREXTENSION_CLASSES
+class PointSetAdapter : public PointSetExt, public PointSetImp POINTSETADAPTEREXTENSION_CLASSES
 {
 public:
    PointSetAdapter(PlotViewImp* pPlot, bool bPrimary);

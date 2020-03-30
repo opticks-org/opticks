@@ -24,46 +24,58 @@
 using namespace std;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;
 
-PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary) :
+PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, bool bQuiet) :
    PlotObjectImp(pPlot, bPrimary),
    mLocation(LocationType()),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
    mColor(Qt::black),
-   mpPointSet(NULL)
+   mpPointSet(NULL),
+   mIsQuiet(bQuiet)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   if (bQuiet == false)
+   {
+      VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   }
 }
 
-PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
+PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point, bool bQuiet) :
    PlotObjectImp(pPlot, bPrimary),
    mLocation(point),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
    mColor(Qt::black),
-   mpPointSet(NULL)
+   mpPointSet(NULL),
+   mIsQuiet(bQuiet)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   if (bQuiet == false)
+   {
+      VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   }
 }
 
-PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
+PointImp::PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY, bool bQuiet) :
    PlotObjectImp(pPlot, bPrimary),
    mLocation(dX, dY),
    mSymbol(Point::SOLID),
    mSymbolSize(5),
    mColor(Qt::black),
-   mpPointSet(NULL)
+   mpPointSet(NULL),
+   mIsQuiet(bQuiet)
 {
    VERIFYNR(connect(this, SIGNAL(locationChanged(const LocationType&)), this, SIGNAL(extentsChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
-   VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   if (bQuiet == false)
+   {
+      VERIFYNR(connect(this, SIGNAL(symbolSizeChanged(int)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(symbolChanged(const Point::PointSymbolType&)), this, SIGNAL(legendPixmapChanged())));
+      VERIFYNR(connect(this, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(legendPixmapChanged())));
+   }
 }
 
 PointImp::~PointImp()
@@ -133,6 +145,10 @@ void PointImp::draw(LocationType pixelSize)
 
    pPlot->translateDataToWorld(mLocation.mX, mLocation.mY, dWorldX, dWorldY);
 
+   int red = mColor.red();
+   int green = mColor.green();
+   int blue = mColor.blue();
+
    // Increase point size when selected
    if (isSelected() == true)
    {
@@ -145,19 +161,65 @@ void PointImp::draw(LocationType pixelSize)
 
       case INVERT_SELECTION:
          // Invert symbol color and draw slightly enlarged symbol behind it when selected
-         glPushMatrix();
-         glLineWidth(2);
+         {
+            // Find a color visually distinct from the background and from the symbol
+            // color and draw a slightly enlarged symbol behind it when selected
+            glPushMatrix();
+            glLineWidth(2);
+            QColor bgColor = pPlot->getBackgroundColor();
+            int	bgRed = bgColor.red();
+            int	bgGreen = bgColor.green();
+            int	bgBlue = bgColor.blue();
+            // find the corner of the RGB color cube that is farthest
+            // away from the background color and the symbol color,
+            // weighted for visual sensitivity to red, green and blue
+            int cubeCorners[8][3] = {
+               { 255, 255, 255 },
+               { 255, 255,	0 },
+               { 255,	0, 255 },
+               { 255,	0,	0 },
+               {	0, 255, 255 },
+               {	0, 255,	0 },
+               {	0,	0, 255 },
+               {	0,	0,	0 }};
+               
+            int sensitivity[ 3 ] = { 3, 6, 1 };
 
-         // Invert the color
-         glColor3ub(255 - mColor.red(), 255 - mColor.green(), 255 - mColor.blue());
+            auto sqr = []( int v ) { return v * v; };
+            int bestCorner = 0;
+            int bestDist = 0;
+            bool goodEnough = false;
+            for( int i = 0; i < 8 && !goodEnough; ++i )
+            {
+               int bgDist =
+                  sqr( cubeCorners[ i ][ 0 ] - bgRed) * sensitivity[ 0 ] +
+                  sqr( cubeCorners[ i ][ 1 ] - bgGreen) * sensitivity[ 1 ] +
+                  sqr( cubeCorners[ i ][ 2 ] - bgBlue) * sensitivity[ 2 ] ;
+               if( bgDist > bestDist )
+               {
+                  int pointDist =
+                     sqr( cubeCorners[ i ][ 0 ] - red) * sensitivity[ 0 ] +
+                     sqr( cubeCorners[ i ][ 1 ] - green) * sensitivity[ 1 ] +
+                     sqr( cubeCorners[ i ][ 2 ] - blue) * sensitivity[ 2 ] ;
+                  if( pointDist > bestDist )
+                  {
+                     bestCorner = i;
+                     bestDist = std::min( bgDist, pointDist );
+                     goodEnough = bestDist > 255 * 255 * 6;
+                  }
+               }
+            }
 
-         // Draw the inverted symbol
-         glTranslatef(dWorldX, dWorldY, 0);
-         glScalef( (mSymbolSize + 1) / pixelSize.mX, (mSymbolSize + 1) / pixelSize.mY, 0);
-         glCallList(pPlot->getDisplayListIndex() + mSymbol);
-         glLineWidth(1);
-         glPopMatrix();
-         break;
+            glColor3ub( cubeCorners[ bestCorner ][ 0 ], cubeCorners[ bestCorner ][ 1 ], cubeCorners[ bestCorner ][ 2 ] );
+
+            // Draw the inverted symbol
+            glTranslatef(dWorldX, dWorldY, 0);
+            glScalef( (mSymbolSize + 1) / pixelSize.mX, (mSymbolSize + 1) / pixelSize.mY, 0);
+            glCallList(pPlot->getDisplayListIndex() + mSymbol);
+            glLineWidth(1);
+            glPopMatrix();
+            break;
+         }
       case BOX_SELECTION:
          // Draw a gray box around the symbol if it is selected
          glPushMatrix();
@@ -174,7 +236,7 @@ void PointImp::draw(LocationType pixelSize)
    }
 
    // Set the color
-   glColor3ub(mColor.red(), mColor.green(), mColor.blue());
+   glColor3ub(red, green, blue);
 
    glPushMatrix();
    glTranslatef(dWorldX, dWorldY, 0);
@@ -836,8 +898,11 @@ void PointImp::setSymbol(const Point::PointSymbolType& eSymbol)
    if (eSymbol != mSymbol)
    {
       mSymbol = eSymbol;
-      emit symbolChanged(mSymbol);
-      notify(SIGNAL_NAME(Point, SymbolChanged), boost::any(mSymbol));
+      if (!mIsQuiet)
+      {
+         emit symbolChanged(mSymbol);
+         notify(SIGNAL_NAME(Point, SymbolChanged), boost::any(mSymbol));
+      }
    }
 }
 
@@ -846,8 +911,11 @@ void PointImp::setSymbolSize(int iSize)
    if (iSize != mSymbolSize)
    {
       mSymbolSize = iSize;
-      emit symbolSizeChanged(mSymbolSize);
-      notify(SIGNAL_NAME(Point, SymbolSizeChanged), boost::any(mSymbolSize));
+      if (!mIsQuiet)
+      {
+         emit symbolSizeChanged(mSymbolSize);
+         notify(SIGNAL_NAME(Point, SymbolSizeChanged), boost::any(mSymbolSize));
+      }
    }
 }
 
@@ -861,9 +929,12 @@ void PointImp::setColor(const QColor& clrSymbol)
    if (clrSymbol != mColor)
    {
       mColor = clrSymbol;
-      emit colorChanged(mColor);
-      notify(SIGNAL_NAME(Point, ColorChanged), boost::any(
-         ColorType(mColor.red(), mColor.green(), mColor.blue())));
+      if (!mIsQuiet)
+      {
+         emit colorChanged(mColor);
+         notify(SIGNAL_NAME(Point, ColorChanged), boost::any(
+            ColorType(mColor.red(), mColor.green(), mColor.blue())));
+      }
    }
 }
 
