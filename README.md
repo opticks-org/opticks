@@ -1,6 +1,9 @@
 # Opticks
 Opticks is an open source remote sensing platform.
 
+Download from the Releases section or from [The Opticks website](https://opticks.org/downloads/opticks/).
+The latest [user documentation](https://opticks.org/docs/help/latest/Help/Opticks/) and [SDK documentation](https://opticks.org/docs/sdk/latest/) are also available.
+
 ## Key Features
 * Imagery and video analysis
 * Zoom, pan, rotate spatially large datasets
