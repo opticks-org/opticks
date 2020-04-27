@@ -131,7 +131,7 @@ protected slots:
    void removeMouseModeAction(const MouseMode* pMouseMode);
    void enableMouseModeAction(const MouseMode* pMouseMode, bool bEnable);
    void updateMouseModeAction(const MouseMode* pMouseMode);
-   void updateExtents();
+   void updateExtents(bool deep=false);
    void updateAnnotationObjects();
 
 private:

@@ -1659,9 +1659,22 @@ void PlotViewImp::updateMouseModeAction(const MouseMode* pMouseMode)
    }
 }
 
-void PlotViewImp::updateExtents()
+void PlotViewImp::updateExtents(bool deep)
 {
    mExtentsDirty = true;
+
+   if (deep)
+   {
+      std::list<PlotObject*> objects = getObjects();
+      for (auto ipPlotObject = objects.begin(); ipPlotObject != objects.end(); ++ipPlotObject)
+      {
+         PointSetImp* pPointSet = dynamic_cast<PointSetImp*>(*ipPlotObject);
+         if (pPointSet)
+         {
+            pPointSet->markExtentsDirty();
+         }
+      }
+   }
 }
 
 void PlotViewImp::getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const
