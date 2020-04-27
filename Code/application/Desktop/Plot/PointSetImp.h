@@ -86,6 +86,8 @@ public slots:
 
    void deleteSelectedPoints(bool filterVisible);
 
+   void markExtentsDirty();
+
 signals:
    void pointAdded(Point* pPoint);
    void pointRemoved(Point* pPoint);

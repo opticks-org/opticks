@@ -39,6 +39,7 @@ PointSetImp::PointSetImp(PlotViewImp* pPlot, bool bPrimary) :
    connect(this, SIGNAL(pointRemoved(Point*)), this, SIGNAL(extentsChanged()));
    connect(this, SIGNAL(pointsSet(const std::vector<Point*>&)), this, SIGNAL(extentsChanged()));
    connect(this, SIGNAL(pointLocationChanged(Point*, const LocationType&)), this, SIGNAL(extentsChanged()));
+   connect(this, SIGNAL(extentsChanged()), this, SLOT(markExtentsDirty()));
 }
 
 PointSetImp::~PointSetImp()
@@ -963,4 +964,9 @@ bool PointSetImp::fromXml(DOMNode* pDocument, unsigned int version)
    mExtentsDirty = true;
 
    return true;
+}
+
+void PointSetImp::markExtentsDirty()
+{
+   mExtentsDirty = true;
 }
