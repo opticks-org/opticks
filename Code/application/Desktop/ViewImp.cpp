@@ -484,6 +484,19 @@ vector<const MouseMode*> ViewImp::getMouseModes() const
       ++iter;
    }
 
+   auto modeComparator = [](const MouseMode* p1, const MouseMode* p2) -> bool
+   {
+      std::string name1;
+      p1->getName(name1);
+
+      std::string name2;
+      p2->getName(name2);
+
+      return name1 < name2;
+   };
+   
+   std::sort(mouseModes.begin(), mouseModes.end(), modeComparator);
+
    return mouseModes;
 }
 
