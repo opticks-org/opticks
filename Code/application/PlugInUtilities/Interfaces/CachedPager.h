@@ -84,7 +84,7 @@ public:
     * @param cacheSize
     *        Number of bytes in the page cache.
     */
-   CachedPager(const size_t cacheSize);
+   CachedPager(const int64_t cacheSize);
 
    /**
     * Destructor
@@ -260,6 +260,13 @@ public:
     * @see DataRequest::getRequestVersion()
     */
    int getSupportedRequestVersion() const;
+
+   /**
+    *  Resize the cache.
+    *  @param newSize
+    *         The new cache size in bytes.
+    */
+   void resize(int64_t newSize);
    
 protected:
    /**
@@ -270,6 +277,13 @@ protected:
     *          function would return 2.
     */
    const int getBytesPerBand() const;
+
+   /**
+    *  Accessor function for subclasses to gain access to private member variables.
+    *
+    *  @return The number of rows in the dataset.
+    */
+   const int getRowCount() const;
 
    /**
     *  Accessor function for subclasses to gain access to private member variables.

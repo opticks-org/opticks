@@ -83,6 +83,9 @@ public:
    double getNextValue(double value) const;
    virtual bool event(QEvent* pEvent);
 
+   double getGranularity() const;
+   double lockToGranularity(double frame) const;
+
 public slots:
    void moveToBeginning();
    void moveToEnd();
@@ -96,6 +99,7 @@ public slots:
    void fastForward(double);
    void fastRewind(double);
    void changeBumpersEnabled(bool enabled);
+   void canDropFramesToggled(bool);
    void snapStartBumperToFrame();
    void snapStopBumperToFrame();
    void adjustBumpers();

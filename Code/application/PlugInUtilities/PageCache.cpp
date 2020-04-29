@@ -17,8 +17,8 @@
 #include <sstream>
 using namespace std;
 
-PageCache::PageCache(const size_t maxCacheSize) :
-   MAX_CACHE_SIZE(maxCacheSize),
+PageCache::PageCache(const int64_t maxCacheSize) :
+   mMaxCacheSize(maxCacheSize),
    mCacheSize(0)
 {
    initialize(0, 0, 0);
@@ -100,11 +100,17 @@ CachedPage *PageCache::createPage(CachedPage::UnitPtr pUnit, InterleaveFormatTyp
 
 void PageCache::enforceCacheSize()
 {
-   while (mCacheSize > MAX_CACHE_SIZE && !mUnits.empty())
+   while (mCacheSize > mMaxCacheSize && !mUnits.empty())
    {
       mCacheSize -= mUnits.front()->getSize();
       mUnits.pop_front();
    }
+}
+
+void PageCache::resize(int64_t newSize)
+{
+   mMaxCacheSize = newSize;
+   enforceCacheSize();
 }
 
 void PageCache::initialize(int bytesPerBand, int columnCount, int bandCount)

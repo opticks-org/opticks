@@ -89,6 +89,12 @@ public:
    SIGNAL_METHOD(AnimationController, FrameChanged)
 
    /**
+    *  Emitted with boost::any<bool> when 'can drop frames' changes for any
+    *  reason.
+    */
+   SIGNAL_METHOD(AnimationController, CanDropFramesChanged)
+
+   /**
     *  Emitted with boost::any<double> when the speed multiplier changes.
     */
    SIGNAL_METHOD(AnimationController, IntervalMultiplierChanged)

@@ -20,7 +20,7 @@ using namespace std;
 
 const int HdfPager::INVALID_HANDLE = -1;
 
-HdfPager::HdfPager()
+HdfPager::HdfPager(int64_t cacheSize) : CachedPager(cacheSize)
 {
 }
 

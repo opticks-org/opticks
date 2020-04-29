@@ -26,7 +26,7 @@ public:
    /**
     * Creates an HdfPager plug-in.
     */
-   HdfPager();
+   HdfPager(int64_t cacheSize = 20000000);
 
    /**
     * Creates an input argument list for the HdfAccessor plug-in.
