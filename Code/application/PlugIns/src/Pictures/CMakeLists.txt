@@ -23,7 +23,6 @@ set (HEADER_FILES
    PngExportOptionsWidget.h
    PostScriptExporter.h
    QuickbirdIsd.h
-   tif_dir.h
    TiffDetails.h
    TiffExportOptionsWidget.h
 )
