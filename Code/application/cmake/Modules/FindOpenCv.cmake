@@ -8,6 +8,20 @@ if(OpenCv_INCLUDE_DIR AND EXISTS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp
     string(REGEX REPLACE "^.*CV_MINOR_VERSION.*([0-9]+).*$" "\\1" OpenCv_VERSION_MINOR "${OpenCv_Parsed_Minor_Version}")
     string(REGEX REPLACE "^.*CV_SUBMINOR_VERSION.*([0-9]+).*$" "\\1" OpenCv_VERSION_RELEASE "${OpenCv_Parsed_Subminor_Version}")
 
+    if(NOT OpenCv_Parsed_Major_Version)
+       # Because newer opencv2/core/version.cpp can do things like
+       #   #define CV_VERSION_MAJOR    3
+       #   /* old  style version constants*/
+       #   #define CV_MAJOR_VERSION    CV_VERSION_MAJOR
+       # which won't be correctly parsed above, as CV_MAJOR_VERSION is not an explicit integer value. That will be set later by the preprocessor
+       file(STRINGS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp" OpenCv_Parsed_Major_Version REGEX "^#define CV_VERSION_MAJOR.*[0-9]+.*$")
+       file(STRINGS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp" OpenCv_Parsed_Minor_Version REGEX "^#define CV_VERSION_MINOR.*[0-9]+.*$")
+       file(STRINGS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp" OpenCv_Parsed_Subminor_Version REGEX "^#define CV_VERSION_REVISION.*[0-9]+.*$")
+       string(REGEX REPLACE "^.*CV_VERSION_MAJOR.*([0-9]+).*$" "\\1" OpenCv_VERSION_MAJOR "${OpenCv_Parsed_Major_Version}")
+       string(REGEX REPLACE "^.*CV_VERSION_MINOR.*([0-9]+).*$" "\\1" OpenCv_VERSION_MINOR "${OpenCv_Parsed_Minor_Version}")
+       string(REGEX REPLACE "^.*CV_VERSION_REVISION.*([0-9]+).*$" "\\1" OpenCv_VERSION_RELEASE "${OpenCv_Parsed_Subminor_Version}")
+    endif()
+
     set(OpenCv_VERSION_STRING "${OpenCv_VERSION_MAJOR}.${OpenCv_VERSION_MINOR}.${OpenCv_VERSION_RELEASE}")
     set(OpenCv_COMPACT_VERSION_STRING "${OpenCv_VERSION_MAJOR}${OpenCv_VERSION_MINOR}${OpenCv_VERSION_RELEASE}")
     set(OpenCv_MAJOR_VERSION "${OpenCv_VERSION_MAJOR}")
@@ -41,6 +55,16 @@ if(NOT ImgProc_FOUND_INDEX EQUAL -1)
     select_library_configurations(OpenCv_ImgProc)
 endif()
 
+list(FIND OpenCv_FIND_COMPONENTS Flann ImgProc_FOUND_INDEX)
+if(NOT flann_FOUND_INDEX EQUAL -1)
+    if (EXISTS "${OpenCv_INCLUDE_DIR}/opencv2/flann/flann.hpp")
+        set(OpenCv_FOUND_Flann_HEADER 1)
+    endif()
+    find_library(OpenCv_Flann_LIBRARY_RELEASE NAMES opencv_flann${OpenCv_COMPACT_VERSION_STRING} opencv_flann)
+    find_library(OpenCv_Flann_LIBRARY_DEBUG NAMES opencv_flann${OpenCv_COMPACT_VERSION_STRING}d opencv_flannd)
+    select_library_configurations(OpenCv_Flann)
+endif()
+
 include(FindPackageHandleStandardArgs)
 if(OpenCv_FIND_REQUIRED_Ml)
     set(OpenCv_LIBRARIES ${OpenCv_LIBRARIES} ${OpenCv_Ml_LIBRARIES})
@@ -51,6 +75,12 @@ endif()
 if(OpenCv_FIND_REQUIRED_ImgProc)
     set(OpenCv_LIBRARIES ${OpenCv_LIBRARIES} ${OpenCv_ImgProc_LIBRARIES})
     find_package_handle_standard_args(OpenCv REQUIRED_VARS OpenCv_INCLUDE_DIR OpenCv_FOUND_ImgProc_HEADER OpenCv_LIBRARY OpenCv_ImgProc_LIBRARY OpenCv_VERSION_STRING VERSION_VAR OpenCv_VERSION_STRING)
+else()
+    find_package_handle_standard_args(OpenCv REQUIRED_VARS OpenCv_INCLUDE_DIR OpenCv_LIBRARY OpenCv_VERSION_STRING VERSION_VAR OpenCv_VERSION_STRING)
+endif()
+if(OpenCv_FIND_REQUIRED_Flann)
+    set(OpenCv_LIBRARIES ${OpenCv_LIBRARIES} ${OpenCv_Flann_LIBRARIES})
+    find_package_handle_standard_args(OpenCv REQUIRED_VARS OpenCv_INCLUDE_DIR OpenCv_FOUND_Flann_HEADER OpenCv_LIBRARY OpenCv_Flann_LIBRARY OpenCv_VERSION_STRING VERSION_VAR OpenCv_VERSION_STRING)
 else()
     find_package_handle_standard_args(OpenCv REQUIRED_VARS OpenCv_INCLUDE_DIR OpenCv_LIBRARY OpenCv_VERSION_STRING VERSION_VAR OpenCv_VERSION_STRING)
 endif()
