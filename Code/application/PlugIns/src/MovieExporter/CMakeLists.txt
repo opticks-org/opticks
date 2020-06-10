@@ -33,6 +33,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${avutil_INCLUDE_DIRS})
 include_directories(${avformat_INCLUDE_DIRS})
 include_directories(${avcodec_INCLUDE_DIRS})
+include_directories(${swscale_INCLUDE_DIRS})
 add_definitions(${avutil_DEFINITIONS})
 add_definitions(${avformat_DEFINITIONS})
 add_definitions(${avcodec_DEFINITIONS})
@@ -44,6 +45,7 @@ target_link_libraries(MovieExporter
     ${avutil_LIBRARIES}
     ${avformat_LIBRARIES}
     ${avcodec_LIBRARIES}
+    ${swscale_LIBRARIES}
 )
 if(WIN32)
     install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

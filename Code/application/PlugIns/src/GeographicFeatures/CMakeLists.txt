@@ -1,37 +1,87 @@
 set (HEADER_FILES
-    FeatureLayerImporter.h
-    PropertiesFeatureClass.h
-    QueryOptions.h
-    ShapeFileImporter.h
-)
+   AddQueriesDlg.h
+   AlphaNumericSortFilterProxyModel.h
+   ConnectionParametersWidget.h
+   CoordinateTransformation.h
+   DisplayQueryOptions.h
+   DisplaySelectionWidget.h
+   FeatureClass.h
+   FeatureClassWidget.h
+   FeatureLayerExporter.h
+   FeatureLayerImporter.h
+   FeatureManager.h
+   FeatureMenuEditorDlg.h
+   FeatureProxyConnector.h
+   FeatureQueryOptions.h
+   FeatureTable.h
+   GeographicFeaturesTabs.h
+   GeographicFeaturesWidget.h
+   GeographicFeaturesWindow.h
+   ListInspectorWidget.h
+   OptionsGeographicFeatures.h
+   PropertiesFeatureClass.h
+   QueryBuilderWidget.h
+   QueryOptions.h
+   QueryOptionsWidget.h
+   ShapeFileImporter.h
+   ShapelibProxy.h
+   )
 set (SOURCE_FILES
-    ConnectionParametersWidget.cpp
-    FeatureClass.cpp
-    FeatureClassWidget.cpp
-    FeatureLayerImporter.cpp
-    FeatureManager.cpp
-    FeatureMenuEditorDlg.cpp
-    FeatureProxyConnector.cpp
-    ListInspectorWidget.cpp
-    ModuleManager.cpp
-    PropertiesFeatureClass.cpp
-    QueryBuilderWidget.cpp
-    QueryOptions.cpp
-    QueryOptionsWidget.cpp
-    ShapeFileImporter.cpp
-    ShapelibProxy.cpp
+   AddQueriesDlg.cpp
+   AlphaNumericSortFilterProxyModel.cpp
+   ConnectionParametersWidget.cpp
+   CoordinateTransformation.cpp
+   DisplayQueryOptions.cpp
+   DisplaySelectionWidget.cpp
+   FeatureClass.cpp
+   FeatureClassWidget.cpp
+   FeatureLayerExporter.cpp
+   FeatureLayerImporter.cpp
+   FeatureManager.cpp
+   FeatureMenuEditorDlg.cpp
+   FeatureProxyConnector.cpp
+   FeatureQueryOptions.cpp
+   FeatureTable.cpp
+   GeographicFeaturesTabs.cpp
+   GeographicFeaturesWidget.cpp
+   GeographicFeaturesWindow.cpp
+   ListInspectorWidget.cpp
+   ModuleManager.cpp
+   OptionsGeographicFeatures.cpp
+   PropertiesFeatureClass.cpp
+   QueryBuilderWidget.cpp
+   QueryOptions.cpp
+   QueryOptionsWidget.cpp
+   ShapeFileImporter.cpp
+   ShapelibProxy.cpp
 ) 
 set (MOC_HEADERS
-    ConnectionParametersWidget.h
-    FeatureClass.h
-    FeatureClassWidget.h
-    FeatureManager.h
-    FeatureMenuEditorDlg.h
-    FeatureProxyConnector.h
-    ListInspectorWidget.h
-    QueryBuilderWidget.h
-    QueryOptionsWidget.h
-    ShapelibProxy.h
+   AddQueriesDlg.h
+   AlphaNumericSortFilterProxyModel.h
+   ConnectionParametersWidget.h
+   CoordinateTransformation.h
+   DisplayQueryOptions.h
+   DisplaySelectionWidget.h
+   FeatureClass.h
+   FeatureClassWidget.h
+   FeatureLayerExporter.h
+   FeatureLayerImporter.h
+   FeatureManager.h
+   FeatureMenuEditorDlg.h
+   FeatureProxyConnector.h
+   FeatureQueryOptions.h
+   FeatureTable.h
+   GeographicFeaturesTabs.h
+   GeographicFeaturesWidget.h
+   GeographicFeaturesWindow.h
+   ListInspectorWidget.h
+   OptionsGeographicFeatures.h
+   PropertiesFeatureClass.h
+   QueryBuilderWidget.h
+   QueryOptions.h
+   QueryOptionsWidget.h
+   ShapeFileImporter.h
+   ShapelibProxy.h
 )
 include(${QT_USE_FILE})
 qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
@@ -47,6 +97,7 @@ target_link_libraries(GeographicFeatures
     ${QT_LIBRARIES}    
     ${shapelib_LIBRARIES}    
     ${Xerces_LIBRARIES}
+    ${Gdal_LIBRARIES}
 )
 if(WIN32)
     install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

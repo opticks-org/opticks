@@ -1,4 +1,4 @@
-set(Opticks_VERSION "4.8Unofficial") #fix this
+set(Opticks_VERSION "5.0.0Unofficial") # Change project(Opticks) below when VERSION becomes an official dotted-decimal
 cmake_minimum_required (VERSION 2.8.3)
 
 # Order is important on this. It MUST be before project()
@@ -13,29 +13,69 @@ else()
    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/../install CACHE PATH "Location to install Opticks" FORCE)
 endif()
 
-project (Opticks)
+# Prevent in-source builds, build directory must be external to the source tree
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
+if(CMAKE_MAJOR_VERSION GREATER 2)
+  cmake_policy(SET CMP0043 NEW)
+  cmake_policy(SET CMP0048 NEW)
+endif()
+
+if(CMAKE_MAJOR_VERSION GREATER 2)
+   #project (Opticks VERSION ${Opticks_VERSION} DESCRIPTION "Ball Aerospace Opticks GIS") # VERSION must be dotted-decimal
+   project (Opticks DESCRIPTION "Ball Aerospace Opticks GIS ${Opticks_VERSION}")
+else()
+   project (Opticks)
+endif()
+
+message(STATUS "Opticks Build Type: ${CMAKE_BUILD_TYPE}")
+############################################################
+# From https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+#
+# use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/PlugIns;${CMAKE_INSTALL_PREFIX}/PlugIns/debug")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif("${isSystemDir}" STREQUAL "-1")
+#################################################################
 
 # Location of the Dependencies directory. On some platforms and configurations, it may not be necessary, but it's still searched.
-if(NOT Opticks_DEPENDENCIES)
+if(NOT IS_DIRECTORY ${Opticks_DEPENDENCIES})
     set(Opticks_DEPENDENCIES $ENV{OPTICKSDEPENDENCIES} CACHE PATH "Location of Opticks pre-built dependencies")
-    if(NOT Opticks_DEPENDENCIES)
+    if(NOT IS_DIRECTORY ${Opticks_DEPENDENCIES})
         get_filename_component(Opticks_DEFAULT_DEPENDENCIES "${Opticks_SOURCE_DIR}/../../Dependencies" ABSOLUTE)
         set(Opticks_DEPENDENCIES ${Opticks_DEFAULT_DEPENDENCIES} CACHE PATH "Location of Opticks pre-built dependencies" FORCE)
     endif()
 endif()
 Message(STATUS "Setting Opticks_DEPENDENCIES to ${Opticks_DEPENDENCIES}")
-if(NOT (EXISTS "${Opticks_DEPENDENCIES}" AND IS_DIRECTORY "${Opticks_DEPENDENCIES}"))
-    message(STATUS "Opticks_DEPENDENCIES was not provided or does not exist, so required 3rd-party libraries will only be searched for on the system. "
-        "Opticks_DEPENDENCIES can be retrieved by running the retrieve-dependencies script from the Dependencies directory.")
-    set(Opticks_DEPENDENCIES "" CACHE PATH "Location of Opticks pre-built dependencies")
+if(NOT IS_DIRECTORY "${Opticks_DEPENDENCIES}")
+   message(STATUS "Opticks_DEPENDENCIES was not provided or does not exist, so required 3rd-party libraries will only be searched for on the system. "
+      "Opticks_DEPENDENCIES can be retrieved by running the retrieve-dependencies script from the Dependencies directory.")
+   set(Opticks_DEPENDENCIES "" CACHE PATH "Location of Opticks pre-built dependencies")
 endif()
+
 # 64-bit or 32-bit dependencies?
 if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 4)
     set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/32)
 elseif(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
     set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/64)
 endif()
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" ${OPTICKS_DEP_PATH})
+
+#set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${OPTICKS_DEP_PATH}")
+set(CMAKE_PREFIX_PATH "${OPTICKS_DEP_PATH}") # Spectral experience with TBB suggests this might make finding Dependencies packages more reliably against competing system packages.
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG) #-DDEBUG only for debug configurations
@@ -91,11 +131,22 @@ set(Opticks_NitfPlugInLib_INCLUDE_DIR "${Opticks_SOURCE_DIR}/NitfPlugInLib")
 set(Opticks_SimpleApi_INCLUDE_DIR "${Opticks_SOURCE_DIR}/SimpleApiLib")
 
 # Get the working copy revision
-find_package(Subversion)
 set(Opticks_Build_Revision "Unknown")
-if(Subversion_FOUND)
-    Subversion_WC_INFO(${Opticks_SOURCE_DIR} OpticksSvn)
-    set(Opticks_Build_Revision "${OpticksSvn_WC_LAST_CHANGED_REV}")
+unset(OpticksGit)
+find_package(Git)
+if(GIT_FOUND)
+    execute_process(COMMAND ${GIT_EXECUTABLE} log -n1 COMMAND /usr/bin/grep commit OUTPUT_VARIABLE OpticksGit OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(SUBSTRING ${OpticksGit} 7 40 OpticksGit)
+    if(OpticksGit)
+        set(Opticks_Build_Revision "${OpticksGit}")
+    endif()
+endif()
+if(NOT OpticksGit)
+    find_package(Subversion)
+    if(Subversion_FOUND)
+      Subversion_WC_INFO(${Opticks_SOURCE_DIR} OpticksSvn)
+      set(Opticks_Build_Revision "${OpticksSvn_WC_LAST_CHANGED_REV}")
+    endif()
 endif()
 Message(STATUS "Setting Build Revision To ${Opticks_Build_Revision}")
 configure_file(cmake/Templates/BuildRevision.h "${Opticks_SOURCE_DIR}/Utilities")
@@ -136,11 +187,16 @@ if(NOT PTHREAD_WORKS)
    message(FATAL_ERROR "pthreads code cannot be built on this system.")
 endif()
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtNetwork REQUIRED)
+set(OpenGL_GL_PREFERENCE GLVND)
+
+# Qt/Qwt configuration boilerplate shared with Spectral
+set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
+include(ConfigureQtQwt)
+unset(DEPENDENCY_PATH)
+
 find_package(Boost 1.45.0 REQUIRED)
 find_package(Xerces REQUIRED)
 find_package(XQilla REQUIRED)
-find_package(Qwt5ForQt4 REQUIRED)
 find_package(Minizip REQUIRED)
 find_package(YamlCpp REQUIRED)
 find_package(Raptor REQUIRED)
@@ -161,6 +217,7 @@ find_package(proj REQUIRED)
 find_package(avcodec)
 find_package(avformat)
 find_package(avutil)
+find_package(swscale)
 find_package(cfitsio)
 find_package(Cg) #optional, still need to work
 find_package(Gdal)
@@ -170,6 +227,10 @@ find_package(OpenJpeg)
 find_package(ehs)
 find_package(pcre)
 find_package(pme)
+
+if(ehs_FOUND)
+   include_directories(${ehs_INCLUDE_DIRS})
+endif()
 
 set(OLD_CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${OPTICKS_DEP_PATH}/tools/graphviz")
@@ -259,6 +320,17 @@ if(WIN32)
     add_subdirectory(PlugIns/src/LegacyModule)
 endif()
 if(avcodec_FOUND AND avformat_FOUND AND avutil_FOUND)
+   if(${avcodec_MAJOR_VERSION} EQUAL 51)
+      # Opticks default 51.13.0 is likely the last ffmpeg avcodec to include img_convert(). Newer than that, must use sws_scale
+      set(avcodec_USE_SWSCALE OFF CACHE BOOL "Set ON to use new sws_scale() for video image format conversion. Set OFF to use img_convert()")
+   else()
+      set(avcodec_USE_SWSCALE ON CACHE BOOL "Set ON to use sws_scale() for video image format conversion. Set OFF to use old img_convert(), if you have one.")
+   endif()
+   if(avcodec_USE_SWSCALE)
+      add_definitions(-DUSE_SWSCALE=1)
+   else()
+      add_definitions(-DUSE_SWSCALE=0)
+   endif()
    add_subdirectory(PlugIns/src/MovieExporter)
 endif()
 add_subdirectory(PlugIns/src/Nitf)
@@ -318,7 +390,6 @@ include(${QT_USE_FILE})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Xerces_INCLUDE_DIRS})
 include_directories(${XQilla_INCLUDE_DIRS})
-include_directories(${Qwt5ForQt4_INCLUDE_DIRS})
 include_directories(${Minizip_INCLUDE_DIRS})
 include_directories(${YamlCpp_INCLUDE_DIRS})
 include_directories(${Raptor_INCLUDE_DIRS})
@@ -346,6 +417,10 @@ foreach(LIB_NAME IN LISTS OPTICKS_EXECUTABLE_LIBS)
     add_subdirectory(${LIB_NAME})
 endforeach()
 
+# CMake documentation cautions against file globing to set HEADER_FILES, SOURCE_FILES, etc.,
+# as you could add source files to a large project, but CMake wouldn't regenerate as none of
+# it's CMakeLists.txt had themselves changed. OTOH, maintaining these file lists is itself a
+# bit of a task. I've chosen to go with CMake's recommendation for now.
 set(INTERFACE_HEADER_FILES
     Interfaces/Animation.h
     Interfaces/AnimationController.h
@@ -468,6 +543,16 @@ set(INTERFACE_HEADER_FILES
     Interfaces/PlugInDescriptor.h
     Interfaces/PlugInManagerServices.h
     Interfaces/PlugInRegistration.h
+    Interfaces/PointCloudAccessor.h
+    Interfaces/PointCloudAccessorImpl.h
+    Interfaces/PointCloudDataDescriptor.h
+    Interfaces/PointCloudDataRequest.h
+    Interfaces/PointCloudElement.h
+    Interfaces/PointCloudFileDescriptor.h
+    Interfaces/PointCloudPager.h
+    Interfaces/PointCloudView.h
+    Interfaces/PointCloudWindow.h
+    Interfaces/PointDataBlock.h
     Interfaces/Point.h
     Interfaces/PointSet.h
     Interfaces/PolarGridlines.h
@@ -576,8 +661,7 @@ source_group(Interfaces FILES ${INTERFACE_HEADER_FILES})
 target_link_libraries(Opticks
     ${OPTICKS_EXECUTABLE_LIBS}
     ${Opticks_LIBRARIES}
-    ${QT_LIBRARIES}    
-    ${Qwt5ForQt4_LIBRARY}
+    ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}    
     ${ZLIB_LIBRARIES}    
     ${YamlCpp_LIBRARIES}    
@@ -587,12 +671,18 @@ target_link_libraries(Opticks
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
-)
+    )
+ if(HAVE_QT5)
+    target_link_libraries(Opticks  ${Qwt5ForQt5_LIBRARY})
+ else()
+    target_link_libraries(Opticks  ${Qwt5ForQt4_LIBRARY})
+ endif()
+
 set_target_properties(Opticks PROPERTIES DEBUG_POSTFIX "d")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_target_properties(Opticks PROPERTIES OUTPUT_NAME "linuxOpticks")
     target_link_libraries(Opticks
-        ${EXPAT_LIBRARIES}
+        ${EXPAT_LIBRARIES} -ldl # TODO Check if -ldl should go as -dl in set(CMAKE_REQUIRED_LIBRARIES -pthread) above
     )
 endif()
 if(WIN32)
@@ -643,6 +733,6 @@ install(DIRECTORY ${Opticks_SOURCE_DIR}/PlugIns/src/Aspam
    ${Opticks_SOURCE_DIR}/PlugIns/src/PlugInSamplerHdf
    ${Opticks_SOURCE_DIR}/PlugIns/src/PlugInSamplerQt
    ${Opticks_SOURCE_DIR}/PlugIns/src/Tutorial DESTINATION examples/PlugIns/src
-   FILES_MATCHING PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
+   FILES_MATCHING PATTERN "*" PATTERN ".svn" PATTERN ".git" EXCLUDE PATTERN "_svn" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/cmake/Modules DESTINATION cmake FILES_MATCHING
-   PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
+   PATTERN "*" PATTERN ".svn" PATTERN ".git" EXCLUDE PATTERN "_svn" EXCLUDE)
