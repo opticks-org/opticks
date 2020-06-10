@@ -81,7 +81,6 @@ set (MOC_HEADERS
    PngExportOptionsWidget.h
    PostScriptExporter.h
    QuickbirdIsd.h
-   tif_dir.h
    TiffDetails.h
    TiffExportOptionsWidget.h
 )
