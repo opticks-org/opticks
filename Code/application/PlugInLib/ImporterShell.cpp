@@ -200,7 +200,7 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor,
    }
 
    // If no RasterDataDescriptor or RasterFileDescriptor tests are performed, end here
-   if (validationTest < RASTER_SIZE)
+   if (static_cast<unsigned int>(validationTest) < static_cast<unsigned int>(RASTER_SIZE))
    {
       return true;
    }
@@ -541,7 +541,7 @@ bool ImporterShell::validate(const DataDescriptor* pDescriptor,
    }
 
    // If no GeoreferenceDescriptor tests are performed, end here
-   if (validationTest < VALID_GEOREFERENCE_PLUGIN)
+   if (static_cast<unsigned int>(validationTest) < static_cast<unsigned int>(VALID_GEOREFERENCE_PLUGIN))
    {
       return true;
    }
