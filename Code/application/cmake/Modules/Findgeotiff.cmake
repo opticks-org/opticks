@@ -1,8 +1,8 @@
-find_path(geotiff_INCLUDE_DIR geotiff.h PATH_SUFFIXES geotiff)
+find_path(geotiff_INCLUDE_DIR geotiff.h PATH_SUFFIXES geotiff libgeotiff)
 
 if(geotiff_INCLUDE_DIR AND EXISTS "${geotiff_INCLUDE_DIR}/geotiff.h")
     file(STRINGS "${geotiff_INCLUDE_DIR}/geotiff.h" geotiff_Parsed_Version REGEX "^#define LIBGEOTIFF_VERSION +[0-9]+.*$")
-
+    string(SUBSTRING ${geotiff_Parsed_Version} 27 -1 geotiff_Parsed_Version)
     math(EXPR geotiff_MAJOR_VERSION "${geotiff_Parsed_Version} / 1000")
     math(EXPR geotiff_MINOR_VERSION "${geotiff_Parsed_Version} % 1000 / 100")
     math(EXPR geotiff_PATCH_VERSION "${geotiff_Parsed_Version} % 1000 % 100 / 10")

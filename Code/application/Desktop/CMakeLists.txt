@@ -25,6 +25,7 @@ set (HEADER_FILES
     Plot/HistogramAdapter.h
     Plot/HistogramPlotAdapter.h
     Plot/HistogramWindowAdapter.h
+    Plot/Legend.h
     Plot/LocatorAdapter.h
     Plot/PlotGroupAdapter.h
     Plot/PlotObjectAdapter.h
@@ -39,6 +40,7 @@ set (HEADER_FILES
     Plot/PolygonPlotObjectAdapter.h
     Plot/RegionObjectAdapter.h
     Plot/SignaturePlotAdapter.h
+    Plot/StatisticsWidget.h
     Plot/TextAdapter.h
     AnimationModel.h
     ContextMenuImp.h
@@ -49,6 +51,10 @@ set (HEADER_FILES
     LayerListAdapter.h
     MouseModeImp.h
     PlugInModel.h
+    PointCloudViewAdapter.h
+    PointCloudViewImp.h
+    PointCloudWindowAdapter.h
+    PointCloudWindowImp.h
     ProductViewAdapter.h
     ProductWindowAdapter.h
     ProductWindowImp.h
@@ -159,6 +165,10 @@ set (SOURCE_FILES
     OrthographicViewImp.cpp
     PerspectiveViewImp.cpp
     PlugInModel.cpp
+    PointCloudViewAdapter.cpp
+    PointCloudViewImp.cpp
+    PointCloudWindowAdapter.cpp
+    PointCloudWindowImp.cpp
     ProductViewAdapter.cpp
     ProductViewImp.cpp
     ProductWindowAdapter.cpp
@@ -228,6 +238,10 @@ set (MOC_HEADERS
     LayerListImp.h
     OrthographicViewImp.h
     PerspectiveViewImp.h
+    PointCloudViewAdapter.h
+    PointCloudViewImp.h
+    PointCloudWindowAdapter.h
+    PointCloudWindowImp.h
     ProductViewImp.h
     SessionExplorerImp.h
     SpatialDataViewImp.h

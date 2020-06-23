@@ -34,6 +34,7 @@ set (MOC_HEADERS
 )
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${Qwt5ForQt4_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
 include(${QT_USE_FILE})

@@ -1,24 +1,34 @@
 set (HEADER_FILES
-    Feature.h
-    ShapeFile.h
-    ShapeFileExporter.h
-    ShapeFileTypes.h
-)
+   AddFeatureDlg.h
+   AddFieldDlg.h
+   FeatureClassDlg.h
+   Feature.h
+   ShapeFileExporter.h
+   ShapeFile.h
+   ShapeFileOptionsWidget.h
+   ShapeFileTypes.h
+   )
 set (SOURCE_FILES
-    AddFeatureDlg.cpp
-    AddFieldDlg.cpp
-    Feature.cpp
-    ModuleManager.cpp
-    ShapeFile.cpp
-    ShapeFileExporter.cpp
-    ShapeFileOptionsWidget.cpp
-    ShapeFileTypes.cpp
-) 
+   AddFeatureDlg.cpp
+   AddFieldDlg.cpp
+   FeatureClassDlg.cpp
+   Feature.cpp
+   ModuleManager.cpp
+   ShapeFile.cpp
+   ShapeFileExporter.cpp
+   ShapeFileOptionsWidget.cpp
+   ShapeFileTypes.cpp
+   ) 
 set (MOC_HEADERS
-    AddFeatureDlg.h
-    AddFieldDlg.h
-    ShapeFileOptionsWidget.h
-)
+   AddFeatureDlg.h
+   AddFieldDlg.h
+   FeatureClassDlg.h
+   Feature.h
+   ShapeFileExporter.h
+   ShapeFile.h
+   ShapeFileOptionsWidget.h
+   ShapeFileTypes.h
+   )
 include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${shapelib_INCLUDE_DIRS} ${Xerces_INCLUDE_DIRS})

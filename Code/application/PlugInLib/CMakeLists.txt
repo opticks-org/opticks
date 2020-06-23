@@ -7,6 +7,7 @@ set(HEADER_FILES
     InterpreterManagerShell.h
     OptionShell.h
     PlugInShell.h
+    PointCloudPagerShell.h
     PropertiesShell.h
     RasterElementImporterShell.h
     RasterPagerShell.h
@@ -26,6 +27,8 @@ set(SOURCE_FILES
     ModuleShell.cpp
     OptionShell.cpp
     PlugInShell.cpp
+    PointCloudAccessor.cpp
+    PointCloudPagerShell.cpp
     PropertiesShell.cpp
     RasterElementImporterShell.cpp
     RasterPagerShell.cpp

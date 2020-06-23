@@ -7,7 +7,7 @@ set (SOURCE_FILES
     PCA.cpp
     PcaDlg.cpp
     StatisticsDlg.cpp
-) 
+)
 set (MOC_HEADERS
     EigenPlotDlg.h
     PcaDlg.h
@@ -17,7 +17,11 @@ include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
-include_directories(${Qwt5ForQt4_INCLUDE_DIRS})
+if(HAVE_QT5)
+   include_directories(${Qwt5ForQt5_INCLUDE_DIRS})
+else()
+   include_directories(${Qwt5ForQt4_INCLUDE_DIRS})
+endif()
 include(${QT_USE_FILE})
 qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
@@ -25,10 +29,15 @@ add_library(Pca SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_F
 target_link_libraries(Pca
     ${Opticks_LIBRARIES}
     ${QT_LIBRARIES}    
-    ${Qwt5ForQt4_LIBRARY}
     ${Ossim_LIBRARIES}
     ${Xerces_LIBRARIES}
-)
+    )
+if(HAVE_QT5)
+   target_link_libraries(Pca ${Qwt5ForQt5_LIBRARY})
+else()
+   target_link_libraries(Pca ${Qwt5ForQt4_LIBRARY})
+endif()
+ 
 if(WIN32)
     install(TARGETS Pca RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     install(TARGETS Pca RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)

@@ -32,11 +32,22 @@ set (HEADER_FILES
     InMemoryPager.h
     LibrarySignatureAdapter.h
     LibrarySignatureImp.h
+    MemoryMappedArray.h
+    MemoryMappedArrayView.h
     MemoryMappedMatrix.h
     MemoryMappedMatrixView.h
     MemoryMappedPage.h
     MemoryMappedPager.h
     ModelServicesImp.h
+    PointCloudDataDescriptorAdapter.h
+    PointCloudDataDescriptorImp.h
+    PointCloudDataRequestImp.h
+    PointCloudElementAdapter.h
+    PointCloudElementImp.h
+    PointCloudFileDescriptorAdapter.h
+    PointCloudFileDescriptorImp.h
+    PointCloudInMemoryPager.h
+    PointCloudMemoryMappedPager.h
     RasterDataDescriptorAdapter.h
     RasterDataDescriptorImp.h
     RasterElementAdapter.h
@@ -93,11 +104,22 @@ set (SOURCE_FILES
     InMemoryPager.cpp
     LibrarySignatureAdapter.cpp
     LibrarySignatureImp.cpp
+    MemoryMappedArray.cpp
+    MemoryMappedArrayView.cpp
     MemoryMappedMatrix.cpp
     MemoryMappedMatrixView.cpp
     MemoryMappedPage.cpp
     MemoryMappedPager.cpp
     ModelServicesImp.cpp
+    PointCloudDataDescriptorAdapter.cpp
+    PointCloudDataDescriptorImp.cpp
+    PointCloudDataRequestImp.cpp
+    PointCloudElementAdapter.cpp
+    PointCloudElementImp.cpp
+    PointCloudFileDescriptorAdapter.cpp
+    PointCloudFileDescriptorImp.cpp
+    PointCloudInMemoryPager.cpp
+    PointCloudMemoryMappedPager.cpp
     RasterDataDescriptorAdapter.cpp
     RasterDataDescriptorImp.cpp
     RasterElementAdapter.cpp

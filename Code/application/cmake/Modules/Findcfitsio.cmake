@@ -1,4 +1,4 @@
-find_path(cfitsio_INCLUDE_DIR fitsio.h)
+find_path(cfitsio_INCLUDE_DIR fitsio.h PATH_SUFFIXES cfitsio)
 if(cfitsio_INCLUDE_DIR AND EXISTS "${cfitsio_INCLUDE_DIR}/fitsio.h")
     file(STRINGS "${cfitsio_INCLUDE_DIR}/fitsio.h" cfitsio_Parsed_Version REGEX "^#define CFITSIO_VERSION +.+$")
     string(REGEX REPLACE "^.*CFITSIO_VERSION +([0-9]+).*$" "\\1" cfitsio_VERSION_MAJOR "${cfitsio_Parsed_Version}")

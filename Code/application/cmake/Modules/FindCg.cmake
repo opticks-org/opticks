@@ -2,7 +2,7 @@ find_path(Cg_INCLUDE_DIR Cg/cg.h)
 
 if(Cg_INCLUDE_DIR AND EXISTS "${Cg_INCLUDE_DIR}/Cg/cg.h")
     file(STRINGS "${Cg_INCLUDE_DIR}/Cg/cg.h" Cg_Parsed_Version REGEX "^#define CG_VERSION_NUM *[0-9]+ *$")
-
+    string(SUBSTRING ${Cg_Parsed_Version} 23 -1 Cg_Parsed_Version)
     math(EXPR Cg_MAJOR_VERSION "${Cg_Parsed_Version} / 1000")
     math(EXPR Cg_MINOR_VERSION "${Cg_Parsed_Version} % 1000 / 100")
     set(Cg_VERSION_STRING "${Cg_MAJOR_VERSION}.${Cg_MINOR_VERSION}")

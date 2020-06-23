@@ -1,22 +1,26 @@
 set (HEADER_FILES
     GcpGeoreference.h
+    GcpGui.h
+    GeoreferenceDlg.h
     GeoreferencePlugIn.h
-    GeoreferenceUtilities.h
     IgmGeoreference.h
+    IgmGui.h
 )
 set (SOURCE_FILES
     GcpGeoreference.cpp
     GcpGui.cpp
     GeoreferenceDlg.cpp
     GeoreferencePlugIn.cpp
-    GeoreferenceUtilities.cpp
     IgmGeoreference.cpp
     IgmGui.cpp
     ModuleManager.cpp
 ) 
 set (MOC_HEADERS
+    GcpGeoreference.h
     GcpGui.h
     GeoreferenceDlg.h
+    GeoreferencePlugIn.h
+    IgmGeoreference.h
     IgmGui.h
 )
 include(${QT_USE_FILE})

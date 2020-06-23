@@ -82,6 +82,11 @@ set (HEADER_FILES
     BadValuesDlg.h
     DynamicObjectItemModel.h
     GuiFunctors.h
+    OptionsFullScreen.h
+    OptionsDockWindow.h
+    OptionsLayer.h
+    OptionsPropertiesDialog.h
+    OptionsToolBar.h
     PropertiesAoiLayer.h
     PropertiesClassification.h
     PropertiesDataDescriptor.h
@@ -90,6 +95,7 @@ set (HEADER_FILES
     PropertiesHistogramPlot.h
     PropertiesMetadata.h
     PropertiesModuleDescriptor.h
+    PropertiesPointCloudView.h
     PropertiesPlotView.h
     PropertiesPlugInDescriptor.h
     PropertiesProductView.h
@@ -204,14 +210,18 @@ set (SOURCE_FILES
     OptionsAnnotationLayer.cpp
     OptionsAoiLayer.cpp
     OptionsDlg.cpp
+    OptionsDockWindow.cpp
     OptionsFileLocations.cpp
+    OptionsFullScreen.cpp
     OptionsGcpLayer.cpp
     OptionsGeneral.cpp
     OptionsGeoreference.cpp
     OptionsLatLonLayer.cpp
+    OptionsLayer.cpp
     OptionsMeasurementLayer.cpp
     OptionsOverviewWindow.cpp
     OptionsPseudocolorLayer.cpp
+    OptionsPropertiesDialog.cpp
     OptionsRasterLayer.cpp
     OptionsSession.cpp
     OptionsShortcuts.cpp
@@ -220,6 +230,7 @@ set (SOURCE_FILES
     OptionsSuppressibleMsg.cpp
     OptionsThresholdLayer.cpp
     OptionsTiePointLayer.cpp
+    OptionsToolBar.cpp
     OptionsView.cpp
     OverviewWindow.cpp
     PaperSizeDlg.cpp
@@ -240,6 +251,7 @@ set (SOURCE_FILES
     PropertiesMeasurementObject.cpp
     PropertiesMetadata.cpp
     PropertiesModuleDescriptor.cpp
+    PropertiesPointCloudView.cpp
     PropertiesPlotView.cpp
     PropertiesPlugInDescriptor.cpp
     PropertiesProductView.cpp
@@ -326,13 +338,17 @@ set (MOC_HEADERS
     OptionsAnnotationLayer.h
     OptionsAoiLayer.h
     OptionsDlg.h
+    OptionsDockWindow.h
     OptionsFileLocations.h
+    OptionsFullScreen.h
     OptionsGcpLayer.h
     OptionsGeneral.h
     OptionsGeoreference.h
     OptionsLatLonLayer.h
+    OptionsLayer.h
     OptionsMeasurementLayer.h
     OptionsOverviewWindow.h
+    OptionsPropertiesDialog.h
     OptionsPseudocolorLayer.h
     OptionsRasterLayer.h
     OptionsSession.h
@@ -342,6 +358,7 @@ set (MOC_HEADERS
     OptionsSuppressibleMsg.h
     OptionsThresholdLayer.h
     OptionsTiePointLayer.h
+    OptionsToolBar.h
     OptionsView.h
     OverviewWindow.h
     PaperSizeDlg.h
@@ -353,6 +370,8 @@ set (MOC_HEADERS
     PropertiesGraphicObject.h
     PropertiesLatLonLayer.h
     PropertiesMeasurementLayer.h
+    PropertiesPlotView.h
+    PropertiesPointCloudView.h
     PropertiesMeasurementObject.h
     PropertiesPseudocolorLayer.h
     PropertiesRasterLayer.h
@@ -375,6 +394,7 @@ set (MOC_HEADERS
     WizardProperties.h
     WizardView.h
     WizardWidget.h
+    Workspace.h
     ZoomCustomDlg.h
     ZoomPanWidget.h
 )

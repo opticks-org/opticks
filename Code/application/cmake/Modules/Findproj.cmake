@@ -2,7 +2,7 @@ find_path(proj_INCLUDE_DIR proj_api.h)
 
 if(proj_INCLUDE_DIR AND EXISTS "${proj_INCLUDE_DIR}/proj_api.h")
     file(STRINGS "${proj_INCLUDE_DIR}/proj_api.h" proj_Parsed_Version REGEX "^#define PJ_VERSION +[0-9]+.*$")
-
+    string(SUBSTRING ${proj_Parsed_Version} 19 -1 proj_Parsed_Version)
     math(EXPR proj_MAJOR_VERSION "${proj_Parsed_Version} / 100")
     math(EXPR proj_MINOR_VERSION "${proj_Parsed_Version} % 100 / 10")
     math(EXPR proj_PATCH_VERSION "${proj_Parsed_Version} % 100 % 10")
