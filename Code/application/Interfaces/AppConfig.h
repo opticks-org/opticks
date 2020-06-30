@@ -54,6 +54,10 @@
    #define HIDE_UNUSED_VARIABLE_WARNING
 
    #define GL_CALLBACK CALLBACK
+
+   #ifndef _THROW0
+   #define _THROW0() noexcept
+   #endif
 #elif defined (__SUNPRO_CC)
    #include <sys/isa_defs.h>
 

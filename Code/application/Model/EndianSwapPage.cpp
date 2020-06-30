@@ -12,6 +12,7 @@
 #include "switchOnEncoding.h"
 #include "RasterUtilities.h"
 
+#include <algorithm>
 #include <stdlib.h>
 #include <string.h>
 
