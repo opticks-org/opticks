@@ -45,7 +45,7 @@ public:
     * @param  maxCacheSize
     *         The maximum size of the cache in bytes.
     */
-   PageCache(const size_t maxCacheSize = 20000000);
+   PageCache(const int64_t maxCacheSize = 20000000);
 
    /**
     * Destroys the thread-safe LRU PageCache.
@@ -109,11 +109,18 @@ public:
    CachedPage *createPage(CachedPage::UnitPtr pUnit, InterleaveFormatType requestedFormat,
       DimensionDescriptor startRow, DimensionDescriptor startColumn, DimensionDescriptor startBand);
 
+   /**
+    *  Resize the cache.
+    *  @param newSize
+    *         The new cache size in bytes.
+    */
+   void resize(int64_t newSize);
+
 protected:
-   const size_t MAX_CACHE_SIZE;
+   int64_t mMaxCacheSize;
    UnitList mUnits;
    std::string mFilename;
-   size_t mCacheSize;
+   int64_t mCacheSize;
    int mBytesPerBand;
    int mColumnCount;
    int mBandCount;

@@ -48,8 +48,8 @@ public:
    virtual PlotType getPlotType() const = 0;
 
    // Objects
-   PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary);
-   PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary);
+   PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet = false);
+   PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary, bool bQuiet = false);
    bool insertObject(PlotObject* pObject);
    bool insertObjects(const std::list<PlotObject*>& objects);
    std::list<PlotObject*> getObjects() const;
@@ -58,7 +58,7 @@ public:
    bool containsObject(PlotObject* pObject) const;
    unsigned int getNumObjects() const;
    bool deleteObject(PlotObject* pObject);
-   bool deleteObjects(const std::list<PlotObject*>& objects);
+   bool deleteObjects(std::vector<PlotObject*>& objects);
 
    bool moveObjectToFront(PlotObject* pObject);
    bool moveObjectToBack(PlotObject* pObject);
@@ -78,6 +78,7 @@ public:
    bool isShadingEnabled() const;
    void setExtentsMargin(double marginFactor);
    double getExtentsMargin() const;
+   void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
 
    // Annotation
    AnnotationLayer* getAnnotationLayer() const;
@@ -121,6 +122,9 @@ protected:
    void drawContents();
    virtual void drawGridlines() = 0;
    void initializeDisplayList();
+   bool insertObjectSafe(PlotObject* pObject);
+   void selectObjectsSafe(const std::list<PlotObject*>& objects, bool select);
+   bool selectObjectSafe(PlotObject* pObject, bool select);
 
 protected slots:
    void setMouseMode(QAction* pAction);
@@ -128,7 +132,7 @@ protected slots:
    void removeMouseModeAction(const MouseMode* pMouseMode);
    void enableMouseModeAction(const MouseMode* pMouseMode, bool bEnable);
    void updateMouseModeAction(const MouseMode* pMouseMode);
-   void updateExtents();
+   void updateExtents(bool deep=false);
    void updateAnnotationObjects();
 
 private:
@@ -155,9 +159,11 @@ private:
    PointSelectionDisplayType mSelectionDisplayMode;
    bool mEnableShading;
    double mExtentsMargin;
+   bool mExtentsDirty;
 
 private:
    QRegion getObjectRegion(const PlotObject* pObject) const;
+   void calculateExtents();
 };
 
 #define PLOTVIEWADAPTEREXTENSION_CLASSES \
@@ -171,11 +177,19 @@ private:
    } \
    PlotObject* createObject(const PlotObjectType& objectType, bool bPrimary) \
    { \
-      return impClass::createObject(objectType, bPrimary); \
+      return impClass::createObject(objectType, bPrimary, false); \
+   } \
+   PlotObject* createQuietObject(const PlotObjectType& objectType, bool bPrimary) \
+   { \
+      return impClass::createObject(objectType, bPrimary, true); \
    } \
    PlotObject* addObject(const PlotObjectType& objectType, bool bPrimary) \
    { \
-      return impClass::addObject(objectType, bPrimary); \
+      return impClass::addObject(objectType, bPrimary, false); \
+   } \
+   PlotObject* addQuietObject(const PlotObjectType& objectType, bool bPrimary) \
+   { \
+      return impClass::addObject(objectType, bPrimary, true); \
    } \
    bool insertObject(PlotObject* pObject) \
    { \
@@ -205,7 +219,7 @@ private:
    { \
       return impClass::deleteObject(pObject); \
    } \
-   bool deleteObjects(const std::list<PlotObject*>& objects) \
+   bool deleteObjects(std::vector<PlotObject*>& objects) \
    { \
       return impClass::deleteObjects(objects); \
    } \

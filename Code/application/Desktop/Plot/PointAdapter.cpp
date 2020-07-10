@@ -11,18 +11,18 @@
 
 using namespace std;
 
-PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary) :
-   PointImp(pPlot, bPrimary)
+PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary, bool bQuiet) :
+   PointImp(pPlot, bPrimary, bQuiet)
 {
 }
 
-PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point) :
-   PointImp(pPlot, bPrimary, point)
+PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point, bool bQuiet) :
+   PointImp(pPlot, bPrimary, point, bQuiet)
 {
 }
 
-PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY) :
-   PointImp(pPlot, bPrimary, dX, dY)
+PointAdapter::PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY, bool bQuiet) :
+   PointImp(pPlot, bPrimary, dX, dY, bQuiet)
 {
 }
 

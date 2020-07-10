@@ -24,9 +24,9 @@ class PointImp : public PlotObjectImp
    Q_OBJECT
 
 public:
-   PointImp(PlotViewImp* pPlot, bool bPrimary);
-   PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point);
-   PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY);
+   PointImp(PlotViewImp* pPlot, bool bPrimary, bool bQuiet);
+   PointImp(PlotViewImp* pPlot, bool bPrimary, LocationType point, bool bQuiet);
+   PointImp(PlotViewImp* pPlot, bool bPrimary, double dX, double dY, bool bQuiet);
    ~PointImp();
 
    PointImp& operator= (const PointImp& object);
@@ -75,6 +75,7 @@ private:
    int mSymbolSize;
    QColor mColor;
    PointSet* mpPointSet;
+   bool mIsQuiet;
 };
 
 #define POINTADAPTEREXTENSION_CLASSES \

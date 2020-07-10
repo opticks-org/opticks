@@ -16,9 +16,9 @@
 class PointAdapter : public Point, public PointImp POINTADAPTEREXTENSION_CLASSES
 {
 public:
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary);
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point);
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, bool bQuiet);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point, bool bQuiet);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY, bool bQuiet);
    ~PointAdapter();
 
    // TypeAwareObject

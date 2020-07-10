@@ -307,7 +307,7 @@ void CartesianPlotImp::setXScaleType(ScaleType scaleType)
       mXScaleType = scaleType;
       emit xScaleTypeChanged(mXScaleType);
       notify(SIGNAL_NAME(CartesianPlot, XScaleTypeChanged), boost::any(mXScaleType));
-      updateExtents();
+      updateExtents(true);
       zoomExtents();
    }
 }
@@ -319,7 +319,7 @@ void CartesianPlotImp::setYScaleType(ScaleType scaleType)
       mYScaleType = scaleType;
       emit yScaleTypeChanged(mYScaleType);
       notify(SIGNAL_NAME(CartesianPlot, YScaleTypeChanged), boost::any(mYScaleType));
-      updateExtents();
+      updateExtents(true);
       zoomExtents();
    }
 }

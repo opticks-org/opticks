@@ -487,6 +487,19 @@ vector<const MouseMode*> ViewImp::getMouseModes() const
       ++iter;
    }
 
+   auto modeComparator = [](const MouseMode* p1, const MouseMode* p2) -> bool
+   {
+      std::string name1;
+      p1->getName(name1);
+
+      std::string name2;
+      p2->getName(name2);
+
+      return name1 < name2;
+   };
+   
+   std::sort(mouseModes.begin(), mouseModes.end(), modeComparator);
+
    return mouseModes;
 }
 
@@ -1468,7 +1481,12 @@ void ViewImp::panTo(const LocationType& worldCoord)
 
 void ViewImp::panToCenter()
 {
-   LocationType worldCenter((mMaxX + mMinX) / 2.0, (mMaxY - mMinY) / 2.0);
+   double dMinX = 0.0;
+   double dMinY = 0.0;
+   double dMaxX = 0.0;
+   double dMaxY = 0.0;
+   getExtents(dMinX, dMinY, dMaxX, dMaxY);
+   LocationType worldCenter((dMaxX + dMinX) / 2.0, (dMaxY - dMinY) / 2.0);
    panTo(worldCenter);
 }
 
