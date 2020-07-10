@@ -120,7 +120,7 @@ bool WavelengthTextExporter::saveWavelengths(const Wavelengths* pWavelengths) co
          string endValue = StringUtilities::toXmlString(endValues[i]);
          if (mBandNumbers == true)
          {
-            fprintf(pFile.get(), "%u\t%s\t%s\t%s\n", i + 1, centerValue.c_str(), startValue.c_str(), endValue.c_str());
+            fprintf(pFile.get(), "%u\t%s\t%s\t%s\n", static_cast<unsigned int>(i) + 1, centerValue.c_str(), startValue.c_str(), endValue.c_str());
          }
          else
          {
@@ -132,7 +132,7 @@ bool WavelengthTextExporter::saveWavelengths(const Wavelengths* pWavelengths) co
          string centerValue = StringUtilities::toXmlString(centerValues[i]);
          if (mBandNumbers == true)
          {
-            fprintf(pFile.get(), "%u\t%s\n", i + 1, centerValue.c_str());
+            fprintf(pFile.get(), "%u\t%s\n", static_cast<unsigned int>(i) + 1, centerValue.c_str());
          }
          else
          {

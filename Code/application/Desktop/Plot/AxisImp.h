@@ -10,7 +10,7 @@
 #ifndef AXISIMP_H
 #define AXISIMP_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_draw.h>
 
@@ -124,7 +124,7 @@ private:
    };
 
    QwtLinearScaleEngine mLinearScale;
-   QwtLog10ScaleEngine mLogScale;
+   QwtLogScaleEngine mLogScale;
    ScaleDraw mScaleDraw;
    int mMaxMajorTicks;
    int mMaxMinorTicks;

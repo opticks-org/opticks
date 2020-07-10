@@ -11,7 +11,7 @@
 #define NAMETYPEVALUEDLG_H
 
 #include <QtCore/QString>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class DataVariant;
 class DataVariantEditor;

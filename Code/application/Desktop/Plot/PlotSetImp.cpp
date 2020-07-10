@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QIcon>
-#include <QtGui/QMenu>
-#include <QtGui/QPushButton>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 #include "AppVerify.h"
 #include "ContextMenu.h"

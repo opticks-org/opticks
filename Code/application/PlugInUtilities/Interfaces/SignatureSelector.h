@@ -12,13 +12,13 @@
 
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtGui/QAction>
-#include <QtGui/QDialog>
-#include <QtGui/QLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTreeWidgetItem>
 
 #include "ModelServices.h"
 #include "PlugInManagerServices.h"

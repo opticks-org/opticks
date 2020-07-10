@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QLayout>
+#include <QtWidgets/QLayout>
 
 #include "ToolBarImp.h"
 #include "AppVerify.h"

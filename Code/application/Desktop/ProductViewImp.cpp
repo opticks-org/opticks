@@ -46,10 +46,10 @@
 #include <map>
 #include <string>
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QCursor>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
 
 using namespace std;

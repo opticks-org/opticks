@@ -10,7 +10,7 @@
 #ifndef OPTIONSDLG_H
 #define OPTIONSDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include <map>
 #include <vector>

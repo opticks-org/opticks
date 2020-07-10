@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QPushButton>
 
 #include "AppVerify.h"
 #include "WizardProperties.h"

@@ -7,5 +7,8 @@
       <DisableSpecificWarnings>4005;4100;4127;4245;4250;4267;4514;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>Qt5Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
 </Project>

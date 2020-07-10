@@ -617,7 +617,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          // nothing to do, markings centered by default
          break;
       }
-      int screenY = 1 + classHeight;
+//      int screenY = 1 + classHeight;
       classPositionTop = QPoint(topX, 1 + classHeight);
       classPositionBottom = QPoint(bottomX, pCodecContext->height - 1);
    }

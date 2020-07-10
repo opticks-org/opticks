@@ -10,10 +10,10 @@
 #include "AppVerify.h"
 #include "ListInspectorWidget.h"
 
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QSplitter>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSplitter>
 
 #include <sstream>
 

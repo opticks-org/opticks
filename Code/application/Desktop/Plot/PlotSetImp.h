@@ -10,8 +10,8 @@
 #ifndef PLOTSETIMP_H
 #define PLOTSETIMP_H
 
-#include <QtGui/QMenu>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QTabWidget>
 
 #include "AttachmentPtr.h"
 #include "SessionExplorer.h"
@@ -21,6 +21,7 @@
 #include "View.h"
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
+#include "PlotSet.h"
 
 #include <string>
 #include <vector>

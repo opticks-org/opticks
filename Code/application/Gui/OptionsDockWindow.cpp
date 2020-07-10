@@ -9,9 +9,9 @@
 
 #include "OptionsDockWindow.h"
 
-#include <QtGui/QSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QVBoxLayout>
 
 #include "ConfigurationSettings.h"
 #include "DockWindow.h"

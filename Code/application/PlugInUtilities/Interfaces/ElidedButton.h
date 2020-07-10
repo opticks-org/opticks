@@ -10,7 +10,7 @@
 #ifndef ELIDEDBUTTON_H
 #define ELIDEDBUTTON_H
 
-#include <QtGui/QPushButton>
+#include <QtWidgets/QPushButton>
 
 /**
  *  A specialized QPushButton that displays an ellipsis when its text is larger

@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 
 EndianSwapPage::EndianSwapPage(void* pSrcData, EncodingType encoding, unsigned int rows, unsigned int columns,
                                unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char* pEndOfSegment) :

@@ -10,7 +10,7 @@
 #ifndef OPTIONSSPATIALDATAVIEW_H
 #define OPTIONSSPATIALDATAVIEW_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVersion.h"
 

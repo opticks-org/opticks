@@ -8,8 +8,8 @@
  */
 
 #include <QtGui/QFontMetrics>
-#include <QtGui/QStyleOptionButton>
-#include <QtGui/QStylePainter>
+#include <QtWidgets/QStyleOptionButton>
+#include <QtWidgets/QStylePainter>
 
 #include "ElidedButton.h"
 

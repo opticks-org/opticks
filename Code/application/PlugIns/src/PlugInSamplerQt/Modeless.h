@@ -12,7 +12,7 @@
 
 #include <memory>
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <QtGui/QIcon>
 
 #include "ViewerShell.h"

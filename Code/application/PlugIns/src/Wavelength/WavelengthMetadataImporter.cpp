@@ -9,7 +9,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 
 #include "AppVersion.h"
 #include "DesktopServices.h"

@@ -10,12 +10,12 @@
 #ifndef PROPERTIESMEASUREMENTLAYER_H
 #define PROPERTIESMEASUREMENTLAYER_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QWidget>
 
 #include "Modifier.h"
 

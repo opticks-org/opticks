@@ -11,8 +11,8 @@
 #define WAVELENGTHSWIDGET_H
 
 #include <QtCore/QModelIndex>
-#include <QtGui/QStyledItemDelegate>
-#include <QtGui/QWidget>
+#include <QtWidgets/QStyledItemDelegate>
+#include <QtWidgets/QWidget>
 
 #include "DimensionDescriptor.h"
 #include "TypesFile.h"

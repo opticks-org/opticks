@@ -167,12 +167,12 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                      vector<EnviField*>& children = pDescriptionField->mChildren;
                      for (vector<EnviField*>::iterator iter = children.begin(); iter != children.end(); ++iter)
                      {
-                        EnviField* pField = *iter;
-                        if (pField != NULL)
+                        EnviField* pField2 = *iter;
+                        if (pField2 != NULL)
                         {
-                           if ((pField->mTag.empty() == false) && (pField->mValue.empty() == false))
+                           if ((pField2->mTag.empty() == false) && (pField2->mValue.empty() == false))
                            {
-                              pMetadata->setAttribute(pField->mTag, pField->mValue);
+                              pMetadata->setAttribute(pField2->mTag, pField2->mValue);
                            }
                         }
                      }
@@ -185,12 +185,12 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                      vector<string> sigNames;
                      for (unsigned int i = 0; i < pSigNamesField->mChildren.size(); i++)
                      {
-                        EnviField* pField = pSigNamesField->mChildren[i];
-                        if (pField != NULL)
+                        EnviField* pField2 = pSigNamesField->mChildren[i];
+                        if (pField2 != NULL)
                         {
-                           vector<char> bufferVector(pField->mValue.size() + 1);
+                           vector<char> bufferVector(pField2->mValue.size() + 1);
                            char* pBuffer = &bufferVector.front();
-                           strcpy(pBuffer, pField->mValue.c_str());
+                           strcpy(pBuffer, pField2->mValue.c_str());
 
                            char* pPtr = strtok(pBuffer, ",");
                            while (pPtr != NULL)
@@ -245,12 +245,12 @@ vector<ImportDescriptor*> EnviLibraryImporter::getImportDescriptors(const string
                            iter != pWavelengthField->mChildren.end();
                            ++iter)
                         {
-                           EnviField* pField = *iter;
-                           if (pField != NULL)
+                           EnviField* pField2 = *iter;
+                           if (pField2 != NULL)
                            {
-                              vector<char> bufferVector(pField->mValue.size() + 1);
+                              vector<char> bufferVector(pField2->mValue.size() + 1);
                               char* pBuffer = &(bufferVector.front());
-                              strcpy(pBuffer, pField->mValue.c_str());
+                              strcpy(pBuffer, pField2->mValue.c_str());
 
                               char* pPtr = strtok(pBuffer, ",");
                               while (pPtr != NULL)

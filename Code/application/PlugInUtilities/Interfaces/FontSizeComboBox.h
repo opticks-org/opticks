@@ -10,7 +10,7 @@
 #ifndef FONTSIZECOMBOBOX_H
 #define FONTSIZECOMBOBOX_H
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 /**
  *  A widget used to choose a font size from an editable combo box.

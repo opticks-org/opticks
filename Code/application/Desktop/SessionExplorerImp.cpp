@@ -25,14 +25,14 @@
 
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QClipboard>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTreeView>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtCore/QSortFilterProxyModel>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTreeView>
 
 using namespace std;
 
@@ -494,7 +494,9 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 
                      // Update the drop point to be between the layer items
                      QPoint dropPos = pDropEvent->pos();
-                     QPoint& newPos = const_cast<QPoint&>(pDropEvent->pos());
+                     QPoint nwPos = pDropEvent->pos();
+                     QPoint& newPos = const_cast<QPoint&>(nwPos);
+//                     QPoint& newPos = const_cast<QPoint&>(pDropEvent->pos());
 
                      QRect layersRect;
                      if (index.isValid() == true)

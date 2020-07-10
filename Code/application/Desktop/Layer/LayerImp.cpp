@@ -37,7 +37,7 @@
 #include "xmlwriter.h"
 #include "xmlreader.h"
 
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE

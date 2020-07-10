@@ -9,16 +9,16 @@
 
 #include <QtCore/QEvent>
 #include <QtCore/QFileInfo>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
 #include <QtGui/QClipboard>
 #include <QtGui/QColor>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QColorDialog>
 #include <QtGui/QContextMenuEvent>
 #include <QtGui/QIcon>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMenu>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AnnotationElementAdapter.h"
 #include "AnnotationLayerAdapter.h"

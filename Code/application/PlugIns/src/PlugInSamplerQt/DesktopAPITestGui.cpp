@@ -8,13 +8,13 @@
  */
 
 #include <QtGui/QBitmap>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QPushButton>
 
 #include "AppVerify.h"
 #include "Axis.h"

@@ -10,8 +10,8 @@
 #ifndef CHIPPINGWINDOW_H
 #define CHIPPINGWINDOW_H
 
-#include <QtGui/QDialog>
-#include <QtGui/QRadioButton>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QRadioButton>
 
 #include "TypesFile.h"
 

@@ -8,13 +8,13 @@
  */
 
 #include <QtCore/QEvent>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QGroupBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QPushButton>
 
 #include "ApplicationServices.h"
 #include "ConfigurationSettings.h"

@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QUndoStack>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QWidgetAction>
 
 #include "AppVerify.h"
 #include "UndoButton.h"

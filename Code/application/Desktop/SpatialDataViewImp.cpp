@@ -59,15 +59,15 @@
 #include "XercesIncludes.h"
 
 #include <QtCore/QTimer>
-#include <QtGui/QActionGroup>
-#include <QtGui/QApplication>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QActionGroup>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QColorDialog>
 #include <QtGui/QHelpEvent>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QToolTip>
+#include <QtWidgets/QToolTip>
 #include <QtOpenGL/QGLFramebufferObject>
 
 #include <boost/bind.hpp>

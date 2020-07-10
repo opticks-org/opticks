@@ -10,7 +10,7 @@
 #ifndef ZOOMANDPANTOPOINT_H
 #define ZOOMANDPANTOPOINT_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "LocationType.h"
 #include "TypesFile.h"

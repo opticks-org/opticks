@@ -11,7 +11,7 @@
 #define MOUSEMODEIMP_H
 
 #include <QtCore/QString>
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QCursor>
 
 #include "MouseMode.h"

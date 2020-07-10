@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #include "AppAssert.h"
 #include "AppConfig.h"
@@ -283,18 +283,18 @@ void ComputeMaskedCov(T* pData, MaskInput* pInput)
       accessor = pInput->mpRaster->getDataAccessor(pRequest->copy());
       it.firstPixel();
       mask = 0;
-      unsigned int numPixels = it.getCount();
-      float progScale = 100.0f / numPixels;
-      LocationType loc;
+      unsigned int numPixels2 = it.getCount();
+      float progScale2 = 100.0f / numPixels2;
+      LocationType loc2;
       progSave = 0;
       while (it != it.end())
       {
          if (pInput->mpProgress != NULL &&
-             progSave != static_cast<int>(progScale * mask))
+             progSave != static_cast<int>(progScale2 * mask))
          {
             if ((pInput->mpAbortFlag == NULL) || !(*pInput->mpAbortFlag))
             {
-               progSave = static_cast<int>(progScale * mask);
+               progSave = static_cast<int>(progScale2 * mask);
                pInput->mpProgress->updateProgress("Computing Covariance Matrix...",
                   progSave, NORMAL);
             }
@@ -303,8 +303,8 @@ void ComputeMaskedCov(T* pData, MaskInput* pInput)
                break;
             }
          }
-         it.getPixelLocation(loc);
-         accessor->toPixel(loc.mY, loc.mX);
+         it.getPixelLocation(loc2);
+         accessor->toPixel(loc2.mY, loc2.mX);
          VERIFYNRV(accessor.isValid());
          pPixel = reinterpret_cast<T*>(accessor->getColumn());
          for (band2 = 0; band2 < numBands; ++band2)
@@ -1373,8 +1373,8 @@ bool PCA::computePCAwhole()
          FactoryResource<DataRequest> pPcaRequest;
          pPcaRequest->setBands(pPcaDesc->getActiveBand(comp), pPcaDesc->getActiveBand(comp));
          pPcaRequest->setWritable(true);
-         DataAccessor pcaAccessor = mpPCARaster->getDataAccessor(pPcaRequest.release());
-         if (!pcaAccessor.isValid())
+         DataAccessor pcaAccessor2 = mpPCARaster->getDataAccessor(pPcaRequest.release());
+         if (!pcaAccessor2.isValid())
          {
             mMessage = "Could not get the pixels in the PCA cube!";
             if (mpProgress != NULL)
@@ -1389,13 +1389,13 @@ bool PCA::computePCAwhole()
          compValAccessor = pComponentValues->getDataAccessor(pBipRequest->copy());
          for (row = 0; row < mNumRows; ++row)
          {
-            VERIFY(pcaAccessor.isValid());
-            pPCAData = pcaAccessor->getRow();
+            VERIFY(pcaAccessor2.isValid());
+            pPCAData = pcaAccessor2->getRow();
             VERIFY(compValAccessor.isValid());
             pValues = reinterpret_cast<double*>(compValAccessor->getRow());
             switchOnEncoding(mOutputDataType, StorePcaRow, pPCAData, pValues, pcaNumCols, pcaNumBands,
                min, scalefactor, mMinScaleValue);
-            pcaAccessor->nextRow();
+            pcaAccessor2->nextRow();
             compValAccessor->nextRow();
 
             if (isAborted())

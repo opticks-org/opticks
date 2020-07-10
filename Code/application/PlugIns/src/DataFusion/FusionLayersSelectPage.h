@@ -11,7 +11,7 @@
 #define FUSIONLAYERSSELECTPAGE_H
 
 #include <QtCore/QMap>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QCheckBox>
 
 #include "FusionPage.h"
 #include "Observer.h"

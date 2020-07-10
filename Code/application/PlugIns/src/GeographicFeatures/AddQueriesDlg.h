@@ -10,7 +10,7 @@
 #ifndef ADDQUERIESDLG_H
 #define ADDQUERIESDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include <string>
 #include <vector>

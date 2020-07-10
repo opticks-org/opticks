@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
 
 #include "AppVerify.h"
 #include "GraphicTriangleWidget.h"

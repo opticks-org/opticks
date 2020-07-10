@@ -536,7 +536,7 @@ bool RasterElementImporterShell::performImport() const
       mpRasterElement->getDataDescriptor());
    FAIL_IF(pDescriptor == NULL, "Could not find RasterDataDescriptor", return false);
 
-   string message;
+//goffena   string message;
 
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
 //   "are being loaded into the global symbol space (tclarke)")

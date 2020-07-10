@@ -13,8 +13,8 @@
 #include "DynamicObject.h"
 #include "ObjectResource.h"
 
-#include <QtGui/QDialog>
-#include <QtGui/QStyledItemDelegate>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QStyledItemDelegate>
 
 class QListWidget;
 class QListWidgetItem;

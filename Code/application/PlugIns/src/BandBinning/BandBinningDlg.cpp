@@ -10,17 +10,17 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
-#include <QtGui/QComboBox>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFrame>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QHeaderView>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QTableView>
-#include <QtGui/QToolButton>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QToolButton>
 
 #include "AppVerify.h"
 #include "BandBinningDlg.h"

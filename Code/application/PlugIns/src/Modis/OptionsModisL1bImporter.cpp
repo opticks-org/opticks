@@ -16,8 +16,8 @@
 #include "RasterConversionTypeComboBox.h"
 #include "StringUtilities.h"
 
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 
 #include <string>
 

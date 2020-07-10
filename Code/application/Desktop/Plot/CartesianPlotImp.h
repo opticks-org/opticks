@@ -10,7 +10,7 @@
 #ifndef CARTESIANPLOTIMP_H
 #define CARTESIANPLOTIMP_H
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 #include "PlotViewImp.h"
 #include "CartesianGridlinesAdapter.h"

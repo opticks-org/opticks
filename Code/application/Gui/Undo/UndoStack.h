@@ -11,8 +11,8 @@
 #define UNDOSTACK_H
 
 #include <QtCore/QList>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 #include <string>
 

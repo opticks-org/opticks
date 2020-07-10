@@ -17,8 +17,8 @@
 #include "RasterDataDescriptor.h"
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
 
 OptionsTiffImporter::OptionsTiffImporter(QWidget* pParent) :
    LabeledSectionGroup(pParent),
@@ -52,10 +52,10 @@ OptionsTiffImporter::OptionsTiffImporter(QWidget* pParent) :
    QWidget* pWidget = widget();
    if (pWidget != NULL)
    {
-      QLayout* pLayout = pWidget->layout();
-      if (pLayout != NULL)
+      QLayout* pLayout2 = pWidget->layout();
+      if (pLayout2 != NULL)
       {
-         pLayout->setMargin(10);
+         pLayout2->setMargin(10);
       }
    }
 

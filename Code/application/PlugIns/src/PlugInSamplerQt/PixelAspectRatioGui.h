@@ -10,7 +10,7 @@
 #ifndef PIXELASPECTRATIOGUI_H
 #define PIXELASPECTRATIOGUI_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include "PlotWidget.h"
 #include "DockWindow.h"
 #include "Layer.h"

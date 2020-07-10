@@ -9,9 +9,9 @@
 
 #include "RpcGui.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
 
 RpcGui::RpcGui(QWidget* pParent) :
    QWidget(pParent),

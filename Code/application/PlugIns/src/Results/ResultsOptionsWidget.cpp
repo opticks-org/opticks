@@ -7,10 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 
 #include "AppVerify.h"
 #include "GeocoordTypeComboBox.h"

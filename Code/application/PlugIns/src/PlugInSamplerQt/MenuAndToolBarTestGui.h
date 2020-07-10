@@ -12,9 +12,9 @@
 
 #include <QtCore/QVariant>
 #include <QtCore/QObject>
-#include <QtGui/QDialog>
-#include <QtGui/QAction>
-#include <QtGui/QWidget>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QWidget>
 #include "PlotWidget.h"
 #include "DockWindow.h"
 #include "HistogramWindow.h"

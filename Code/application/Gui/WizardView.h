@@ -10,8 +10,8 @@
 #ifndef WIZARDVIEW_H
 #define WIZARDVIEW_H
 
-#include <QtGui/QGraphicsView>
-#include <QtGui/QRubberBand>
+#include <QtWidgets/QGraphicsView>
+#include <QtWidgets/QRubberBand>
 
 #include "AttachmentPtr.h"
 #include "WizardObjectAdapter.h"

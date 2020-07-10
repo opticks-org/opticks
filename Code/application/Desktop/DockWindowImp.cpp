@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 #include "AppAssert.h"
 #include "AppVerify.h"

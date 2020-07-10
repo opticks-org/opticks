@@ -88,7 +88,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QUuid>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 
 XERCES_CPP_NAMESPACE_USE
@@ -282,8 +282,8 @@ SessionItem *SessionManagerImp::createPlugInInstance(const string &type, const s
    }
    else
    {
-      string name = type.substr(pos+1);
-      return PlugInManagerServicesImp::instance()->createPlugInInstance(name, id);
+      string name2 = type.substr(pos+1);
+      return PlugInManagerServicesImp::instance()->createPlugInInstance(name2, id);
    }
 }
 

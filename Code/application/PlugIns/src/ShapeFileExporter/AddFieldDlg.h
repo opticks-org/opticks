@@ -12,7 +12,7 @@
 
 #include "DataVariant.h"
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class QComboBox;
 class QIntValidator;

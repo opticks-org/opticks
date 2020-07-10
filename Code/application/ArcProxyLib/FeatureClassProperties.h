@@ -42,7 +42,7 @@ namespace
    public:
       std::string operator()(const QString &encoded)
       {
-         return QUrl::fromPercentEncoding(encoded.toAscii()).toStdString();
+         return QUrl::fromPercentEncoding(encoded.toLatin1()).toStdString();
       }
    };
 }

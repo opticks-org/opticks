@@ -8,8 +8,8 @@
  */
 
 #include <QtCore/QDir>
-#include <QtGui/QListView>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QListView>
+#include <QtWidgets/QMessageBox>
 
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"
@@ -236,7 +236,7 @@ QString ExportDlg::updateExtension(const QString& strFilename,
    }
    QString orgFilename = (preserveFullPath ? strFilename : fileInfo.fileName());
 
-   QString strCurrentFilter = selectedFilter();
+   QString strCurrentFilter = selectedNameFilter();
    int iOpenParen = strCurrentFilter.indexOf("(");
    int iCloseParen = strCurrentFilter.indexOf(")");
 

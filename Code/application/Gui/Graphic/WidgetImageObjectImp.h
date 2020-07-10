@@ -11,7 +11,7 @@
 #define WIDGETIMAGEOBJECTIMP_H
 
 #include <QtGui/QImage>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "ImageObjectImp.h"
 

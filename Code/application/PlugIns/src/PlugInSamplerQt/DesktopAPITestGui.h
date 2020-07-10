@@ -10,12 +10,12 @@
 #ifndef DESKTOPAPITESTGUI_H
 #define DESKTOPAPITESTGUI_H
 
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
 
 #include "AttachmentPtr.h"
 #include "PlotWidget.h"

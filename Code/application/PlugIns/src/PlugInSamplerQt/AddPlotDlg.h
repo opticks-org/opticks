@@ -11,13 +11,13 @@
 #define ADDPLOTDLG_H
 
 #include <QtCore/QStringList>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QRadioButton>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QRadioButton>
 
 #include "DesktopServices.h"
 #include "ModelServices.h"

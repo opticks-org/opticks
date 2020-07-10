@@ -9,13 +9,13 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QMap>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSplitter>
-#include <QtGui/QToolButton>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QSplitter>
+#include <QtWidgets/QToolButton>
 
 #include "DesktopServices.h"
 #include "DynamicObject.h"

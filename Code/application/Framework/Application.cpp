@@ -8,6 +8,7 @@
  */
 
 #include "AppConfig.h"
+
 #if defined(WIN_API)
 #include <windows.h>
 #else
@@ -40,8 +41,11 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 #include <xqilla/xqilla-dom3.hpp>
+
+
 using namespace std;
 
 Application::Application(QCoreApplication& app) :
@@ -189,10 +193,10 @@ bool Application::generateXml()
       auto_ptr<BatchWizard> pBatchWizard(WizardUtilities::createBatchWizardFromWizard(wizardFilename));
       if (pBatchWizard.get() != NULL)
       {
-         vector<BatchWizard*> batchWizards;
-         batchWizards.push_back(pBatchWizard.get());
+         std::vector<BatchWizard*> bbatchWizards;
+         bbatchWizards.push_back(pBatchWizard.get());
          string outputFilename = WizardUtilities::deriveBatchWizardFilename(wizardFilename);
-         if (!WizardUtilities::writeBatchWizard(batchWizards, outputFilename))
+         if (!WizardUtilities::writeBatchWizard(bbatchWizards, outputFilename))
          {
             reportError("Cannot write out batch wizard file: " + outputFilename);
             return false;

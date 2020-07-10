@@ -10,7 +10,7 @@
 #ifndef OPTIONSNITFEXPORTER_H
 #define OPTIONSNITFEXPORTER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class Classification;
 class DateTime;

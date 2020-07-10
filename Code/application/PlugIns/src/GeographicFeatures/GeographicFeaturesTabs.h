@@ -14,7 +14,7 @@
 
 #include <boost/any.hpp>
 
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QTabWidget>
 
 class QWidget;
 class FeatureClass;

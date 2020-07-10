@@ -13,10 +13,10 @@
 #define AOIMERGEDLG_H
 
 #include <QtCore/QStringList>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QListWidget>
-#include <QtGui/QRadioButton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QRadioButton>
 
 class AoiMergeDlg : public QDialog
 {

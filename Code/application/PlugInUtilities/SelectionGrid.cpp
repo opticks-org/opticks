@@ -320,7 +320,7 @@ void SelectionGrid::hitTest(const QPoint& ptMouse, int& iRow, int& iColumn)
       for (int j = 0; j < miColumns; j++)
       {
          QRect rcCell = getCellRect(i, j);
-         if (rcCell.contains(ptMouse) == TRUE)
+         if (rcCell.contains(ptMouse) == true)
          {
             iRow = i;
             iColumn = j;

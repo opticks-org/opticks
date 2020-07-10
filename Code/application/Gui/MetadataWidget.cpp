@@ -18,18 +18,18 @@
 #include "TypeConverter.h"
 
 #include <QtCore/QRegExp>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtGui/QClipboard>
-#include <QtGui/QComboBox>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QToolButton>
-#include <QtGui/QTreeView>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtCore/QSortFilterProxyModel>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QTreeView>
 
 using namespace std;
 

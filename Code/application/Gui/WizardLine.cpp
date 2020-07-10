@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QStyleOptionGraphicsItem>
+#include <QtWidgets/QStyleOptionGraphicsItem>
 
 #include "AppVerify.h"
 #include "WizardLine.h"

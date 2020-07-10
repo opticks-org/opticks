@@ -15,7 +15,7 @@
 #include "RasterLayer.h"
 #include "ViewerShell.h"
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <QtCore/QTime>
 
 class QLabel;

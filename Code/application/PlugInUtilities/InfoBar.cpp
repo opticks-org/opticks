@@ -7,10 +7,10 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QHBoxLayout>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QHBoxLayout>
 
 #include "ElidedButton.h"
 #include "ElidedLabel.h"

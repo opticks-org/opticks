@@ -10,7 +10,7 @@
 #ifndef OPTIONSDOCKWINDOW_H
 #define OPTIONSDOCKWINDOW_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVersion.h"
 

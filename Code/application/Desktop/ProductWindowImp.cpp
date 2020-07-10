@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QImage>
-#include <QtGui/QPrinter>
+#include <QtPrintSupport/QPrinter>
 
 #include "ProductWindowImp.h"
 #include "PrintPixmap.h"

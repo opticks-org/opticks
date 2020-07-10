@@ -10,7 +10,7 @@
 #ifndef OVERVIEWWINDOW_H
 #define OVERVIEWWINDOW_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "ColorType.h"
 #include "LocationType.h"

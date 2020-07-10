@@ -12,7 +12,7 @@
 
 #include "TypesFile.h"
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 /**
  *  A combo box that will allow a user to select wavelength units.

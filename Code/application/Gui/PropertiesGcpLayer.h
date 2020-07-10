@@ -10,7 +10,7 @@
 #ifndef PROPERTIESGCPLAYER_H
 #define PROPERTIESGCPLAYER_H
 
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QSpinBox>
 
 #include "LabeledSectionGroup.h"
 

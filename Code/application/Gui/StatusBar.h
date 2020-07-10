@@ -10,8 +10,8 @@
 #ifndef STATUSBAR_H
 #define STATUSBAR_H
 
-#include <QtGui/QLabel>
-#include <QtGui/QStatusBar>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QStatusBar>
 
 #include "Observer.h"
 #include "TypesFile.h"

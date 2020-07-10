@@ -32,8 +32,8 @@
 #include "Undo.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 namespace
 {

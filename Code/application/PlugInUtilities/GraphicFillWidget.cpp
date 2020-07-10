@@ -8,8 +8,8 @@
  */
 
 #include <QtGui/QColor>
-#include <QtGui/QLabel>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QGridLayout>
 
 #include "AppVerify.h"
 #include "CustomColorButton.h"

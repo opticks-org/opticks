@@ -10,7 +10,7 @@
 #ifndef SUPPRESSIBLEMSGDLG_H
 #define SUPPRESSIBLEMSGDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "TypesFile.h"
 

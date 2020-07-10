@@ -10,7 +10,7 @@
 #ifndef GRAPHICUNITSWIDGET_H
 #define GRAPHICUNITSWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "TypesFile.h"
 
 class QComboBox;

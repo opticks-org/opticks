@@ -12,7 +12,7 @@
 
 #include "TypesFile.h"
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 class RegionUnitsComboBox : public QComboBox
 {

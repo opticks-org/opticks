@@ -10,7 +10,7 @@
 #ifndef LINEWIDTHCOMBOBOX_H
 #define LINEWIDTHCOMBOBOX_H
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 class LineWidthComboBox : public QComboBox
 {

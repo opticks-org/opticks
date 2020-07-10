@@ -10,14 +10,14 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPixmap>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QPushButton>
 
 #include "AppConfig.h"
 #include "AppVerify.h"
@@ -844,7 +844,7 @@ bool BatchEditorDlg::execute(bool bBatch)
       NULL, SW_SHOWNORMAL);
 
    // Handle less than 32 indicates failure
-   bSuccess = reinterpret_cast<int>(hinst) > 32;
+   bSuccess = reinterpret_cast<size_t>(hinst) > 32;
 #else
    QString command = strExecutable + " " + strInput + "&";
    system(command.toStdString().c_str());

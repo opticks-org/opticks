@@ -19,9 +19,9 @@
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
 
 GeographicFeaturesWidget::GeographicFeaturesWidget(QWidget* pParent) :
    QStackedWidget(pParent)
@@ -119,10 +119,10 @@ bool GeographicFeaturesWidget::displayLayer(GraphicLayer* pLayer)
    return false;
 }
 
-void GeographicFeaturesWidget::windowAdded(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::windowAdded(Subject& subject, const std::string& signal, const boost::any& data2)
 {
    // Not supporting views displayed in product windows.
-   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(data));
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(data2));
    if (pWindow != NULL)
    {
       SpatialDataView* pView = pWindow->getSpatialDataView();
@@ -146,9 +146,9 @@ void GeographicFeaturesWidget::windowAdded(Subject& subject, const std::string& 
    }
 }
 
-void GeographicFeaturesWidget::windowRemoved(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::windowRemoved(Subject& subject, const std::string& signal, const boost::any& data2)
 {
-   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(data));
+   SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(boost::any_cast<Window*>(data2));
    if (pWindow != NULL)
    {
       SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pWindow->getSpatialDataView());
@@ -172,9 +172,9 @@ void GeographicFeaturesWidget::windowRemoved(Subject& subject, const std::string
    }
 }
 
-void GeographicFeaturesWidget::layerAdded(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::layerAdded(Subject& subject, const std::string& signal, const boost::any& data2)
 {
-   GraphicLayer* pGraphicLayer = dynamic_cast<GraphicLayer*>(boost::any_cast<Layer*>(data));
+   GraphicLayer* pGraphicLayer = dynamic_cast<GraphicLayer*>(boost::any_cast<Layer*>(data2));
    if (pGraphicLayer == NULL)
    {
       return;
@@ -250,16 +250,16 @@ void GeographicFeaturesWidget::layerAdded(Subject& subject, const std::string& s
    }
 }
 
-void GeographicFeaturesWidget::layerDeleted(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::layerDeleted(Subject& subject, const std::string& signal, const boost::any& data2)
 {
-   Layer* pLayer = boost::any_cast<Layer*>(data);
+   Layer* pLayer = boost::any_cast<Layer*>(data2);
    if (pLayer != NULL)
    {
       removeLayer(pLayer);
    }
 }
 
-void GeographicFeaturesWidget::featureClassDeleted(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::featureClassDeleted(Subject& subject, const std::string& signal, const boost::any& data2)
 {
    Any* pAny = dynamic_cast<Any*>(&subject);
    if (pAny == NULL)
@@ -356,7 +356,7 @@ void GeographicFeaturesWidget::removeLayer(Layer* pLayer)
    }
 }
 
-void GeographicFeaturesWidget::initializeSession(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesWidget::initializeSession(Subject& subject, const std::string& signal, const boost::any& data2)
 {
    std::vector<Window*> windows;
    Service<DesktopServices> pDesktop;

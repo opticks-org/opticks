@@ -11,7 +11,7 @@ def generate(env):
     lib = "qwt"
     if env["OS"] == "windows":
         lib = "qwt5"
-    env.AppendUnique(CXXFLAGS=["-I%s/qwt-qt4" % dep_include, "-I%s/qt4/QtCore" % dep_include, "-I%s/qt4/QtGui" % dep_include],
+    env.AppendUnique(CXXFLAGS=["-I%s/qwt-qt5" % dep_include, "-I%s/qt5/QtCore" % dep_include, "-I%s/qt5/QtGui" % dep_include],
                      LIBS=[lib])
 
 def exists(env):

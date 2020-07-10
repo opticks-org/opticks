@@ -14,7 +14,7 @@
 #include "TypesFile.h"
 
 #include <QtCore/QMetaType>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <boost/any.hpp>
 #include <string>

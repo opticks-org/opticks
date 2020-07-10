@@ -732,7 +732,7 @@ private:
 
                   if (hasBadValues)
                   {
-                     bool badValue = false;
+//                     bool badValue = false;
                      if (hasSingleBadValueRange)
                      {
                         if (dValue > singleBadValueLower && dValue < singleBadValueUpper)

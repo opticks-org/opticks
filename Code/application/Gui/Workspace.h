@@ -10,7 +10,7 @@
 #ifndef WORKSPACE_H
 #define WORKSPACE_H
 
-#include <QtGui/QMdiArea>
+#include <QtWidgets/QMdiArea>
 
 #include "TypesFile.h"
 

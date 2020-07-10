@@ -39,12 +39,12 @@
 #include "xmlreader.h"
 
 #include <QtCore/QEvent>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QClipboard>
 #include <QtGui/QContextMenuEvent>
 #include <QtGui/QCursor>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QFontMetrics>
 #include <QtOpenGL/QGLFramebufferObject>
 
@@ -57,6 +57,9 @@ XERCES_CPP_NAMESPACE_USE
 
 const QGLWidget* ViewImp::mpShareWidget = NULL;
 
+//ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawContext, QWidget* parent) :
+//   QOpenGLWidget(parent),
+//   SessionItemImp(id, viewName),
 ViewImp::ViewImp(const string& id, const string& viewName, QGLContext* drawContext, QWidget* parent) :
    QGLWidget(new ViewContext(drawContext, QGLFormat(QGL::StencilBuffer | QGL::AlphaChannel)), parent,
       ViewImp::getShareWidget()),
@@ -725,8 +728,73 @@ void ViewImp::renderText(int screenCoordX, int screenCoordY, const QString& strT
    }
    else
    {
-      QGLWidget::renderText(screenCoordX, screenCoordY, strText, fnt);
+      //VS2017, Qt5.12.2      QGLWidget::renderText(screenCoordX, screenCoordY, strText, fnt);
+
+      std::string txt = strText.toStdString();
+
+//      qt_save_gl_state();
+
+      QPaintEngine *engine = paintEngine();
+
+      QPainter *p;
+      //bool reuse_painter = false;
+      //if (engine->isActive()) {
+      //   reuse_painter = true;
+         p = engine->painter();
+      //}
+      //else {
+//         p = new QPainter();
+      //}
+         
+      GLfloat currentColor[] = { 1.0, 1.0, 1.0, 1.0 };
+      glGetFloatv(GL_CURRENT_COLOR, currentColor);
+      QColor qcol;
+      qcol.setRgbF(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
+      qglColor(qcol);
+      p->setPen(qcol);
+      p->setFont(fnt);
+      p->drawText(screenCoordX, screenCoordY, strText);
+
+      //if (!reuse_painter) {
+//         p->endNativePainting();
+//         delete p;
+      //}
+
+//      qt_restore_gl_state();
    }
+}
+
+void ViewImp::qt_save_gl_state()
+{
+//   glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+//   glPushAttrib(GL_ALL_ATTRIB_BITS);
+   glMatrixMode(GL_TEXTURE);
+   glPushMatrix();
+   glLoadIdentity();
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glMatrixMode(GL_MODELVIEW);
+   glPushMatrix();
+
+   //glShadeModel(GL_FLAT);
+   //glDisable(GL_CULL_FACE);
+   //glDisable(GL_LIGHTING);
+   //glDisable(GL_STENCIL_TEST);
+   //glDisable(GL_DEPTH_TEST);
+   //glEnable(GL_BLEND);
+   //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void ViewImp::qt_restore_gl_state()
+{
+   glMatrixMode(GL_TEXTURE);
+   glPopMatrix();
+   glMatrixMode(GL_PROJECTION);
+   glPopMatrix();
+   glMatrixMode(GL_MODELVIEW);
+   glPopMatrix();
+//   glPopAttrib();
+//   glPopClientAttrib();
 }
 
 QImage ViewImp::getCurrentImage()
@@ -1523,7 +1591,7 @@ void ViewImp::refresh()
    update();
 }
 
-void ViewImp::notifyClassificationChanged(Subject& subject, const string& signal, const boost::any& data)
+void ViewImp::notifyClassificationChanged(Subject& subject, const string& signal, const boost::any& data2)
 {
    if (&subject == &mClassification)
    {
@@ -2473,8 +2541,8 @@ bool ViewImp::fromXml(DOMNode* pDocument, unsigned int version)
    // re-establish view links
    for (DOMNode* pChld = pDocument->getFirstChild(); pChld != NULL; pChld = pChld->getNextSibling())
    {
-      string name = A(pChld->getNodeName());
-      if (name == "LinkedView")
+      string name2 = A(pChld->getNodeName());
+      if (name2 == "LinkedView")
       {
          pElem = static_cast<DOMElement*>(pChld);
          if (pElem != NULL)

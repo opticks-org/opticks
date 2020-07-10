@@ -16,10 +16,10 @@
 #include "PlotView.h"
 #include "PlotWidget.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QPushButton>
 
 #include <string>
 #include <sstream>

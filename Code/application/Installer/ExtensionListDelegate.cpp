@@ -28,7 +28,7 @@ ExtensionListDelegate::~ExtensionListDelegate()
 QWidget* ExtensionListDelegate::createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
    ExtensionListItem* pEditor = new ExtensionListItem(true, mAllowEditing, pParent);
-   connect(pEditor, SIGNAL(modified()), this, SLOT(commit()));
+   connect(pEditor, SIGNAL(finished(QWidget*)), this, SIGNAL(closeEditor(QWidget*)));
    return pEditor;
 }
 
@@ -80,7 +80,8 @@ void ExtensionListDelegate::paint(QPainter* pPainter, const QStyleOptionViewItem
    QRect pixMapRect;
    pixMapRect.setWidth(option.rect.width());
    pixMapRect.setHeight(option.rect.height());
-   QPixmap pix = QPixmap::grabWidget(pWidget.get());
+//VS2017   QPixmap pix = QPixmap::grabWidget(pWidget.get());
+   QPixmap pix = pWidget.get()->grab();
    pPainter->save();
    pPainter->drawPixmap(option.rect, pix);
    pPainter->setPen(QPen(option.palette.mid(), 1.0, Qt::DashLine));

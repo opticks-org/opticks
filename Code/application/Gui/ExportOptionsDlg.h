@@ -10,8 +10,8 @@
 #ifndef EXPORTOPTIONSDLG_H
 #define EXPORTOPTIONSDLG_H
 
-#include <QtGui/QDialog>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QTabWidget>
 
 #include "PlugInResource.h"
 

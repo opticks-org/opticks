@@ -10,7 +10,7 @@
 #ifndef PROPERTIESPSEUDOCOLORLAYER_H
 #define PROPERTIESPSEUDOCOLORLAYER_H
 
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QTreeWidgetItem>
 
 #include "LabeledSectionGroup.h"
 

@@ -18,11 +18,11 @@
 #include "RasterUtilities.h"
 #include "SpatialDataView.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
 
 GetConvolveParametersDialog::GetConvolveParametersDialog(SpatialDataView* pView,
                                                          RasterElement* pElement,

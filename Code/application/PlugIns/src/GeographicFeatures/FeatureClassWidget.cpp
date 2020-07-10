@@ -20,13 +20,13 @@
 #include "QueryOptionsWidget.h"
 
 #include <QtCore/QFile>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QPushButton>
-#include <QtGui/QProgressBar>
-#include <QtGui/QRadioButton>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QTabWidget>
 
 #include <algorithm>
 #include <boost/bind.hpp>

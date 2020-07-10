@@ -235,7 +235,7 @@ bool SpatialResampler::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
    FactoryResource<DataRequest> pResultRequest;
    pResultRequest->setWritable(true);
-   RasterDataDescriptor* pDestDesc = dynamic_cast<RasterDataDescriptor*>(pResultCube->getDataDescriptor());
+//   RasterDataDescriptor* pDestDesc = dynamic_cast<RasterDataDescriptor*>(pResultCube->getDataDescriptor());
    DataAccessor pDestAcc = pResultCube->getDataAccessor(pResultRequest.release());
 
    int matType;

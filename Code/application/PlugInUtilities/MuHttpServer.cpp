@@ -73,7 +73,7 @@ bool MuHttpServer::start()
 
    for (QMap<QString, EHS*>::iterator it = mRegistrations.begin(); it != mRegistrations.end(); ++it)
    {
-      RegisterEHS(it.value(), it.key().toAscii());
+      RegisterEHS(it.value(), it.key().toLatin1());
    }
 
    mServerIsRunning = true;
@@ -93,7 +93,7 @@ void MuHttpServer::registerPath(const QString &path, EHS *pObj)
 {
    if (mServerIsRunning)
    {
-      RegisterEHS(pObj, path.toAscii());
+      RegisterEHS(pObj, path.toLatin1());
    }
    else
    {
@@ -115,7 +115,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
       QString errorString = QString("<html><body><h1>Forbidden</h1>"
          "Connection from %1 has been blocked. Only localhost connections are allowed.</body></html>")
          .arg(QString::fromStdString(pHttpRequest->RemoteAddress()));
-      pHttpResponse->SetBody(errorString.toAscii(), errorString.size());
+      pHttpResponse->SetBody(errorString.toLatin1(), errorString.size());
       warning(errorString);
       return HTTPRESPONSECODE_403_FORBIDDEN;
    }
@@ -133,7 +133,7 @@ ResponseCode MuHttpServer::HandleRequest(HttpRequest *pHttpRequest, HttpResponse
          switch (rsp.mEncoding)
          {
          case Response::ASCII:
-            pHttpResponse->SetBody(rsp.mBody.toAscii(), rsp.mBody.toAscii().length());
+            pHttpResponse->SetBody(rsp.mBody.toLatin1(), rsp.mBody.toLatin1().length());
             break;
          case Response::UTF8:
             pHttpResponse->SetBody(rsp.mBody.toUtf8(), rsp.mBody.toUtf8().length());

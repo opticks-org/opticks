@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
 
 #include "AppVersion.h"
 #include "ConfigurationSettings.h"

@@ -10,7 +10,7 @@
 #ifndef STATISTICSWIDGET_H__
 #define STATISTICSWIDGET_H__
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class HistogramPlotImp;
 class QLabel;

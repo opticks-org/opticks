@@ -12,7 +12,7 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class AoiElement;
 class FileBrowser;

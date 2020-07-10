@@ -9,17 +9,17 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QEvent>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QHelpEvent>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
 #include <QtGui/QPainter>
 #include <QtGui/QResizeEvent>
-#include <QtGui/QStyle>
-#include <QtGui/QStyleOptionSlider>
-#include <QtGui/QToolButton>
-#include <QtGui/QToolTip>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QStyle>
+#include <QtWidgets/QStyleOptionSlider>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QToolTip>
+#include <QtWidgets/QWidgetAction>
 
 #include "Animation.h"
 #include "AnimationController.h"
@@ -1017,7 +1017,7 @@ double AnimationToolBarImp::getSliderFrame(int sliderIndex) const
 
    double startFrame = mpController->getStartFrame();
    double range = mpController->getStopFrame() - startFrame;
-   double fraction = static_cast<double>(sliderIndex) / static_cast<double>(mpFrameSlider->maximum());
+//   double fraction = static_cast<double>(sliderIndex) / static_cast<double>(mpFrameSlider->maximum());
    long maximum = mpFrameSlider->maximum();
    double frame = startFrame + range * sliderIndex / maximum;
    return frame;

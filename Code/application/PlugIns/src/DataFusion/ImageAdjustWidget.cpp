@@ -24,15 +24,15 @@
 
 #include <QtCore/QTimer>
 #include <QtCore/QVariant>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 #include <qwt_knob.h>
 #include <qwt_slider.h>
 #include <qwt_wheel.h>
@@ -494,7 +494,7 @@ bool ImageAdjustWidget::deserialize(SessionItemDeserializer& deserializer)
 
    for (DOMNode* pChild = pRootElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
-      DOMElement* pElement = static_cast<DOMElement*>(pChild);
+//      DOMElement* pElement = static_cast<DOMElement*>(pChild);
       if (XMLString::equals(pChild->getNodeName(), X("ViewId")))
       {
          std::string viewid = A(pChild->getTextContent());

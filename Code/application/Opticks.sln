@@ -1,5 +1,7 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Opticks", "Opticks.vcxproj", "{4848789B-87B2-49B2-AF93-8F1B6AA7DB18}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AutoImporter", "PlugIns\src\AutoImporter\AutoImporter.vcxproj", "{0831B515-FEFC-4158-BFBD-6D066BA326A7}"
@@ -661,5 +663,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B846230-0D46-496D-AC23-C15598ADCC42}
 	EndGlobalSection
 EndGlobal

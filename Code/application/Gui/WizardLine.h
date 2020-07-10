@@ -10,7 +10,7 @@
 #ifndef WIZARDLINE_H
 #define WIZARDLINE_H
 
-#include <QtGui/QGraphicsLineItem>
+#include <QtWidgets/QGraphicsLineItem>
 #include <QtGui/QPainter>
 
 class WizardNode;

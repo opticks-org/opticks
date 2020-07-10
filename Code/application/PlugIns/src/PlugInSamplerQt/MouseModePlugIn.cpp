@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QBitmap>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
 
 #include "AppVerify.h"

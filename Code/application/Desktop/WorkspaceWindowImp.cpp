@@ -9,8 +9,8 @@
 
 #include <QtGui/QIcon>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QMdiArea>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMdiArea>
+#include <QtWidgets/QMessageBox>
 
 #include "ApplicationWindow.h"
 #include "ContextMenuActions.h"

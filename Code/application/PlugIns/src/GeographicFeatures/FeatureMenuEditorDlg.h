@@ -10,7 +10,7 @@
 #ifndef FEATUREMENUEDITORDLG_H
 #define FEATUREMENUEDITORDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "FeatureClass.h"
 #include "ObjectResource.h"

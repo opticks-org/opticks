@@ -16,14 +16,14 @@
 #endif
 
 #include <QtCore/QUrl>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QCursor>
 #include <QtGui/QDesktopServices>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPixmap>
-#include <QtGui/QStatusBar>
+#include <QtWidgets/QStatusBar>
 
 #include "AnnotationLayerImp.h"
 #include "AoiLayerImp.h"

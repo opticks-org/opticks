@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "ViewerShell.h"
 #include "ApplicationServices.h"

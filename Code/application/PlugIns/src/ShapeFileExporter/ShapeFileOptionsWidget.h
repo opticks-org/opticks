@@ -11,7 +11,7 @@
 #define SHAPEFILEOPTIONSWIDGET_H
 
 #include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <string>
 #include <vector>

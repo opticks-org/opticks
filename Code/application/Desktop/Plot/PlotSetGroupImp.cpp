@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QIcon>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMenu>
-#include <QtGui/QStackedWidget>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QStackedWidget>
 
 #include "AppVerify.h"
 #include "Axis.h"
@@ -866,8 +866,8 @@ bool PlotSetGroupImp::fromXml(DOMNode* pDocument, unsigned int version)
       {
          for (DOMNode* pGChld = pChld->getFirstChild(); pGChld != NULL; pGChld = pGChld->getNextSibling())
          {
-            std::string name = A(pGChld->getNodeName());
-            if (name == "PlotSet")
+            std::string name2 = A(pGChld->getNodeName());
+            if (name2 == "PlotSet")
             {
                DOMElement* pPlotSetElement = static_cast<DOMElement*>(pGChld);
 

@@ -13,8 +13,8 @@
 #include "BadValuesAdapter.h"
 
 #include <QtCore/QString>
-#include <QtGui/QDialog>
-#include <QtGui/QStyledItemDelegate>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QStyledItemDelegate>
 
 #include <string>
 

@@ -9,9 +9,9 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QUrl>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
 
 #include "ConfigurationSettings.h"
 #include "AppVerify.h"
@@ -33,6 +33,9 @@ FilePlugInDlg::FilePlugInDlg(const vector<PlugInDescriptor*>& availablePlugins, 
    QFileDialog(parent),
    mPlugInKey(plugInKey)
 {
+   //VS2017
+   setOption(QFileDialog::DontUseNativeDialog);
+
    // Plug-in label
    mpPlugInLabel = new QLabel(this);
    setPlugInLabel("Plug-Ins");
@@ -195,7 +198,7 @@ bool FilePlugInDlg::isDefaultExtension(const QString& strExtension) const
       return false;
    }
 
-   QString strFilters = selectedFilter();
+   QString strFilters = selectedNameFilter();
 
    int iPosition = strFilters.indexOf(".");
    while (iPosition != -1)
@@ -248,14 +251,14 @@ void FilePlugInDlg::updateFileFilters(const QString& strPlugIn)
          if (filterList.empty() == false)
          {
             strFilter = filterList.front();
-            setFilters(filterList);
+            setNameFilters(filterList);
          }
       }
    }
 
    if (strFilter.isEmpty() == true)
    {
-      setFilter("All Files (*)");
+      setNameFilter("All Files (*)");
    }
 }
 

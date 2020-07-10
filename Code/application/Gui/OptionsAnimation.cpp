@@ -13,10 +13,10 @@
 #include "LabeledSection.h"
 #include "OptionsAnimation.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QLayout>
 
 #include <algorithm>
 

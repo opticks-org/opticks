@@ -14,8 +14,8 @@
 #include "ConfigurationSettings.h"
 #include "ui_ConvolutionMatrixWidget.h"
 #include <ossim/matrix/newmat.h>
-#include <QtGui/QTableWidgetItem>
-#include <QtGui/QWidget>
+#include <QtWidgets/QTableWidgetItem>
+#include <QtWidgets/QWidget>
 
 class AoiElement;
 class QIcon;

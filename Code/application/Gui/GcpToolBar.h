@@ -10,8 +10,8 @@
 #ifndef GCPTOOLBAR_H
 #define GCPTOOLBAR_H
 
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenu>
 
 #include "ToolBarAdapter.h"
 

@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QLineEdit>
 
 #include "DisplayToolBar.h"
 

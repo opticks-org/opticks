@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QGroupBox>
-#include <QtGui/QLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLayout>
 
 #include "AppVersion.h"
 #include "AppVerify.h"

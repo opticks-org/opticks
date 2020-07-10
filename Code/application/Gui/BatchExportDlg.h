@@ -12,9 +12,9 @@
 
 #include <QtCore/QMap>
 #include <QtCore/QStringList>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLineEdit>
 
 #include <vector>
 

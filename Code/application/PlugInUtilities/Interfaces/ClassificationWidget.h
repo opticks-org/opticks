@@ -15,7 +15,7 @@
 #include "DynamicObject.h"
 #include "SafePtr.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <boost/any.hpp>
 #include <string>

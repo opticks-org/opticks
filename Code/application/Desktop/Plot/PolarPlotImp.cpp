@@ -9,7 +9,7 @@
 
 #include <math.h>
 
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 #include "ContextMenuAction.h"
 #include "ContextMenuActions.h"

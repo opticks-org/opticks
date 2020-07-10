@@ -10,9 +10,9 @@
 #ifndef WIZARDPROPERTIES_H
 #define WIZARDPROPERTIES_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QWidget>
 
 #include "AttachmentPtr.h"
 #include "WizardObjectAdapter.h"

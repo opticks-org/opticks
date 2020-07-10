@@ -10,7 +10,7 @@
 #ifndef BANDBINNINGDLG_H
 #define BANDBINNINGDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "DimensionDescriptor.h"
 

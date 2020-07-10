@@ -11,8 +11,8 @@
 #define LABELEDSECTIONGROUP_H
 
 #include <QtCore/QMap>
-#include <QtGui/QLayout>
-#include <QtGui/QScrollArea>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QScrollArea>
 
 #include <vector>
 

@@ -7,16 +7,16 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QSplitter>
-#include <QtGui/QTreeWidget>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QSplitter>
+#include <QtWidgets/QTreeWidget>
 
 #include "AoiElement.h"
 #include "AoiLayer.h"
@@ -738,8 +738,8 @@ void DataFusionDlg::fuse()
          polywarp(xS, yS, xP, yP, p, q, zoomFactor, mProgressTracker);
          mProgressTracker.nextStage();
 
-         const DataDescriptor* pDescriptor = pPrimaryRaster->getDataDescriptor();
-         if (pDescriptor == NULL)
+         const DataDescriptor* pDescriptor2 = pPrimaryRaster->getDataDescriptor();
+         if (pDescriptor2 == NULL)
          {
             throw FusionException("ERROR DataFusionDlg: Unable to get Data descriptor! Bailing out!",
                                   __LINE__, __FILE__);
@@ -1140,11 +1140,11 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
             unsigned int newCols = 0;
             unsigned int newRows = 0;
 
-            RasterDataDescriptor* pDescriptor = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
-            REQUIRE(pDescriptor != NULL);
+            RasterDataDescriptor* pDescriptor2 = dynamic_cast<RasterDataDescriptor*>(pRaster->getDataDescriptor());
+            REQUIRE(pDescriptor2 != NULL);
 
-            newCols = pDescriptor->getColumnCount();
-            newRows = pDescriptor->getRowCount();
+            newCols = pDescriptor2->getColumnCount();
+            newRows = pDescriptor2->getRowCount();
 
             LocationType offset(pLayer->getXOffset(), pLayer->getYOffset());
             // make RasterElement on the same coordinates as scene by applying offset
@@ -1179,10 +1179,10 @@ bool DataFusionDlg::copyLayersToView(SpatialDataView& view, int scaleFactor) con
             REQUIRE(rmEnd.mY >= 0);
 
             string newName(pRaster->getName() + "_resampled");
-            const vector<DimensionDescriptor>& srcRows = pDescriptor->getRows();
+            const vector<DimensionDescriptor>& srcRows = pDescriptor2->getRows();
             vector<DimensionDescriptor> rows =
                RasterUtilities::subsetDimensionVector(srcRows, srcRows[rmStart.mY], srcRows[rmEnd.mY]);
-            const vector<DimensionDescriptor>& srcCols = pDescriptor->getColumns();
+            const vector<DimensionDescriptor>& srcCols = pDescriptor2->getColumns();
             vector<DimensionDescriptor> cols =
                RasterUtilities::subsetDimensionVector(srcCols, srcCols[rmStart.mX], srcCols[rmEnd.mX]);
 

@@ -50,10 +50,10 @@
 #include "WidgetImageObjectImp.h"
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 #include <QtOpenGL/QGLWidget>
 
 #include <algorithm>

@@ -12,10 +12,10 @@
 #include "OptionsJpegExporter.h"
 #include "ImageResolutionWidget.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QSlider>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QSlider>
 
 JpegExportOptionsWidget::JpegExportOptionsWidget() :
    LabeledSectionGroup(NULL)

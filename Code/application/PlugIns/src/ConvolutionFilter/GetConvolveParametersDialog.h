@@ -10,7 +10,7 @@
 #ifndef GETCONVOLVEPARAMETERSDIALOG_H__
 #define GETCONVOLVEPARAMETERSDIALOG_H__
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <vector>
 
 class AoiElement;

@@ -10,15 +10,15 @@
 #include <sys/timeb.h>
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
 #include <QtGui/QIcon>
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationControllerImp.h"
@@ -940,7 +940,7 @@ bool AnimationControllerImp::event(QEvent* pEvent)
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
          QApplication::processEvents();
-         QApplication::processEvents(QEventLoop::DeferredDeletion);
+//         QApplication::processEvents(QEventLoop::DeferredDeletion);
          if (mppActiveController != mRunningControllers.end() && pActiveController == *mppActiveController)
          {
             ++mppActiveController;

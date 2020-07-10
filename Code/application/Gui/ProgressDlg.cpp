@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QMovie>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 
 #include "AppAssert.h"
 #include "Executable.h"
@@ -349,8 +349,7 @@ void ProgressDlg::updateWindowsTaskbar(int percentage, ReportingLevel level)
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
-      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
+      HWND pWin = reinterpret_cast<HWND>(Service<DesktopServices>()->getMainWidget()->winId());
       if (pWin != NULL)
       {
          if (level != ERRORS)
@@ -378,8 +377,7 @@ void ProgressDlg::setWindowsTaskbarPaused()
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
-      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
+      HWND pWin = reinterpret_cast<HWND>(Service<DesktopServices>()->getMainWidget()->winId());
       if (pWin != NULL)
       {
          pTask->SetProgressState(pWin, TBPF_PAUSED);
@@ -395,8 +393,7 @@ void ProgressDlg::resetWindowsTaskbar()
    if ((CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&pTask) == S_OK) &&
       (pTask != NULL))
    {
-      QWidget* pMainWidget = Service<DesktopServices>()->getMainWidget();
-      HWND pWin = (pMainWidget == NULL) ? NULL : pMainWidget->winId();
+      HWND pWin = reinterpret_cast<HWND>(Service<DesktopServices>()->getMainWidget()->winId());
       if (pWin != NULL)
       {
          pTask->SetProgressState(pWin, TBPF_NOPROGRESS);

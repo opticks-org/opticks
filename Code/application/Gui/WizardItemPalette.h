@@ -11,8 +11,8 @@
 #define WIZARDITEMPALETTE_H
 
 #include <QtCore/QMimeData>
-#include <QtGui/QListWidget>
-#include <QtGui/QToolBox>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QToolBox>
 
 #include "ConfigurationSettings.h"
 

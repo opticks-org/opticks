@@ -179,8 +179,8 @@ int BatchApplication::run(int argc, char** argv)
          string extName = autoInfo.fileName().toStdString();
          Aeb extension;
          AebIo io(extension);
-         string errMsg; // ignored
-         if (io.fromFile(autoInfo.filePath().toStdString(), errMsg))
+         string errMsg2; // ignored
+         if (io.fromFile(autoInfo.filePath().toStdString(), errMsg2))
          {
             extName = extension.getName();
          }

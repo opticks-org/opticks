@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QTabWidget>
 
 #include "FeatureTable.h"
 #include "GeographicFeaturesTabs.h"
@@ -82,12 +82,12 @@ bool GeographicFeaturesTabs::activateTab(Layer* pLayer)
    return success;
 }
 
-void GeographicFeaturesTabs::renameFeatureTableTab(Subject& subject, const std::string& signal, const boost::any& data)
+void GeographicFeaturesTabs::renameFeatureTableTab(Subject& subject, const std::string& signal, const boost::any& data2)
 {
    GraphicLayer* pGraphicLayer = dynamic_cast<GraphicLayer*>(&subject);
    if (pGraphicLayer != NULL)
    {
-      std::string newName = boost::any_cast<std::string>(data);
+      std::string newName = boost::any_cast<std::string>(data2);
       int tabIndex = getTabId(pGraphicLayer);
       if (tabIndex >= 0 && tabIndex < count())
       {

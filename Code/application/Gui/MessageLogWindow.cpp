@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QHeaderView>
-#include <QtGui/QTreeView>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QTreeView>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AppVerify.h"
 #include "DynamicObject.h"
@@ -463,12 +463,12 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
          {
             if (pMessageImp->getComponent().empty() || pMessageImp->getKey().empty())
             {
-               return QVariant(Qt::yellow);
+               return QVariant(QColor(Qt::yellow));
             }
             const StepImp* pStepImp = dynamic_cast<const StepImp*>(pMessageImp);
             if ((pStepImp != NULL) && (pStepImp->getResult() == Message::Failure))
             {
-               return QVariant(Qt::red);
+               return QVariant(QColor(Qt::red));
             }
 
             break;
@@ -478,7 +478,7 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
             const StepImp* pStepImp = dynamic_cast<const StepImp*>(pMessageImp);
             if ((pStepImp != NULL) && (pStepImp->getResult() == Message::Failure))
             {
-               return QVariant(Qt::white);
+               return QVariant(QColor(Qt::white));
             }
             break;
          }

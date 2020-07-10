@@ -15,9 +15,9 @@
 #include "SpatialDataWindow.h"
 
 #include <QtGui/QColor>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QVBoxLayout>
 
 #include <string>
 

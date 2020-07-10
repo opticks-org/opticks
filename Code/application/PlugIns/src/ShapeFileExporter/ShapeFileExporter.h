@@ -14,7 +14,7 @@
 #include "PlugInManagerServices.h"
 #include "ShapeFile.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <memory>
 

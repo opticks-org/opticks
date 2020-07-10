@@ -98,7 +98,7 @@ InstallerServicesImp::InstallerServicesImp()
          QFile pending(extensionDir.absoluteFilePath("pendinguninstall"));
          if (pending.open(QFile::WriteOnly | QFile::Append | QFile::Text))
          {
-            pending.write(subDir.toAscii());
+            pending.write(subDir.toLatin1());
             pending.write("\n");
             pending.close();
          }

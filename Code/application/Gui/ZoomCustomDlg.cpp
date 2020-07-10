@@ -8,10 +8,10 @@
  */
 
 #include <QtGui/QDoubleValidator>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 
 #include "LocationType.h"
 #include "ZoomCustomDlg.h"

@@ -12,7 +12,7 @@
 
 #include <QtCore/QList>
 #include <QtCore/QMap>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "GcpList.h"
 #include "Observer.h"

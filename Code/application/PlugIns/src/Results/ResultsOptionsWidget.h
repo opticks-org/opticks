@@ -10,7 +10,7 @@
 #ifndef RESULTSOPTIONSWIDGET_H
 #define RESULTSOPTIONSWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "TypesFile.h"
 

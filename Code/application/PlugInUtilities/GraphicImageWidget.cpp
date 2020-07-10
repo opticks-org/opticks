@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QGridLayout>
 
 #include "AppConfig.h"
 #include "AppVerify.h"

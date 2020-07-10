@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <Qt3Support/Q3MimeSourceFactory>
+//VS2017_FIX_ME #include <Qt3Support/Q3MimeSourceFactory>
 #include <QtGui/QBitmap>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsSceneMouseEvent>
 #include <QtGui/QPainter>
-#include <QtGui/QStyleOptionGraphicsItem>
+#include <QtWidgets/QStyleOptionGraphicsItem>
 #include <QtGui/QTextDocument>
 
 #include "AppVerify.h"
@@ -70,7 +70,7 @@ WizardGraphicsItem::WizardGraphicsItem(WizardItem* pItem, QGraphicsItem* pParent
 
          // Store a pixmap for the wizard node to use in the tool tip
          QPixmap nodePix = getNodePixmap(nodeType);
-         Q3MimeSourceFactory::defaultFactory()->setPixmap(nodeType, nodePix);
+//VS2017_FIX_ME         Q3MimeSourceFactory::defaultFactory()->setPixmap(nodeType, nodePix);
       }
    }
 
@@ -475,7 +475,8 @@ void WizardGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent* pEvent)
                   // Update the button pixmap
                   mpDownButton->setDown(true);
 
-                  QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+//VS2017                  QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+                  QPixmap pixButton = mpDownButton->grab();
                   pPixmap->setPixmap(pixButton);
 
                   mpDownButton->setDown(false);
@@ -509,7 +510,8 @@ void WizardGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* pEvent)
          QGraphicsPixmapItem* pPixmap = iter->second.second;
          if (pPixmap != NULL)
          {
-            QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+//VS2017            QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+            QPixmap pixButton = mpDownButton->grab();
             pPixmap->setPixmap(pixButton);
          }
 
@@ -699,10 +701,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    if (originalType.isEmpty() == false)
    {
       QString imageType = originalType;
-      if (Q3MimeSourceFactory::defaultFactory()->data(originalType) == NULL)
-      {
-         imageType = "Unknown";
-      }
+      //VS2017_FIX_ME      //if (Q3MimeSourceFactory::defaultFactory()->data(originalType) == NULL)
+      //{
+      //   imageType = "Unknown";
+      //}
 
       imageType = Qt::escape(imageType);
       originalType = Qt::escape(originalType);
@@ -714,10 +716,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    if (type.isEmpty() == false)
    {
       QString imageType = type;
-      if (Q3MimeSourceFactory::defaultFactory()->data(type) == NULL)
-      {
-         imageType = "Unknown";
-      }
+      //if (Q3MimeSourceFactory::defaultFactory()->data(type) == NULL)
+      //{
+      //   imageType = "Unknown";
+      //}
 
       imageType = Qt::escape(imageType);
       type = Qt::escape(type);
@@ -734,10 +736,10 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       if (validType.isEmpty() == false)
       {
          QString imageType = validType;
-         if (Q3MimeSourceFactory::defaultFactory()->data(validType) == NULL)
-         {
-            imageType = "Unknown";
-         }
+         //VS2017_FIX_ME          //if (Q3MimeSourceFactory::defaultFactory()->data(validType) == NULL)
+         //{
+         //   imageType = "Unknown";
+         //}
 
          imageType = Qt::escape(imageType);
          validType = Qt::escape(validType);
@@ -972,7 +974,8 @@ void WizardGraphicsItem::updateNodes()
          pPixmap = new QGraphicsPixmapItem(mpRect);
 
          // Pixmap
-         QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+//VS2017         QPixmap pixButton = QPixmap::grabWidget(mpDownButton);
+         QPixmap pixButton = mpDownButton->grab();
          pPixmap->setPixmap(pixButton);
       }
 

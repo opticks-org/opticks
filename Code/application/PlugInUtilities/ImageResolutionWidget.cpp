@@ -9,8 +9,8 @@
 
 #include <QtGui/QBitmap>
 #include <QtGui/QIntValidator>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
 
 #include "AppVerify.h"
 #include "ImageResolutionWidget.h"

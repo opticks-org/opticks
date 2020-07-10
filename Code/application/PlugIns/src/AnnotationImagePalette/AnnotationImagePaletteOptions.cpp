@@ -20,13 +20,13 @@
 #include "OptionQWidgetWrapper.h"
 #include "PlugInRegistration.h"
 
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
 #include <vector>
 
 REGISTER_PLUGIN(OpticksAnnotationImagePalette, AnnotationImagePaletteOptions,  OptionQWidgetWrapper<AnnotationImagePaletteOptions>);

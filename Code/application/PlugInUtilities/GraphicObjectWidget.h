@@ -10,8 +10,8 @@
 #ifndef GRAPHICOBJECTWIDGET_H
 #define GRAPHICOBJECTWIDGET_H
 
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QWidget>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QWidget>
 
 #include "LocationType.h"
 

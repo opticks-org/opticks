@@ -12,7 +12,7 @@
 
 #include "EnumWrapper.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <string>
 #include <vector>
 

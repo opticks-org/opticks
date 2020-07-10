@@ -9,8 +9,8 @@
 
 #include <math.h>
 
-#include <QtGui/QApplication>
-#include <QtGui/QHBoxLayout>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QHBoxLayout>
 
 #include "BrightnessToolBar.h"
 #include "DesktopServices.h"

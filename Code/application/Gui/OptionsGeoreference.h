@@ -13,7 +13,7 @@
 #include "AppVersion.h"
 #include "TypesFile.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <string>
 

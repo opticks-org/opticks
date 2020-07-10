@@ -12,12 +12,12 @@
 
 #include <QtCore/QMap>
 #include <QtCore/QString>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTreeWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTreeWidget>
 
 #include "DimensionDescriptor.h"
 

@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 #include "AppVersion.h"
 #include "DesktopServices.h"

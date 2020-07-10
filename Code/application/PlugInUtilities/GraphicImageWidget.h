@@ -11,10 +11,10 @@
 #define GRAPHICIMAGEWIDGET_H
 
 #include <QtCore/QMap>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QWidget>
 
 #include "EnumWrapper.h"
 

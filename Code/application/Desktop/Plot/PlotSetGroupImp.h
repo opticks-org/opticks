@@ -14,7 +14,7 @@
 #include "SubjectImp.h"
 #include "TypesFile.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <boost/any.hpp>
 #include <map>

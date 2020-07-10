@@ -14,14 +14,14 @@
 #include "LabeledSection.h"
 #include "TiePointLayer.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtGui/QFont>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QVBoxLayout>
 
 #include <limits>
 #include <string>

@@ -1117,57 +1117,57 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
             }
 
             // Data type
-            EncodingType dataType = INT1UBYTE;
+            EncodingType dataType2 = INT1UBYTE;
             if (bitsPerElement <= 8)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT1SBYTE;
+                  dataType2 = INT1SBYTE;
                }
                else
                {
-                  dataType = INT1UBYTE;
+                  dataType2 = INT1UBYTE;
                }
             }
             else if (bitsPerElement <= 16)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT2SBYTES;
+                  dataType2 = INT2SBYTES;
                }
                else
                {
-                  dataType = INT2UBYTES;
+                  dataType2 = INT2UBYTES;
                }
             }
             else if (bitsPerElement <= 32)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT4SBYTES;
+                  dataType2 = INT4SBYTES;
                }
                else
                {
-                  dataType = INT4UBYTES;
+                  dataType2 = INT4UBYTES;
                }
             }
             else if (bitsPerElement <= 64)
             {
-               dataType = FLT8BYTES;
+               dataType2 = FLT8BYTES;
             }
 
-            if (dataType != pDescriptor->getDataType())
+            if (dataType2 != pDescriptor->getDataType())
             {
-               pDescriptor->setDataType(dataType);
+               pDescriptor->setDataType(dataType2);
             }
 
             // Rows
             unsigned int numRows = pImage->comps->h;
             if (numRows != pFileDescriptor->getRowCount())
             {
-               vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(numRows, true, false, true);
-               pDescriptor->setRows(rows);
-               pFileDescriptor->setRows(rows);
+               vector<DimensionDescriptor> rows2 = RasterUtilities::generateDimensionVector(numRows, true, false, true);
+               pDescriptor->setRows(rows2);
+               pFileDescriptor->setRows(rows2);
             }
 
             // Columns
@@ -1184,10 +1184,10 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
             unsigned int numBands = pImage->numcomps;
             if (numBands != pFileDescriptor->getBandCount())
             {
-               vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(numBands, true, false,
+               vector<DimensionDescriptor> bands2 = RasterUtilities::generateDimensionVector(numBands, true, false,
                   true);
-               pDescriptor->setBands(bands);
-               pFileDescriptor->setBands(bands);
+               pDescriptor->setBands(bands2);
+               pFileDescriptor->setBands(bands2);
             }
 
             // Cleanup

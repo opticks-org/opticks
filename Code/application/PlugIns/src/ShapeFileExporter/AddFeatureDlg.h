@@ -15,7 +15,7 @@
 #include "ShapeFileTypes.h"
 
 #include <QtCore/QMetaType>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include <map>
 #include <vector>

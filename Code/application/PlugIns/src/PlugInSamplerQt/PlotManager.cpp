@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QBitmap>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 #include "DesktopServices.h"
 #include "DockWindowWidget.h"

@@ -10,12 +10,12 @@
 #include "AddQueriesDlg.h"
 #include "AppVerify.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QDialogButtonBox>
 
 AddQueriesDlg::AddQueriesDlg(const std::vector<std::string>& fields, QWidget* pParent) :
    QDialog(pParent)

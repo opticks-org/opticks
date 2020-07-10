@@ -10,7 +10,7 @@
 #ifndef COLORMENU_H
 #define COLORMENU_H
 
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 class ColorGrid;
 

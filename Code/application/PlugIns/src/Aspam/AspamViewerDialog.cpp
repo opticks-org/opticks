@@ -28,25 +28,25 @@
 
 #include <QtCore/QDate>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QComboBox>
-#include <QtGui/QDateTimeEdit>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDateTimeEdit>
 #include <QtGui/QFontMetrics>
-#include <QtGui/QGridLayout>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPalette>
-#include <QtGui/QPushButton>
-#include <QtGui/QRadioButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTabWidget>
 #include <QtGui/QTextCursor>
-#include <QtGui/QTextEdit>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QVBoxLayout>
 #include <vector>
 
 using namespace std;

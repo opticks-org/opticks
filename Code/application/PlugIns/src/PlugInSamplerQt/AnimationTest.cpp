@@ -8,17 +8,17 @@
  */
 
 #include <QtCore/QString>
-#include <QtGui/QComboBox>
-#include <QtGui/QDateTimeEdit>
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDateTimeEdit>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QTextEdit>
 
 #include "Animation.h"
 #include "AnimationController.h"

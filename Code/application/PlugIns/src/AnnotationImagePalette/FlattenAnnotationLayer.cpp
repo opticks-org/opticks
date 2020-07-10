@@ -33,7 +33,7 @@
 #include "Undo.h"
 
 #include <QtGui/QImage>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 REGISTER_PLUGIN_BASIC(OpticksAnnotationImagePalette, FlattenAnnotationLayer);
 

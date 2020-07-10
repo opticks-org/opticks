@@ -10,7 +10,7 @@
 #include <float.h>
 
 #include <QtGui/QCursor>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 #include <QtGui/QMouseEvent>
 
 #include "AnnotationElementAdapter.h"

@@ -155,10 +155,10 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
                bool hasGeoData = pResults->isGeoreferenced();
                if (hasGeoData == false)
                {
-                  RasterElement* pParent = dynamic_cast<RasterElement*>(mpResults->getParent());
-                  if (pParent != NULL)
+                  RasterElement* pParent2 = dynamic_cast<RasterElement*>(mpResults->getParent());
+                  if (pParent2 != NULL)
                   {
-                     hasGeoData = pParent->isGeoreferenced();
+                     hasGeoData = pParent2->isGeoreferenced();
                   }
                }
 

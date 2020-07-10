@@ -9,7 +9,7 @@
 
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVerify.h"
 #include "ClassificationLayer.h"

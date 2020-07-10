@@ -188,7 +188,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("hm425m.dll")
         bla("szlibdll.dll") #hdf4
         bla("szip.dll") #hdf5
-        bla("gdal18.dll")
+        bla("gdal241.dll")
         bla("cg.dll")
         bla("cgc.exe")
         if arch == "32":
@@ -197,7 +197,7 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("cgD3D10.dll")
         bla("cgGL.dll")
         bla("glut32.dll")
-        bla("xerces-c_3_1.dll") #needed for GDAL
+        bla("xerces-c_3_2.dll") #needed for GDAL
         bla("hdf5dll.dll") #needed for GDAL
         bla("proj.dll") #needed for OGR
         if is_debug:
@@ -254,31 +254,37 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             bla("tbb.dll")
             bla("tbbmalloc.dll")
             bla("tbbmalloc_proxy.dll")
-            bla("xqilla22.dll")
+            bla("xqilla23.dll")
             bla("glew32.dll")
             bla("liblas.dll")
             bla("openjp2.dll")
-            bla("qwt5.dll")
+            bla("qwt.dll")
             bla("avcodec.dll")
             bla("avformat.dll")
             bla("avutil.dll")
             bla("ossim.dll")
             bla("hdf5.dll")
-            la(join("plugins", "imageformats", "qgif4.dll"), "imageformats")
-            la(join("plugins", "imageformats", "qjpeg4.dll"), "imageformats")
-            la(join("plugins", "imageformats", "qmng4.dll"), "imageformats")
-            la(join("plugins", "imageformats", "qsvg4.dll"), "imageformats")
-            la(join("plugins", "imageformats", "qtiff4.dll"), "imageformats")
-            la(join("lib", "Qt3Support4.dll"))
-            la(join("lib", "QtCore4.dll"))
-            la(join("lib", "QtGui4.dll"))
-            la(join("lib", "QtNetwork4.dll"))
-            la(join("lib", "QtOpenGL4.dll"))
-            la(join("lib", "QtScript4.dll"))
-            la(join("lib", "QtSql4.dll"))
-            la(join("lib", "QtSvg4.dll"))
-            la(join("lib", "QtXml4.dll"))
-            la(join("lib", "QtXmlPatterns4.dll"))
+            la(join("plugins", "imageformats", "qgif.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qjpeg.dll"), "imageformats")
+            #VS2017 la(join("plugins", "imageformats", "qmng4.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qsvg.dll"), "imageformats")
+            la(join("plugins", "imageformats", "qtiff.dll"), "imageformats")
+            la(join("plugins", "platforms", "qdirect2d.dll"), "platforms")
+            la(join("plugins", "platforms", "qminimal.dll"), "platforms")
+            la(join("plugins", "platforms", "qoffscreen.dll"), "platforms")
+            la(join("plugins", "platforms", "qwindows.dll"), "platforms")
+            #VS2017 la(join("lib", "Qt3Support4.dll"))
+            la(join("lib", "Qt5Core.dll"))
+            la(join("lib", "Qt5Gui.dll"))
+            la(join("lib", "Qt5Network.dll"))
+            la(join("lib", "Qt5OpenGL.dll"))
+            la(join("lib", "Qt5PrintSupport.dll"))
+            #VS2017 la(join("lib", "QtScript4.dll"))
+            la(join("lib", "Qt5Sql.dll"))
+            la(join("lib", "Qt5Svg.dll"))
+            la(join("lib", "Qt5Widgets.dll"))
+            la(join("lib", "Qt5Xml.dll"))
+            #VS2017 la(join("lib", "QtXmlPatterns4.dll"))
     return dp_list
 
 def create_qt_conf(path, verbosity):

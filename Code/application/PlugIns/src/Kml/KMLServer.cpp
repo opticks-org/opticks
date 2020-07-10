@@ -35,7 +35,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
 #include <QtGui/QMatrix>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 namespace
 {

@@ -20,6 +20,8 @@
 #include "SpatialDataView.h"
 #include "TypesFile.h"
 
+#include "LayerImp.h"
+
 #include <QtCore/QMetaType>
 #include <QtCore/QPointer>
 

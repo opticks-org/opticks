@@ -625,9 +625,9 @@ void BadValuesImp::generateAdjustedValues()
 
          // check if value is in a range
          bool valueInRange(false);
-         for (std::map<double,double>::const_iterator it = tempRanges.begin(); it != tempRanges.end(); ++it)
+         for (std::map<double,double>::const_iterator iti = tempRanges.begin(); iti != tempRanges.end(); ++it)
          {
-            if (value > it->first && value < it->second)
+            if (value > iti->first && value < iti->second)
             {
                valueInRange = true;
                break;

@@ -17,7 +17,7 @@
 #include "PlugInManagerServices.h"
 
 #include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class QCheckBox;
 class QGroupBox;

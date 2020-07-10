@@ -12,7 +12,7 @@
 
 #include <QtCore/QList>
 #include <QtGui/QIcon>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVersion.h"
 

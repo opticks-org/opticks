@@ -8,7 +8,7 @@
  */
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include "AnnotationLayerImp.h"
 #include "GraphicLayer.h"
