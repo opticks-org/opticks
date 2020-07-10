@@ -18,7 +18,10 @@
 #include <sstream>
 #include <string.h>
 
+#pragma warning(push)
+#pragma warning(disable: 4701)  // crc.hpp triggers this warning
 #include <boost/crc.hpp>
+#pragma warning(pop)
 #include <boost/cstdint.hpp>
 
 XERCES_CPP_NAMESPACE_USE

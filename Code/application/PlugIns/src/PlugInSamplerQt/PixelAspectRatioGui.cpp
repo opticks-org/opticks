@@ -29,7 +29,7 @@ PixelAspectRatioGui::PixelAspectRatioGui( QWidget* pParent, const char* pName, b
    {
       setObjectName( "PixelAspectRatioGui" );
    }
-   setModal( FALSE );
+   setModal( false );
 
    QGridLayout* pLayout = new QGridLayout( this );
 

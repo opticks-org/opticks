@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -23,27 +23,32 @@
     <ProjectGuid>{66D36FE3-0DA7-49C8-810B-FEE3450BB1D9}</ProjectGuid>
     <RootNamespace>Batch</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -63,8 +68,8 @@
     <Import Project="..\CompileSettings\glew-debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\minizip-debug.props" />
-    <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\CompileSettings\yaml-cpp-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -81,8 +86,8 @@
     <Import Project="..\CompileSettings\glew-release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\minizip-release.props" />
-    <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\CompileSettings\yaml-cpp-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -99,8 +104,8 @@
     <Import Project="..\CompileSettings\glew-debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\minizip-debug.props" />
-    <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\CompileSettings\yaml-cpp-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -117,8 +122,8 @@
     <Import Project="..\CompileSettings\glew-release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\minizip-release.props" />
-    <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
+    <Import Project="..\CompileSettings\yaml-cpp-release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>

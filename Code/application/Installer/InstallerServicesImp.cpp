@@ -691,7 +691,7 @@ bool InstallerServicesImp::launchHelper(const std::vector<std::string> installLi
    {
       cmdline += " " + QString::fromStdString(*it);
    }
-   int rval = reinterpret_cast<int>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
+   auto rval = reinterpret_cast<long long>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
    if (rval <= 32)
    {
       return false;

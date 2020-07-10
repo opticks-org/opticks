@@ -42,7 +42,7 @@ class MenuAndToolBarTestGui : public QDialog
     Q_OBJECT
 
 public:
-    MenuAndToolBarTestGui( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
+    MenuAndToolBarTestGui( QWidget* pParent = 0, const char* pName = 0, bool modal = false );
     ~MenuAndToolBarTestGui();
 
 public slots:

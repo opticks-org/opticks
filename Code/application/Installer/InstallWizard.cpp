@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QCloseEvent>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include "Aeb.h"
 #include "AppAssert.h"

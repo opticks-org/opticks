@@ -15,6 +15,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QPushButton>
+#include <QtCore/QMimeData>
 
 #include "AppVerify.h"
 #include "Axis.h"
