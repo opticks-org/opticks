@@ -81,7 +81,7 @@ vector<ImportDescriptor*> Nitf::NitfImporterShell::getImportDescriptors(const st
    }
 
    const ossimNitfFileHeaderV2_X* pFileHeader =
-      dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader().get());
+      dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
    if (pFileHeader == NULL)
    {
       return vector<ImportDescriptor*>();
@@ -1275,7 +1275,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
       fileLength = static_cast<size_t>(ftell(pFile.get()));
    }
 
-   opj_stream_t* pStream = opj_stream_create_file_stream(pFile.get(), fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(filename.c_str(), fileLength, true);
    if (pStream == NULL)
    {
       return NULL;

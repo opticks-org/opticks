@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qwt-qt5;$(OPTICKSDEPENDENCIESINCLUDE)\qt5\QtCore;$(OPTICKSDEPENDENCIESINCLUDE)\qt5\QtGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qt5\QtGui;$(OPTICKSDEPENDENCIESINCLUDE)\qt5\QtWidgets;$(OPTICKSDEPENDENCIESINCLUDE)\qt5\QtCore;$(OPTICKSDEPENDENCIESINCLUDE)\qwt-qt5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>qwt.lib;%(AdditionalDependencies)</AdditionalDependencies>

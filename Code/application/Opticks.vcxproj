@@ -255,6 +255,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\build.py" />
+    <None Include="..\commonutils.py" />
     <None Include="..\Release\DefaultSettings\1-ApplicationDefaults.cfg" />
     <None Include="..\Release\DefaultSettings\2-ApplicationMode.cfg" />
     <None Include="..\Release\DefaultSettings\25-XmlRpc.cfg" />
@@ -292,6 +294,7 @@
     <None Include="..\Release\Templates\MultipleImages.spg" />
     <None Include="..\Release\Templates\SingleImage.spg" />
     <None Include="..\Release\Templates\ZoomedImages.spg" />
+    <None Include="..\update-build-revision.py" />
     <None Include="Gui\res\application.ico" />
   </ItemGroup>
   <ItemGroup>

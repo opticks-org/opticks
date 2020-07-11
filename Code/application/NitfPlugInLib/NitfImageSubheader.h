@@ -165,17 +165,17 @@ namespace Nitf
    private:
       ImageSubheader& operator=(const ImageSubheader& rhs);
 
-      static bool getGCPsFromUtmMgrs(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromUtmMgrs(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromUtm(const string& iCords, const string& iGeolo,
-         const LocationType gcpPixels[], unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromUtm(const std::string& iCords, const std::string& iGeolo,
+         const LocationType gcpPixels[], unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromGeographic(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromGeographic(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromDecimalDegrees(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromDecimalDegrees(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
    };
 }
 

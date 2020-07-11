@@ -114,7 +114,6 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qt4\QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ProgramDataBaseFileName>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Pdbs\$(ProjectName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <ResourceCompile>

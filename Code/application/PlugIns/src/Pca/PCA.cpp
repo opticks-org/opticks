@@ -623,11 +623,11 @@ bool PCA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             else
             {
                QString strMethod = dlg.getCalcMethod();
-               if (strMethod.contains("second", Qt::CaseInsensitive) > 0)
+               if (strMethod.contains("second", Qt::CaseInsensitive))
                {
                   mCalcMethod = SECONDMOMENT;
                }
-               else if (strMethod.contains("covariance", Qt::CaseInsensitive) > 0)
+               else if (strMethod.contains("covariance", Qt::CaseInsensitive))
                {
                   mCalcMethod = COVARIANCE;
                }

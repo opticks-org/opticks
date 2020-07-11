@@ -201,8 +201,8 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("cgGL.dll")
         bla("glut32.dll")
         bla("xerces-c_3_2.dll") #needed for GDAL
-        #bla("hdf5dll.dll") #needed for GDAL
-        #???bla("proj.dll") #needed for OGR
+        bla("hdf5.dll") #needed for GDAL
+        bla("proj.dll") #needed for OGR
         if is_debug:
             bla("ehsd.dll")
             #???bla("opencv_core220d.dll")
@@ -219,13 +219,16 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             bla("xerces-c_3_2D.dll")
             bla("xqilla23.dll")
             bla("glew32d.dll")
-            #???bla(join("debug", "liblas.dll"))
+            bla(join("debug", "liblas.dll"))
             bla(join("debug", "openjp2.dll"))
             bla("qwtd.dll")
             bla("avcodecd.dll")
             bla("avformatd.dll")
             bla("avutild.dll")
             bla("ossimd.dll")
+            bla("geosd.dll")
+            bla("geos_cd.dll")
+            bla("libtiff.dll")
             bla("hdf5.dll")
             la(join("lib", "Qt5Cored.dll"))
             la(join("lib", "Qt5Guid.dll"))
@@ -254,13 +257,16 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             #???bla("tbbmalloc_proxy.dll")
             bla("xqilla23.dll")
             bla("glew32.dll")
-            #???bla("liblas.dll")
+            bla("liblas.dll")
             bla("openjp2.dll")
             bla("qwt.dll")
             bla("avcodec.dll")
             bla("avformat.dll")
             bla("avutil.dll")
-            #???bla("ossim.dll")
+            bla("ossim.dll")
+            bla("geos.dll")
+            bla("geos_c.dll")
+            bla("libtiff.dll")
             bla("hdf5.dll")
             la(join("plugins", "imageformats", "qgif.dll"), "imageformats")
             la(join("plugins", "imageformats", "qjpeg.dll"), "imageformats")

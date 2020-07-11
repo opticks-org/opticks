@@ -455,8 +455,8 @@ namespace Nitf
        */
       static bool importDateYYMMDD(const ossimPropertyInterface *pPropertyInterface,
          RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const string& appName, 
-         const string& ossimName);
+         DynamicObject *pDynObj, const std::string& appName, 
+         const std::string& ossimName);
 
       /**
        * An Element contains all information needed to import
