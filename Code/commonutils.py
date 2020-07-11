@@ -191,7 +191,21 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("hd425m.dll")
         bla("hm425m.dll")
         bla("szlibdll.dll") #hdf4
-        bla("gdal241.dll")
+        #### Begin gdal workaround - TODO: need to possibly upgrade gdal
+        #### this is based on the GISInternals distro
+        ###bla("gdal241.dll")
+        bla("gdal204.dll")
+        bla("expat.dll")
+        bla("libcurl.dll")
+        bla("libmysql.dll")
+        bla("libpq.dll")
+        bla("spatialite.dll")
+        bla("sqlite3.dll")
+        bla("freexl.dll")
+        bla("iconv.dll")
+        bla("libcrypto-1_1-x64.dll")
+        bla("libssl-1_1-x64.dll")
+        ##### END
         bla("cg.dll")
         bla("cgc.exe")
         if arch == "32":
