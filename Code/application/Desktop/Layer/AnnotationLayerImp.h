@@ -66,6 +66,8 @@ public:
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
+   
+   virtual GraphicObject* cloneObject(const GraphicObject* pObject);
 
 public slots:
    void reset();
@@ -85,5 +87,9 @@ private:
    GRAPHICLAYERADAPTEREXTENSION_CLASSES
 
 #define ANNOTATIONLAYERADAPTER_METHODS(impClass) \
+   GraphicObject* cloneObject(const GraphicObject* pObject) \
+   { \
+      return impClass::cloneObject(pObject); \
+   } \
    GRAPHICLAYERADAPTER_METHODS(impClass)
 #endif

@@ -203,6 +203,21 @@ LayerType AnnotationLayerImp::getLayerType() const
    return ANNOTATION;
 }
 
+GraphicObject* AnnotationLayerImp::cloneObject(const GraphicObject* pObject)
+{
+	if (pObject != nullptr)
+	{
+		GraphicObject* pNewObject = addObject(pObject->getGraphicObjectType(), LocationType());
+		GraphicObjectImp* pNewObjectImp = pNewObject == nullptr ? nullptr : dynamic_cast<GraphicObjectImp*>(pNewObject);
+		if (pNewObjectImp != nullptr)
+		{
+			pNewObjectImp->replicateObject(pObject);
+			return pNewObject;
+		}
+	}
+	return nullptr;
+}
+
 QCursor AnnotationLayerImp::getMouseCursor() const
 {
    return QCursor(QPixmap(":/icons/AnnotationCursor"), 1, 15);

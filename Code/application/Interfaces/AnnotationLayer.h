@@ -41,6 +41,20 @@ public:
     * @return The corrected coordinate.
     */
    virtual LocationType correctCoordinate(const LocationType &coord) const = 0;
+   
+   /**
+    *  Copy a graphic object to the layer.
+	*
+	*  This method adds a graphic object to the layer which is a clone of the specified object.
+	*
+	*  @param pObject
+	*         The object to clone.
+	*
+	*  @return A pointer to the new graphic object. NULL is returned if an error occured.
+	*
+	*  @notify This method will notify Subject::signalModified.
+	*/
+	virtual GraphicObject* cloneObject(const GraphicObject* pObject) = 0;
 
 protected:
    /**
