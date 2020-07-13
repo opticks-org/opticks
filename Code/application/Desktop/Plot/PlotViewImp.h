@@ -19,6 +19,7 @@
 
 #include <list>
 #include <string>
+#include <unordered_set>
 
 class AnnotationLayer;
 class AnnotationLayerAdapter;
@@ -58,7 +59,7 @@ public:
    bool containsObject(PlotObject* pObject) const;
    unsigned int getNumObjects() const;
    bool deleteObject(PlotObject* pObject);
-   bool deleteObjects(std::vector<PlotObject*>& objects);
+   bool deleteObjects(std::unordered_set<PlotObject*>& objects);
 
    bool moveObjectToFront(PlotObject* pObject);
    bool moveObjectToBack(PlotObject* pObject);
@@ -219,7 +220,7 @@ private:
    { \
       return impClass::deleteObject(pObject); \
    } \
-   bool deleteObjects(std::vector<PlotObject*>& objects) \
+   bool deleteObjects(std::unordered_set<PlotObject*>& objects) \
    { \
       return impClass::deleteObjects(objects); \
    } \

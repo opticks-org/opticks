@@ -640,13 +640,12 @@ bool PlotViewImp::deleteObject(PlotObject* pObject)
    return false;
 }
 
-bool PlotViewImp::deleteObjects(std::vector<PlotObject*>& objects)
+bool PlotViewImp::deleteObjects(std::unordered_set<PlotObject*>& objects)
 {
    if (objects.empty() == true)
    {
       return false;
    }
-   std::sort(objects.begin(), objects.end());
    int countToDelete = objects.size();
 
    VERIFYNR(disconnect(this, SIGNAL(objectDeleted(PlotObject*)), this, SLOT(updateExtents())));
@@ -655,9 +654,11 @@ bool PlotViewImp::deleteObjects(std::vector<PlotObject*>& objects)
    while (iter != mObjects.end() && countDeleted < countToDelete)
    {
       PlotObject* pCurrentObject = *iter;
-      if (std::binary_search(objects.begin(), objects.end(), pCurrentObject))
+	  auto iObject = objects.find(pCurrentObject);
+	  if (iObject != objects.end())
       {
          iter = mObjects.erase(iter);
+		 objects.erase(iObject);
          emit objectDeleted(pCurrentObject);
          notify(SIGNAL_NAME(PlotView, ObjectDeleted), boost::any(pCurrentObject));
 

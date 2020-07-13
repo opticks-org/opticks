@@ -15,6 +15,7 @@
 #include "TypesFile.h"
 
 #include <list>
+#include <unordered_set>
 
 class AnnotationLayer;
 class Gridlines;
@@ -582,8 +583,7 @@ public:
     * Removes objects from the plot and deletes them.
     *
     *	@param	objects
-    *	The annotation objects to delete. Note that this	vector	will
-    *	get re-sorted during the	execution of the	method
+    *	The annotation objects to delete.
     *
     *	@return	TRUE if the objects were	all successfully	removed	and	deleted,
     *	otherwise	FALSE.
@@ -593,7 +593,7 @@ public:
     * @notify This	method	will	notify	signalObjectDeleted() with
     *	any<PlotObject*>	for	each	object	deleted.
     */
-   virtual bool deleteObjects(std::vector<PlotObject*>& objects) = 0;
+   virtual bool deleteObjects(std::unordered_set<PlotObject*>& objects) = 0;
 
 protected:
    /**
