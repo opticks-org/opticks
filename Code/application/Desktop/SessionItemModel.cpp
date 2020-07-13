@@ -30,11 +30,18 @@ using namespace std;
 SessionItemModel::SessionItemModel(QObject* pParent) :
    QAbstractItemModel(pParent),
    mpRootWrapper(new SessionItemWrapper(this, NULL))
-{}
+{
+	setSupportedDragActions(Qt::MoveAction);
+}
 
 SessionItemModel::~SessionItemModel()
 {
    delete mpRootWrapper;
+}
+
+Qt::DropActions SessionItemModel::supportedDropActions() const
+{
+	return Qt::MoveAction;
 }
 
 QModelIndex SessionItemModel::index(SessionItem* pItem) const

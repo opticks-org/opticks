@@ -255,7 +255,7 @@ void ContextMenuImp::logActions(const string& stepName)
 {
 #ifndef DEBUG
    return;
-#endif
+#else
 
    if ((ContextMenu::hasSettingLogActions() == false) || (ContextMenu::getSettingLogActions() == false))
    {
@@ -345,4 +345,5 @@ void ContextMenuImp::logActions(const string& stepName)
 
       pActionStep->finalize();
    }
+#endif
 }

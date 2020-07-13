@@ -212,6 +212,11 @@
 #define APP_DOCKWINDOW_UNDOCK_ACTION "APP_DOCKWINDOW_UNDOCK_ACTION"
 
 /**
+ *  Copy the GraphicLayer to another view
+ */
+#define APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION "APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION"
+
+/**
  *  Destroys the selected GraphicObject objects contained in a GraphicLayer.
  */
 #define APP_GRAPHICLAYER_OBJECT_DELETE_ACTION "APP_GRAPHICLAYER_OBJECT_DELETE_ACTION"

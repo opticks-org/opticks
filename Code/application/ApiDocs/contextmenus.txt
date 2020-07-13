@@ -149,6 +149,7 @@
  *  \subsection graphiclayer Graphic Layer
  *  <table>
  *    <tr><td><b>Action</b></td><td><b>ID</b></td></tr>
+ *    <tr><td>Copy to View</d>APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION()</td></tr>
  *    <tr><td>Delete</td><td>APP_GRAPHICLAYER_OBJECT_DELETE_ACTION()</td></tr>
  *    <tr><td>Separator</td><td>APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION()</td></tr>
  *  </table>

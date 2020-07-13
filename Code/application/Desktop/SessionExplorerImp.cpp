@@ -62,8 +62,10 @@ SessionExplorerImp::SessionExplorerImp(const string& id, const string& windowNam
    mpWindowTree->setSelectionBehavior(QAbstractItemView::SelectItems);
    mpWindowTree->sortByColumn(0, Qt::AscendingOrder);
    mpWindowTree->setDragEnabled(true);
+   mpWindowTree->setAcceptDrops(true);
    mpWindowTree->setDragDropMode(QAbstractItemView::InternalMove);
    mpWindowTree->viewport()->installEventFilter(this);
+   mpWindowTree->viewport()->setAcceptDrops(true);
 
    // Animations tree
    mpAnimationTree = new QTreeView();
@@ -479,6 +481,8 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
                      QModelIndex index;
 
                      vector<SessionItem*> selectedLayers = getSelectedSessionItems();
+					 // selectedLayers shouldn't be able to be empty with
+					 // itemCount == 1, but check it anyway just to be sure
                      if (selectedLayers.empty() == false)
                      {
                         SessionItem* pItem = selectedLayers.front();
@@ -494,11 +498,10 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
 
                      // Update the drop point to be between the layer items
                      QPoint dropPos = pDropEvent->pos();
-                     QPoint nwPos = pDropEvent->pos();
-                     QPoint& newPos = const_cast<QPoint&>(nwPos);
-//                     QPoint& newPos = const_cast<QPoint&>(pDropEvent->pos());
 
                      QRect layersRect;
+					 QModelIndex parentIndex;
+					 int row = -1;
                      if (index.isValid() == true)
                      {
                         int numLayers = pWindowModel->rowCount(index);
@@ -511,32 +514,59 @@ bool SessionExplorerImp::eventFilter(QObject* pObject, QEvent* pEvent)
                            {
                               layersRect = layersRect.united(layerRect);
 
-                              if (layerRect.contains(dropPos) == true)
+                              if (layerRect.contains(dropPos) == true && index != layerIndex)
                               {
+								  parentIndex = layerIndex.parent();
+								  
                                  int topDist = dropPos.y() - layerRect.top();
                                  int bottomDist = layerRect.bottom() - dropPos.y();
 
                                  if (topDist < bottomDist)
                                  {
-                                    newPos.setY(layerRect.top());
+                                    row = i;
                                  }
                                  else
                                  {
-                                    newPos.setY(layerRect.bottom());
+                                    row = i + 1;
                                  }
+								 
+								 break;
                               }
                            }
                         }
                      }
 
                      // Do not allow drops outside of the sibling layers
+					 bool isInside = layersRect.contains(dropPos);
+					 
+					 if (isInside)
+					 {
+						 pDropEvent->accept();
+					 }
+					 
                      if (type != QEvent::Drop)
                      {
-                        mpWindowTree->setDropIndicatorShown(layersRect.contains(dropPos));
+                        mpWindowTree->setDropIndicatorShown(isInside);
+						return false;
                      }
+					 else
+					 {
+						 mpWindowTree->setDropIndicatorShown(false);
+					 }
 
-                     // Send the event to the tree view
-                     return false;
+					 if (row != -1)
+					 {
+						 // This should not be necessary. However, for some reason
+						 // the dropMimeData function isn't being called by Qt
+						 // on drops, so we need to call it explicitly.
+						 // If we fix it or it magically starts working like it
+						 // is supposed to, we should get rid of this.
+						 // When that is done, all of the code to get parentIndex
+						 // and row can be removed also.
+						 pWindowModel->dropMimeData(pData, Qt::MoveAction, row, 0, parentIndex);
+					 }
+					 
+					 return false;
                   }
                }
             }

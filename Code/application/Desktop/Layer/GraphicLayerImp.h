@@ -223,6 +223,7 @@ protected:
 
 protected slots:
    void deleteObject();
+   void copyToView();
 
 signals:
    void objectAdded(GraphicObject* pObject);

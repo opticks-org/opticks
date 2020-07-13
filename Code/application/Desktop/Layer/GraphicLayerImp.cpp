@@ -36,6 +36,8 @@
 #include "GraphicGroupImp.h"
 #include "GuiFunctors.h"
 #include "LatLonInsertObject.h"
+#include "LayerList.h"
+#include "LayerListImp.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
 #include "PlotWidgetAdapter.h"
@@ -43,6 +45,7 @@
 #include "PolylineObject.h"
 #include "PolylineObjectImp.h"
 #include "ScaleBarObject.h"
+#include "SpatialDataView.h"
 #include "SymbolManager.h"
 #include "Undo.h"
 #include "View.h"
@@ -2006,6 +2009,14 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
          pMenu->addActionBefore(pDeleteAction, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION,
             APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION);
       }
+	  if (dynamic_cast<GraphicLayerImp*>(items.front()) == this)
+	  {
+		  // Copy to another view
+		  QAction* pCopyToViewAction = new QAction(QIcon(":/icons/Copy"), "Copy to View", pParent);
+		  pCopyToViewAction->setAutoRepeat(false);
+		  connect(pCopyToViewAction, SIGNAL(triggered()), this, SLOT(copyToView()));
+		  pMenu->addActionBefore(pCopyToViewAction, APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION);
+	  }
    }
    else if (numItems > 1)
    {
@@ -2083,4 +2094,54 @@ void GraphicLayerImp::layerActivated(bool activated)
       completeInsertion();
       deselectAllObjects();
    }
+}
+
+void GraphicLayerImp::copyToView()
+{
+	// get destination view
+	std::vector<Window*> windows;
+	Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOWS, windows);
+	const SpatialDataView* pThisView = dynamic_cast<SpatialDataView*>(getView());
+	VERIFYNRV(pThisView);
+	QStringList availableViews;
+	QMap<QString, SpatialDataView*> nameMap;
+	for (auto window = windows.begin(); window != windows.end(); ++window)
+	{
+		auto pView = dynamic_cast<SpatialDataView*>(dynamic_cast<SpatialDataWindow*>(*window)->getActiveView());
+		if (pView != pThisView)
+		{
+			QString dname = QStrign::fromStdString(pView->getDisplayName(true));
+			availableViews.push_back(dname);
+			nameMap.insert(dname, pView);
+		}
+	}
+	QString destination = QInputDialog::getItem(pThisView->getWidget(), "Copy Layer to View", "Destination", availableViews, 0, false);
+	if (!nameMap.contains(destination))
+	{
+		return;
+	}
+	SpatialDataView* pDest = nameMap[destination];
+	VERIFYNRV(pDest);
+	
+	// create a layer with a unique name
+	UndoGroup group(pDest, "Copy Graphic Layer to View");
+	LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pDest->getLayerList());
+	VERIFYNRV(pLayerList);
+	QString newLayerName = pLayerList->getUniqueLayerName(QString::fromStdString(getName()), getLayerType());
+	if (newLayerName.isEmpty())
+	{
+		return;
+	}
+	GraphicLayer* pNewLayer = dynamic_cast<GraphicLayer*>(pDest->createLayer(getLayerType(), nullptr, newLayerName.toStdString()));
+	std::list<GraphicObject*> objects = getObjects();
+	for (auto object = objects.begin(); object != objects.end(); ++object)
+	{
+		GraphicObject* pNewObject = pNewLayer->addObject((*object)->getGraphicObjectType());
+		if (pNewObject != nullptr)
+		{
+			GraphicObjectImp* pNewObjectImp = dynamic_cast<GraphicObjectImp*>(pNewObject);
+			VERIFYNRV(pNewObjectImp);
+			pNewObjectImp->replicateObject(*object);
+		}
+	}
 }
