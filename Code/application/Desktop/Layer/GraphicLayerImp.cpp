@@ -46,6 +46,7 @@
 #include "PolylineObjectImp.h"
 #include "ScaleBarObject.h"
 #include "SpatialDataView.h"
+#include "SpatialDataWindow.h"
 #include "SymbolManager.h"
 #include "Undo.h"
 #include "View.h"
@@ -2111,7 +2112,7 @@ void GraphicLayerImp::copyToView()
 {
 	// get destination view
 	std::vector<Window*> windows;
-	Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOWS, windows);
+	Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
 	const SpatialDataView* pThisView = dynamic_cast<SpatialDataView*>(getView());
 	VERIFYNRV(pThisView);
 	QStringList availableViews;
@@ -2121,7 +2122,7 @@ void GraphicLayerImp::copyToView()
 		auto pView = dynamic_cast<SpatialDataView*>(dynamic_cast<SpatialDataWindow*>(*window)->getActiveView());
 		if (pView != pThisView)
 		{
-			QString dname = QStrign::fromStdString(pView->getDisplayName(true));
+			QString dname = QString::fromStdString(pView->getDisplayName(true));
 			availableViews.push_back(dname);
 			nameMap.insert(dname, pView);
 		}
