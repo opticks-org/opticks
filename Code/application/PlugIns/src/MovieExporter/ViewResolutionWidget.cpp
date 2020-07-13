@@ -13,11 +13,11 @@
 #include <QtGui/QBitmap>
 #include <QtGui/QIcon>
 #include <QtGui/QIntValidator>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QRadioButton>
-#include <QtGui/QStyleOptionButton>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QStyleOptionButton>
 
 namespace
 {

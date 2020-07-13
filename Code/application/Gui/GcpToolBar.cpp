@@ -8,8 +8,8 @@
  */
 
 #include <QtCore/QEvent>
-#include <QtGui/QToolButton>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QWidgetAction>
 
 #include "ColorMenu.h"
 #include "GcpLayer.h"

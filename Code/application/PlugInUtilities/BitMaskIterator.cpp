@@ -14,6 +14,10 @@
 
 #include <limits>
 
+//goffena below
+#include <algorithm>
+//goffena above
+
 using namespace std;
 
 BitMaskIterator::BitMaskIterator(BitMaskIterator, bool) :
@@ -34,10 +38,16 @@ BitMaskIterator::BitMaskIterator(const BitMask* pBitMask,
                                  unsigned int x1, unsigned int y1,
                                  unsigned int x2, unsigned int y2) :
    mpBitMask(pBitMask),
-   mX1(min(min(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
-   mY1(min(min(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
-   mX2(min(max(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
-   mY2(min(max(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+//goffena below
+//   mX1(min(min(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+//   mY1(min(min(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+//   mX2(min(max(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+//   mY2(min(max(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+   mX1(std::min(std::min(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+   mY1(std::min(std::min(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+   mX2(std::min(std::max(x1, x2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+   mY2(std::min(std::max(y1, y2), static_cast<unsigned int>(numeric_limits<int>::max()))),
+//goffena above
    mCurrentPixelX(-1),
    mCurrentPixelY(0),
    mFirstPixelX(-1),

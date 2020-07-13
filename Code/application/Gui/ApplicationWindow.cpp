@@ -13,26 +13,27 @@
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
 #include <QtCore/QUrl>
-#include <QtGui/QActionGroup>
-#include <QtGui/QApplication>
+#include <QtWidgets/QActionGroup>
+#include <QtWidgets/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QClipboard>
 #include <QtGui/QDesktopServices>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QInputDialog>
 #include <QtGui/QKeySequence>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QShortcutEvent>
-#include <QtGui/QSplashScreen>
-#include <QtGui/QToolTip>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWhatsThis>
+#include <QtWidgets/QSplashScreen>
+#include <QtWidgets/QToolTip>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWhatsThis>
+#include <QtCore/QMimeData>
 
 #include "AboutDlg.h"
 #include "Aeb.h"
@@ -186,6 +187,7 @@ ApplicationWindow::ApplicationWindow(QWidget* pSplash) :
    mpUndoGroup(new QUndoGroup(this)),
    mClearingUndoStacks(false),
    mDropNewSession(false),
+   mRightMouseDrapDrop(false),
    mpFullScreenAction(NULL),
    mFullScreen(false)
 {
@@ -2089,14 +2091,14 @@ void ApplicationWindow::fileMenuActivated(QAction* pAction)
             {
                bool bImported = false;
 
-               for (vector<ImportDescriptor*>::const_iterator mruIter = mruFileDescriptors.begin();
-                  mruIter != mruFileDescriptors.end();
-                  ++mruIter)
+               for (vector<ImportDescriptor*>::const_iterator mruIter2 = mruFileDescriptors.begin();
+                  mruIter2 != mruFileDescriptors.end();
+                  ++mruIter2)
                {
-                  if (*mruIter != NULL)
+                  if (*mruIter2 != NULL)
                   {
                      DataDescriptor* pImporterDescriptor = (*importerIter)->getDataDescriptor();
-                     DataDescriptor* pMruDescriptor = (*mruIter)->getDataDescriptor();
+                     DataDescriptor* pMruDescriptor = (*mruIter2)->getDataDescriptor();
                      if ((pImporterDescriptor != NULL) && (pMruDescriptor != NULL))
                      {
                         if ((pImporterDescriptor->getName() == pMruDescriptor->getName()) &&
@@ -2443,8 +2445,8 @@ bool ApplicationWindow::exportSessionItems(const vector<SessionItem*>& items, Pr
          if (filename.isEmpty() == false)
          {
             // Prompt for overwrite
-            QFileInfo fileInfo(filename);
-            if (fileInfo.exists() == true)
+            QFileInfo fileInfo2(filename);
+            if (fileInfo2.exists() == true)
             {
                if (bOverwrite == false)
                {
@@ -3680,10 +3682,10 @@ void ApplicationWindow::linkAllSpatialDataWindows()
                {
                   pSpatialDataView = pView2;
 
-                  LayerList* pLayerList = pSpatialDataView->getLayerList();
-                  if (pLayerList != NULL)
+                  LayerList* pLayerList2 = pSpatialDataView->getLayerList();
+                  if (pLayerList2 != NULL)
                   {
-                     RasterElement* pRaster = pLayerList->getPrimaryRasterElement();
+                     RasterElement* pRaster = pLayerList2->getPrimaryRasterElement();
                      if (pRaster != NULL)
                      {
                         hasGeocoords = pRaster->isGeoreferenced();
@@ -5616,6 +5618,14 @@ void ApplicationWindow::dragEnterEvent(QDragEnterEvent* pEvent)
 
    if (filename.isEmpty() == false)
    {
+      if (pEvent->mouseButtons() == Qt::RightButton)
+      {
+         mRightMouseDrapDrop = true;
+      }
+      else
+      {
+         mRightMouseDrapDrop = false;
+      }
       if (pEvent->proposedAction() == Qt::CopyAction)
       {
          pEvent->acceptProposedAction();
@@ -5661,7 +5671,7 @@ void ApplicationWindow::dropEvent(QDropEvent* pEvent)
       QString filename = pEvent->mimeData()->text();
       if (filename.isEmpty() == false)
       {
-         QByteArray charArray = filename.toAscii();
+         QByteArray charArray = filename.toLatin1();
          for (int i = 0; i < filename.length(); ++i)
          {
             if (charArray[i] == '\\')
@@ -5763,8 +5773,11 @@ void ApplicationWindow::dropEvent(QDropEvent* pEvent)
    Qt::MouseButton contextMenuButton = Qt::MidButton;
 #endif
 
-   if (pEvent->mouseButtons() == contextMenuButton)
+   Qt::MouseButtons btns = pEvent->mouseButtons();
+   if (pEvent->mouseButtons() == contextMenuButton  ||
+      mRightMouseDrapDrop == true)
    {
+      mRightMouseDrapDrop = false;
       if (mDropFilesType == EXTENSION_FILE)
       {
          QMenu contextMenu(this);

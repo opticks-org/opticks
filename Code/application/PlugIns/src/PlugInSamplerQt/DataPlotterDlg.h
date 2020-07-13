@@ -10,7 +10,7 @@
 #ifndef DATAPLOTTERDLG_H
 #define DATAPLOTTERDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class DockWindow;
 class PlotWidget;

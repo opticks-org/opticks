@@ -20,8 +20,8 @@
 #include "TypesFile.h"
 
 #include <string>
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
 
 using namespace std;
 

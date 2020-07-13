@@ -42,6 +42,7 @@ public:
    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
    void updateData(SessionItem* pItem);
+   virtual Qt::DropActions supportedDropActions() const;
 
 protected:
    class SessionItemWrapper

@@ -34,7 +34,7 @@
 #include "UtilityServices.h"
 
 #include <QtCore/QString>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include <list>
 using namespace std;

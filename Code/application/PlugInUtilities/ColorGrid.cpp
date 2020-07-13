@@ -9,6 +9,7 @@
 
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
+#include "QtWidgets/qdrawutil.h"
 
 #include "ColorGrid.h"
 
@@ -90,7 +91,8 @@ void ColorGrid::paintEvent(QPaintEvent* e)
 {
    QRect rcWidget = rect();
    QPixmap pix(rcWidget.size());
-   pix.fill(this, 0, 0);
+   //VS2017   pix.fill(this, 0, 0);
+   pix.fill(Qt::transparent);
 
    QPainter p(&pix);
 

@@ -10,8 +10,8 @@
 #ifndef GRAPHICTRIANGLEWIDGET_H
 #define GRAPHICTRIANGLEWIDGET_H
 
-#include <QtGui/QSpinBox>
-#include <QtGui/QWidget>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QWidget>
 
 class GraphicTriangleWidget : public QWidget
 {

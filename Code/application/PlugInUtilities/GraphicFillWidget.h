@@ -10,7 +10,7 @@
 #ifndef GRAPHICFILLWIDGET_H
 #define GRAPHICFILLWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "TypesFile.h"
 

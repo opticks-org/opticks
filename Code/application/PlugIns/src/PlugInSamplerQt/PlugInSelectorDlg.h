@@ -10,7 +10,7 @@
 #ifndef PLUGINSELECTORDLG_H
 #define PLUGINSELECTORDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include <string>
 #include <vector>

@@ -10,7 +10,7 @@
 #ifndef GRAPHICLINEWIDGET_H
 #define GRAPHICLINEWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "ColorType.h"
 #include "TypesFile.h"
 

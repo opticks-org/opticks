@@ -7,11 +7,11 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
 
 #include "Animation.h"
 #include "AppConfig.h"
@@ -1034,6 +1034,7 @@ void RasterLayerImp::drawPixelValues()
 
                      // Draw the text
                      QString strGray = stringifyValue(accessor->getColumn(), dataType, pBadValues);
+                     std::string txt = strGray.toStdString();
                      if (strGray.isEmpty() == false)
                      {
                         QPoint textOffset(-fm.width(strGray) / 2, 0);

@@ -6,8 +6,8 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
 #include "DesktopServices.h"
 #include "MessageLogResource.h"
 #include "ModelServices.h"

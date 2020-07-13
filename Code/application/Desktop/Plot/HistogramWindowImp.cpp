@@ -39,7 +39,7 @@
 #include "WorkspaceWindow.h"
 
 #include <QtCore/QEvent>
-#include <QtGui/QSplitter>
+#include <QtWidgets/QSplitter>
 #include <vector>
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -1297,9 +1297,9 @@ void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
    QStringList aoiNames;
    for (std::vector<Layer*>::const_iterator layer = aoiLayers.begin(); layer != aoiLayers.end(); ++layer)
    {
-      AoiLayer* pLayer = static_cast<AoiLayer*>(*layer);
-      aoiNames << QString::fromStdString(pLayer->getName());
-      aoiElements[pLayer->getName()] = static_cast<AoiElement*>(pLayer->getDataElement());
+      AoiLayer* pLayer2 = static_cast<AoiLayer*>(*layer);
+      aoiNames << QString::fromStdString(pLayer2->getName());
+      aoiElements[pLayer2->getName()] = static_cast<AoiElement*>(pLayer2->getDataElement());
    }
    std::vector<std::string> bandNamesStl = RasterUtilities::getBandNames(pDesc);
    QStringList bandNames;
@@ -1361,16 +1361,16 @@ void HistogramWindowImp::createSubsetPlot(Layer* pLayer)
       }
       // create a title which shows at least some of the bands
       std::string title = dlg.getPlotName().toStdString() + " (";
-      std::string bandNames;
+      std::string bandNames2;
       for (std::vector<DimensionDescriptor>::const_iterator band = bands.begin(); band != bands.end(); ++band)
       {
-         if (!bandNames.empty())
+         if (!bandNames2.empty())
          {
-            bandNames += ",";
+            bandNames2 += ",";
          }
-         bandNames += RasterUtilities::getBandName(pDesc, *band);
+         bandNames2 += RasterUtilities::getBandName(pDesc, *band);
       }
-      title += bandNames + ")";
+      title += bandNames2 + ")";
       pPlot->setTitle(title);
       PlotWidgetImp* pPlotImp = dynamic_cast<PlotWidgetImp*>(pPlot);
       VERIFYNRV(pPlotImp);

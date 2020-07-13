@@ -8,7 +8,7 @@
  */
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include "AnnotationLayerImp.h"
 #include "GraphicLayer.h"
@@ -201,6 +201,21 @@ void AnnotationLayerImp::reset()
 LayerType AnnotationLayerImp::getLayerType() const
 {
    return ANNOTATION;
+}
+
+GraphicObject* AnnotationLayerImp::cloneObject(const GraphicObject* pObject)
+{
+	if (pObject != nullptr)
+	{
+		GraphicObject* pNewObject = addObject(pObject->getGraphicObjectType(), LocationType());
+		GraphicObjectImp* pNewObjectImp = pNewObject == nullptr ? nullptr : dynamic_cast<GraphicObjectImp*>(pNewObject);
+		if (pNewObjectImp != nullptr)
+		{
+			pNewObjectImp->replicateObject(pObject);
+			return pNewObject;
+		}
+	}
+	return nullptr;
 }
 
 QCursor AnnotationLayerImp::getMouseCursor() const

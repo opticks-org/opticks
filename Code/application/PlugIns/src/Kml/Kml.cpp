@@ -92,13 +92,13 @@ bool Kml::toFile(const std::string &filename)
 
       zipOpenNewFileInZip(pZip, "doc.kml", &nfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
       QString data = toString();
-      zipWriteInFileInZip(pZip, data.toAscii(), data.size());
+      zipWriteInFileInZip(pZip, data.toLatin1(), data.size());
       zipCloseFileInZip(pZip);
 
       const QMap<QString, QByteArray> images = getImages();
       for (QMap<QString, QByteArray>::const_iterator image = images.begin(); image != images.end(); ++image)
       {
-         zipOpenNewFileInZip(pZip, image.key().toAscii(), &nfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED,
+         zipOpenNewFileInZip(pZip, image.key().toLatin1(), &nfo, NULL, 0, NULL, 0, NULL, Z_DEFLATED,
             Z_DEFAULT_COMPRESSION);
          zipWriteInFileInZip(pZip, image.value().data(), image.value().size());
          zipCloseFileInZip(pZip);
@@ -357,7 +357,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
       ColorType c = pObject->getFillColor();
       QChar fc('0');
       mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(
-         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
+         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toLatin1().data(),
          mXml.addElement("color"));
       mXml.addText(pObject->getLineState() ? "1" : "0", mXml.addElement("outline"));
       mXml.addText(pObject->getFillState() ? "1" : "0", mXml.addElement("fill"));
@@ -365,7 +365,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
       mXml.pushAddPoint(mXml.addElement("LineStyle"));
       c = pObject->getLineColor();
       mXml.addText(QString("%1%2%3%4").arg(c.mAlpha, 2, 16, fc).arg(c.mBlue, 2, 16, fc).arg(
-         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toAscii().data(),
+         c.mGreen, 2, 16, fc).arg(c.mRed, 2, 16, fc).toLatin1().data(),
          mXml.addElement("color"));
       mXml.addText(StringUtilities::toXmlString(pObject->getLineWidth()), mXml.addElement("width"));
       mXml.popAddPoint(); // LineStyle
@@ -379,9 +379,9 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
             for (vector<LocationType>::const_iterator vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
             {
                mXml.pushAddPoint(mXml.addElement("Point"));
-               mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
+               mXml.addText(QString::number(order).toLatin1().data(), mXml.addElement("drawOrder"));
                LocationType geo = pGeoElement->convertPixelToGeocoord(*vertex);
-               mXml.addText(QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10).toAscii().data(),
+               mXml.addText(QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10).toLatin1().data(),
                   mXml.addElement("coordinates"));
                mXml.popAddPoint(); // Point
             }
@@ -396,7 +396,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
       case COLUMN_OBJECT:
          {
             mXml.pushAddPoint(mXml.addElement("LineString"));
-            mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
+            mXml.addText(QString::number(order).toLatin1().data(), mXml.addElement("drawOrder"));
             mXml.addText("1", mXml.addElement("tessellate"));
             QStringList coords;
             vector<LocationType> vertices;
@@ -416,7 +416,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
                LocationType geo = pGeoElement->convertPixelToGeocoord(*vertex);
                coords << QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10);
             }
-            mXml.addText(coords.join(" ").toAscii().data(), mXml.addElement("coordinates"));
+            mXml.addText(coords.join(" ").toLatin1().data(), mXml.addElement("coordinates"));
             mXml.popAddPoint(); // LineString
             break;
          }
@@ -425,7 +425,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
       case POLYGON_OBJECT:
          {
             mXml.pushAddPoint(mXml.addElement("Polygon"));
-            mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
+            mXml.addText(QString::number(order).toLatin1().data(), mXml.addElement("drawOrder"));
             mXml.addText("1", mXml.addElement("tessellate"));
             mXml.pushAddPoint(mXml.addElement("LinearRing", mXml.addElement("outerBoundaryIs")));
             QStringList coords;
@@ -465,7 +465,7 @@ void Kml::generatePolygonalLayer(const GraphicLayer* pGraphicLayer, bool visible
                LocationType geo = pGeoElement->convertPixelToGeocoord(LocationType(point.x(), point.y()));
                coords << QString("%1,%2").arg(geo.mY, 0, 'f', 10).arg(geo.mX, 0, 'f', 10);
             }
-            mXml.addText(coords.join(" ").toAscii().data(), mXml.addElement("coordinates"));
+            mXml.addText(coords.join(" ").toLatin1().data(), mXml.addElement("coordinates"));
             mXml.popAddPoint(); // LinearRing
             mXml.popAddPoint(); // Polygon
             break;
@@ -518,7 +518,7 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
    mXml.addText(name, mXml.addElement("name"));
    mXml.addText(pLayer->getDisplayText(), mXml.addElement("description"));
    mXml.addText(visible ? "1" : "0", mXml.addElement("visibility"));
-   mXml.addText(QString::number(order).toAscii().data(), mXml.addElement("drawOrder"));
+   mXml.addText(QString::number(order).toLatin1().data(), mXml.addElement("drawOrder"));
    QString layerId = QString::fromStdString(pLayer->getId());
    if (mExportImages)
    {

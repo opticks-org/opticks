@@ -7,8 +7,8 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QPushButton>
-#include <QtGui/QSlider>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
 
 #include "DemoGuiImp.h"
 #include "AlgorithmPattern.h"

@@ -1052,9 +1052,9 @@ void FeatureClass::addFeatures()
                pGraphic->setName(featureIter->getLabel());
 
                const std::vector<std::string>& attributes = featureIter->getAttributes();
-               for (unsigned int i = 0; i < mAttributeValues.size(); i++)
+               for (unsigned int i2 = 0; i2 < mAttributeValues.size(); i2++)
                {
-                  mAttributeValues[i].push_back(attributes[i]);
+                  mAttributeValues[i2].push_back(attributes[i2]);
                }
 
                const vector<pair<double, double> >& vertices = featureIter->getVertices();
@@ -1770,9 +1770,9 @@ void FeatureClass::populateDisplayQueries()
                {
                   bool bFound = false;
                   QString tmpQueryName = QString("Query ") + QString::number(getCurrentQueryIndex());
-                  for (unsigned int i = 0; i < mDisplayQueries.size(); i++)
+                  for (unsigned int i2 = 0; i2 < mDisplayQueries.size(); i2++)
                   {
-                     if (mDisplayQueries[i]->getUniqueName() == tmpQueryName.toStdString())
+                     if (mDisplayQueries[i2]->getUniqueName() == tmpQueryName.toStdString())
                      {
                         incrementCurrentQueryIndex();
                         bFound = true;

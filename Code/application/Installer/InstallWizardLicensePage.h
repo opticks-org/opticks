@@ -10,7 +10,7 @@
 #ifndef INSTALLWIZARDLICENSEPAGE_H
 #define INSTALLWIZARDLICENSEPAGE_H
 
-#include <QtGui/QWizardPage>
+#include <QtWidgets/QWizardPage>
 
 class Aeb;
 

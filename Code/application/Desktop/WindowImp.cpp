@@ -16,6 +16,7 @@
 #include "xmlreader.h"
 #include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>
+#include <QtCore/QMimeData>
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;

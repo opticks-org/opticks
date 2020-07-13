@@ -1004,9 +1004,9 @@ void ThresholdLayerImp::setDisplayedBand(DimensionDescriptor band)
 
       vector<Layer*> linkedLayers = getLinkedLayers();
 
-      for(vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); iter)
+      for(vector<Layer*>::iterator iter2 = linkedLayers.begin(); iter2 != linkedLayers.end(); iter2)
       {
-         ThresholdLayerImp *pLayer = dynamic_cast<ThresholdLayerImp*>(*iter);
+         ThresholdLayerImp *pLayer = dynamic_cast<ThresholdLayerImp*>(*iter2);
          if(pLayer != NULL)
          {
             pLayer->setDisplayedBand(band);

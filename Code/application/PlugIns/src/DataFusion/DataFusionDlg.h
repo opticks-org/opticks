@@ -14,10 +14,10 @@
 #include "Vector.h"
 
 #include <QtCore/QMap>
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QStackedWidget>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QStackedWidget>
 
 class DatasetPage;
 class FusionAlgorithmInputsPage;

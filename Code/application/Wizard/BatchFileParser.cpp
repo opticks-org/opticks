@@ -151,7 +151,7 @@ BatchWizard* BatchFileParser::read()
    // Input parameters
    QDomNodeList parameters = wizardNode.childNodes();
 
-   for (unsigned int node = 0; node < parameters.length(); node++)
+   for (int node = 0; node < parameters.length(); node++)
    {
       QDomNode parameterNode = parameters.item(node);
       if (parameterNode.nodeName() == "parameter")
@@ -232,7 +232,7 @@ bool BatchFileParser::parseFilesets()
    // Parse the file set portion of the XML file.
    QDomNodeList filesetList = mpDocument->elementsByTagName("fileset");
 
-   for (unsigned int node = 0; node < filesetList.length(); node++)
+   for (int node = 0; node < filesetList.length(); node++)
    {
       BatchFileset* pFileset = new BatchFileset();
 
@@ -268,7 +268,7 @@ bool BatchFileParser::parseFilesets()
       // Parse the <include> and <exclude> tags
       QDomNodeList cludes = (filesetList.item(node)).childNodes();
 
-      for (unsigned int x = 0; x < cludes.length(); x++)
+      for (int x = 0; x < cludes.length(); x++)
       {
          // Include Tag
          if (cludes.item(x).nodeName() == "include")

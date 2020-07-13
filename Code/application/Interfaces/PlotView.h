@@ -15,6 +15,7 @@
 #include "TypesFile.h"
 
 #include <list>
+#include <unordered_set>
 
 class AnnotationLayer;
 class Gridlines;
@@ -225,26 +226,6 @@ public:
     *  @see     deleteObjects()<br>clear()
     */
    virtual bool deleteObject(PlotObject* pObject) = 0;
-
-   /**
-    *  Removes multiple objects from the plot and deletes them.
-    *
-    *  @param   objects
-    *           The plot objects to delete.  This method does nothing and
-    *           returns \c false if the list is empty.
-    *
-    *  @return  Returns \c true if all of the given objects were successfully
-    *           removed and deleted.  Returns \c false if at least one object
-    *           could not be deleted.
-    *
-    *  @notify  This method notifies signalObjectDeleted() with
-    *           boost::any<#PlotObject*> for each object that is successfully
-    *           removed.  The signal is notified immediately after the object is
-    *           removed but before the object is deleted.
-    *
-    *  @see     deleteObject()<br>clear()
-    */
-   virtual bool deleteObjects(const std::list<PlotObject*>& objects) = 0;
 
    /**
     *  Removes all primary objects from the plot and deletes them.
@@ -543,6 +524,76 @@ public:
     *  @see     setExtentsMargin()
     */
    virtual double getExtentsMargin() const = 0;
+   /**
+    *	Creates a new object but doesn't add it to	the plot.	The created object
+    *	will not have most of its signals attached. Only the	ones relating to
+    *  extents will be attached. This can be a significant performance boost
+    *	when there are many objects being created.	This method only works with
+    *	the objectType set to POINT_OBJECT.
+    *
+    *	This method creates a new object of the given type.
+    *	The object can be created as a primary object or secondary
+    *	object. A primary plot object is one that appears in the foreground of
+    *	the plot and has an entry in the legend. Most objects added to a plot
+    *	will be primary objects, but sometimes objects such as gridlines can be
+    *	created as secondary objects so that they will not be included with the
+    *	main data objects in the plot.
+    *
+    *	@param	objectType
+    *	The type	of	plot	object	to add.
+    *	@param	bPrimary
+    *	Set this value to TRUE to create a primary object or FALSE to
+    *	create a	secondary	object.
+    *
+    *	@return	A pointer to the new plot object. NULL is returned if an error
+    *	occurred and the object could not be added.
+    */
+   virtual PlotObject* createQuietObject(const PlotObjectType& objectType, bool bPrimary) = 0;
+
+   /**
+    *	Adds a new object to the plot. The created object will not have most of
+    *	its signals attached. Only the ones relating to extents will be
+    *	attached. This can be a significant performance boost when there are
+    *	many objects being created. This method only works with the objectType
+    *	set to POINT_OBJECT.
+    *
+    *	This method adds a new object of the given type to the plot with the
+    *	given type. The object can be created as a primary object or secondary
+    *	object. A primary plot object is one that appears in the foreground of
+    *	the plot and has an entry in the legend. Most objects added to a plot
+    *	will be primary objects, but sometimes objects such as gridlines can be
+    *	created as secondary objects so that they will not be included with the
+    *	main data objects in the plot.
+    *
+    *	@param	objectType
+    *		The type of plot object to add.
+    *	@param	bPrimary
+    *		Set this value to TRUE to create a primary object or FALSE to
+    *		create a secondary object.
+    *
+    *	@return	A pointer to the new plot object. NULL is returned if an error
+    *		occurred and the object could not be added.
+    *
+    *	@notify	This method will notify	signalObjectAdded() with
+    *	any<PlotObject*>.
+    */
+   virtual PlotObject* addQuietObject(const PlotObjectType& objectType, bool bPrimary) = 0;
+
+   /**
+    * Removes objects from the plot and deletes them.
+    *
+    *	@param	objects
+    *	The annotation objects to delete.
+    *
+    *	@return	TRUE if the objects were	all successfully	removed	and	deleted,
+    *	otherwise	FALSE.
+    *
+    * @see	clear()
+    *
+    * @notify This	method	will	notify	signalObjectDeleted() with
+    *	any<PlotObject*>	for	each	object	deleted.
+    */
+   virtual bool deleteObjects(std::unordered_set<PlotObject*>& objects) = 0;
 
 protected:
    /**

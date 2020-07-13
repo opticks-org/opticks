@@ -14,7 +14,7 @@
 #include "GcpList.h"
 #include "GeoreferenceDescriptor.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <list>
 #include <string>

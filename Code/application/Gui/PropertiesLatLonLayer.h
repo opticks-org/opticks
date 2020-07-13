@@ -10,10 +10,10 @@
 #ifndef PROPERTIESLATLONLAYER_H
 #define PROPERTIESLATLONLAYER_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QFontComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QRadioButton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFontComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QRadioButton>
 
 #include "LabeledSectionGroup.h"
 #include "TypesFile.h"

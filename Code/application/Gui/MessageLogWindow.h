@@ -15,7 +15,7 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 #include "AttachmentPtr.h"
 #include "DockWindowAdapter.h"

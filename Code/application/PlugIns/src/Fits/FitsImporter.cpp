@@ -930,9 +930,14 @@ CachedPage::UnitPtr FitsRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    long maxInRow = std::min(pOriginalRequest->getConcurrentRows(),
       pDesc->getRowCount() - pOriginalRequest->getStartRow().getOnDiskNumber());
    long pixcnt = maxInRow * pDesc->getColumnCount();
+//goffena below
+//   long pStartPix[3] = { 1,
+//                        pOriginalRequest->getStartRow().getOnDiskNumber() + 1,
+//                        pOriginalRequest->getStartBand().getOnDiskNumber() + 1 };
    long pStartPix[3] = {1,
-                        pOriginalRequest->getStartRow().getOnDiskNumber() + 1,
-                        pOriginalRequest->getStartBand().getOnDiskNumber() + 1};
+                        static_cast<long>(pOriginalRequest->getStartRow().getOnDiskNumber() + 1),
+                        static_cast<long>(pOriginalRequest->getStartBand().getOnDiskNumber() + 1)};
+//goffena above
    int status = 0;
 
    size_t bufsize = pixcnt * pDesc->getBytesPerElement();

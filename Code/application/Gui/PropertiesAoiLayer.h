@@ -10,7 +10,7 @@
 #ifndef PROPERTIESAOILAYER_H
 #define PROPERTIESAOILAYER_H
 
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QCheckBox>
 
 #include "LabeledSectionGroup.h"
 

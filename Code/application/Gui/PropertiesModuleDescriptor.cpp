@@ -6,8 +6,8 @@
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
-#include <QtGui/QFormLayout>
-#include <QtGui/QLayout>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QLayout>
 
 #include "AppVersion.h"
 #include "DateTime.h"

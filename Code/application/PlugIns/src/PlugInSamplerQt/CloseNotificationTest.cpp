@@ -10,7 +10,7 @@
 #include "PlugInRegistration.h"
 #include "SessionItemSerializer.h"
 #include "Slot.h"
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 REGISTER_PLUGIN_BASIC(OpticksPlugInSamplerQt, CloseNotificationTest);
 

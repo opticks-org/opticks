@@ -10,7 +10,7 @@
 #ifndef MULTILINETEXTDIALOG_H
 #define MULTILINETEXTDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "ConfigurationSettings.h"
 

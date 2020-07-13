@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QFontDatabase>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QLineEdit>
 #include <QtGui/QIntValidator>
 
 #include "AppVerify.h"

@@ -10,7 +10,7 @@
 #ifndef FILEDESCRIPTORWIDGET_H
 #define FILEDESCRIPTORWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "FileDescriptor.h"
 #include "SafePtr.h"

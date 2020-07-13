@@ -10,7 +10,7 @@
 #ifndef ANIMATIONTEST_H
 #define ANIMATIONTEST_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "AnimationController.h"
 #include "AttachmentPtr.h"

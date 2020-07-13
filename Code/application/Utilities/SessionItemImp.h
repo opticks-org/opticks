@@ -19,6 +19,7 @@
 #include "ContextMenuAction.h"
 #include "Serializable.h"
 #include "SerializableImp.h"
+#include "SessionItem.h"
 
 class QIcon;
 class SessionItem;

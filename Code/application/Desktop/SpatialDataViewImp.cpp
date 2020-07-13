@@ -59,15 +59,16 @@
 #include "XercesIncludes.h"
 
 #include <QtCore/QTimer>
-#include <QtGui/QActionGroup>
-#include <QtGui/QApplication>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QActionGroup>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QColorDialog>
 #include <QtGui/QHelpEvent>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QToolTip>
+#include <QtWidgets/QToolTip>
+#include <QtWidgets/QMdiArea>
 #include <QtOpenGL/QGLFramebufferObject>
 
 #include <boost/bind.hpp>
@@ -2570,7 +2571,24 @@ bool SpatialDataViewImp::isListLayer(Layer* pLayer) const
 
 bool SpatialDataViewImp::event(QEvent* pEvent)
 {
-   if (pEvent->type() == QEvent::ToolTip)
+   if (pEvent->type() == QEvent::Paint)
+   {
+      QWidget* pThisWindow = parentWidget();
+      if (!pThisWindow->isMaximized())
+      {
+         QMdiArea* pWorkspace = static_cast<QMdiArea*>(pThisWindow->parentWidget());
+         QObjectList workspaceWindows = pWorkspace->children();
+         for (int i=0; i < workspaceWindows.count(); ++i)
+         {
+            QWidget* pWindow = static_cast<QWidget*>(workspaceWindows[i]);
+            if (pWindow != pThisWindow && pWindow->isMaximized())
+            {
+               return false;
+            }
+         }
+      }
+   }
+   else if (pEvent->type() == QEvent::ToolTip)
    {
       toolTipEvent(static_cast<QHelpEvent*>(pEvent));
       return true;

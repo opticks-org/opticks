@@ -12,7 +12,7 @@
 
 #include "SpatialDataView.h"
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 class PanLimitTypeComboBox : public QComboBox
 {

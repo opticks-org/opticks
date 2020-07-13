@@ -11,8 +11,8 @@
 #define SELECTIONGRID_H
 
 #include <QtCore/QPoint>
-#include <QtGui/QLabel>
-#include <QtGui/QWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QWidget>
 
 class SelectionGrid : public QWidget
 {

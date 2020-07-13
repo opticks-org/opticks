@@ -7,12 +7,12 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QCompleter>
-#include <QtGui/QDirModel>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCompleter>
+#include <QtWidgets/QDirModel>
+#include <QtWidgets/QFileDialog>
 #include <QtGui/QFocusEvent>
-#include <QtGui/QHBoxLayout>
+#include <QtWidgets/QHBoxLayout>
 
 #include "AppVerify.h"
 #include "FileBrowser.h"

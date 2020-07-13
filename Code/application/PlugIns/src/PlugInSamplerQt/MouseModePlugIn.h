@@ -11,7 +11,7 @@
 #define MOUSEMODEPLUGIN_H
 
 #include <QtCore/QObject>
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 #include "AlgorithmShell.h"
 #include "SessionItemDeserializer.h"

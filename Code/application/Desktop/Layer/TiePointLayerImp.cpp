@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QFont>
 
 #include "AppConfig.h"
@@ -606,8 +606,8 @@ bool TiePointLayerImp::processMouseRelease(const QPoint& screenCoord, Qt::MouseB
          vector<TiePoint>::const_iterator pPoint;
          for (pPoint = oldPoints.begin(); pPoint != oldPoints.end(); ++pPoint)
          {
-            LocationType point = getPoint(*pPoint);
-            if (!isInBounds(point, bounds))
+            LocationType point2 = getPoint(*pPoint);
+            if (!isInBounds(point2, bounds))
             {
                remainingPoints.push_back(*pPoint);
             }

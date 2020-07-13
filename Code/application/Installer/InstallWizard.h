@@ -11,7 +11,7 @@
 #define INSTALLWIZARD_H
 
 #include <QtCore/QList>
-#include <QtGui/QWizard>
+#include <QtWidgets/QWizard>
 
 class Aeb;
 class Progress;

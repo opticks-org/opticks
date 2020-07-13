@@ -10,7 +10,7 @@
 #ifndef EXTENSIONLISTITEM_H__
 #define EXTENSIONLISTITEM_H__
 
-#include <QtGui/QListWidgetItem>
+#include <QtWidgets/QListWidgetItem>
 
 class QDialogButtonBox;
 class QLabel;
@@ -52,10 +52,12 @@ public:
    void setUseUninstallHelper(bool v);
 
 private slots:
+   void accepted();
    void about();
    void uninstall();
 
 signals:
+   void finished(QWidget* pEditor);
    void modified();
 
 private:

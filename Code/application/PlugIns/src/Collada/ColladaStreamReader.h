@@ -165,7 +165,7 @@ private:
    std::vector<std::string> mGeometryIds;
    std::vector<Opticks::Location<float, 3>> mVertices;
    std::vector<std::vector<unsigned int>> mPolygons;
-   std::vector<const COLLADAFW::VisualScene> mScenes;
+   std::vector<COLLADAFW::VisualScene> mScenes;
    double mRotation;
    std::string mCurrentElement;
    std::string mFilename;

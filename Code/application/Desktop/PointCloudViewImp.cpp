@@ -28,9 +28,9 @@
 #include "Undo.h"
 
 #include <QtCore/QFile>
-#include <QtGui/QAction>
-#include <QtGui/QActionGroup>
-#include <QtGui/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QActionGroup>
+#include <QtWidgets/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtOpenGL/QGLBuffer>
 #include <QtOpenGL/QGLShader>

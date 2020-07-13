@@ -9,6 +9,7 @@
 
 #include <qwt_scale_engine.h>
 #include <qwt_scale_div.h>
+#include <qwt_compat.h>
 
 #include "CartesianGridlinesImp.h"
 #include "CartesianPlotImp.h"
@@ -117,7 +118,7 @@ void CartesianGridlinesImp::updateLocations()
 
    if (scaleType == SCALE_LOG)
    {
-      QwtLog10ScaleEngine logScale;
+      QwtLogScaleEngine logScale;
       logScale.autoScale(maxMajorTicks, dMin, dMax, dStepSize);
       scaleDivision = logScale.divideScale(dMin, dMax, maxMajorTicks, maxMinorTicks);
    }

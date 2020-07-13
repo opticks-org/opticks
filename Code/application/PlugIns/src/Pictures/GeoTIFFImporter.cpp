@@ -670,10 +670,10 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       if (isdFilename.isEmpty() == true)
       {
          // An ISD filename has not yet been set, so check for an existing file based on the raster filename
-         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
-         if (pFileDescriptor != NULL)
+         const FileDescriptor* pFileDescriptor2 = pDescriptor->getFileDescriptor();
+         if (pFileDescriptor2 != NULL)
          {
-            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
+            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor2->getFilename().getFullPathAndName()));
             QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
             if (isdInfo.exists() == true)
             {

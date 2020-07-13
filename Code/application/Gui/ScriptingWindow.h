@@ -14,9 +14,9 @@
 #include "DockWindowAdapter.h"
 #include "SessionManager.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QTabWidget>
-#include <QtGui/QStackedWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QStackedWidget>
 #include <string>
 
 class ScriptingWidget;

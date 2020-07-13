@@ -247,13 +247,13 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
       {
          V(objs.size() == 1, "Invalid requirement target applicaiton specification.");
          std::string root = objs.front();
-         AebId id;
-         GET_SINGLE_OBJ(id, root, sAeblPrefix+"id", "Invalid requirement target application id.");
-         AebVersion min;
-         GET_SINGLE_OBJ(min, root, sAeblPrefix+"minVersion", "Invalid requirement target application minVersion.");
-         AebVersion max;
-         GET_SINGLE_OBJ(max, root, sAeblPrefix+"maxVersion", "Invalid requirement target application maxVersion.");
-         targetApp = AebRequirement(id, min, max);
+         AebId id2;
+         GET_SINGLE_OBJ(id2, root, sAeblPrefix+"id", "Invalid requirement target application id.");
+         AebVersion min2;
+         GET_SINGLE_OBJ(min2, root, sAeblPrefix+"minVersion", "Invalid requirement target application minVersion.");
+         AebVersion max2;
+         GET_SINGLE_OBJ(max2, root, sAeblPrefix+"maxVersion", "Invalid requirement target application maxVersion.");
+         targetApp = AebRequirement(id2, min2, max2);
          V(targetApp.isValid(), "Invalid requirement target application.");
       }
       mObj.mRequires.push_back(std::make_pair(targetApp, req));
@@ -280,13 +280,13 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
       {
          V(objs.size() == 1, "Invalid incompatible target application.");
          std::string root = objs.front();
-         AebId id;
-         GET_SINGLE_OBJ(id, root, sAeblPrefix+"id", "Invalid incompatible target application ID.");
-         AebVersion min;
-         GET_SINGLE_OBJ(min, root, sAeblPrefix+"minVersion", "Invalid incompatible target application minVersion.");
-         AebVersion max;
+         AebId id3;
+         GET_SINGLE_OBJ(id3, root, sAeblPrefix+"id", "Invalid incompatible target application ID.");
+         AebVersion min3;
+         GET_SINGLE_OBJ(min3, root, sAeblPrefix+"minVersion", "Invalid incompatible target application minVersion.");
+         AebVersion max3;
          GET_SINGLE_OBJ(max, root, sAeblPrefix+"maxVersion", "Invalid incompatible target application maxVersion.");
-         targetApp = AebRequirement(id, min, max);
+         targetApp = AebRequirement(id3, min3, max3);
          V(targetApp.isValid(), "Invalid incompatible target application.");
       }
       mObj.mIncompatibles.push_back(std::make_pair(targetApp, incomp));
@@ -326,12 +326,12 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
    // Load icon and licenses
    if (Service<ApplicationServices>()->isInteractive() && !mObj.mIconURL.empty())
    {
-      bool wasValidPath = true;
-      QByteArray bytes = getBytesFromAeb(QString::fromStdString(mObj.mIconURL), wasValidPath);
-      if (wasValidPath && !bytes.isEmpty())
+      bool wasValidPath2 = true;
+      QByteArray bytes2 = getBytesFromAeb(QString::fromStdString(mObj.mIconURL), wasValidPath2);
+      if (wasValidPath2 && !bytes.isEmpty())
       {
          QImage img;
-         if (img.loadFromData(bytes))
+         if (img.loadFromData(bytes2))
          {
             mObj.mpIcon = new QPixmap(QPixmap::fromImage(img).scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation));
          }
@@ -346,11 +346,11 @@ bool AebIo::fromFile(const std::string& fname, std::string& errMsg)
    {
       for (std::vector<std::string>::const_iterator url = mObj.mLicenseURLs.begin(); url != mObj.mLicenseURLs.end(); ++url)
       {
-         bool wasValidPath = true;
-         QByteArray bytes = getBytesFromAeb(QString::fromStdString(*url), wasValidPath);
-         if (wasValidPath && !bytes.isEmpty())
+         bool wasValidPath3 = true;
+         QByteArray bytes3 = getBytesFromAeb(QString::fromStdString(*url), wasValidPath3);
+         if (wasValidPath3 && !bytes3.isEmpty())
          {
-            mObj.mLicenses.push_back(QString(bytes));
+            mObj.mLicenses.push_back(QString(bytes3));
          }
          else
          {
@@ -569,8 +569,8 @@ const QList<const AebEntry*>& AebIo::getContentPaths(std::string& errMsg) const
             else if (item.isFile())
             {
                QString absoluteFilePath = item.absoluteFilePath();
-               QString path = root.relativeFilePath(absoluteFilePath);
-               mContentPaths.push_back(new FsAebEntry(path, item.size(), absoluteFilePath));
+               QString path2 = root.relativeFilePath(absoluteFilePath);
+               mContentPaths.push_back(new FsAebEntry(path2, item.size(), absoluteFilePath));
             }
          }
       }
@@ -643,7 +643,7 @@ const AebEntry* AebIo::getEntry(const QUrl& aebUrl) const
    }
    // remove the initial / since an aeb: URL is really relative to the zip file
    QString upath = aebUrl.path().remove(0, 1);
-   if (unzLocateFile(*mZipFile, upath.toAscii(), 0) != UNZ_OK)
+   if (unzLocateFile(*mZipFile, upath.toLatin1(), 0) != UNZ_OK)
    {
       return NULL;
    }
@@ -854,7 +854,7 @@ QByteArray AebIo::getBytesFromAeb(const QString& url, bool& wasValidPath) const
       }
       // remove the initial / since an aeb: URL is really relative to the zip file
       QString upath = u.path().remove(0, 1);
-      if (unzLocateFile(*mZipFile, upath.toAscii(), 0) != UNZ_OK)
+      if (unzLocateFile(*mZipFile, upath.toLatin1(), 0) != UNZ_OK)
       {
          return bytes;
       }

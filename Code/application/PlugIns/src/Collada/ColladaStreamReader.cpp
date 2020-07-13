@@ -88,7 +88,7 @@ bool ColladaStreamReader::writeGeometry(const COLLADAFW::Geometry* pGeometry)
    {
       if (pGeometry->getType() == COLLADAFW::Geometry::GEO_TYPE_MESH)
       {
-         const COLLADAFW::Mesh* pMesh = static_cast<const COLLADAFW::Mesh*>(pGeometry);
+         COLLADAFW::Mesh* pMesh = static_cast<COLLADAFW::Mesh*>(const_cast<COLLADAFW::Geometry*>(pGeometry));
          if (!readVertices(pMesh))
          {
             return false;
@@ -111,7 +111,7 @@ void ColladaStreamReader::finish()
 {
    if (!mFirstPass)
    {
-      for (std::vector<const COLLADAFW::VisualScene>::iterator it = mScenes.begin(); it != mScenes.end(); ++it)
+      for (std::vector<COLLADAFW::VisualScene>::iterator it = mScenes.begin(); it != mScenes.end(); ++it)
       {
          const COLLADAFW::NodePointerArray& rootNodes = (*it).getRootNodes();
          for (unsigned int i = 0; i < rootNodes.getCount(); ++i)

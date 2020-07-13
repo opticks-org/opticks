@@ -126,10 +126,10 @@ extern "C"
       if (pWizard == NULL)
       {
          // open using a path relative to the default wizard path
-         const Filename* pFilename = Service<ConfigurationSettings>()->getSettingWizardPath();
-         if (pFilename != NULL)
+         const Filename* pFilename2 = Service<ConfigurationSettings>()->getSettingWizardPath();
+         if (pFilename2 != NULL)
          {
-            filename = pFilename->getFullPathAndName() + "/" + filename;
+            filename = pFilename2->getFullPathAndName() + "/" + filename;
             pWizard = WizardUtilities::readWizard(filename);
          }
       }

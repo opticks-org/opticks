@@ -26,9 +26,9 @@
 
 #include <ossim/matrix/newmat.h>
 #include <QtGui/QBitmap>
-#include <QtGui/QHeaderView>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 namespace
 {
@@ -417,12 +417,12 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
                pView->getLayerList()->getLayers(AOI_LAYER, layers);
                for (unsigned int i = 0; i < layers.size(); ++i)
                {
-                  Layer* pLayer = layers[i];
-                  if (pLayer == NULL)
+                  Layer* pLayer2 = layers[i];
+                  if (pLayer2 == NULL)
                   {
                      continue;
                   }
-                  AoiElement* pElement = dynamic_cast<AoiElement*>(pLayer->getDataElement());
+                  AoiElement* pElement = dynamic_cast<AoiElement*>(pLayer2->getDataElement());
                   if (pElement != NULL && pElement->getId() == iter->second.mAoiElementId)
                   {
                      pAoi = pElement;
@@ -468,7 +468,7 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
 
       //clean-up any stale data in mPreviousConvolves
       std::vector<Window*> windows;
-      std::vector<string> activeViewIds;
+      std::vector<std::string> activeViewIds;
       Service<DesktopServices>()->getWindows(windows);
       for (unsigned int i = 0; i < windows.size(); ++i)
       {
@@ -477,10 +477,10 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
          {
             continue;
          }
-         SpatialDataView* pView = dynamic_cast<SpatialDataView*>(pWindow->getActiveView());
-         if (pView != NULL)
+         SpatialDataView* pView2 = dynamic_cast<SpatialDataView*>(pWindow->getActiveView());
+         if (pView2 != NULL)
          {
-            activeViewIds.push_back(pView->getId());
+            activeViewIds.push_back(pView2->getId());
          }
       }
       std::sort(activeViewIds.begin(), activeViewIds.end());

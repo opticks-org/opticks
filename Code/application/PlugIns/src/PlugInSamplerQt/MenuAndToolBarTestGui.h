@@ -12,9 +12,9 @@
 
 #include <QtCore/QVariant>
 #include <QtCore/QObject>
-#include <QtGui/QDialog>
-#include <QtGui/QAction>
-#include <QtGui/QWidget>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QWidget>
 #include "PlotWidget.h"
 #include "DockWindow.h"
 #include "HistogramWindow.h"
@@ -42,7 +42,7 @@ class MenuAndToolBarTestGui : public QDialog
     Q_OBJECT
 
 public:
-    MenuAndToolBarTestGui( QWidget* pParent = 0, const char* pName = 0, bool modal = FALSE );
+    MenuAndToolBarTestGui( QWidget* pParent = 0, const char* pName = 0, bool modal = false );
     ~MenuAndToolBarTestGui();
 
 public slots:

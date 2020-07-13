@@ -240,10 +240,10 @@ bool GeoreferencePlugIn::execute(PlugInArgList* pInParam, PlugInArgList* pOutPar
          else
          {
             // Set the layer offset and scale factor to that of the corresponding raster layer
-            LayerList* pLayerList = mpView->getLayerList();
-            if (pLayerList != NULL)
+            LayerList* pLayerList2 = mpView->getLayerList();
+            if (pLayerList2 != NULL)
             {
-               RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayerList->getLayer(RASTER, mpRaster));
+               RasterLayer* pRasterLayer = dynamic_cast<RasterLayer*>(pLayerList2->getLayer(RASTER, mpRaster));
                if (pRasterLayer != NULL)
                {
                   pLatLonLayer->setXOffset(pRasterLayer->getXOffset());

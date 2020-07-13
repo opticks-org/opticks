@@ -7,13 +7,13 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QTextEdit>
-#include <QtGui/QTreeWidget>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QTreeWidget>
 
 #include "SignaturePropertiesDlg.h"
 #include "Classification.h"
@@ -141,22 +141,22 @@ SignaturePropertiesDlg::SignaturePropertiesDlg(Signature* pSignature, QWidget* p
          strFile = QString::fromStdString(file);
       }
 
-      const Classification* pClassification = pSignature->getClassification();
-      if (pClassification != NULL)
+      const Classification* pClassification2 = pSignature->getClassification();
+      if (pClassification2 != NULL)
       {
          string classificationText = "";
-         pClassification->getClassificationText(classificationText);
+         pClassification2->getClassificationText(classificationText);
          if (classificationText.empty() == false)
          {
             strClassification = QString::fromStdString(classificationText);
          }
       }
 
-      const DynamicObject* pMetadata = pSignature->getMetadata();
-      if (pMetadata != NULL)
+      const DynamicObject* pMetadataO = pSignature->getMetadata();
+      if (pMetadataO != NULL)
       {
          vector<string> metadataKeys;
-         pMetadata->getAttributeNames(metadataKeys);
+         pMetadataO->getAttributeNames(metadataKeys);
 
          for (unsigned int i = 0; i < metadataKeys.size(); i++)
          {
@@ -165,7 +165,7 @@ SignaturePropertiesDlg::SignaturePropertiesDlg(Signature* pSignature, QWidget* p
             {
                QString strValue;
 
-               string value = pMetadata->getAttribute(metadataName).toDisplayString();
+               string value = pMetadataO->getAttribute(metadataName).toDisplayString();
                if (value.empty() == false)
                {
                   strValue = QString::fromStdString(value);

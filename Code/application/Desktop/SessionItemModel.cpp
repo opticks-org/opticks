@@ -10,7 +10,7 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
 #include <QtGui/QIcon>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include "AppVerify.h"
 #include "AppVersion.h"
@@ -30,11 +30,18 @@ using namespace std;
 SessionItemModel::SessionItemModel(QObject* pParent) :
    QAbstractItemModel(pParent),
    mpRootWrapper(new SessionItemWrapper(this, NULL))
-{}
+{
+	setSupportedDragActions(Qt::MoveAction);
+}
 
 SessionItemModel::~SessionItemModel()
 {
    delete mpRootWrapper;
+}
+
+Qt::DropActions SessionItemModel::supportedDropActions() const
+{
+	return Qt::MoveAction;
 }
 
 QModelIndex SessionItemModel::index(SessionItem* pItem) const

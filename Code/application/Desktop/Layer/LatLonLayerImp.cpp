@@ -8,7 +8,7 @@
  */
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include "AppConfig.h"
 #include "AppVerify.h"
@@ -1124,7 +1124,7 @@ void LatLonLayerImp::setColor(const QColor& newColor)
 
       vector<Layer*> linkedLayers = getLinkedLayers();
 
-      vector<Layer*>::iterator iter = linkedLayers.begin();
+//      vector<Layer*>::iterator iter = linkedLayers.begin();
       for (vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); ++iter)
       {
          LatLonLayerImp* pLayer = dynamic_cast<LatLonLayerImp*>(*iter);

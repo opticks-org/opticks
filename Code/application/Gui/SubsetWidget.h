@@ -10,12 +10,12 @@
 #ifndef SUBSETWIDGET_H
 #define SUBSETWIDGET_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QListWidget>
-#include <QtGui/QSpinBox>
-#include <QtGui/QStringListModel>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QSpinBox>
+#include <QtCore/QStringListModel>
+#include <QtWidgets/QWidget>
 
 #include "DimensionDescriptor.h"
 

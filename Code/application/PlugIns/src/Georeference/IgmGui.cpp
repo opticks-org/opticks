@@ -12,9 +12,9 @@
 #include "IgmGeoreference.h"
 #include "IgmGui.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QRadioButton>
-#include <QtGui/QStyleOptionButton>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QStyleOptionButton>
 
 IgmGui::IgmGui(QWidget* pParent) :
    QWidget(pParent),

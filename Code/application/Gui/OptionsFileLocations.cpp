@@ -9,8 +9,8 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QRegExp>
-#include <QtGui/QHeaderView>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QMessageBox>
 
 #include "ApplicationWindow.h"
 #include "AppVersion.h"

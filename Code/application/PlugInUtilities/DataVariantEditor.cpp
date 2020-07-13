@@ -30,18 +30,18 @@
 #include <QtCore/QString>
 #include <QtCore/QTemporaryFile>
 #include <QtCore/QUrl>
-#include <QtGui/QDateTimeEdit>
+#include <QtWidgets/QDateTimeEdit>
 #include <QtGui/QDesktopServices>
-#include <QtGui/QFileDialog>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QRadioButton>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QTextEdit>
 #include <QtGui/QValidator>
 
 #include <limits>
@@ -779,7 +779,8 @@ void DataVariantEditor::edit()
    if (file.open(QIODevice::WriteOnly | QIODevice::Text) == true)
    {
       disconnect(&mTempFileWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(tempFileChanged()));
-      file.write(mpValueTextEdit->toPlainText().toAscii());
+//      file.write(mpValueTextEdit->toPlainText().toLatin1());
+      file.write(mpValueTextEdit->toPlainText().toLatin1());
       VERIFYNR(connect(&mTempFileWatcher, SIGNAL(fileChanged(const QString&)), this, SLOT(tempFileChanged())));
       file.close();
    }

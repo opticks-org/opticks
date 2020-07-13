@@ -10,8 +10,8 @@
 #ifndef GRAPHICSCALEWIDGET_H
 #define GRAPHICSCALEWIDGET_H
 
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QWidget>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QWidget>
 
 class GraphicScaleWidget : public QWidget
 {

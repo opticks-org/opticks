@@ -8,9 +8,9 @@
  */
 
 #include <QtGui/QPainter>
-#include <QtGui/QPrintDialog>
-#include <QtGui/QPrinter>
-#include <QtGui/QWidget>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtWidgets/QWidget>
 
 #include "PrintPixmap.h"
 

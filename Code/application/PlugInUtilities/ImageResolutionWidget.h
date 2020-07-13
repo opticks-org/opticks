@@ -10,10 +10,10 @@
 #ifndef IMAGERESOLUTIONWIDGET_H
 #define IMAGERESOLUTIONWIDGET_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QWidget>
 
 class LabeledSection;
 

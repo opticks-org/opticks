@@ -16,9 +16,9 @@
 #include "ListInspectorWidget.h"
 #include "ObjectResource.h"
 
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QListWidget>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QVBoxLayout>
 
 using namespace std;
 

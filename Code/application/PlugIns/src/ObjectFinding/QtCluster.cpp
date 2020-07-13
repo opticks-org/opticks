@@ -37,7 +37,7 @@
 #include "StringUtilities.h"
 #include <QtCore/QList>
 #include <QtCore/QPoint>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <limits>
 #include <math.h>
 #if !defined(DEBUG)

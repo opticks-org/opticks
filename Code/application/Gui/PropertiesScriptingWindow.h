@@ -11,7 +11,7 @@
 #define PROPERTIESSCRIPTINGWINDOW_H
 
 #include <QtGui/QFont>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QSpinBox>
 
 #include "LabeledSectionGroup.h"
 

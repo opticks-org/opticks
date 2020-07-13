@@ -10,7 +10,7 @@
 #ifndef FRAMERATEWIDGET_H
 #define FRAMERATEWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <boost/rational.hpp>
 #include <vector>

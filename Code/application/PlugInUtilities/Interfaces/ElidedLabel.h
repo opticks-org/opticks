@@ -10,7 +10,7 @@
 #ifndef ELIDEDLABEL_H
 #define ELIDEDLABEL_H
 
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 
 /**
  *  A specialized QLabel that displays an ellipsis when its text is larger than

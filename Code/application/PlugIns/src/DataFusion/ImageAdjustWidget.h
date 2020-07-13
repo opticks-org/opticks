@@ -18,7 +18,7 @@
 
 #include <boost/any.hpp>
 #include <QtCore/QMetaType>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class QComboBox;
 class QDoubleSpinBox;

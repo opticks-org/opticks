@@ -32,8 +32,8 @@
 #include "Undo.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 namespace
 {
@@ -133,8 +133,8 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    pResult->copyClassification(mInput.mpRaster);
    pResult->getMetadata()->merge(mInput.mpDescriptor->getMetadata()); //copy original metadata
    //chip metadata by bands
-   vector<DimensionDescriptor> orgBands = mInput.mpDescriptor->getBands();
-   vector<DimensionDescriptor> newBands;
+   std::vector<DimensionDescriptor> orgBands = mInput.mpDescriptor->getBands();
+   std::vector<DimensionDescriptor> newBands;
    newBands.reserve(mInput.mBands.size());
    for (unsigned int index = 0; index < mInput.mBands.size(); ++index)
    {

@@ -10,8 +10,8 @@
 #ifndef TOOLBARIMP_H
 #define TOOLBARIMP_H
 
-#include <QtGui/QAction>
-#include <QtGui/QToolBar>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QToolBar>
 
 #include "WindowImp.h"
 #include "TypesFile.h"

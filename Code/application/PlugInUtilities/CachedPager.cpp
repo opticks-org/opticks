@@ -35,7 +35,7 @@ CachedPager::CachedPager() :
 {
 }
 
-CachedPager::CachedPager(const size_t cacheSize) :
+CachedPager::CachedPager(const int64_t cacheSize) :
    mCache(cacheSize),
    mpMutex(new mta::DMutex),
    mpDescriptor(NULL),
@@ -192,6 +192,11 @@ const int CachedPager::getBytesPerBand() const
    return mBytesPerBand;
 }
 
+const int CachedPager::getRowCount() const
+{
+   return mRowCount;
+}
+
 const int CachedPager::getColumnCount() const
 {
    return mColumnCount;
@@ -210,4 +215,9 @@ const RasterElement* CachedPager::getRasterElement() const
 double CachedPager::getChunkSize() const
 {
    return 1 * 1024 * 1024;
+}
+
+void CachedPager::resize(int64_t newSize)
+{
+   mCache.resize(newSize);
 }

@@ -56,7 +56,7 @@ Nitf::FileHeader::FileHeader(const string &fileVersion) :
       exportDateCCYYMMDDhhmmss));
 
       // 02.10 security strings
-      mElements.push_back(Element(SECURITY_SYSTEM, ossimNitfFileHeaderV2_1::FSCLASY_KW, 
+      mElements.push_back(Element(SECURITY_SYSTEM, ossimNitfFileHeaderV2_1::FSCLSY_KW, 
          importClassificationString, 
          exportClassificationString));
       mElements.push_back(Element(SECURITY_DECLASS_TYPE, ossimNitfFileHeaderV2_1::FSDCTP_KW, 

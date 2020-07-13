@@ -11,7 +11,7 @@
 #define ALGORITHMDIALOG_H
 
 #include <QtCore/QEventLoop>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 /**
  *  Modeless dialog support for a plug-in.

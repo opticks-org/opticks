@@ -10,7 +10,7 @@
 #ifndef WIZARDBUILDER_H
 #define WIZARDBUILDER_H
 
-#include <QtGui/QMainWindow>
+#include <QtWidgets/QMainWindow>
 
 #include "ConfigurationSettings.h"
 

@@ -10,7 +10,7 @@
 #ifndef OPTIONSPROPERTIESDIALOG_H
 #define OPTIONSPROPERTIESDIALOG_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVersion.h"
 

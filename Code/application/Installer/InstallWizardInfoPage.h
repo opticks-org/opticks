@@ -11,7 +11,7 @@
 #define INSTALLWIZARDINFOPAGE_H
 
 #include <QtCore/QList>
-#include <QtGui/QWizardPage>
+#include <QtWidgets/QWizardPage>
 
 class Aeb;
 class QListWidget;

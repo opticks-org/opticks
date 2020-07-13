@@ -11,7 +11,7 @@
 #define TIEPOINTPAGE_H
 
 #include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "EnumWrapper.h"
 #include "FusionPage.h"

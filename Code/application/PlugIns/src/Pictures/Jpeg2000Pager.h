@@ -44,6 +44,7 @@ protected:
 private:
    static size_t msMaxCacheSize;
 
+   char *mpFilename;
    FILE* mpFile;
    uint64_t mOffset;
    uint64_t mSize;

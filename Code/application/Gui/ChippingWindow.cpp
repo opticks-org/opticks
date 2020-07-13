@@ -9,10 +9,10 @@
 
 #include <QtCore/QEvent>
 #include <QtCore/QFileInfo>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 
 #include "ChippingWindow.h"
 #include "ChippingWidget.h"

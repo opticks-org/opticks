@@ -18,8 +18,8 @@
 #include "StringUtilities.h"
 #include "Units.h"
 
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 
 #include <mfhdf.h>
 

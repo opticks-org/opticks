@@ -10,7 +10,7 @@
 #ifndef DISPLAYTOOLBAR_H
 #define DISPLAYTOOLBAR_H
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 #include "ToolBarAdapter.h"
 

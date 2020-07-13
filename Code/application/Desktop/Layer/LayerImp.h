@@ -13,7 +13,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QMetaType>
 #include <QtCore/QObject>
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 #include "AttachmentPtr.h"
 #include "ColorType.h"
@@ -24,6 +24,7 @@
 #include "TypesFile.h"
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
+#include "Layer.h"
 
 #include <string>
 #include <vector>

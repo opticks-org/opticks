@@ -7,7 +7,7 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include "GeoreferenceDescriptor.h"
 #include "LatLonLayer.h"

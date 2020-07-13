@@ -32,6 +32,8 @@
 #include <QtGui/QPolygon>
 #include <QtOpenGL/QGLContext>
 #include <QtOpenGL/QGLWidget>
+//#include <QtWidgets/QOpenGLWidget>
+//#include <QtGui/QOpenGLFunctions>
 
 #include <map>
 #include <vector>
@@ -45,7 +47,9 @@ class UndoStack;
 
 Q_DECLARE_METATYPE(View*)
 
-class ViewImp : public QGLWidget, public SessionItemImp, public SubjectImp
+// VS2017, Qt5.12.2  class ViewImp : public QGLWidget, public SessionItemImp, public SubjectImp
+//class ViewImp : public QOpenGLWidget, public SessionItemImp, public SubjectImp, protected QOpenGLFunctions
+class ViewImp : public QGLWidget, public SessionItemImp, public SubjectImp 
 {
    Q_OBJECT
 
@@ -132,7 +136,7 @@ public:
    bool isMousePanEnabled() const;
    void setMousePanPos(const QPoint& globalScreenCoord);
 
-   void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
+   virtual void getExtents(double& dMinX, double& dMinY, double& dMaxX, double& dMaxY) const;
    void getVisibleCorners(LocationType& lowerLeft, LocationType& upperLeft, LocationType& upperRight,
       LocationType& lowerRight) const;
    LocationType getVisibleCenter() const;
@@ -151,6 +155,10 @@ public:
 
    virtual void draw();
    void renderText(int screenCoordX, int screenCoordY, const QString& strText, const QFont& fnt = QFont());
+
+   void qt_save_gl_state();
+   void qt_restore_gl_state();
+
    QImage getCurrentImage();
    bool getCurrentImage(QImage &image);
    View::SubImageIterator *getSubImageIterator(const QSize &totalSize, const QSize &subImageSize);

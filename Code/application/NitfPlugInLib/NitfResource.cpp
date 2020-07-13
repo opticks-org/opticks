@@ -21,7 +21,7 @@
 
 ossimNitfFile* Nitf::OssimFileObject::obtainResource(const Args &args) const
 {
-   string fname = args.mFilename;
+   std::string fname = args.mFilename;
    if (args.mAccess.find("r") >= 0)
    {
       FileResource readTest(fname.c_str(), "r");

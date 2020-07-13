@@ -10,7 +10,7 @@
 #ifndef OPTIONSTHRESHOLDLAYER_H
 #define OPTIONSTHRESHOLDLAYER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "AppVersion.h"
 
 class CustomColorButton;

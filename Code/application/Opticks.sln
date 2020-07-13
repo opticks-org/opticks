@@ -1,5 +1,7 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.438
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Opticks", "Opticks.vcxproj", "{4848789B-87B2-49B2-AF93-8F1B6AA7DB18}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AutoImporter", "PlugIns\src\AutoImporter\AutoImporter.vcxproj", "{0831B515-FEFC-4158-BFBD-6D066BA326A7}"
@@ -475,13 +477,9 @@ Global
 		{860D2864-451B-42C1-9D5D-7F54E4EA9754}.Release|x64.ActiveCfg = Release|x64
 		{860D2864-451B-42C1-9D5D-7F54E4EA9754}.Release|x64.Build.0 = Release|x64
 		{140590C9-ED72-44A6-B0F0-E4337452D490}.Debug|Win32.ActiveCfg = Debug|Win32
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Debug|Win32.Build.0 = Debug|Win32
 		{140590C9-ED72-44A6-B0F0-E4337452D490}.Debug|x64.ActiveCfg = Debug|x64
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Debug|x64.Build.0 = Debug|x64
 		{140590C9-ED72-44A6-B0F0-E4337452D490}.Release|Win32.ActiveCfg = Release|Win32
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Release|Win32.Build.0 = Release|Win32
 		{140590C9-ED72-44A6-B0F0-E4337452D490}.Release|x64.ActiveCfg = Release|x64
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Release|x64.Build.0 = Release|x64
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Debug|Win32.ActiveCfg = Debug|Win32
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Debug|Win32.Build.0 = Debug|Win32
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Debug|x64.ActiveCfg = Debug|x64
@@ -619,13 +617,9 @@ Global
 		{2C2BA439-DAD6-43ED-BAD4-ED0A52835EE5}.Release|x64.ActiveCfg = Release|x64
 		{2C2BA439-DAD6-43ED-BAD4-ED0A52835EE5}.Release|x64.Build.0 = Release|x64
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8B25F228-190F-4C43-9545-70FB7511842C}.Debug|Win32.Build.0 = Debug|Win32
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Debug|x64.ActiveCfg = Debug|x64
-		{8B25F228-190F-4C43-9545-70FB7511842C}.Debug|x64.Build.0 = Debug|x64
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|Win32.ActiveCfg = Release|Win32
-		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|Win32.Build.0 = Release|Win32
 		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|x64.ActiveCfg = Release|x64
-		{8B25F228-190F-4C43-9545-70FB7511842C}.Release|x64.Build.0 = Release|x64
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|Win32.ActiveCfg = Debug|Win32
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|Win32.Build.0 = Debug|Win32
 		{BBBDE64F-2E25-4E96-B2CC-4D59AA2C1708}.Debug|x64.ActiveCfg = Debug|x64
@@ -661,5 +655,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5B846230-0D46-496D-AC23-C15598ADCC42}
 	EndGlobalSection
 EndGlobal

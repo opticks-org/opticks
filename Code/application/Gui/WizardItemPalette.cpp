@@ -7,9 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 #include <QtGui/QPainter>
 
 #include "DataVariantEditor.h"
@@ -325,7 +325,7 @@ QMimeData* WizardItemPalette::WizardItemList::mimeData(const QList<QListWidgetIt
    QString dataText = itemNames.join("@@!!@@");
 
    QMimeData* pData = new QMimeData();
-   pData->setData("text/x-wizarditem", dataText.toAscii());
+   pData->setData("text/x-wizarditem", dataText.toLatin1());
 
    return pData;
 }

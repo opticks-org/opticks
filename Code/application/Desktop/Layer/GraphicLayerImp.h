@@ -108,6 +108,9 @@ public:
    virtual void deleteSelectedObjects();
    virtual void clear();
    void replicateObject(GraphicObject *pDest, GraphicObject *pSource);
+   
+   virtual void setCustomReplicate(bool replicate);
+   virtual bool getCustomReplicate() const;
 
    void nudgeSelectedObjects(int x, int y);
    void moveSelectedObjects(LocationType delta);
@@ -223,6 +226,7 @@ protected:
 
 protected slots:
    void deleteObject();
+   void copyToView();
 
 signals:
    void objectAdded(GraphicObject* pObject);
@@ -267,6 +271,8 @@ private:
     *  Determines if the object type is a physical object that is seen on the layer
     */
    bool isVisibleObjectType(GraphicObjectType eType) const;
+   
+   bool mCustomReplicate;
 };
 
 #define GRAPHICLAYERADAPTEREXTENSION_CLASSES \
@@ -400,6 +406,14 @@ private:
    GraphicObject* hit(LocationType sceneCoord) const \
    { \
       return impClass::hit(sceneCoord); \
+   } \
+   void setCustomReplicate(bool replicate) \
+   { \
+      impClass::setCustomReplicate(replicate); \
+   } \
+   bool getCustomReplicate() const \
+   { \
+      return impClass::getCustomReplicate(); \
    }
 
 #endif

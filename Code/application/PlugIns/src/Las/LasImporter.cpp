@@ -41,7 +41,7 @@
 #include <boost/atomic.hpp>
 #include <math.h>
 #include <QtCore/QString>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 REGISTER_PLUGIN_BASIC(Las, LasImporter);
 

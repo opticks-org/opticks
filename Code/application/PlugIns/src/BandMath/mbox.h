@@ -15,8 +15,8 @@
 #define MB_OK_CANCEL         3
 #define MB_OK_CANCEL_ALWAYS  4
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialog>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialog>
 
 class MBox : public QDialog
 {

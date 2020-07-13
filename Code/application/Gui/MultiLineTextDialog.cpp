@@ -9,10 +9,10 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTextEdit>
 
 #include "AppVerify.h"
 #include "MultiLineTextDialog.h"

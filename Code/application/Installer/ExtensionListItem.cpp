@@ -10,13 +10,13 @@
 #include "Aeb.h"
 #include "ExtensionListItem.h"
 #include "InstallerServices.h"
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPixmap>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
 
 ExtensionListItem::ExtensionListItem(bool editor, bool showUpdateInfo, QWidget* pParent) :
       QWidget(pParent),
@@ -172,6 +172,11 @@ void ExtensionListItem::setUpdateInfo(const QString& v)
    {
       mpUpdateInfo->setText(v);
    }
+}
+
+void ExtensionListItem::accepted()
+{
+   emit finished(this);
 }
 
 void ExtensionListItem::about()

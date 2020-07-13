@@ -10,7 +10,7 @@
 #ifndef OPTIONSPSEUDOCOLORLAYER_H
 #define OPTIONSPSEUDOCOLORLAYER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "AppVersion.h"
 
 class SymbolTypeButton;

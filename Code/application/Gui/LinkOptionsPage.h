@@ -13,7 +13,7 @@
 #include "TypesFile.h"
 
 #include <QtCore/QMap>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <vector>
 

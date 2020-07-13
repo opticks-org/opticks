@@ -8,7 +8,7 @@
  */
 
 #include <QtGui/QIntValidator>
-#include <QtGui/QLayout>
+#include <QtWidgets/QLayout>
 
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"

@@ -12,7 +12,7 @@
 
 #include "TypesFile.h"
 
-#include <QtGui/QToolButton>
+#include <QtWidgets/QToolButton>
 
 class PixmapGrid;
 class QMenu;

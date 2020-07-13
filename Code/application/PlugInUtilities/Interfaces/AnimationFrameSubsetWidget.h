@@ -10,7 +10,7 @@
 #ifndef ANIMATIONFRAMESUBSETWIDGET_H
 #define ANIMATIONFRAMESUBSETWIDGET_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AnimationController.h"
 #include "AnimationFrame.h"

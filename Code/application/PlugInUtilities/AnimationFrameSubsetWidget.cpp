@@ -15,9 +15,9 @@
 #include "AnimationFrameSubsetWidget.h"
 #include "AppVerify.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QSlider>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSlider>
 
 #include <limits>
 

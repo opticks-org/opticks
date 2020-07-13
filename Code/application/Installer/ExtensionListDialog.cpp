@@ -19,14 +19,14 @@
 #include "InstallWizard.h"
 #include "ProgressResource.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHeaderView>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QStandardItemModel>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QVBoxLayout>
 
 ExtensionListDialog::ExtensionListDialog(QWidget* pParent) : QDialog(pParent)
 {
@@ -113,7 +113,7 @@ void ExtensionListDialog::install()
    dlg.setConfirmOverwrite(false);
    dlg.setReadOnly(true);
    dlg.setResolveSymlinks(true);
-   dlg.setFilters(QStringList() << "Extension Bundles (*.aeb)" << "Extension Metadata (install.rdf)" << "All Files (*)");
+   dlg.setNameFilters(QStringList() << "Extension Bundles (*.aeb)" << "Extension Metadata (install.rdf)" << "All Files (*)");
    dlg.setWindowTitle("Select extensions");
    dlg.restoreState(state);
 

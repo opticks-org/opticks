@@ -14,10 +14,10 @@
 #include "LabeledSection.h"
 #include "OptionsGeoreference.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QVBoxLayout>
 
 OptionsGeoreference::OptionsGeoreference() :
    QWidget(NULL),

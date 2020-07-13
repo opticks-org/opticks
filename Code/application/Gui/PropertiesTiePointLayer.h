@@ -10,8 +10,8 @@
 #ifndef PROPERTIESTIEPOINTLAYER_H
 #define PROPERTIESTIEPOINTLAYER_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QSpinBox>
 
 #include "LabeledSectionGroup.h"
 

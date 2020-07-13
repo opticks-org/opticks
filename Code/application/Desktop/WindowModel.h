@@ -10,7 +10,7 @@
 #ifndef WINDOWMODEL_H
 #define WINDOWMODEL_H
 
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 
 #include "SessionItemModel.h"
 

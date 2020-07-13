@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include <QtGui/QPainter>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 using namespace std;
 

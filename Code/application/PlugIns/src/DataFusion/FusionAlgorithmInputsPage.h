@@ -10,7 +10,7 @@
 #ifndef FUSIONALGORITHMINPUTSPAGE_H
 #define FUSIONALGORITHMINPUTSPAGE_H
 
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QCheckBox>
 
 #include "AoiLayer.h"
 #include "FusionPage.h"

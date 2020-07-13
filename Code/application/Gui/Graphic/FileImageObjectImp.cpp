@@ -16,8 +16,8 @@
 #include "Resource.h"
 #include "View.h"
 
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #include <QtGui/QImageReader>
 #include <QtCore/QLibraryInfo>

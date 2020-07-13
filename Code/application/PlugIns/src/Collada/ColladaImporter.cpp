@@ -220,8 +220,8 @@ bool ColladaImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          }
       }
       ++count;
-      int curPercent = (count * 100) / geomIds.size();
-      pProgress->updateProgress("Reading geometry...", curPercent, NORMAL);
+      int curPercent2 = (count * 100) / geomIds.size();
+      pProgress->updateProgress("Reading geometry...", curPercent2, NORMAL);
    }
 
    return true;

@@ -10,12 +10,12 @@
 #include <QtCore/QEvent>
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QHelpEvent>
-#include <QtGui/QLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QToolTip>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QToolTip>
 
 #include "AppVerify.h"
 #include "ChippingWidget.h"

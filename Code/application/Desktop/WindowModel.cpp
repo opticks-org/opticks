@@ -9,7 +9,7 @@
 
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVerify.h"
 #include "ClassificationLayer.h"
@@ -53,7 +53,7 @@ WindowModel::~WindowModel()
 
 Qt::DropActions WindowModel::supportedDropActions() const
 {
-   return Qt::CopyAction | Qt::MoveAction;
+   return Qt::MoveAction;
 }
 
 bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,

@@ -19,15 +19,15 @@
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
 
 GeoMosaicDlg::GeoMosaicDlg(Progress* pProgress, QWidget* pParent) :
    QDialog(pParent)
@@ -144,9 +144,9 @@ void GeoMosaicDlg::batchStitch()
             return;
          }
          std::vector<DataElement*> elements = autoImporter->getImportedElements();
-         for (unsigned int i = 0; i < elements.size(); ++i)
+         for (unsigned int i2 = 0; i2 < elements.size(); ++i2)
          {
-            RasterElement* pRaster = dynamic_cast<RasterElement*>(elements[i]);
+            RasterElement* pRaster = dynamic_cast<RasterElement*>(elements[i2]);
             if (pRaster != NULL)
             {
                if (pRaster->getParent() == NULL)

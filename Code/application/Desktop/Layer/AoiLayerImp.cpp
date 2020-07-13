@@ -11,8 +11,8 @@
 
 #include <QtCore/QRect>
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QFontMetrics>
 
 #include "AnnotationToolBar.h"

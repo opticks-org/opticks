@@ -10,7 +10,7 @@
 #ifndef OPTIONSANNOTATIONLAYER_H
 #define OPTIONSANNOTATIONLAYER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "AppVersion.h"
 
 class ArcRegionComboBox;

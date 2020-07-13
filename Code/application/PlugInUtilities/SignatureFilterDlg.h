@@ -12,7 +12,7 @@
 
 #include <QtCore/QRegExp>
 #include <QtCore/QString>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class FilterWidget;
 class QCheckBox;

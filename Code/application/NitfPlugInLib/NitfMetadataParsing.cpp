@@ -449,7 +449,7 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
 
       if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
       {
-         errorMessage += tagName + " has not been imported.\n";
+         errorMessage += static_cast<std::string>(tagName) + " has not been imported.\n";
          return false;
       }
    }

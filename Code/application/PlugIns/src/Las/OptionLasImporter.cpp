@@ -10,7 +10,7 @@
 #include "LasImporter.h"
 #include "OptionLasImporter.h"
 #include <QtCore/QString>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QGridLayout>
 
 OptionLasImporter::OptionLasImporter()
 {

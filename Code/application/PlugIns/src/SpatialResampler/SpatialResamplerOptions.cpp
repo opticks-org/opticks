@@ -13,8 +13,8 @@
 #include "PlugInRegistration.h"
 #include "SpatialResamplerOptions.h"
 
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QLabel>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QLabel>
 
 REGISTER_PLUGIN(OpticksSpatialResampler, SpatialResamplerOptions, OptionQWidgetWrapper<SpatialResamplerOptions>());
 

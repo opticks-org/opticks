@@ -10,7 +10,7 @@
 #ifndef FUSIONPAGE_H
 #define FUSIONPAGE_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <boost/any.hpp>
 

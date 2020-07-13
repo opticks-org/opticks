@@ -12,8 +12,8 @@
 #ifndef LINKDATASETPAGE_H
 #define LINKDATASETPAGE_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QWidget>
 
 class LinkDatasetPage : public QWidget
 {

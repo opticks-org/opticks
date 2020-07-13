@@ -14,9 +14,9 @@
 
 #include <QtCore/QEvent>
 #include <QtGui/QActionEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QMenu>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QWidgetAction>
 
 #include <string>
 #include <vector>

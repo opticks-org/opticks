@@ -12,8 +12,8 @@
 #include "OptionsGeographicFeatures.h"
 #include "PlugInRegistration.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QVBoxLayout>
 
 REGISTER_PLUGIN(OpticksGeographicFeatures, OptionsGeographicFeatures, OptionQWidgetWrapper<OptionsGeographicFeatures>);
 

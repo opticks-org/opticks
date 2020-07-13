@@ -9,10 +9,10 @@
 
 #include <QtCore/QEvent>
 #include <QtGui/QActionEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QMessageBox>
-#include <QtGui/QToolButton>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QToolButton>
 
 #include "AnnotationLayerAdapter.h"
 #include "AnnotationToolBar.h"

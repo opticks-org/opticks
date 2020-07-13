@@ -11,7 +11,7 @@
 #define FILTERWIDGET_H
 
 #include <QtCore/QRegExp>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class QCheckBox;
 class QLineEdit;

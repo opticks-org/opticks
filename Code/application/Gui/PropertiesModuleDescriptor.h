@@ -10,7 +10,7 @@
 #ifndef PROPERTIESMODULEDESCRIPTOR_H
 #define PROPERTIESMODULEDESCRIPTOR_H
 
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 
 #include "LabeledSectionGroup.h"
 

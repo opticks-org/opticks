@@ -168,7 +168,17 @@ void PolygonObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintain
       }
       else
       {
+//goffena
+#if defined(WIN_API)
+#pragma warning( push )
+#pragma warning( disable: 4389 )
+#endif
          vector<unsigned int>::iterator itr = find(mPaths.begin(), mPaths.end(), movedVertex+1);
+//goffena
+#if defined(WIN_API)
+#pragma warning( pop )
+#endif
+
          if (itr != mPaths.end()) // last in a path
          {
             endPiece = true;

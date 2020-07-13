@@ -10,9 +10,9 @@
 #ifndef MEASUREMENTTOOLBAR_H
 #define MEASUREMENTTOOLBAR_H
 
-#include <QtGui/QAction>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QMenu>
 
 #include "AttachmentPtr.h"
 #include "PixmapGrid.h"

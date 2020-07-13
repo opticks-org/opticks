@@ -24,12 +24,12 @@
 
 #include <boost/any.hpp>
 #include <limits>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTreeWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTreeWidget>
 
 REGISTER_PLUGIN(OpticksNitfCommonTre, EngrdaWidget, Nitf::PropertiesQWidgetWrapper<EngrdaWidget>());
 
@@ -170,12 +170,12 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
             {
                return;
             }
-            const std::vector<unsigned char>& data = dv_cast<Blob>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGDATA));
-            if (data.empty())
+            const std::vector<unsigned char>& data2 = dv_cast<Blob>(pDo->getAttribute(Nitf::TRE::ENGRDA::ENGDATA));
+            if (data2.empty())
             {
                return;
             }
-            const void* pData = reinterpret_cast<const void*>(&data.front());
+            const void* pData = reinterpret_cast<const void*>(&data2.front());
 
             mpValueType->setText(QString("%1 byte %2").arg(dts).arg(QString::fromStdString(type)));
             mpDataUnits->setText(QString::fromStdString(units));
@@ -255,8 +255,8 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
                   // this is really a string per row.
                   size_t idx = row * cols;
                   const QByteArray buf(reinterpret_cast<const char*>(pData) + idx, cols);
-                  QTableWidgetItem* pItem = new QTableWidgetItem(QString(buf));
-                  mpData->setItem(row, 0, pItem);
+                  QTableWidgetItem* pItem2 = new QTableWidgetItem(QString(buf));
+                  mpData->setItem(row, 0, pItem2);
                }
                else 
                {
@@ -272,17 +272,17 @@ void EngrdaWidget::updateData(QTreeWidgetItem* pItem)
                         idx++;
                         double imag = std::numeric_limits<double>::quiet_NaN();
                         switchOnEncoding(FLT4BYTES, getDataValue, pData, idx, imag, endian);
-                        QTableWidgetItem* pItem = new QTableWidgetItem(
+                        QTableWidgetItem* pItem3 = new QTableWidgetItem(
                            QString::number(real, 'g', 12) + ", " + QString::number(imag, 'g', 12));
-                        mpData->setItem(row, col, pItem);
+                        mpData->setItem(row, col, pItem3);
                      }
                      else
                      {
                         size_t idx = col + row * cols;
                         double val = std::numeric_limits<double>::quiet_NaN();
                         switchOnEncoding(encoding, getDataValue, pData, idx, val, endian);
-                        QTableWidgetItem* pItem = new QTableWidgetItem(QString::number(val, 'g', 12));
-                        mpData->setItem(row, col, pItem);
+                        QTableWidgetItem* pItem3 = new QTableWidgetItem(QString::number(val, 'g', 12));
+                        mpData->setItem(row, col, pItem3);
                      }
                   }
                }

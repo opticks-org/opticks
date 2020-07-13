@@ -16,6 +16,7 @@
 
 #include <limits>
 #include <memory>
+#include <algorithm>
 
 ConvertToBsqPager::ConvertToBsqPager(RasterElement* pRaster) :
    mpRaster(pRaster),

@@ -16,9 +16,9 @@
 #include "SpatialDataView.h"
 
 #include <boost/any.hpp>
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QVBoxLayout>
 #include <time.h>
 #include <vector>
 

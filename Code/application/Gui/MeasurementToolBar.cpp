@@ -9,9 +9,9 @@
 
 #include <QtCore/QEvent>
 #include <QtCore/QString>
-#include <QtGui/QMessageBox>
-#include <QtGui/QToolButton>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QWidgetAction>
 
 #include "Layer.h"
 #include "LayerList.h"

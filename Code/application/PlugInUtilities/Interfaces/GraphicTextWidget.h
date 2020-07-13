@@ -10,11 +10,11 @@
 #ifndef GRAPHICTEXTWIDGET_H
 #define GRAPHICTEXTWIDGET_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QFontComboBox>
-#include <QtGui/QTextEdit>
-#include <QtGui/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFontComboBox>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QWidget>
 
 class CustomColorButton;
 class FontSizeComboBox;

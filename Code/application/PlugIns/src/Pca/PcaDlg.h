@@ -10,7 +10,7 @@
 #ifndef PCADLG_H
 #define PCADLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 #include "TypesFile.h"
 

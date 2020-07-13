@@ -9,13 +9,13 @@
 
 #include <QtGui/QBitmap>
 #include <QtGui/QImage>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
-#include <QtGui/QSplitter>
-#include <QtGui/QToolBar>
+#include <QtWidgets/QSplitter>
+#include <QtWidgets/QToolBar>
 
 #include "AppAssert.h"
 #include "ApplicationServices.h"
@@ -455,7 +455,8 @@ QImage PlotWidgetImp::getCurrentImage()
 bool PlotWidgetImp::getCurrentImage(QImage& image)
 {
    // Get the pixmap for the widget
-   QPixmap widgetPixmap = QPixmap::grabWidget(mpPlotWidget);
+//VS2017   QPixmap widgetPixmap = QPixmap::grabWidget(mpPlotWidget);
+   QPixmap widgetPixmap = mpPlotWidget->grab();
    if (widgetPixmap.isNull() == true)
    {
       return false;
@@ -742,11 +743,13 @@ void PlotWidgetImp::showAxis(AxisPosition axis, bool bShow)
 {
    if ((axis == AXIS_LEFT) && (mpYAxis != NULL))
    {
-      mpYAxis->setShown(bShow);
+//      mpYAxis->setShown(bShow);
+      mpYAxis->setVisible(bShow);
    }
    else if ((axis == AXIS_BOTTOM) && (mpXAxis != NULL))
    {
-      mpXAxis->setShown(bShow);
+//      mpXAxis->setShown(bShow);
+      mpXAxis->setVisible(bShow);
    }
 }
 

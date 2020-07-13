@@ -98,7 +98,7 @@ InstallerServicesImp::InstallerServicesImp()
          QFile pending(extensionDir.absoluteFilePath("pendinguninstall"));
          if (pending.open(QFile::WriteOnly | QFile::Append | QFile::Text))
          {
-            pending.write(subDir.toAscii());
+            pending.write(subDir.toLatin1());
             pending.write("\n");
             pending.close();
          }
@@ -691,7 +691,7 @@ bool InstallerServicesImp::launchHelper(const std::vector<std::string> installLi
    {
       cmdline += " " + QString::fromStdString(*it);
    }
-   int rval = reinterpret_cast<int>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
+   auto rval = reinterpret_cast<long long>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
    if (rval <= 32)
    {
       return false;

@@ -90,7 +90,8 @@ void ViewWindowImp::print(bool bSetupDialog)
       QWidget* pWidget = getWidget();
       if (pWidget != NULL)
       {
-         windowPixmap = QPixmap::grabWidget(pWidget);
+//VS2017         windowPixmap = QPixmap::grabWidget(pWidget);
+         windowPixmap = pWidget->grab();
       }
    }
 

@@ -12,8 +12,8 @@
 
 #include <QtCore/QEvent>
 #include <QtCore/QString>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
 
 #include "AttachmentPtr.h"
 #include "DockWindowAdapter.h"

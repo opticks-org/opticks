@@ -10,11 +10,11 @@
 #ifndef PROGRESSDLG_H
 #define PROGRESSDLG_H
 
-#include <QtGui/QDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QProgressBar>
-#include <QtGui/QPushButton>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTextEdit>
 
 #include "ProgressAdapter.h"
 

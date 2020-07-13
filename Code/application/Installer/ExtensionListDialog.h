@@ -10,7 +10,7 @@
 #ifndef EXTENSIONLISTDIALOG_H__
 #define EXTENSIONLISTDIALOG_H__
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class QListWidget;
 

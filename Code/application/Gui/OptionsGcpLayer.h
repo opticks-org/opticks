@@ -10,7 +10,7 @@
 #ifndef OPTIONSGCPLAYER_H
 #define OPTIONSGCPLAYER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include "AppVersion.h"
 
 class CustomColorButton;

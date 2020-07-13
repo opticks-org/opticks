@@ -11,9 +11,9 @@
 #define PLUGINSELECTDLG_H
 
 #include <QtCore/QString>
-#include <QtGui/QDialog>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTreeWidgetItem>
 
 #include "TypesFile.h"
 

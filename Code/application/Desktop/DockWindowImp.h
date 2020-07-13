@@ -10,8 +10,8 @@
 #ifndef DOCKWINDOWIMP_H
 #define DOCKWINDOWIMP_H
 
-#include <QtGui/QAction>
-#include <QtGui/QDockWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QDockWidget>
 
 #include "ViewWindowImp.h"
 

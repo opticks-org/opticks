@@ -8,10 +8,10 @@
  */
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QSplitter>
-#include <QtGui/QStyleOptionButton>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QSplitter>
+#include <QtWidgets/QStyleOptionButton>
 
 #include "AppVerify.h"
 #include "AppVersion.h"

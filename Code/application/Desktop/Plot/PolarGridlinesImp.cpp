@@ -11,6 +11,7 @@
 
 #include <qwt_scale_engine.h>
 #include <qwt_scale_div.h>
+#include <qwt_compat.h>
 
 #include "PolarGridlinesImp.h"
 #include "DrawUtil.h"

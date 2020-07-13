@@ -12,7 +12,7 @@
 
 #include "ComplexData.h"
 
-#include <QtGui/QComboBox>
+#include <QtWidgets/QComboBox>
 
 class ComplexComponentComboBox : public QComboBox
 {

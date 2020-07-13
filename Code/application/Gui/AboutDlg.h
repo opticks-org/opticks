@@ -12,7 +12,7 @@
 #ifndef ABOUTDLG_H
 #define ABOUTDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class AboutDlg : public QDialog
 {

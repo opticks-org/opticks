@@ -13,17 +13,17 @@
 
 #include <QtCore/QModelIndex>
 #include <QtCore/QStringList>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QDoubleValidator>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTreeWidgetItem>
+#include <QtWidgets/QVBoxLayout>
 
 #include <string>
 using namespace std;
@@ -202,7 +202,7 @@ void BadValuesDlg::accept()
    QString separator(", ");
    if (mpEnableLowerThreshold->isChecked())
    {
-      double value = mpLowerThreshold->text().toDouble(&success);
+/*      double value = */mpLowerThreshold->text().toDouble(&success);
       if (!success)
       {
          QMessageBox::warning(this, "Bad Values", "Invalid entry for the lower threshold.");
@@ -218,7 +218,7 @@ void BadValuesDlg::accept()
       {
          continue;
       }
-      double value = pItem->text(0).toDouble(&success);
+ /*     double value = */pItem->text(0).toDouble(&success);
       if (!success)
       {
          QMessageBox::warning(this, "Bad Values", "Invalid entry for an individual bad value.");
@@ -265,7 +265,7 @@ void BadValuesDlg::accept()
 
    if (mpEnableUpperThreshold->isChecked())
    {
-      double value = mpUpperThreshold->text().toDouble(&success);
+/*      double value = */mpUpperThreshold->text().toDouble(&success);
       if (!success)
       {
          QMessageBox::warning(this, "Bad Values", "Invalid entry for the upper threshold.");
@@ -459,7 +459,7 @@ void BadValueInputDlg::accept()
       QMessageBox::warning(this, "Add Bad Value", "No value has been entered.");
       return;
    }
-   double value = valueStr.toDouble(&success);
+/*   double value = */valueStr.toDouble(&success);
    if (!success)
    {
       QMessageBox::warning(this, "Add Bad Value", "The entry must be a valid numeric string.");

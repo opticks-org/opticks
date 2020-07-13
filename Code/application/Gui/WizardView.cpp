@@ -9,15 +9,16 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPainter>
-#include <QtGui/QPrintDialog>
-#include <QtGui/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
+#include <QtPrintSupport/QPrinter>
 #include <QtGui/QWheelEvent>
+#include <QtCore/QMimeData>
 
 #include "AppVersion.h"
 #include "BatchWizard.h"
@@ -1086,10 +1087,10 @@ void WizardView::mouseDoubleClickEvent(QMouseEvent* pEvent)
                else
                {
                   WizardGraphicsItem* pNewGraphicsItem = getGraphicsItem(pNewItem);
-                  WizardGraphicsItem* pGraphicsItem = getGraphicsItem(pItem);
-                  VERIFYNRV(pNewGraphicsItem && pGraphicsItem);
+                  WizardGraphicsItem* pGraphicsItem2 = getGraphicsItem(pItem);
+                  VERIFYNRV(pNewGraphicsItem && pGraphicsItem2);
 
-                  QPointF nodeSceneLocation = pGraphicsItem->getNodeConnectionPoint(pNode);
+                  QPointF nodeSceneLocation = pGraphicsItem2->getNodeConnectionPoint(pNode);
                   QPointF valueNodeOffset = pNewGraphicsItem->mapFromScene(
                      pNewGraphicsItem->getNodeConnectionPoint(pNewNode));
                   valueNodeOffset += QPointF(60, 0); // magic number based on visual trials

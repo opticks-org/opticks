@@ -8,8 +8,8 @@
  */
 
 #include <QtCore/QStringList>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLayout>
 
 #include "AppVersion.h"
 #include "LabeledSection.h"

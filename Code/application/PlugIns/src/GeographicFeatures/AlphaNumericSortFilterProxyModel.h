@@ -10,7 +10,7 @@
 #ifndef ALPHANUMERICSORTFILTERPROXYMODEL_H
 #define ALPHANUMERICSORTFILTERPROXYMODEL_H
 
-#include <QtGui/QSortFilterProxyModel>
+#include <QtCore/QSortFilterProxyModel>
 
 class AlphaNumericSortFilterProxyModel : public QSortFilterProxyModel
 {

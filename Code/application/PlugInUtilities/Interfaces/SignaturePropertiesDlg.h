@@ -12,7 +12,7 @@
 #ifndef SIGNATUREPROPERTIESDLG_H
 #define SIGNATUREPROPERTIESDLG_H
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class Signature;
 

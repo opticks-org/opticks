@@ -21,8 +21,8 @@
 #include "Statistics.h"
 #include "Undo.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
 #include <vector>
 #include <time.h>
 

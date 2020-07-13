@@ -32,7 +32,7 @@
 #include <limits>
 #include <vector>
 #include <QtCore/QStringList>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 
 REGISTER_PLUGIN_BASIC(OpticksTutorial, Tutorial4);
 

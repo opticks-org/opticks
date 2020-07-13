@@ -568,8 +568,8 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                for (uint32 row = 0; row < tileLength; ++row)
                {
                   const size_t rowOffset = row * mColumnCount * bandSkip * mBytesPerElement;
-                  const size_t tileOffset = row * tileWidth * bandSkip * mBytesPerElement;
-                  memcpy(pBlockPos + rowOffset, &tileData[tileOffset], numBytesToCopy);
+                  const size_t tileOffset2 = row * tileWidth * bandSkip * mBytesPerElement;
+                  memcpy(pBlockPos + rowOffset, &tileData[tileOffset2], numBytesToCopy);
                }
             }
 

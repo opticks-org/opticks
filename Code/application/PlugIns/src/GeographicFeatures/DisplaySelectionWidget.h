@@ -12,7 +12,7 @@
 
 #include "QueryOptions.h"
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <string>
 #include <vector>

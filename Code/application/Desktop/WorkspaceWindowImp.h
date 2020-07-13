@@ -10,7 +10,7 @@
 #ifndef WORKSPACEWINDOWIMP_H
 #define WORKSPACEWINDOWIMP_H
 
-#include <QtGui/QMdiSubWindow>
+#include <QtWidgets/QMdiSubWindow>
 
 #include "ApplicationServices.h"
 #include "AttachmentPtr.h"

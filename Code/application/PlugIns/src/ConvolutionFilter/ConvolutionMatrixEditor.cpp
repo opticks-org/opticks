@@ -15,8 +15,8 @@
 #include "MenuBar.h"
 #include "PlugInRegistration.h"
 
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenu>
 
 REGISTER_PLUGIN_BASIC(OpticksConvolutionFilter, ConvolutionMatrixEditor);
 

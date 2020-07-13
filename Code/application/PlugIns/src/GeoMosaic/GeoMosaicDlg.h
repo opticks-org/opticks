@@ -13,7 +13,7 @@
 #include "MosaicManager.h"
 #include "ProgressTracker.h"
 
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 class Progress;
 class QCheckBox;

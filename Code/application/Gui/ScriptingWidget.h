@@ -15,7 +15,7 @@
 #include "PlugInResource.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QTextEdit>
 
 #include <string>
 #include <boost/any.hpp>
