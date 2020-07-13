@@ -468,7 +468,7 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
 
       //clean-up any stale data in mPreviousConvolves
       std::vector<Window*> windows;
-      std::vector<string> activeViewIds;
+      std::vector<std::string> activeViewIds;
       Service<DesktopServices>()->getWindows(windows);
       for (unsigned int i = 0; i < windows.size(); ++i)
       {
