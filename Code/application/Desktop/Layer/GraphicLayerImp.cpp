@@ -81,7 +81,8 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
    mpInsertingObject(NULL),
    mCurrentType(MOVE_OBJECT),
    mpUndoLock(NULL),
-   mHandleSize(4.0)
+   mHandleSize(4.0),
+   mCustomReplicate(false)
 {
    addAcceptableGraphicType(MOVE_OBJECT);
    addAcceptableGraphicType(ROTATE_OBJECT);
@@ -323,6 +324,16 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
    }
 
    return bSuccess;
+}
+
+void GraphicLayerImp::setCustomReplicate(bool replicate)
+{
+	mCustomReplicate = replicate;
+}
+
+bool GraphicLayerImp::getCustomReplicate() const
+{
+	return mCustomReplicate;
 }
 
 bool GraphicLayerImp::hasObject(GraphicObject* pObject) const
@@ -2123,25 +2134,32 @@ void GraphicLayerImp::copyToView()
 	SpatialDataView* pDest = nameMap[destination];
 	VERIFYNRV(pDest);
 	
-	// create a layer with a unique name
 	UndoGroup group(pDest, "Copy Graphic Layer to View");
-	LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pDest->getLayerList());
-	VERIFYNRV(pLayerList);
-	QString newLayerName = pLayerList->getUniqueLayerName(QString::fromStdString(getName()), getLayerType());
-	if (newLayerName.isEmpty())
+	if (mCustomReplicate)
 	{
-		return;
+		notify(SIGNAL_NAME(GraphicLayer, CustomReplicate), boost::any(pDest));
 	}
-	GraphicLayer* pNewLayer = dynamic_cast<GraphicLayer*>(pDest->createLayer(getLayerType(), nullptr, newLayerName.toStdString()));
-	std::list<GraphicObject*> objects = getObjects();
-	for (auto object = objects.begin(); object != objects.end(); ++object)
+	else
 	{
-		GraphicObject* pNewObject = pNewLayer->addObject((*object)->getGraphicObjectType());
-		if (pNewObject != nullptr)
+		// create a layer with a unique name
+		LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pDest->getLayerList());
+		VERIFYNRV(pLayerList);
+		QString newLayerName = pLayerList->getUniqueLayerName(QString::fromStdString(getName()), getLayerType());
+		if (newLayerName.isEmpty())
 		{
-			GraphicObjectImp* pNewObjectImp = dynamic_cast<GraphicObjectImp*>(pNewObject);
-			VERIFYNRV(pNewObjectImp);
-			pNewObjectImp->replicateObject(*object);
+			return;
+		}
+		GraphicLayer* pNewLayer = dynamic_cast<GraphicLayer*>(pDest->createLayer(getLayerType(), nullptr, newLayerName.toStdString()));
+		std::list<GraphicObject*> objects = getObjects();
+		for (auto object = objects.begin(); object != objects.end(); ++object)
+		{
+			GraphicObject* pNewObject = pNewLayer->addObject((*object)->getGraphicObjectType());
+			if (pNewObject != nullptr)
+			{
+				GraphicObjectImp* pNewObjectImp = dynamic_cast<GraphicObjectImp*>(pNewObject);
+				VERIFYNRV(pNewObjectImp);
+				pNewObjectImp->replicateObject(*object);
+			}
 		}
 	}
 }
