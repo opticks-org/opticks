@@ -74,16 +74,7 @@ QSize ExtensionListDelegate::sizeHint(const QStyleOptionViewItem& option, const 
 
 void ExtensionListDelegate::paint(QPainter* pPainter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-   std::auto_ptr<ExtensionListItem> pWidget(new ExtensionListItem(false, mAllowEditing));
-   setEditorData(pWidget.get(), index);
-   pWidget->resize(option.rect.width(), option.rect.height());
-   QRect pixMapRect;
-   pixMapRect.setWidth(option.rect.width());
-   pixMapRect.setHeight(option.rect.height());
-//VS2017   QPixmap pix = QPixmap::grabWidget(pWidget.get());
-   QPixmap pix = pWidget.get()->grab();
    pPainter->save();
-   pPainter->drawPixmap(option.rect, pix);
    pPainter->setPen(QPen(option.palette.mid(), 1.0, Qt::DashLine));
    pPainter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
    pPainter->restore();
