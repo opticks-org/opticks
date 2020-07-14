@@ -18,6 +18,7 @@
 
 #include <string>
 #include <list>
+#include <unordered_set>
 
 class GraphicLayer;
 class Progress;
@@ -59,6 +60,7 @@ public:
    int getObjectStackingIndex(GraphicObject* pObject) const;
    void setObjectStackingIndex(GraphicObject* pObject, int index);
    virtual bool removeObject(GraphicObject* pObject, bool bDelete);
+   bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete);
    virtual void removeAllObjects(bool bDelete);
 
    bool replicateObject(const GraphicObject* pObject);
@@ -135,6 +137,10 @@ private:
    { \
       return impClass::removeObject(pObject, bDelete); \
    }\
+   bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) \
+   { \
+      return impClass::removeObjects(objects, bDelete); \
+   } \
    void removeAllObjects(bool bDelete) \
    { \
       return impClass::removeAllObjects(bDelete); \

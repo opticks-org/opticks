@@ -14,6 +14,7 @@
 #include "LocationType.h"
 
 #include <list>
+#include <unordered_set>
 
 class Progress;
 
@@ -162,6 +163,23 @@ public:
     *           any<GraphicObject*>.
     */
    virtual bool removeObject(GraphicObject *pObject, bool bDelete) = 0;
+   
+   /**
+    *  Removes multiple graphic objects from the group.
+	*
+	*  @param  objects
+	*          The graphic objects to remove.
+	*  @param  bDelete
+	*          The flag should be set to true to delete the objects. If it is
+	*          false, the objects are not deleted.
+	*
+	*  @return true if the objects were successfully removed, otherwise false.
+	*
+	*  @notify This method will notify Subject::signalModified.
+	*
+	*  @see    addObject()
+	*/
+	virtual bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) = 0;
 
    /**
     * Remove all objects from the group.

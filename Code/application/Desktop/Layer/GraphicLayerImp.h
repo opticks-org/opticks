@@ -19,6 +19,7 @@
 #include <list>
 #include <set>
 #include <memory>
+#include <unordered_set>
 
 #include <QtCore/QPoint>
 #include <QtGui/QColor>
@@ -82,6 +83,7 @@ public:
 
    virtual GraphicObject* addObject(const GraphicObjectType& objectType, LocationType point);
    virtual bool removeObject(GraphicObject* pObject, bool bDelete);
+   virtual bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete);
    virtual bool hasObject(GraphicObject* pObject) const;
    virtual std::list<GraphicObject*> getObjects() const;
    virtual std::list<GraphicObject*> getObjects(const GraphicObjectType& objectType) const;
@@ -289,6 +291,10 @@ private:
    bool removeObject(GraphicObject* pObject, bool bDelete) \
    { \
       return impClass::removeObject(pObject, bDelete); \
+   } \
+   bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) \
+   { \
+      return impClass::removeObjects(pObject, bDelete); \
    } \
    void getObjects(std::list<GraphicObject*>& objects) const \
    { \

@@ -327,6 +327,18 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
    return bSuccess;
 }
 
+void GraphicLayerImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
+{
+	bool bSuccess = getGroup()->removeObjects(objects, bDelete);
+	if (bSuccess == true)
+	{
+		emit modified();
+		notify(SIGNAL_NAME(Subject, Modified)));
+	}
+	
+	return bSuccess;
+}
+
 void GraphicLayerImp::setCustomReplicate(bool replicate)
 {
 	mCustomReplicate = replicate;
