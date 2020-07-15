@@ -33,7 +33,6 @@
    #elif defined(_WIN32)
       #define PTR_SIZE 4
    #endif
-   #define CG_SUPPORTED
 
    //platform defines
    #define SLASH std::string("\\")

@@ -680,6 +680,8 @@ public:
 
    const ImageData& getImageData() const;
 
+   void setColorMapChanged(bool changed);
+
 protected:
    virtual Tile* createTile() const;
    const std::vector<Tile*>* getActiveTiles() const;
@@ -693,6 +695,7 @@ protected:
       std::vector<unsigned int>& tileZoomIndices);
 
    ImageData mInfo;
+   bool mColorMapChanged;
 
 private:
    int mNumTilesX;

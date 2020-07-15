@@ -37,7 +37,8 @@ Image::Image() :
    mNumTilesX(0),
    mNumTilesY(0),
    mpTiles(NULL),
-   mAlpha(255)
+   mAlpha(255),
+   mColorMapChanged(false)
 {}
 
 // Grayscale
@@ -1552,4 +1553,9 @@ vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<u
    }
 
    return tilesToUpdate;
+}
+
+void Image::setColorMapChanged(bool changed)
+{
+   mColorMapChanged = changed;
 }

@@ -23,9 +23,7 @@
 
 #include "AppConfig.h"
 #include "AppVersion.h"
-#if defined (CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 #include "ComplexComponentComboBox.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
@@ -295,12 +293,10 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    pAccelerationGrid->setColumnStretch(1, 10);
 
    bool bUnsupported = true;
-#if defined (CG_SUPPORTED)
-   if (CgContext::instance() != NULL)
+   if (GlSlContext::instance() != NULL)
    {
       bUnsupported = false;
    }
-#endif
 
    if (bUnsupported == true)
    {

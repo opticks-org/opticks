@@ -61,7 +61,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\qwt.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -74,7 +73,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\qwt.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -87,7 +85,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\qwt.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
@@ -100,7 +97,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\qwt.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>

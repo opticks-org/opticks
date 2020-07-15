@@ -54,9 +54,7 @@
 #include "BatchEditorDlg.h"
 #include "BatchExportDlg.h"
 #include "BrightnessToolBar.h"
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 #include "Classification.h"
 #include "ClassificationWidget.h"
 #include "ConfigurationSettingsImp.h"
@@ -5459,7 +5457,7 @@ void ApplicationWindow::checkColorDepth(QWidget* pSplash)
 void ApplicationWindow::checkGpuImageSupport()
 {
    bool systemSupportsGpuImage = false;
-#if defined(CG_SUPPORTED)
+
    class tmpGL : public QGLWidget {
    public:
       tmpGL(QWidget *parent) : QGLWidget(parent) {}
@@ -5472,11 +5470,11 @@ void ApplicationWindow::checkGpuImageSupport()
       tmpGL& operator=(const tmpGL& rhs) { return *this; }
    } tmp(this);
    tmp.makeCurrent();
-   if (CgContext::instance() != NULL)
+   if (GlSlContext::instance() != NULL)
    {
       systemSupportsGpuImage = true;
    }
-#endif
+
    bool defaultGpuImage = RasterLayer::getSettingGpuImage();
    if (!systemSupportsGpuImage && defaultGpuImage)
    {

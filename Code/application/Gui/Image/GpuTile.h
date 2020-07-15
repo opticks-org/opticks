@@ -15,6 +15,8 @@
 #include "glCommon.h"
 #include "TypesFile.h"
 
+#include "GpuProgram.h"
+
 #include <vector>
 
 class ColorBuffer;
@@ -29,7 +31,7 @@ public:
    ~GpuTile();
 
    void setupTile(void* pData, EncodingType encodingType, unsigned int index);
-   void draw(CGparameter outputCgTextureParam, GLfloat textureMode);
+   void draw(GpuProgram* pProgram, GLfloat textureMode);
 
    ImageFilter *createFilter(ImageFilterDescriptor *pDescriptor);
    ImageFilter *getFilter(ImageFilterDescriptor *pDescriptor) const;
@@ -39,6 +41,7 @@ public:
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
    bool getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const;
    unsigned int readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid* pPixels);
+   unsigned int writeFilterBuffer( GLint tileOffsetX, GLint tileOffsetY,GLint xCoord, GLint yCoord, GLint width,GLint height, GLint chipWidth, GLint chipHeight, GLvoid* pPixels);
 
    bool isTextureReady(unsigned int index) const;
 

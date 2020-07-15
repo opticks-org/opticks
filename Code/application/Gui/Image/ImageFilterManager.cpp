@@ -20,9 +20,7 @@
 #include "MessageLogResource.h"
 #include "xmlreader.h"
 
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 
 XERCES_CPP_NAMESPACE_USE
 using namespace std;
@@ -88,7 +86,6 @@ ImageFilterDescriptor* ImageFilterManager::createFilterDescriptor(const string& 
 
 void ImageFilterManager::buildFilterList(const string& filterPath)
 {
-#if defined(CG_SUPPORTED)
    // Get the default filter path if necessary
    string imageFiltersPath = filterPath;
    if (filterPath.empty())
@@ -151,7 +148,6 @@ void ImageFilterManager::buildFilterList(const string& filterPath)
          }
       }
    }
-#endif
 }
 
 void ImageFilterManager::clearFilters()
@@ -173,10 +169,8 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::loadFilterDescriptors(cons
 {
    vector<ImageFilterDescriptorImp*> filters;
 
-#if defined(CG_SUPPORTED)
    FileFinderImp fileFinder;
-   fileFinder.findFile(filterPath, "*.gic");
-
+   fileFinder.findFile(filterPath, "*.gs");
    // Get the filter descriptors from all files in the path
    while (fileFinder.findNextFile() == true)
    {
@@ -199,7 +193,7 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::loadFilterDescriptors(cons
          }
       }
    }
-#endif
+
 
    return filters;
 }
@@ -212,12 +206,10 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
       return filterDescriptors;
    }
 
-#if defined(CG_SUPPORTED)
-   if (CgContext::instance() == NULL)
+   if (GlSlContext::instance() == NULL)
    {
       return filterDescriptors;
    }
-#endif
 
    XmlReader xmlReader(NULL, false);
    XERCES_CPP_NAMESPACE_QUALIFIER DOMDocument* pDomDoc(NULL);
@@ -320,11 +312,8 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                                  }
                               }
                            }
+                           // TODO JO test if shader program is valid
                            bool compiled = true;
-#if defined(CG_SUPPORTED)
-                           compiled = CgContext::instance()->isCgVertexProgram(pGpuDescriptor->getName()) ||
-                              CgContext::instance()->isCgFragmentProgram(pGpuDescriptor->getName());
-#endif
                            if (compiled)
                            {
                               pFilterDescriptor->addGpuProgram(pGpuDescriptor);
@@ -334,9 +323,6 @@ vector<ImageFilterDescriptorImp*> ImageFilterManager::deserialize(const string& 
                               MessageResource msg("Unable to load GPU filter", "app",
                                  "7FA00287-DF55-46A9-AA82-D3CBFA34842F");
                               msg->addProperty("filter name", pGpuDescriptor->getName());
-#if defined(CG_SUPPORTED)
-                              msg->addProperty("error message", CgContext::instance()->getLastCgErrorMessage());
-#endif
                               // make sure this filter descriptor does not go in the list
                               pFilterDescriptor->setName("");
                               delete pGpuDescriptor;

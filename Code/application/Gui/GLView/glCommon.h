@@ -12,9 +12,7 @@
 
 #include "AppConfig.h"
 
-#if defined(CG_SUPPORTED)
 #include <GL/glew.h>
-#endif
 
 #if defined(WIN_API)
 #include <windows.h>
@@ -23,14 +21,9 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-// Cg header files
-#if defined(CG_SUPPORTED)
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
 #if defined(WIN_API)
 #undef GL_GLEXT_PROTOTYPES
 #include <GL/wglew.h>
-#endif
 #endif
 
 #include "GlContextSave.h"
