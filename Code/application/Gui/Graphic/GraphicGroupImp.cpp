@@ -824,7 +824,7 @@ bool GraphicGroupImp::removeObject(GraphicObject* pObject, bool bDelete)
    return false;
 }
 
-void GraphicGroupImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
+bool GraphicGroupImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
 {
 	GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
 	if (pLayer == nullptr)
@@ -844,13 +844,13 @@ void GraphicGroupImp::removeObjects(std::unordered_set<GraphicObject*>& objects,
 		pLayer->deselectObject(pObject);
 	}
 	
-	for (auto it = mObjects.begin(); it != mObjects.end(); !objects.empty())
+	for (auto it = mObjects.begin(); it != mObjects.end() && !objects.empty(); )
 	{
 		GraphicObject* pObject = *it;
 		auto ipObject = objects.find(pObject);
 		if (ipObject != objects.end())
 		{
-			it = mObjects.erase(*it);
+			it = mObjects.erase(it);
 			objects.erase(ipObject);
 			DisconnectObject(this)(pObject);
 			notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(pObject));

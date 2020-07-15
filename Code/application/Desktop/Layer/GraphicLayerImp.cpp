@@ -333,7 +333,7 @@ bool GraphicLayerImp::removeObjects(std::unordered_set<GraphicObject*>& objects,
 	if (bSuccess == true)
 	{
 		emit modified();
-		notify(SIGNAL_NAME(Subject, Modified)));
+		notify(SIGNAL_NAME(Subject, Modified));
 	}
 	
 	return bSuccess;
