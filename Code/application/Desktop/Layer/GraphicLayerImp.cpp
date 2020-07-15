@@ -327,7 +327,7 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
    return bSuccess;
 }
 
-void GraphicLayerImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
+bool GraphicLayerImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
 {
 	bool bSuccess = getGroup()->removeObjects(objects, bDelete);
 	if (bSuccess == true)

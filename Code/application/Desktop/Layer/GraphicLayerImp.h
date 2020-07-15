@@ -294,7 +294,7 @@ private:
    } \
    bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) \
    { \
-      return impClass::removeObjects(pObject, bDelete); \
+      return impClass::removeObjects(objects, bDelete); \
    } \
    void getObjects(std::list<GraphicObject*>& objects) const \
    { \
