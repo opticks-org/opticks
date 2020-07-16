@@ -26,7 +26,7 @@ void main()
     x = max(0.0, min(1.0, (imageColor.x - lowerValue/dataMax)/((upperValue - lowerValue)/dataMax)));
   
   
-  if(imageColor.x < (minBound/dataMax) || imageColor.x > (maxBound/dataMax)){
+    if(imageColor.x < (minBound/dataMax) || imageColor.x > (maxBound/dataMax)){
 		outputColor.x = 0;
 		outputColor.y = 0;
 		outputColor.z = 0;

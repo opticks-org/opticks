@@ -1,4 +1,5 @@
-#version 130
+#version 450
+// Backward compatible to #version 130, 330, ...
 
 #ifdef GL_ARB_texture_rectangle
 #extension GL_ARB_texture_rectangle : require
@@ -14,6 +15,7 @@ float xZh0010;
 float bZh0014;
 vec2 ZDtemp15;
 vec2 bZh0020;
+out vec4 outputColor;
 
  // main procedure, the original name was main
 void main()
@@ -22,14 +24,13 @@ void main()
     vec3 value;
     float d;
     float m;
-    vec4 outputColor;
-
-    value = texture2DRect(inputImage, gl_TexCoord[0].xy).xyz;
-    cZh0004 = gl_TexCoord[0].xy + vec2( 1.00000000E+000, 0.00000000E+000);
+    
+    value = texture2DRect(inputImage, gl_FragCoord.xy).xyz;
+    cZh0004 = gl_FragCoord.xy + vec2( 1.00000000E+000, 0.00000000E+000);
     m = value.x + texture2DRect(inputImage, cZh0004).x;
-    cZh0006 = gl_TexCoord[0].xy + vec2( 1.00000000E+000, 1.00000000E+000);
+    cZh0006 = gl_FragCoord.xy + vec2( 1.00000000E+000, 1.00000000E+000);
     m = m + texture2DRect(inputImage, cZh0006).x;
-    cZh0008 = gl_TexCoord[0].xy + vec2( 0.00000000E+000, 1.00000000E+000);
+    cZh0008 = gl_FragCoord.xy + vec2( 0.00000000E+000, 1.00000000E+000);
     m = m + texture2DRect(inputImage, cZh0008).x;
     m = m/4.00000000E+000;
     d = value.x - m;
@@ -46,6 +47,4 @@ void main()
     // Set the alpha to 1.0 so the color is not transparent
     outputColor.a = 1.0;
     
-    gl_FragColor = outputColor;
-    return;
 } // main end

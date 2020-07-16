@@ -1,5 +1,5 @@
-#version 130
-
+#version 450
+// Backward compatible to #version 130, 330, ...
 // source file: Sepia.cg
 
 #ifdef GL_ARB_texture_rectangle
@@ -7,14 +7,14 @@
 #endif
 
 uniform sampler2DRect inputImage;
-
+out vec4 outputColor;
 
 void main()
 {
     vec4 imageColor;
 
-    imageColor = texture2DRect(inputImage, gl_TexCoord[0].xy);
+    imageColor = texture2DRect(inputImage, gl_FragCoord.xy);
     imageColor.r = dot(imageColor.rgb, vec3(0.299, 0.587, 0.114));
-    gl_FragColor = vec4(imageColor.r * vec3(1.2, 1.0, 0.8), imageColor.w);
+    outputColor = vec4(imageColor.r * vec3(1.2, 1.0, 0.8), imageColor.w);
 } 
 
