@@ -5,6 +5,8 @@
 #extension GL_ARB_texture_rectangle : require
 #endif
 
+// These inputs need to match the parameters in GrayscaleGpuProgram::initialize()
+
 uniform sampler2DRect inputImage;
 uniform float dataMax;
 uniform float lowerValue;

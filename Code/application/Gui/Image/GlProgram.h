@@ -84,7 +84,7 @@ private:
    /**
    * Retrieves the parameters of a specified gpu program.
    * 
-   * GLSL doesn't allow us to query the parameter types. So we need our GIC
+   * GLSL doesn't allow us to query the parameter types. So we need our GS
    * file to tell us the types.
    * 
    * @return A Collection containing the parameters for the program. An empty
@@ -93,7 +93,7 @@ private:
    */
    const DynamicObject *setupParameters(GpuProgramDescriptor* descriptor);
 
-   int mProgramObject; // Same as Cg CGprogram (mProgramId)
+   int mProgramObject; // Same as glsl CGprogram (mProgramId)
 
    int mShaderObject;
 

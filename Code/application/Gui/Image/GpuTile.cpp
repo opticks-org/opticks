@@ -143,7 +143,7 @@ void GpuTile::draw(GpuProgram* pProgram, GLfloat textureMode)
    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   // Set the input texture parameter for Cg display program
+   // Set the input texture parameter for glsl display program
    pProgram->setInput(textureId);
 
    // Draw the texture

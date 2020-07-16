@@ -46,7 +46,7 @@ GlSlContext::GlSlContext() :
    QGLWidget* pGlWidget = NULL;
    if (!validGlContext)
    {
-      //create a valid open gl context, so that the Cg
+      //create a valid open gl context, so that the GLSL
       //context can be initialized correctly
       class tmpGL : public QGLWidget {
       public:

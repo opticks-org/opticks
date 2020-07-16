@@ -1,6 +1,8 @@
+#version 130
 // This is a mask filter.  
 
 uniform sampler2DRect inputImage;
+
 
 void main()
 {

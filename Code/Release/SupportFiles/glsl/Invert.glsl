@@ -1,3 +1,5 @@
+#version 130
+
 vec4 ret_0;
 uniform sampler2DRect inputImage;
 

@@ -206,13 +206,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("libcrypto-1_1-x64.dll")
         bla("libssl-1_1-x64.dll")
         ##### END
-        bla("cg.dll")
-        bla("cgc.exe")
-        if arch == "32":
-            bla("cgD3D8.dll")
-        bla("cgD3D9.dll")
-        bla("cgD3D10.dll")
-        bla("cgGL.dll")
         bla("glut32.dll")
         bla("xerces-c_3_2.dll") #needed for GDAL
         bla("hdf5.dll") #needed for GDAL

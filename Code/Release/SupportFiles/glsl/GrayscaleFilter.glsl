@@ -1,3 +1,4 @@
+#version 130
 // source file: GrayscaleDisplay.cg
 
 #ifdef GL_ARB_texture_rectangle

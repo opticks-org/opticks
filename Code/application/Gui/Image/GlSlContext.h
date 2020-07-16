@@ -31,7 +31,7 @@ class GlSlContext
 {
 public:
    /**
-    *  Destroys the Cg context along with its profiles and programs.
+    *  Destroys the GLSL context along with its profiles and programs.
     */
    ~GlSlContext();
 
@@ -40,7 +40,7 @@ public:
     *
     *  This method creates and initializes the GlSlContext class if it has not already been created.
     *
-    *  @return  A pointer to the Cg context.
+    *  @return  A pointer to the GLSL context.
     */
    static GlSlContext* instance();
 
@@ -59,16 +59,16 @@ public:
    GlProgram* getGlProgram( GpuProgramDescriptor* mpGpuProgramDescriptor);
 
    /**
-    *  Unloads a Cg program from the context.
+    *  Unloads a GLSL program from the context.
     *
     *  @param   programName
-    *           The name of the Cg file containing the program (e.g. "MyCgProgram.cg").
+    *           The name of the GLSL file containing the program (e.g. "MyGpuProgram.glsl").
     */
    bool destroyGlProgram(const std::string& programName);
 
 protected:
    /**
-    *  Creates and initializes the Cg context.
+    *  Creates and initializes the GLSL context.
     */
    GlSlContext();
 
@@ -77,7 +77,7 @@ private:
    
    std::map<std::string, std::pair<GlProgram*, unsigned int> > mGlPrograms;
    bool mbGpuSupported;                   // Used to check whether or not the system has the necessary OpenGL
-                                          // extensions and that the graphics card can support the Cg programs
+                                          // extensions and that the graphics card can support the GLSL programs
 };
 
 #endif

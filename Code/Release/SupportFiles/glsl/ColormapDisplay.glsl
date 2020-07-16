@@ -1,5 +1,6 @@
 #version 130
 
+// These inputs need to match the parameters in ColormapGpuProgram::initialize()
 uniform sampler2DRect inputImage;
 uniform sampler2DRect colorMap;
 uniform float numColors;

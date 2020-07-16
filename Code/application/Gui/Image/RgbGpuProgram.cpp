@@ -36,7 +36,7 @@ void RgbGpuProgram::initialize()
    mpGpuProgramDescriptor->setParameter("greenUpperValue", defaultStretch);
    mpGpuProgramDescriptor->setParameter("blueLowerValue", defaultStretch);
    mpGpuProgramDescriptor->setParameter("blueUpperValue", defaultStretch);
-   mpGpuProgramDescriptor->setParameter("alpha", defaultStretch);
+   mpGpuProgramDescriptor->setParameter("alphaValue", defaultStretch);
    mpGpuProgramDescriptor->setParameter("minBound", defaultStretch);
    mpGpuProgramDescriptor->setParameter("maxBound", defaultStretch);
    GlShaderGpuProgram::initialize();

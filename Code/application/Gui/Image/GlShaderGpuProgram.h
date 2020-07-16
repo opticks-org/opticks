@@ -163,9 +163,9 @@ protected:
 
    /**
    * Image to be displayed. This is the primary input parameter to most of the
-   * CG programs for color map, RGB, and gray scale display
+   * glsl programs for color map, RGB, and gray scale display
    */
-   int mInputTexture; // Same as Cg (CGparameter)
+   int mInputTexture; 
 
    int mTextureUnit;
 
@@ -177,7 +177,7 @@ protected:
    /**
    * Id of the compiled program.
    */
-   int mProgramObject; // Same as Cg CGprogram (mProgramId)
+   int mProgramObject; // Same as glsl GPUprogram (mProgramId)
 
    /**
    * has the program for this shader been compiled

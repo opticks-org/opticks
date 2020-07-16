@@ -15,37 +15,23 @@
       </program>
    </filter>
 
-   <filter name="Bloom" type="ImageFilter"
-     description="Example Filter.">
-      <program name="bloom.glsl" type="Fragment">
-         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
-      </program>
-   </filter>
-
-   <filter name="Median3x3" type="ImageFilter"
-     description="This program is an example 3x3 median filter.">
-      <program name="Median.glsl" type="Fragment">
-         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
-      </program>
-   </filter>
-
-   <filter name="GaussFilter" type="ImageFilter"
-     description="This program is an example gauss filter.">
-      <program name="GaussFilter.glsl" type="Fragment">
-         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
-      </program>
-   </filter>
-
-   <filter name="LaplacianEdges" type="ImageFilter"
-     description="This program is an example LaplacianEdges filter.">
-      <program name="LaplacianEdges.glsl" type="Fragment">
-         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
-      </program>
-   </filter>
-
    <filter name="Sharpen" type="ImageFilter"
      description="This program is an example sharpen filter.">
       <program name="Sharpen.glsl" type="Fragment">
+         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
+      </program>
+   </filter>
+
+   <filter name="Grayscale" type="ImageFilter"
+     description="This program is an example grayscale filter.">
+      <program name="GrayscaleFilter.glsl" type="Fragment">
+         <parameter name="inputImage" type="unsigned int" value="0"></parameter>
+      </program>
+   </filter>
+
+   <filter name="Invert" type="ImageFilter"
+     description="This program is an example invert filter.">
+      <program name="Invert.glsl" type="Fragment">
          <parameter name="inputImage" type="unsigned int" value="0"></parameter>
       </program>
    </filter>

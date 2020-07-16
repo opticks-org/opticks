@@ -1,3 +1,5 @@
+#version 130
+
 // source file: Sepia.cg
 
 #ifdef GL_ARB_texture_rectangle
@@ -5,6 +7,7 @@
 #endif
 
 uniform sampler2DRect inputImage;
+
 
 void main()
 {
