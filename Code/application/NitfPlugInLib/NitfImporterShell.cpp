@@ -176,14 +176,15 @@ bool Nitf::NitfImporterShell::createRasterPager(RasterElement* pRaster) const
    FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
    VERIFY(pFileDescriptor != NULL);
 
-   const string& datasetLocation = pFileDescriptor->getDatasetLocation();
-   if (datasetLocation.empty() == true)
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   VERIFYRV(pMetadata, NULL);
+   auto pIndexVariant = pMetadata->getAttribute("Image Index");
+   unsigned int imageSegment = 99999;
+   if (!pIndexVariant.getValue(imageSegment))
    {
       return false;
    }
-
-   string imageSegmentText = datasetLocation.substr(1);
-   unsigned int imageSegment = StringUtilities::fromDisplayString<unsigned int>(imageSegmentText) - 1;
+   --imageSegment;  // need 0 based for data structures
 
    // Create the resource to execute the pager
    ExecutableResource pPlugIn;
@@ -197,7 +198,6 @@ bool Nitf::NitfImporterShell::createRasterPager(RasterElement* pRaster) const
    const RasterElement* pElement = getRasterElement();
    if (pElement != NULL)
    {
-      const DynamicObject* pMetadata = pElement->getMetadata();
       VERIFYRV(pMetadata, NULL);
 
       const string attributePath[] =
@@ -260,8 +260,8 @@ EncodingType Nitf::NitfImporterShell::ossimImageHeaderToEncodingType(const ossim
 }
 
 bool Nitf::NitfImporterShell::validate(const DataDescriptor* pDescriptor,
-                                       const vector<const DataDescriptor*>& importedDescriptors,
-                                       string& errorMessage) const
+   const vector<const DataDescriptor*>& importedDescriptors,
+   string& errorMessage) const
 {
    if (pDescriptor == NULL)
    {
@@ -274,16 +274,18 @@ bool Nitf::NitfImporterShell::validate(const DataDescriptor* pDescriptor,
 
    string filename = pFileDescriptor->getFilename().getFullPathAndName();
 
-   // Get the image segment being validated
-   const string& datasetLocation = pFileDescriptor->getDatasetLocation();
-   VERIFY(datasetLocation.empty() == false);
-
-   string imageSegmentText = datasetLocation.substr(1);
-   ossim_uint32 imageSegment = StringUtilities::fromDisplayString<unsigned int>(imageSegmentText) - 1;
-
    // Check for J2K compression, which can be imported without ossim
    const DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
+
+   auto pIndexVariant = pMetadata->getAttribute("Image Index");
+   unsigned int imageSegment = 99999;
+   if (!pIndexVariant.getValue(imageSegment))
+   {
+      errorMessage = "Can't determine image index!";
+      return false;
+   }
+   --imageSegment;  // need 0 based for data structures
 
    const string attributePath[] =
    {

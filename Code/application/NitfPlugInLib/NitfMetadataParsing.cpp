@@ -233,7 +233,8 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       }
    }
 
-   Nitf::ImageSubheader imageSubheader(fileVersion);
+   Nitf::ImageSubheader imageSubheader(fileVersion, currentImage);
+   
    if (imageSubheader.importMetadata(pImageSubheader, pDescriptor) == false)
    {
       errorMessage += "Unable to import metadata from the image subheader.\n";
@@ -525,7 +526,7 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
    ossimRefPtr<ossimProperty> pImageProp = pNitf->getProperty("image_header");
    VERIFY(pImageProp != NULL && pImageProp->canCastTo("ossimContainerProperty"));
 
-   Nitf::ImageSubheader imageSubheader(Nitf::VERSION_02_10);
+   Nitf::ImageSubheader imageSubheader(Nitf::VERSION_02_10, -1);
    if (imageSubheader.exportMetadata(pDescriptor, PTR_CAST(ossimContainerProperty, pImageProp.get())) == false)
    {
       return false;

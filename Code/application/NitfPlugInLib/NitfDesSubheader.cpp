@@ -133,6 +133,11 @@ string Nitf::DesSubheader::getMetadataPath() const
    return Nitf::NITF_METADATA + "/" + Nitf::DES_METADATA + "/" + indexStr.str();
 }
 
+unsigned int Nitf::DesSubheader::getIndex() const
+{
+   return mIndex;
+}
+
 FactoryResource<DynamicObject> Nitf::DesSubheader::createDefaultsDynamicObject(
    const RasterDataDescriptor *pDescriptor)
 {

@@ -50,6 +50,13 @@ namespace Nitf
 
       std::string getMetadataPath() const;
 
+      /**
+       * Accessor for the segment index.
+       *
+       * @return The segment index.
+       */
+      unsigned int getIndex() const;
+
       FactoryResource<DynamicObject> createDefaultsDynamicObject(const RasterDataDescriptor* pDescriptor);
 
    protected: // special import/export code
