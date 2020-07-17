@@ -58,7 +58,6 @@
     <Import Project="..\CompileSettings\32bitSettings.props" />
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Debug-32bit.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\CompileSettings\xqilla-debug.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings-Debug.props" />
@@ -76,7 +75,6 @@
     <Import Project="..\CompileSettings\32bitSettings.props" />
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Release-32bit.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\CompileSettings\xqilla-release.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings-Release.props" />
@@ -94,7 +92,6 @@
     <Import Project="..\CompileSettings\64bitSettings.props" />
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\CompileSettings\xqilla-debug.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings-Debug.props" />
@@ -112,7 +109,6 @@
     <Import Project="..\CompileSettings\64bitSettings.props" />
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Release-64bit.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\CompileSettings\xqilla-release.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings-Release.props" />

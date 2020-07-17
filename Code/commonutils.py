@@ -1,3 +1,11 @@
+#
+# The information in this file is
+# Copyright(c) 2020 Ball Aerospace & Technologies Corporation
+# and is subject to the terms and conditions of the
+# GNU Lesser General Public License Version 2.1
+# The license text is available from   
+# http://www.gnu.org/licenses/lgpl.html
+#
 
 from os.path import join
 import os.path
@@ -206,13 +214,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("libcrypto-1_1-x64.dll")
         bla("libssl-1_1-x64.dll")
         ##### END
-        bla("cg.dll")
-        bla("cgc.exe")
-        if arch == "32":
-            bla("cgD3D8.dll")
-        bla("cgD3D9.dll")
-        bla("cgD3D10.dll")
-        bla("cgGL.dll")
         bla("glut32.dll")
         bla("xerces-c_3_2.dll") #needed for GDAL
         bla("hdf5.dll") #needed for GDAL

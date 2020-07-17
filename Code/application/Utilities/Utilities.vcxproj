@@ -61,7 +61,6 @@
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Qt.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\glew-release.props" />
     <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -75,7 +74,6 @@
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Qt.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\glew-debug.props" />
     <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -89,7 +87,6 @@
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Qt.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\glew-release.props" />
     <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -103,7 +100,6 @@
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Qt.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\glew-debug.props" />
     <Import Project="..\CompileSettings\yaml-cpp.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />

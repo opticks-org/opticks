@@ -14,6 +14,9 @@
 #include "ImageFilterDescriptor.h"
 #include "glCommon.h"
 #include "TypesFile.h"
+#include "GrayscaleGpuProgram.h"
+#include "RgbGpuProgram.h"
+#include "ColormapGpuProgram.h"
 
 #include <vector>
 
@@ -98,29 +101,26 @@ protected:
                          GLsizei& calculatedWidth, GLsizei& calculatedHeight, GLvoid* pValues);
 
 private:
-   void setCgParameterValues();
    float getTextureStretchValue(float rawValue, EncodingType dataType) const;
    void initializeFilter(ImageFilterDescriptor *pDescriptor);
 
 private:
+
+   GrayscaleGpuProgram mGrayscaleProgram;
+   ColormapGpuProgram mColormapProgram;
+   RgbGpuProgram mRgbProgram;
+   int mGpuProgramObject;
+   
    // Grayscale display program
-   CGprogram mGrayscaleProgram;
    ImageKey mGrayscaleImageKey;
 
    // Colormap display program
-   CGprogram mColormapProgram;
    GlTextureResource mColormapTexture;
    ImageKey mColormapImageKey;
 
    // RGB display program
-   CGprogram mRgbProgram;
    ImageKey mRgbImageKey;
 
-   // Active display program
-   CGprogram* mpCgProgram;
-   CGprofile mFragmentProfile;   // Cg display program's profile
-   CGparameter mInputTexture;    // Image to be displayed
-   std::vector<CGparameter> mCgParameters;
 
    // Member variable to keep track of whether or not there was a band change
    unsigned int mPreviousBand;

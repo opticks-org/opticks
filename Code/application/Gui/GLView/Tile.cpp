@@ -136,11 +136,11 @@ void Tile::setupTexture(unsigned int index, unsigned char* pTextureData)
    mYcoords[3] = -(mTexSizeY / 2) + mGeomSizeY;
 
    int channels = 1;
-   if (mTexFormat == GL_RGB)
+   if (mTexFormat == GL_RGB || mTexFormat == GL_BGR)
    {
       channels = 3;
    }
-   else if (mTexFormat == GL_RGBA)
+   else if (mTexFormat == GL_RGBA || mTexFormat == GL_BGRA)
    {
       channels = 4;
    }

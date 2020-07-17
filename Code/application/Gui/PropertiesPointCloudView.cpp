@@ -25,9 +25,6 @@
 
 #include "AppConfig.h"
 #include "AppVersion.h"
-#if defined (CG_SUPPORTED)
-#include "CgContext.h"
-#endif
 #include "ComplexComponentComboBox.h"
 #include "CustomColorButton.h"
 #include "DesktopServices.h"

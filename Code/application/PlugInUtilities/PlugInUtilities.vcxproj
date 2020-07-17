@@ -65,7 +65,6 @@
     <Import Project="..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\glew-release.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
@@ -81,7 +80,6 @@
     <Import Project="..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\glew-debug.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
@@ -97,7 +95,6 @@
     <Import Project="..\CompileSettings\Ossim-Release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\glew-release.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
@@ -113,7 +110,6 @@
     <Import Project="..\CompileSettings\Ossim-Debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\glew-debug.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />

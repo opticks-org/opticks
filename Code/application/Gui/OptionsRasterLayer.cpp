@@ -8,9 +8,7 @@
  */
 
 #include "AppConfig.h"
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 #include "ComplexComponentComboBox.h"
 #include "CustomTreeWidget.h"
 #include "DynamicObject.h"
@@ -200,12 +198,10 @@ OptionsRasterLayer::OptionsRasterLayer() :
    pLayout->addWidget(pColorCompositesSection, 10);
 
    bool systemSupportsGpuImage = false;
-#if defined(CG_SUPPORTED)
-   if (CgContext::instance() != NULL)
+   if (GlSlContext::instance() != NULL)
    {
       systemSupportsGpuImage = true;
    }
-#endif
 
    mpUseGpuImage->setEnabled(systemSupportsGpuImage);
 

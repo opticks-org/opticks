@@ -32,10 +32,8 @@
 #include <algorithm>
 #include <limits>
 
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
+#include "GlSlContext.h"
 #include "GpuImage.h"
-#endif
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -787,13 +785,11 @@ void PseudocolorLayerImp::generateImage()
 
    if (mpImage == NULL)
    {
-#if defined(CG_SUPPORTED)
       bool useGpuImage = RasterLayer::getSettingGpuImage();
       if (useGpuImage)
       {
          mpImage = new GpuImage();
       }
-#endif
 
       if (mpImage == NULL) // not using gpu image
       {
@@ -867,9 +863,8 @@ void PseudocolorLayerImp::invalidateImage()
 
 bool PseudocolorLayerImp::isGpuImageSupported() const
 {
-#if defined(CG_SUPPORTED)
    // Check if the hardware supports the GPU image
-   if (CgContext::instance() == NULL)
+   if (GlSlContext::instance() == NULL)
    {
       return false;
    }
@@ -888,7 +883,6 @@ bool PseudocolorLayerImp::isGpuImageSupported() const
          return true;
       }
    }
-#endif
 
    return false;
 }

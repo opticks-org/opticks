@@ -61,7 +61,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\minizip-release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -75,7 +74,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\minizip-debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -89,7 +87,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\minizip-release.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -103,7 +100,6 @@
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
-    <Import Project="..\CompileSettings\Cg.props" />
     <Import Project="..\CompileSettings\minizip-debug.props" />
     <Import Project="..\CompileSettings\raptor.props" />
     <Import Project="..\CompileSettings\EnableWarnings.props" />
@@ -198,6 +194,12 @@
     <ClCompile Include="GcpToolBar.cpp" />
     <ClCompile Include="GetSubsetDialog.cpp" />
     <ClCompile Include="GraphicObjectTypeGrid.cpp" />
+    <ClCompile Include="Image\ColormapGpuProgram.cpp" />
+    <ClCompile Include="Image\GlProgram.cpp" />
+    <ClCompile Include="Image\GlShaderGpuProgram.cpp" />
+    <ClCompile Include="Image\GlSlContext.cpp" />
+    <ClCompile Include="Image\GrayscaleGpuProgram.cpp" />
+    <ClCompile Include="Image\RgbGpuProgram.cpp" />
     <ClCompile Include="ImportDlg.cpp" />
     <ClCompile Include="ImportOptionsDlg.cpp" />
     <ClCompile Include="LinkDatasetPage.cpp" />
@@ -396,7 +398,6 @@
     <ClCompile Include="GLView\PseudocolorClass.cpp" />
     <ClCompile Include="GLView\Textures.cpp" />
     <ClCompile Include="GLView\Tile.cpp" />
-    <ClCompile Include="Image\CgContext.cpp" />
     <ClCompile Include="Image\ColorBuffer.cpp" />
     <ClCompile Include="Image\FrameBuffer.cpp" />
     <ClCompile Include="Image\GpuImage.cpp" />
@@ -1656,6 +1657,12 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="Image\ColormapGpuProgram.h" />
+    <ClInclude Include="Image\GlProgram.h" />
+    <ClInclude Include="Image\GlShaderGpuProgram.h" />
+    <ClInclude Include="Image\GlSlContext.h" />
+    <ClInclude Include="Image\GrayscaleGpuProgram.h" />
+    <ClInclude Include="Image\RgbGpuProgram.h" />
     <ClInclude Include="PropertiesAoiLayer.h" />
     <ClInclude Include="PropertiesClassification.h" />
     <ClInclude Include="PropertiesDataDescriptor.h" />
@@ -2235,7 +2242,6 @@
     <ClInclude Include="GLView\SymbolRegionDrawer.h" />
     <ClInclude Include="GLView\Textures.h" />
     <ClInclude Include="GLView\Tile.h" />
-    <ClInclude Include="Image\CgContext.h" />
     <ClInclude Include="Image\ColorBuffer.h" />
     <ClInclude Include="Image\FrameBuffer.h" />
     <ClInclude Include="Image\GpuImage.h" />

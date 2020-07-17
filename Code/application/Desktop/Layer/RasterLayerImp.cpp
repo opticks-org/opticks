@@ -46,10 +46,8 @@
 #include "XercesIncludes.h"
 #include "xmlreader.h"
 
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
+#include "GlSlContext.h"
 #include "GpuImage.h"
-#endif
 
 #include <algorithm>
 #include <boost/tuple/tuple.hpp>
@@ -546,9 +544,8 @@ list<ContextMenuAction> RasterLayerImp::getContextMenuActions() const
 
 bool RasterLayerImp::isGpuImageSupported() const
 {
-#if defined(CG_SUPPORTED)
    // Check if the hardware supports the GPU image
-   if (CgContext::instance() == NULL)
+   if (GlSlContext::instance() == NULL)
    {
       return false;
    }
@@ -601,7 +598,6 @@ bool RasterLayerImp::isGpuImageSupported() const
          }
       }
    }
-#endif
 
    return false;
 }
@@ -2167,7 +2163,6 @@ void RasterLayerImp::enableFilters(const vector<string>& filterNames)
          vector<string>::iterator newIter = find(newFilters.begin(), newFilters.end(), enabledName);
          if (newIter == newFilters.end())
          {
-#if defined (CG_SUPPORTED)
             ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
             GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
 
@@ -2176,7 +2171,6 @@ void RasterLayerImp::enableFilters(const vector<string>& filterNames)
                GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
-#endif
 
             delete dynamic_cast<ImageFilterDescriptorImp*>(pDescriptor);
             enabledIter = mEnabledFilters.erase(enabledIter);
@@ -2242,7 +2236,6 @@ void RasterLayerImp::disableFilter(const string& filterName)
             find(mEnabledFilters.begin(), mEnabledFilters.end(), pDescriptor);
          if (iter != mEnabledFilters.end())
          {
-#if defined (CG_SUPPORTED)
             ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
             GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
 
@@ -2251,7 +2244,6 @@ void RasterLayerImp::disableFilter(const string& filterName)
                GlContextSave contextSave(pViewImp);
                pGpuImage->disableFilter(pDescriptor);
             }
-#endif
 
             vector<ImageFilterDescriptor*> oldFilters = mEnabledFilters;
             mEnabledFilters.erase(iter);
@@ -2359,7 +2351,6 @@ void RasterLayerImp::resetFilter(const string& filterName)
       ImageFilterDescriptor* pDescriptor = getEnabledFilter(filterName);
       if (pDescriptor != NULL)
       {
-#if defined (CG_SUPPORTED)
          ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
          GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
 
@@ -2369,7 +2360,6 @@ void RasterLayerImp::resetFilter(const string& filterName)
             pGpuImage->resetFilter(pDescriptor);
             mbRegenerate = true;
          }
-#endif
       }
 
       mbLinking = true;
@@ -2400,7 +2390,6 @@ void RasterLayerImp::freezeFilter(const string& filterName, bool toggle)
       ImageFilterDescriptor* pDescriptor = getEnabledFilter(filterName);
       if (pDescriptor != NULL)
       {
-#if defined (CG_SUPPORTED)
          ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
          GpuImage* pGpuImage = dynamic_cast<GpuImage*>(getImage());
 
@@ -2410,7 +2399,6 @@ void RasterLayerImp::freezeFilter(const string& filterName, bool toggle)
             pGpuImage->freezeFilter(pDescriptor, toggle);
             mbRegenerate = true;
          }
-#endif
       }
 
       mbLinking = true;
@@ -3030,9 +3018,7 @@ void RasterLayerImp::setDisplayMode(const DisplayMode& eMode)
       meDisplayMode = eMode;
 
       bool usingGpu = false;
-#if defined(CG_SUPPORTED)
       usingGpu = (dynamic_cast<GpuImage*>(mpImage) != NULL);
-#endif
       if (usingGpu)
       {
          delete mpImage;
@@ -3140,7 +3126,6 @@ void RasterLayerImp::generateImage()
 
    Image* pImage = getImage();
 
-#if defined(CG_SUPPORTED)
    GpuImage* pGpuImage = dynamic_cast<GpuImage*>(pImage);
    bool bGpuImage = isGpuImageEnabled();
 
@@ -3153,7 +3138,6 @@ void RasterLayerImp::generateImage()
    {
       pImage = NULL;
    }
-#endif
 
    if (pImage == NULL)
    {
@@ -3304,7 +3288,6 @@ void RasterLayerImp::generateImage()
          pRedBadValues, pGreenBadValues, pBlueBadValues);
    }
 
-#if defined (CG_SUPPORTED)
    // Enable the filters after the image is initialized to ensure the tiles are created
    if ((pGpuImage != NULL) && (bGpuImage == true))
    {
@@ -3315,7 +3298,6 @@ void RasterLayerImp::generateImage()
          pGpuImage->enableFilters(mEnabledFilters);
       }
    }
-#endif
 
    setImage(pImage);
 }
@@ -4246,7 +4228,6 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
 {
    unsigned int numElements = 0;
 
-#if defined (CG_SUPPORTED)
    ViewImp* pViewImp = dynamic_cast<ViewImp*>(getView());
    if (pViewImp != NULL)
    {
@@ -4261,7 +4242,6 @@ unsigned int RasterLayerImp::readFilterBuffer(double xCoord, double yCoord, int 
          numElements = pGpuImage->readTiles(xCoord, yCoord, width, height, values, hasAlphas);
       }
    }
-#endif
    return numElements;
 }
 

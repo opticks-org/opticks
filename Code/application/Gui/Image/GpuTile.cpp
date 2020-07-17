@@ -111,7 +111,7 @@ void GpuTile::setupTile(void *pData, EncodingType encodingType, unsigned int ind
    applyFilters();
 }
 
-void GpuTile::draw(CGparameter outputCgTextureParam, GLfloat textureMode)
+void GpuTile::draw(GpuProgram* pProgram, GLfloat textureMode)
 {
    const vector<GLfloat>& xCoords = getXCoords();
    const vector<GLfloat>& yCoords = getYCoords();
@@ -143,9 +143,8 @@ void GpuTile::draw(CGparameter outputCgTextureParam, GLfloat textureMode)
    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-   // Set the input texture parameter for Cg display program
-   cgGLSetTextureParameter(outputCgTextureParam, textureId);
-   cgGLEnableTextureParameter(outputCgTextureParam);
+   // Set the input texture parameter for glsl display program
+   pProgram->setInput(textureId);
 
    // Draw the texture
    unsigned int alpha = getAlpha();
@@ -453,3 +452,91 @@ void *GpuTile::getTexData(unsigned int bytes)
 
    return &mTexData.front();
 }
+
+unsigned int GpuTile::writeFilterBuffer( GLint tileOffsetX, GLint tileOffsetY,GLint xCoord, GLint yCoord, GLint width,GLint height, GLint chipWidth, GLint chipHeight, GLvoid* pPixels)
+{
+   unsigned int numElements = 0;
+
+   // read back the filtered results buffer
+
+   if (mpOutputColorBuffer != NULL)
+   {
+      GLint internalFormat = mpOutputColorBuffer->getInternalFormat();
+      GLenum textureFormat = mpOutputColorBuffer->getTextureFormat();
+      GLenum dataType = mpOutputColorBuffer->getDataType();
+      unsigned int alpha = mpOutputColorBuffer->getAlpha();
+
+      numElements = width * height * ImageUtilities::getNumColorChannels(textureFormat);
+
+      // switch to the filtered buffers color buffer with the filtered results
+      Service<GpuResourceManager> pResourceManager;
+
+      if (mpImageReader == NULL)
+      {
+         // Initialize the reader to the size of the texture to accommodate all possible reads (i.e. later reads)
+         LocationType texSize = getTexSize();
+         ColorBuffer* pColorBuffer(new ColorBuffer(GL_TEXTURE_RECTANGLE_ARB, internalFormat,
+            static_cast<int>(texSize.mX), static_cast<int>(texSize.mY), textureFormat, dataType, alpha));
+         if ((pColorBuffer != NULL) && (pColorBuffer->getTextureObjectId() != 0))
+         {
+            int numBytes = static_cast<int>(texSize.mX) * static_cast<int>(texSize.mY) *
+               ImageUtilities::sizeOf(dataType) * ImageUtilities::getNumColorChannels(textureFormat);
+            PixelBufferObject* pPixelBufferObject = pResourceManager->getPixelBufferObject(numBytes, GL_WRITE_ONLY);
+            if (pPixelBufferObject != NULL)
+            {
+               mpImageReader = new ImagePBO(pColorBuffer, pPixelBufferObject);
+            }
+            else
+            {
+               mpImageReader = new ImageLoader(pColorBuffer);
+            }
+         }
+
+         if (mpImageReader == NULL)
+         {
+            return 0;
+         }
+      }
+
+      try
+      {
+         ImageBuffer* pImageBuffer = NULL;
+         if (mFilters.empty() == false)
+         {
+            pImageBuffer = mFilters.back()->getImageBuffer(mpOutputColorBuffer);
+         }
+
+         if (pImageBuffer != NULL)
+         {
+            pImageBuffer->readFromBuffer(mpOutputColorBuffer);
+
+            // May need to add - JO
+            //// chip the buffer into the required size.
+            //ByteBuffer chip = null;
+
+            //if ((chipWidth == width) && (chipHeight == height)) {
+            //   chip = buffer;
+            //} else {
+            //   chip = BufferUtil.chipFloatBuffer(data, width, xCoord,
+            //      yCoord, chipWidth, chipHeight);
+            //}
+
+            //chip.rewind();
+
+            // Write the chip size to the reader
+            mpImageReader->write(xCoord, yCoord, width, height, textureFormat, dataType, pPixels);
+
+            // switch back to the graphics cards framebuffer
+            pImageBuffer->readFromBuffer(NULL);
+         }
+      }
+      catch (AssertException& assertException)
+      {
+         string assertMessage = assertException.getText();
+         MessageResource msg(assertMessage, "app", "58719F13-30CF-4739-A1E0-1B296DFB9D92");
+      }
+   }
+
+   return numElements;
+}
+
