@@ -1097,15 +1097,7 @@ void PropertiesRasterLayer::enableFilterCheck(bool bEnable)
 
 void PropertiesRasterLayer::enableFilterCombo(bool bEnable)
 {
-   if ((mInitializing == false) && (bEnable == true))
-   {
-      Service<DesktopServices>()->showSuppressibleMsgDlg(APP_NAME,  "<b>This is an EXPERIMENTAL feature!</b><br/>"
-         "Enabling image filtering uses additional system resources when generating the image for display.<br/>"
-         "For large data sets it is possible for the system to run out of resources, which could have adverse "
-         "effects including application shutdown or system reboot.", MESSAGE_WARNING, 
-         getFilterWarningDialogId(), this);
-   }
-   else if (bEnable == false)
+   if (bEnable == false)
    {
       mpFilterList->clearSelection();
    }
