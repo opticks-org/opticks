@@ -41,8 +41,9 @@ namespace
    const static string iGeoloPath[] = {Nitf::NITF_METADATA, Nitf::IMAGE_SUBHEADER, IGEOLO, END_METADATA_NAME};
 }
 
-Nitf::ImageSubheader::ImageSubheader(const string &fileVersion) :
-   Header(fileVersion)
+Nitf::ImageSubheader::ImageSubheader(const string &fileVersion, unsigned int index) :
+   Header(fileVersion),
+   mIndex(index)
 {
    // Elements specific to NITF 02.00
    if (mFileVersion == Nitf::VERSION_02_00)
@@ -225,6 +226,11 @@ string Nitf::ImageSubheader::getMetadataPath() const
    return Nitf::NITF_METADATA + "/" + Nitf::IMAGE_SUBHEADER;
 }
 
+unsigned int Nitf::ImageSubheader::getIndex() const
+{
+   return mIndex;
+}
+
 FactoryResource<DynamicObject> Nitf::ImageSubheader::createDefaultsDynamicObject(
    const RasterDataDescriptor *pDescriptor)
 {
@@ -319,6 +325,7 @@ bool Nitf::ImageSubheader::importMetadata(const ossimPropertyInterface *pHeader,
    DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
    pMetadata->setAttributeByPath(getMetadataPath(), *pImageHeaderMetadata.get());
+   pMetadata->setAttributeByPath("Image Index", mIndex);
    return true;
 }
 

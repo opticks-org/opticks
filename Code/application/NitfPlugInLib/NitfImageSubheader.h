@@ -32,8 +32,11 @@ namespace Nitf
        *
        * @param fileVersion
        *        Either Nitf::VERSION_02_00 or Nitf::VERSION_02_10.
+       *
+       * @param index
+       *        The index of this image.
        */
-      ImageSubheader(const std::string& fileVersion);
+      ImageSubheader(const std::string& fileVersion, unsigned int index);
 
       /**
        * Adds NITF ImageSubheader metadata to the DynamicObject.
@@ -48,6 +51,13 @@ namespace Nitf
       bool importMetadata(const ossimPropertyInterface* pHeader, RasterDataDescriptor* pDescriptor);
 
       std::string getMetadataPath() const;
+
+      /**
+       * Accessor for the segment index.
+       *
+       * @return The segment index.
+       */
+      unsigned int getIndex() const;
 
       FactoryResource<DynamicObject> createDefaultsDynamicObject(const RasterDataDescriptor* pDescriptor);
 
@@ -176,6 +186,8 @@ namespace Nitf
 
       static bool getGCPsFromDecimalDegrees(const std::string& iGeolo, const LocationType gcpPixels[],
          unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
+
+      const unsigned int mIndex;
    };
 }
 
