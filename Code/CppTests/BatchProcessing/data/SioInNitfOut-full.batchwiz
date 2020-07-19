@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<batch xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd">
+
+  <wizard filename="E:\opticks\TrunkSupport\Code\CppTests\BatchProcessing\data\SioInNitfOut-full.wiz">
+    <parameter item="Import Data Set" name="in file" type="Filename">
+      <value>file:///T:/cppTestData/daytonchip.sio</value>
+    </parameter>
+    <parameter item="Import Data Set" name="importer" type="string">
+      <value>SIO Importer</value>
+    </parameter>
+    <parameter item="Export Data Set" name="out file" type="Filename">
+      <value>file:///E:/opticks/TrunkSupport/Code/CppTests/BatchProcessing/data/SioInNitfOut.ntf</value>
+    </parameter>
+    <parameter item="Export Data Set" name="exporter" type="string">
+      <value>NITF Exporter</value>
+    </parameter>
+  </wizard>
+
+</batch>

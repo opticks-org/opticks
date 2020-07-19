@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<batch xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd">
+
+  <wizard filename="E:\opticks\TrunkSupport\Code\CppTests\BatchProcessing\data\MultiplyAndSubtractBands-full.wiz">
+    <parameter item="Import Data Set" name="in file" type="Filename">
+      <value>file:///T:/cppTestData/BandMath/mi1clouds.sio</value>
+    </parameter>
+    <parameter item="Import Data Set" name="importer" type="string">
+      <value>SIO Importer</value>
+    </parameter>
+    <parameter item="Band Math" name="expression" type="string">
+      <value>b1*b4-b7</value>
+    </parameter>
+    <parameter item="Band Math" name="displayResults" type="bool">
+      <value>false</value>
+    </parameter>
+    <parameter item="Band Math" name="useDegrees" type="bool">
+      <value>false</value>
+    </parameter>
+    <parameter item="Export Data Set" name="outfile" type="Filename">
+      <value>file:///E:/opticks/TrunkSupport/Code/CppTests/BatchProcessing/data/MultiplyAndSubtractBands.ice.h5</value>
+    </parameter>
+    <parameter item="Export Data Set" name="exporter" type="string">
+      <value>Ice Exporter</value>
+    </parameter>
+  </wizard>
+
+</batch>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<batch xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd">
+
+  <wizard filename="E:\opticks\TrunkSupport\Code\CppTests\BatchProcessing\data\AddCubes-full.wiz">
+    <parameter item="Import Data Set" name="Input File 1" type="Filename">
+      <value>file:///T:/cppTestData/BandMath/mi1clouds.sio</value>
+    </parameter>
+    <parameter item="Import Data Set" name="Importer 1" type="string">
+      <value>SIO Importer</value>
+    </parameter>
+    <parameter item="Import Data Set" name="Input File 2" type="Filename">
+      <value>file:///T:/cppTestData/BandMath/mi2clouds.sio</value>
+    </parameter>
+    <parameter item="Import Data Set" name="Importer 2" type="string">
+      <value>SIO Importer</value>
+    </parameter>
+    <parameter item="Band Math" name="Expression" type="string">
+      <value>c1+c2</value>
+    </parameter>
+    <parameter item="Band Math" name="Display Results" type="bool">
+      <value>false</value>
+    </parameter>
+    <parameter item="Band Math" name="Use Degrees" type="bool">
+      <value>false</value>
+    </parameter>
+    <parameter item="Export Data Set" name="Output File" type="Filename">
+      <value>file:///E:/opticks/TrunkSupport/Code/CppTests/BatchProcessing/data/AddCubes.ice.h5</value>
+    </parameter>
+    <parameter item="Export Data Set" name="Exporter" type="string">
+      <value>Ice Exporter</value>
+    </parameter>
+  </wizard>
+
+</batch>

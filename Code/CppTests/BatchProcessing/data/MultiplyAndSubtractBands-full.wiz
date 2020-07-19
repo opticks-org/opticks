@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Wizard xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" batch="true" menuLocation="" name="Wizard" type="WizardObject" version="3">
+
+  <item batch="true" batchSupported="true" name="Value - in file" type="Value">
+    <location>14 43</location>
+    <output name="in file" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+      <value>file:///T:/cppTestData/BandMath/mi1clouds.sio</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - importer" type="Value">
+    <location>24 91</location>
+    <output name="importer" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+      <value>SIO Importer</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Import Data Set" type="Wizard">
+    <location>161 54</location>
+    <input name="Progress" originalType="Progress" type="Progress" version="Wizard Node Version 3.0">
+      <validType>Progress</validType>
+    </input>
+    <input name="Filename" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+    </input>
+    <input name="Data Descriptor" originalType="DataDescriptor" type="DataDescriptor" version="Wizard Node Version 3.0">
+      <validType>DataDescriptor</validType>
+    </input>
+    <input name="Importer Name" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+    </input>
+    <output name="Data Set" originalType="DataElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>DataElement</validType>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - expression" type="Value">
+    <location>91 163</location>
+    <output name="expression" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+      <value>b1*b4-b7</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - displayResults" type="Value">
+    <location>84 201</location>
+    <output name="displayResults" originalType="bool" type="bool" version="Wizard Node Version 3.0">
+      <validType>bool</validType>
+      <value>false</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - useDegrees" type="Value">
+    <location>88 250</location>
+    <output name="useDegrees" originalType="bool" type="bool" version="Wizard Node Version 3.0">
+      <validType>bool</validType>
+      <value>false</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Band Math" type="Algorithm">
+    <location>304 67</location>
+    <input name="Progress" originalType="Progress" type="Progress" version="Wizard Node Version 3.0">
+      <validType>Progress</validType>
+    </input>
+    <input name="Data Element" originalType="RasterElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </input>
+    <input name="Raster Element 2" originalType="RasterElement" type="RasterElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </input>
+    <input name="Raster Element 3" originalType="RasterElement" type="RasterElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </input>
+    <input name="Raster Element 4" originalType="RasterElement" type="RasterElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </input>
+    <input name="Raster Element 5" originalType="RasterElement" type="RasterElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </input>
+    <input name="Input Expression" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+    </input>
+    <input name="Display Results" originalType="bool" type="bool" version="Wizard Node Version 3.0">
+      <validType>bool</validType>
+    </input>
+    <input name="Degrees" originalType="bool" type="bool" version="Wizard Node Version 3.0">
+      <validType>bool</validType>
+    </input>
+    <output name="Band Math Result" originalType="RasterElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>RasterElement</validType>
+      <validType>DataElement</validType>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - outfile" type="Value">
+    <location>276 262</location>
+    <output name="outfile" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+      <value>file:///E:\opticks\TrunkSupport\Code\CppTests\BatchProcessing\data/MultiplyAndSubtractBands.ice.h5</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - exporter" type="Value">
+    <location>283 319</location>
+    <output name="exporter" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+      <value>Ice Exporter</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Export Data Set" type="Wizard">
+    <location>473 137</location>
+    <input name="Progress" originalType="Progress" type="Progress" version="Wizard Node Version 3.0">
+      <validType>Progress</validType>
+    </input>
+    <input name="View" originalType="View" type="View" version="Wizard Node Version 3.0">
+      <validType>View</validType>
+    </input>
+    <input name="Layer" originalType="Layer" type="Layer" version="Wizard Node Version 3.0">
+      <validType>Layer</validType>
+    </input>
+    <input name="Data Element" originalType="DataElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>DataElement</validType>
+    </input>
+    <input name="Filename" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+    </input>
+    <input name="File Descriptor" originalType="FileDescriptor" type="FileDescriptor" version="Wizard Node Version 3.0">
+      <validType>FileDescriptor</validType>
+    </input>
+    <input name="Exporter Name" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+    </input>
+  </item>
+
+  <connection inputItem="2" inputNode="1" outputItem="0" outputNode="0"/>
+
+  <connection inputItem="2" inputNode="3" outputItem="1" outputNode="0"/>
+
+  <connection inputItem="6" inputNode="1" outputItem="2" outputNode="0"/>
+
+  <connection inputItem="6" inputNode="6" outputItem="3" outputNode="0"/>
+
+  <connection inputItem="6" inputNode="7" outputItem="4" outputNode="0"/>
+
+  <connection inputItem="6" inputNode="8" outputItem="5" outputNode="0"/>
+
+  <connection inputItem="9" inputNode="3" outputItem="6" outputNode="0"/>
+
+  <connection inputItem="9" inputNode="4" outputItem="7" outputNode="0"/>
+
+  <connection inputItem="9" inputNode="6" outputItem="8" outputNode="0"/>
+
+</Wizard>
