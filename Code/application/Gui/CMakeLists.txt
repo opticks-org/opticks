@@ -107,6 +107,21 @@ set (HEADER_FILES
     WizardItemPalette.h
     WizardLine.h
     Workspace.h
+    Image/GlSlContext.h
+    Image/ColorBuffer.h
+    Image/FrameBuffer.h
+    Image/GpuImage.h
+    Image/GpuProgram.h
+    Image/GpuProgramDescriptorAdapter.h
+    Image/GpuTile.h
+    Image/ImageBuffer.h
+    Image/ImageFilter.h
+    Image/ImageFilterDescriptorAdapter.h
+    Image/ImageLoader.h
+    Image/ImagePBO.h
+    Image/ImagePBuffer.h
+    Image/ImageUtilities.h
+    Image/PixelBufferObject.h
 )
 set (SOURCE_FILES
     GLView/DrawUtil.cpp
@@ -286,6 +301,23 @@ set (SOURCE_FILES
     Workspace.cpp
     ZoomCustomDlg.cpp
     ZoomPanWidget.cpp
+    Image/GlSlContext.cpp
+    Image/ColorBuffer.cpp
+    Image/FrameBuffer.cpp
+    Image/GpuImage.cpp
+    Image/GpuProgram.cpp
+    Image/GpuProgramDescriptorImp.cpp
+    Image/GpuResourceManager.cpp
+    Image/GpuTile.cpp
+    Image/ImageBuffer.cpp
+    Image/ImageFilter.cpp
+    Image/ImageFilterDescriptorImp.cpp
+    Image/ImageFilterManager.cpp
+    Image/ImageLoader.cpp
+    Image/ImagePBO.cpp
+    Image/ImagePBuffer.cpp
+    Image/ImageUtilities.cpp
+    Image/PixelBufferObject.cpp
 ) 
 set (MOC_HEADERS
     GLView/PseudocolorClass.h
@@ -398,49 +430,11 @@ set (MOC_HEADERS
     ZoomCustomDlg.h
     ZoomPanWidget.h
 )
-if (CG_FOUND)
-    set (CG_HEADERS
-        Image/CgContext.h
-        Image/ColorBuffer.h
-        Image/FrameBuffer.h
-        Image/GpuImage.h
-        Image/GpuProgram.h
-        Image/GpuProgramDescriptorAdapter.h
-        Image/GpuTile.h
-        Image/ImageBuffer.h
-        Image/ImageFilter.h
-        Image/ImageFilterDescriptorAdapter.h
-        Image/ImageLoader.h
-        Image/ImagePBO.h
-        Image/ImagePBuffer.h
-        Image/ImageUtilities.h
-        Image/PixelBufferObject.h
-    )
-    set (CG_SOURCE_FILES
-        Image/CgContext.cpp
-        Image/ColorBuffer.cpp
-        Image/FrameBuffer.cpp
-        Image/GpuImage.cpp
-        Image/GpuProgram.cpp
-        Image/GpuProgramDescriptorImp.cpp
-        Image/GpuResourceManager.cpp
-        Image/GpuTile.cpp
-        Image/ImageBuffer.cpp
-        Image/ImageFilter.cpp
-        Image/ImageFilterDescriptorImp.cpp
-        Image/ImageFilterManager.cpp
-        Image/ImageLoader.cpp
-        Image/ImagePBO.cpp
-        Image/ImagePBuffer.cpp
-        Image/ImageUtilities.cpp
-        Image/PixelBufferObject.cpp
-    )
-endif()
 set(QRC_FILES
     res/Application.qrc	
 )
 if(ONE_OPTICKS_LIB)
-    set_property(DIRECTORY PROPERTY ALL_SOURCES ${SOURCE_FILES} ${HEADER_FILES} ${CG_SOURCE_FILES} ${CG_HEADERS})
+    set_property(DIRECTORY PROPERTY ALL_SOURCES ${SOURCE_FILES} ${HEADER_FILES})
     set_property(DIRECTORY PROPERTY MOC_HEADERS ${MOC_HEADERS})
     set_property(DIRECTORY PROPERTY QRC_FILES ${QRC_FILES})
 else()
@@ -452,6 +446,6 @@ else()
     source_group(Graphic REGULAR_EXPRESSION Graphic.*)
     source_group(Image REGULAR_EXPRESSION Image.*) 
     source_group(Undo REGULAR_EXPRESSION Undo.*) 
-    add_library(Gui STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES} ${RCC_OUTFILES} ${CG_SOURCE_FILES} ${CG_HEADERS})
+    add_library(Gui STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES} ${RCC_OUTFILES})
 endif()
 
