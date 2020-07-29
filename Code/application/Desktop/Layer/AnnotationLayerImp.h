@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -66,6 +66,8 @@ public:
 
    bool toXml(XMLWriter* pXml) const;
    bool fromXml(DOMNode* pDocument, unsigned int version);
+   
+   virtual GraphicObject* cloneObject(const GraphicObject* pObject);
 
 public slots:
    void reset();
@@ -85,5 +87,9 @@ private:
    GRAPHICLAYERADAPTEREXTENSION_CLASSES
 
 #define ANNOTATIONLAYERADAPTER_METHODS(impClass) \
+   GraphicObject* cloneObject(const GraphicObject* pObject) \
+   { \
+      return impClass::cloneObject(pObject); \
+   } \
    GRAPHICLAYERADAPTER_METHODS(impClass)
 #endif

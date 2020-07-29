@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -536,7 +536,7 @@ bool RasterElementImporterShell::performImport() const
       mpRasterElement->getDataDescriptor());
    FAIL_IF(pDescriptor == NULL, "Could not find RasterDataDescriptor", return false);
 
-   string message;
+//goffena   string message;
 
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Re-evaluate this code when plug-ins " \
 //   "are being loaded into the global symbol space (tclarke)")

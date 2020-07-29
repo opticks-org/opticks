@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -46,7 +46,7 @@
 #include <QtCore/QtDebug>
 #include <QtGui/QColor>
 #include <QtGui/QImage>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <string>
 #include <vector>
 
@@ -200,9 +200,15 @@ XmlRpcParam* Version::operator()(const XmlRpcParams& params)
 
 QString Version::getHelp()
 {
-   return QString("Returns version information. "
-                  "The first return value is the version of the XML-RPC interface. "
-                  "The second return value is the version of "APP_NAME".");
+//   return QString("Returns version information. "
+//                  "The first return value is the version of the XML-RPC interface. "
+//                  "The second return value is the version of "APP_NAME".");
+   QString str = QString("Returns version information. "
+      "The first return value is the version of the XML-RPC interface. "
+      "The second return value is the version of ");
+   str += QString(APP_NAME);
+   str += QString(".");
+   return str;
 }
 
 XmlRpcArrayParam* Version::getSignature()
@@ -210,7 +216,11 @@ XmlRpcArrayParam* Version::getSignature()
    XmlRpcArrayParam* pSignatures = new XmlRpcArrayParam;
 
    XmlRpcArrayParam* pParams = new XmlRpcArrayParam;
-   *pParams << new XmlRpcParam(STRING_PARAM, "[XML-RPC version, "APP_NAME" version]");
+//   *pParams << new XmlRpcParam(STRING_PARAM, "[XML-RPC version, "APP_NAME" version]");
+   QString str("[XML-RPC version, ");
+   str += QString(APP_NAME);
+   str += QString(" version]");
+   *pParams << new XmlRpcParam(STRING_PARAM, str);
    *pSignatures << pParams;
 
    return pSignatures;
@@ -786,7 +796,7 @@ XmlRpcParam* GetMetadata::operator()(const XmlRpcParams& params)
       throw XmlRpcMethodFault(200);
    }
 
-   const std::string inputFilename = XmlBase::URLtoPath(X(pInputFilename->value().toString().toAscii()));
+   const std::string inputFilename = XmlBase::URLtoPath(X(pInputFilename->value().toString().toLatin1()));
    if (inputFilename.empty())
    {
       throw XmlRpcMethodFault(200);
@@ -798,7 +808,7 @@ XmlRpcParam* GetMetadata::operator()(const XmlRpcParams& params)
       throw XmlRpcMethodFault(200);
    }
 
-   const std::string outputFilename = XmlBase::URLtoPath(X(pOutputFilename->value().toString().toAscii()));
+   const std::string outputFilename = XmlBase::URLtoPath(X(pOutputFilename->value().toString().toLatin1()));
    if (outputFilename.empty())
    {
       throw XmlRpcMethodFault(200);
@@ -1064,7 +1074,7 @@ XmlRpcParam* Open::operator()(const XmlRpcParams& params)
    {
       throw XmlRpcMethodFault(200);
    }
-   filename = XmlBase::URLtoPath(X(pFilenameParam->value().toString().toAscii()));
+   filename = XmlBase::URLtoPath(X(pFilenameParam->value().toString().toLatin1()));
    if (filename.empty())
    {
       throw XmlRpcMethodFault(200);
@@ -1549,8 +1559,13 @@ XmlRpcParam* SetWindowState::operator()(const XmlRpcParams& params)
 
 QString SetWindowState::getHelp()
 {
-   return "Change the window state of "APP_NAME" by specifying new Qt::WindowStates flags. "
-      "ClearFlags will be applied before SetFlags.";
+//   return "Change the window state of "APP_NAME" by specifying new Qt::WindowStates flags. "
+//      "ClearFlags will be applied before SetFlags.";
+   QString str("Change the window state of ");
+   str += QString(APP_NAME);
+   str += QString(" by specifying new Qt::WindowStates flags. "
+      "ClearFlags will be applied before SetFlags.");
+   return str;
 }
 
 XmlRpcArrayParam* SetWindowState::getSignature()

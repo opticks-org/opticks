@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -98,7 +98,7 @@ InstallerServicesImp::InstallerServicesImp()
          QFile pending(extensionDir.absoluteFilePath("pendinguninstall"));
          if (pending.open(QFile::WriteOnly | QFile::Append | QFile::Text))
          {
-            pending.write(subDir.toAscii());
+            pending.write(subDir.toLatin1());
             pending.write("\n");
             pending.close();
          }
@@ -691,7 +691,7 @@ bool InstallerServicesImp::launchHelper(const std::vector<std::string> installLi
    {
       cmdline += " " + QString::fromStdString(*it);
    }
-   int rval = reinterpret_cast<int>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
+   auto rval = reinterpret_cast<long long>(ShellExecute(NULL, "open", path.toLocal8Bit().data(), cmdline.toLocal8Bit().data(), NULL, SW_SHOWNORMAL));
    if (rval <= 32)
    {
       return false;

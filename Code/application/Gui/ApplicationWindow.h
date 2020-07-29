@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,10 +11,10 @@
 #define APPLICATIONWINDOW_H
 
 #include <QtCore/QList>
-#include <QtGui/QAction>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QUndoGroup>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QUndoGroup>
 
 #include "ConfigurationSettings.h"
 #include "DynamicObject.h"
@@ -481,6 +481,7 @@ private:
    DropFilesType mDropFilesType;
    ImportAgent::EditType mDropEditType;
    bool mDropNewSession;
+   bool mRightMouseDrapDrop;
 
    std::vector<std::string> mToolbarDisplayStatus;
    std::vector<std::string> mDockWindowDisplayStatus;

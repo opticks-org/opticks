@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -210,6 +210,11 @@
  *  context menu if the window is currently docked.
  */
 #define APP_DOCKWINDOW_UNDOCK_ACTION "APP_DOCKWINDOW_UNDOCK_ACTION"
+
+/**
+ *  Copy the GraphicLayer to another view
+ */
+#define APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION "APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION"
 
 /**
  *  Destroys the selected GraphicObject objects contained in a GraphicLayer.

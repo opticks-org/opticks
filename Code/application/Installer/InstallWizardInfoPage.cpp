@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,10 +9,10 @@
 
 #include <QtCore/QEvent>
 #include <QtCore/QString>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QVBoxLayout>
 
 #include "Aeb.h"
 #include "ExtensionListDelegate.h"

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -13,7 +13,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QMetaType>
 #include <QtCore/QObject>
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 #include "AttachmentPtr.h"
 #include "ColorType.h"
@@ -24,6 +24,7 @@
 #include "TypesFile.h"
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
+#include "Layer.h"
 
 #include <string>
 #include <vector>

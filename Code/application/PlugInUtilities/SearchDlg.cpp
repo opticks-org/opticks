@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,13 +9,13 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QRegExp>
-#include <QtGui/QFileDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPixmap>
-#include <QtGui/QPushButton>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
 
 #include "SearchDlg.h"
 #include "Progress.h"

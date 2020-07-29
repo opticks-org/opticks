@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -246,7 +246,8 @@ void ConfigurationSettingsImp::initDeploymentValues()
    HRESULT retValue = SHGetFolderPath(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
    if (SUCCEEDED(retValue))
    {
-      userSettingsPath = QString::fromAscii(path);
+//      userSettingsPath = QString::fromAscii(path);
+      userSettingsPath = QString::fromLatin1(path);
    }
    appNamePath = "Opticks";
 #else
@@ -973,7 +974,8 @@ string ConfigurationSettingsImp::locateUserDocs()
    HRESULT retValue = SHGetFolderPath(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, path);
    if (SUCCEEDED(retValue))
    {
-      userFolderPath = QString::fromAscii(path);
+//      userFolderPath = QString::fromAscii(path);
+      userFolderPath = QString::fromLatin1(path);
    }
 #else
    char* pPath = getenv("HOME");

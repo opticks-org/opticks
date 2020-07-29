@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -13,8 +13,8 @@
 #include "DynamicObject.h"
 #include "ObjectResource.h"
 
-#include <QtGui/QDialog>
-#include <QtGui/QStyledItemDelegate>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QStyledItemDelegate>
 
 class QListWidget;
 class QListWidgetItem;

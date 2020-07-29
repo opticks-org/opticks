@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -32,11 +32,8 @@
 #include <algorithm>
 #include <limits>
 
-#include "DependencyConfigs.h"
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
+#include "GlSlContext.h"
 #include "GpuImage.h"
-#endif
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
@@ -788,13 +785,11 @@ void PseudocolorLayerImp::generateImage()
 
    if (mpImage == NULL)
    {
-#if defined(CG_SUPPORTED)
       bool useGpuImage = RasterLayer::getSettingGpuImage();
       if (useGpuImage)
       {
          mpImage = new GpuImage();
       }
-#endif
 
       if (mpImage == NULL) // not using gpu image
       {
@@ -868,9 +863,8 @@ void PseudocolorLayerImp::invalidateImage()
 
 bool PseudocolorLayerImp::isGpuImageSupported() const
 {
-#if defined(CG_SUPPORTED)
    // Check if the hardware supports the GPU image
-   if (CgContext::instance() == NULL)
+   if (GlSlContext::instance() == NULL)
    {
       return false;
    }
@@ -889,7 +883,6 @@ bool PseudocolorLayerImp::isGpuImageSupported() const
          return true;
       }
    }
-#endif
 
    return false;
 }

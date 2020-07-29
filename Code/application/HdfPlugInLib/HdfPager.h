@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -26,7 +26,7 @@ public:
    /**
     * Creates an HdfPager plug-in.
     */
-   HdfPager();
+   HdfPager(int64_t cacheSize = 20000000);
 
    /**
     * Creates an input argument list for the HdfAccessor plug-in.

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -13,14 +13,14 @@
 #include "ToolBar.h"
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QPushButton>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QWidgetAction>
 
 MenuAndToolBarTestGui::MenuAndToolBarTestGui(QWidget* pParent, const char* pName, bool modal) :
    QDialog(pParent)

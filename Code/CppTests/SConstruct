@@ -1,0 +1,110 @@
+import os
+import glob
+
+####
+# Set up the options and environment
+####
+opts = Options()
+opts.AddOptions(BoolOption('RELEASE','False for debug, true for release',0))
+opts.Add('BUILDDIR','Directory for build files',"%s/Build" % (os.environ["OPTICKS_CODE_DIR"]))
+
+TOOLPATH = Dir("%s/application/CompileSettings" % (os.environ["OPTICKS_CODE_DIR"])).abspath
+OPTICKSPLATFORM = "%s-%s" % (os.environ['OSTYPE'],os.environ['MACHTYPE'])
+OS = "solaris"
+
+dep_path = os.environ.get('OPTICKSDEPENDENCIES', None)
+if not dep_path:
+   raise Exception("OPTICKSDEPENDENCIES is not set")
+dep_path = os.path.join(dep_path, "64")
+if not os.path.exists(dep_path):
+   raise Exception("Dependencies of %s does not exist" % dep_path)
+OPTICKSDEPENDENCIESINCLUDE="%s/include" % dep_path
+env = Environment(options=opts,
+                  OPTICKSPLATFORM=OPTICKSPLATFORM,
+                  OPTICKSDEPENDENCIESBIN="%s/bin" % dep_path,
+                  OPTICKSDEPENDENCIESINCLUDE=OPTICKSDEPENDENCIESINCLUDE,
+                  OS=OS,
+                  ENV=os.environ,
+                  tools=["default","qt4","qwt","xercesc","raptor","minizip",
+                         "suncc","sunar","sunlink", "ossim", "yaml-cpp",
+                         "xqilla"],
+                  toolpath=[TOOLPATH])
+if env['RELEASE']:
+   MODE='release'
+else:
+   MODE='debug'
+BUILDDIR = env.Dir(env["BUILDDIR"]).abspath
+env["TESTBINDIR"] = '%s/Binaries-%s-%s/TestBin' % (BUILDDIR,OPTICKSPLATFORM,MODE)
+env["LIBDIR"] = '%s/Binaries-%s-%s/Lib' % (BUILDDIR,OPTICKSPLATFORM,MODE)
+env["BUILDDIR"] = '%s/%s-%s/CppTests' % (BUILDDIR,OPTICKSPLATFORM,MODE)
+
+
+Help(opts.GenerateHelpText(env))
+env["QT_MODULES"] = ["QtCore","QtGui","Qt3Support","QtOpenGL", "QtXml"]
+env.Qt4AddModules(env["QT_MODULES"])
+
+env.AppendUnique(CXXFLAGS=["-I%s" % OPTICKSDEPENDENCIESINCLUDE])
+env['LINK'] = "$CXX"
+env.Append(CXXFLAGS="-library=stlport4 -m64 -xcode=pic32",
+           LINKFLAGS="-library=stlport4 -m64 -xcode=pic32 -mt -L/usr/sfw/lib/sparcv9",
+           LIBPATH=["$LIBDIR"],
+           CPPDEFINES=["APPLICATION_XERCES","CPPTESTS"],
+           LIBS=env["QT_MODULES"] + ["SimpleApiLib", "PlugInUtilities", "nsl","dl","GLU","GL","Xm","Xext","Xrender","X11","m","z"])
+env.AppendUnique(LIBPATH=["%s/lib" % dep_path])
+env.BuildDir(env["BUILDDIR"], "#", duplicate=0)
+
+if MODE == 'release':
+   env.Append(CXXFLAGS="-xO3")
+else:
+   env.Append(CXXFLAGS="-g")
+
+incdirs = map(lambda x: "%s/application/" % (os.environ["OPTICKS_CODE_DIR"]) + x, ["Desktop",
+                                                  "Desktop/Animation",
+                                                  "Desktop/Layer",
+                                                  "Desktop/Plot",
+                                                  "Framework",
+                                                  "Gui",
+                                                  "Gui/GLView",
+                                                  "Gui/Graphic",
+                                                  "Gui/Image",
+                                                  "Gui/Undo",
+                                                  "Interfaces",
+                                                  "Model",
+                                                  "Model/DatasetParameters",
+                                                  "PlugInLib",
+                                                  "PlugInManager",
+                                                  "PlugInUtilities",
+                                                  "PlugInUtilities/Interfaces",
+                                                  "PlugInUtilities/MathUtilities",
+                                                  "PlugInUtilities/pthreads-wrapper",
+                                                  "SimpleApiLib",
+                                                  "Utilities",
+                                                  "Wizard"])
+env.Append(CPPPATH=incdirs)
+
+libs = map(lambda x,ld=env["LIBDIR"]: '%s/%s' % (ld,x),
+       ["libDesktop.a",
+        "libFramework.a",
+        "libGui.a",
+        "libHdfPlugInLib.a",
+        "libInstaller.a",
+        "libModel.a",
+        "libPlugInLib.a",
+        "libPlugInManager.a",
+        "libPlugInUtilities.a",
+        "libUtilities.a",
+        "libWizard.a"])
+
+####
+# Build the testbed binary
+####
+testbed = env.Object(map(lambda x,bd=env["BUILDDIR"]: '%s/%s' % (bd,x), glob.glob("*.cpp")))
+testbedBin = env.Program('%s/testBed' % env['BUILDDIR'],testbed+libs+libs+libs)
+env.Alias('testBed',testbedBin)
+
+####
+# Install the binaries and libraries to the proper directories
+# and set up some useful aliases
+####
+testbedInstall = env.Install(env["TESTBINDIR"], testbedBin)
+Default(testbedInstall)

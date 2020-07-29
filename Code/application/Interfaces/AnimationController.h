@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -88,6 +88,12 @@ public:
     *  @see getCurrentFrame()
     */
    SIGNAL_METHOD(AnimationController, FrameChanged)
+
+   /**
+    *  Emitted with boost::any<bool> when 'can drop frames' changes for any
+    *  reason.
+    */
+   SIGNAL_METHOD(AnimationController, CanDropFramesChanged)
 
    /**
     *  Emitted with boost::any<double> when the speed multiplier changes.

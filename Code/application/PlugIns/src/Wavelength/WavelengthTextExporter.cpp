@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -120,7 +120,7 @@ bool WavelengthTextExporter::saveWavelengths(const Wavelengths* pWavelengths) co
          string endValue = StringUtilities::toXmlString(endValues[i]);
          if (mBandNumbers == true)
          {
-            fprintf(pFile.get(), "%u\t%s\t%s\t%s\n", i + 1, centerValue.c_str(), startValue.c_str(), endValue.c_str());
+            fprintf(pFile.get(), "%u\t%s\t%s\t%s\n", static_cast<unsigned int>(i) + 1, centerValue.c_str(), startValue.c_str(), endValue.c_str());
          }
          else
          {
@@ -132,7 +132,7 @@ bool WavelengthTextExporter::saveWavelengths(const Wavelengths* pWavelengths) co
          string centerValue = StringUtilities::toXmlString(centerValues[i]);
          if (mBandNumbers == true)
          {
-            fprintf(pFile.get(), "%u\t%s\n", i + 1, centerValue.c_str());
+            fprintf(pFile.get(), "%u\t%s\n", static_cast<unsigned int>(i) + 1, centerValue.c_str());
          }
          else
          {

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,9 +10,9 @@
 #include "AppVerify.h"
 #include "BitrateWidget.h"
 
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QSlider>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QSlider>
 
 BitrateWidget::BitrateWidget(QWidget* pParent) :
    QWidget(pParent)

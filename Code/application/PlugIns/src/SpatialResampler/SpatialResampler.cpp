@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from
@@ -235,7 +235,7 @@ bool SpatialResampler::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
    }
    FactoryResource<DataRequest> pResultRequest;
    pResultRequest->setWritable(true);
-   RasterDataDescriptor* pDestDesc = dynamic_cast<RasterDataDescriptor*>(pResultCube->getDataDescriptor());
+//   RasterDataDescriptor* pDestDesc = dynamic_cast<RasterDataDescriptor*>(pResultCube->getDataDescriptor());
    DataAccessor pDestAcc = pResultCube->getDataAccessor(pResultRequest.release());
 
    int matType;

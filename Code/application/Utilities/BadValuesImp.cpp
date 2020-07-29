@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from
@@ -625,9 +625,9 @@ void BadValuesImp::generateAdjustedValues()
 
          // check if value is in a range
          bool valueInRange(false);
-         for (std::map<double,double>::const_iterator it = tempRanges.begin(); it != tempRanges.end(); ++it)
+         for (std::map<double,double>::const_iterator iti = tempRanges.begin(); iti != tempRanges.end(); ++it)
          {
-            if (value > it->first && value < it->second)
+            if (value > iti->first && value < iti->second)
             {
                valueInRange = true;
                break;

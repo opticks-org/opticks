@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -136,11 +136,11 @@ void Tile::setupTexture(unsigned int index, unsigned char* pTextureData)
    mYcoords[3] = -(mTexSizeY / 2) + mGeomSizeY;
 
    int channels = 1;
-   if (mTexFormat == GL_RGB)
+   if (mTexFormat == GL_RGB || mTexFormat == GL_BGR)
    {
       channels = 3;
    }
-   else if (mTexFormat == GL_RGBA)
+   else if (mTexFormat == GL_RGBA || mTexFormat == GL_BGRA)
    {
       channels = 4;
    }

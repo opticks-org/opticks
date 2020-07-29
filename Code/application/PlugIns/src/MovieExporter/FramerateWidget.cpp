@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,10 +10,10 @@
 #include "AppVerify.h"
 #include "FramerateWidget.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QSpinBox>
 
 FramerateWidget::FramerateWidget(QWidget* pParent) :
    QWidget(pParent)

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -14,9 +14,9 @@
 
 #include <QtCore/QEvent>
 #include <QtGui/QActionEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QMenu>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QWidgetAction>
 
 #include <string>
 #include <vector>

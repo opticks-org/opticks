@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -37,7 +37,8 @@ Image::Image() :
    mNumTilesX(0),
    mNumTilesY(0),
    mpTiles(NULL),
-   mAlpha(255)
+   mAlpha(255),
+   mColorMapChanged(false)
 {}
 
 // Grayscale
@@ -732,7 +733,7 @@ private:
 
                   if (hasBadValues)
                   {
-                     bool badValue = false;
+//                     bool badValue = false;
                      if (hasSingleBadValueRange)
                      {
                         if (dValue > singleBadValueLower && dValue < singleBadValueUpper)
@@ -1552,4 +1553,9 @@ vector<Tile*> Image::getTilesToUpdate(const vector<Tile*>& tilesToDraw, vector<u
    }
 
    return tilesToUpdate;
+}
+
+void Image::setColorMapChanged(bool changed)
+{
+   mColorMapChanged = changed;
 }

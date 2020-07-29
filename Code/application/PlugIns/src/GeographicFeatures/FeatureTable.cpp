@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -18,8 +18,8 @@
 #include "PerspectiveView.h"
 #include "SignalBlocker.h"
 
-#include <QtGui/QMenu>
-#include <QtGui/QScrollBar>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QScrollBar>
 
 #include <list>
 #include <string>
@@ -221,7 +221,7 @@ void FeatureTable::selectGraphicObjects(const QItemSelection& selection, bool se
                            if (selected != pLayer->isObjectSelected(pGraphicObject))
                            {
                               // Prevent cyclical calls
-                              GraphicLayer* pFeatureLayer = mpFeatureLayer.get();
+                              GraphicLayer* pFeatureLayer2 = mpFeatureLayer.get();
                               mpFeatureLayer.reset();
                               if (selected)
                               {
@@ -231,7 +231,7 @@ void FeatureTable::selectGraphicObjects(const QItemSelection& selection, bool se
                               {
                                  pLayer->deselectObject(pGraphicObject);
                               }
-                              mpFeatureLayer.reset(pFeatureLayer);
+                              mpFeatureLayer.reset(pFeatureLayer2);
                            }
                         }
                      }
@@ -271,7 +271,7 @@ int FeatureTable::getObjectRow(const GraphicObject* pObject) const
    return -1;
 }
 
-void FeatureTable::selectRows(Subject& subject, const std::string& signal, const boost::any& data)
+void FeatureTable::selectRows(Subject& subject, const std::string& signal, const boost::any& data2)
 {
    QAbstractItemModel* pModel = model();
    VERIFYNR(pModel != NULL);
@@ -286,7 +286,7 @@ void FeatureTable::selectRows(Subject& subject, const std::string& signal, const
    clearSelection();
 
    // Select the table rows of the newly selected graphic objects
-   std::list<GraphicObject*> selectedObjects = boost::any_cast<std::list<GraphicObject*> >(data);
+   std::list<GraphicObject*> selectedObjects = boost::any_cast<std::list<GraphicObject*> >(data2);
    for (std::list<GraphicObject*>::iterator iter = selectedObjects.begin(); iter != selectedObjects.end(); ++iter)
    {
       GraphicObject* pObject = *iter;

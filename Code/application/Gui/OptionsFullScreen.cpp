@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2015 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -13,12 +13,12 @@
 #include <string>
 #include <vector>
 
-#include <QtGui/QComboBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AppVerify.h"
 #include "ConfigurationSettings.h"

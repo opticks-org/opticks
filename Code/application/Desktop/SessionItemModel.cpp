@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,7 +10,7 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
 #include <QtGui/QIcon>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include "AppVerify.h"
 #include "AppVersion.h"
@@ -30,11 +30,18 @@ using namespace std;
 SessionItemModel::SessionItemModel(QObject* pParent) :
    QAbstractItemModel(pParent),
    mpRootWrapper(new SessionItemWrapper(this, NULL))
-{}
+{
+	setSupportedDragActions(Qt::MoveAction);
+}
 
 SessionItemModel::~SessionItemModel()
 {
    delete mpRootWrapper;
+}
+
+Qt::DropActions SessionItemModel::supportedDropActions() const
+{
+	return Qt::MoveAction;
 }
 
 QModelIndex SessionItemModel::index(SessionItem* pItem) const

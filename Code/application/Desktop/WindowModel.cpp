@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,7 +9,7 @@
 
 #include <QtCore/QDataStream>
 #include <QtCore/QMimeData>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "AppVerify.h"
 #include "ClassificationLayer.h"
@@ -53,7 +53,7 @@ WindowModel::~WindowModel()
 
 Qt::DropActions WindowModel::supportedDropActions() const
 {
-   return Qt::CopyAction | Qt::MoveAction;
+   return Qt::MoveAction;
 }
 
 bool WindowModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, int row, int column,

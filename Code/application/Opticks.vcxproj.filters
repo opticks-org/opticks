@@ -647,6 +647,9 @@
     <Filter Include="Release\SupportFiles\SecurityMarkings">
       <UniqueIdentifier>{c5c3ca38-e028-4f9a-9dbf-e385bcb06321}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{41f8b311-728c-438c-acd8-cadcf1314f07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="App.rc">
@@ -775,6 +778,15 @@
     </None>
     <None Include="..\Release\SupportFiles\SecurityMarkings\ClassificationLevels.txt">
       <Filter>Release\SupportFiles\SecurityMarkings</Filter>
+    </None>
+    <None Include="..\build.py">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="..\commonutils.py">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="..\update-build-revision.py">
+      <Filter>scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,10 +9,10 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTextEdit>
 
 #include "AppVerify.h"
 #include "MultiLineTextDialog.h"

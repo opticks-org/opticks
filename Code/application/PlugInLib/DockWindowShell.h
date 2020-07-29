@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2009 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,8 +12,8 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QPointer>
-#include <QtGui/QAction>
-#include <QtGui/QWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QWidget>
 
 #include "AttachmentPtr.h"
 #include "DockWindow.h"

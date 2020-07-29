@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -568,8 +568,8 @@ RasterPage* GeoTiffPager::getPage(DataRequest *pOriginalRequest,
                for (uint32 row = 0; row < tileLength; ++row)
                {
                   const size_t rowOffset = row * mColumnCount * bandSkip * mBytesPerElement;
-                  const size_t tileOffset = row * tileWidth * bandSkip * mBytesPerElement;
-                  memcpy(pBlockPos + rowOffset, &tileData[tileOffset], numBytesToCopy);
+                  const size_t tileOffset2 = row * tileWidth * bandSkip * mBytesPerElement;
+                  memcpy(pBlockPos + rowOffset, &tileData[tileOffset2], numBytesToCopy);
                }
             }
 

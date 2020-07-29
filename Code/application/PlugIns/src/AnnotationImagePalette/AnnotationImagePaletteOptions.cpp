@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -20,13 +20,13 @@
 #include "OptionQWidgetWrapper.h"
 #include "PlugInRegistration.h"
 
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
 #include <vector>
 
 REGISTER_PLUGIN(OpticksAnnotationImagePalette, AnnotationImagePaletteOptions,  OptionQWidgetWrapper<AnnotationImagePaletteOptions>);

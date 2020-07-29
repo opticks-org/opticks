@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -95,7 +95,7 @@ namespace ArcProxyLib
 
                      for (int i = 0; i < numValues; ++i)
                      {
-                        mAttributeValues[i] = QUrl::fromPercentEncoding(attributeValues[i].toAscii()).toStdString();
+                        mAttributeValues[i] = QUrl::fromPercentEncoding(attributeValues[i].toLatin1()).toStdString();
                      }
                   }
                }
@@ -105,7 +105,7 @@ namespace ArcProxyLib
                QStringList label = featureArgs.front().split("=");
                if (label.size() == 2)
                {
-                  mLabel = QUrl::fromPercentEncoding(label[1].toAscii()).toStdString();
+                  mLabel = QUrl::fromPercentEncoding(label[1].toLatin1()).toStdString();
                }
             }
             else

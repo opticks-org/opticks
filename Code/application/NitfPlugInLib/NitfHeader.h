@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -455,8 +455,8 @@ namespace Nitf
        */
       static bool importDateYYMMDD(const ossimPropertyInterface *pPropertyInterface,
          RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const string& appName, 
-         const string& ossimName);
+         DynamicObject *pDynObj, const std::string& appName, 
+         const std::string& ossimName);
 
       /**
        * An Element contains all information needed to import

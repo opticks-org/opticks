@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -16,9 +16,9 @@
 class PointAdapter : public Point, public PointImp POINTADAPTEREXTENSION_CLASSES
 {
 public:
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary);
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point);
-   PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, bool bQuiet);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, LocationType point, bool bQuiet);
+   PointAdapter(PlotViewImp* pPlot, bool bPrimary, double dX, double dY, bool bQuiet);
    ~PointAdapter();
 
    // TypeAwareObject

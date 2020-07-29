@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -234,9 +234,9 @@ bool MemoryMappedPager::execute(PlugInArgList* pInputArgList, PlugInArgList* pOu
             for (vector<const Filename*>::const_iterator iter = bandFiles.begin();
                iter != bandFiles.end(); ++iter)
             {
-               const Filename* pFilename = *iter;
-               VERIFY(pFilename != NULL);
-               mMatrices.push_back(new MemoryMappedMatrix(pFilename->getFullPathAndName(),
+               const Filename* pFilename2 = *iter;
+               VERIFY(pFilename2 != NULL);
+               mMatrices.push_back(new MemoryMappedMatrix(pFilename2->getFullPathAndName(),
                   pFileDescriptor->getHeaderBytes() + pFileDescriptor->getPrelineBytes() +
                      pFileDescriptor->getPrebandBytes(),
                   pFileDescriptor->getInterleaveFormat(),

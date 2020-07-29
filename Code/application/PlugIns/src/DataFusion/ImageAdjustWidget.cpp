@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -24,15 +24,16 @@
 
 #include <QtCore/QTimer>
 #include <QtCore/QVariant>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
+#include <qwt_compat.h>
 #include <qwt_knob.h>
 #include <qwt_slider.h>
 #include <qwt_wheel.h>
@@ -80,7 +81,7 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    QLabel* pXShiftLabel = new QLabel("X Shift:", pOffsetScaleGroup);
    pShiftLayout->addWidget(pXShiftLabel);
    mpXOffsetWheel = new QwtWheel(pOffsetScaleGroup);
-   mpXOffsetWheel->setValid(false);
+   //TODO mpXOffsetWheel->setValid(false);
    mpXOffsetWheel->setOrientation(Qt::Horizontal);
    pShiftLayout->addWidget(mpXOffsetWheel);
    mpXOffset = new QDoubleSpinBox(pOffsetScaleGroup);
@@ -89,8 +90,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pShiftLayout->addWidget(mpXOffset);
    pShiftLayout->addSpacing(10);
 
-   mpXOffsetWheel->setPeriodic(true);
-   mpXOffsetWheel->setRange(0, 10000, 1, 100);
+   //TODO mpXOffsetWheel->setPeriodic(true);
+   mpXOffsetWheel->setRange(0, 10000); // TODO , 1, 100);
    mpXOffsetWheel->setTotalAngle(36000);
    mXOffsetPrev = mpXOffsetWheel->value();
 
@@ -104,8 +105,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pShiftLayout->addWidget(mpYOffset);
    pShiftLayout->addStretch(10);
 
-   mpYOffsetWheel->setPeriodic(true);
-   mpYOffsetWheel->setRange(0, 10000, 1, 100);
+   //TODO mpYOffsetWheel->setPeriodic(true);
+   mpYOffsetWheel->setRange(0, 10000); //TODO  , 1, 100);
    mpYOffsetWheel->setTotalAngle(36000);
    mYOffsetPrev = mpYOffsetWheel->value();
 
@@ -140,8 +141,12 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    // 15fps is usually plenty for the typical use case
    // and a larger range on the knob makes it difficult to
    // adjust since 1fps is a very small movement.
-   mpFramerateKnob->setRange(0.0, 15.0, 1);
-   mpFramerateKnob->setScale(0, 15, 3);
+   mpFramerateKnob->setLowerBound(0.0);
+   mpFramerateKnob->setUpperBound(15.0);
+   mpFramerateKnob->setPageSteps(1);
+   mpFramerateKnob->setLowerBound(0);
+   mpFramerateKnob->setUpperBound(15);
+   mpFramerateKnob->setPageSteps(3);
    pFbgLayout->addWidget(mpFramerateKnob, 0, 0, 4, 1);
 
    QLabel* pAutoFlickerRateLabel = new QLabel("Automated Flicker Rate (fps):", pFlickerBlendGroup);
@@ -178,8 +183,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pFbgLayout->addWidget(mpTransparencyLabel, 5, 0, 1, 3);
    mpAlpha = new QwtSlider(pFlickerBlendGroup);
    mpAlpha->setAutoFillBackground(false);
-   mpAlpha->setScalePosition(QwtSlider::BottomScale);
-   mpAlpha->setBgStyle(QwtSlider::BgSlot);
+   //TODO mpAlpha->setScalePosition(QwtSlider::BottomScale);
+   //TODO mpAlpha->setBgStyle(QwtSlider::BgSlot);
    pFbgLayout->addWidget(mpAlpha, 6, 0, 1, 3);
 
    pFbgLayout->setRowStretch(7, 10);
@@ -272,13 +277,13 @@ void ImageAdjustWidget::updateOffset(double value)
    if (pSender == mpXOffsetWheel)
    {
       double delta = value - mXOffsetPrev;
-      if (delta > (mpXOffsetWheel->maxValue() / 2))
+      if (delta > (mpXOffsetWheel->maximum() / 2))
       {
-         delta -= mpXOffsetWheel->maxValue();
+         delta -= mpXOffsetWheel->maximum();
       }
-      else if (-delta > (mpXOffsetWheel->maxValue() / 2))
+      else if (-delta > (mpXOffsetWheel->maximum() / 2))
       {
-         delta += mpXOffsetWheel->maxValue();
+         delta += mpXOffsetWheel->maximum();
       }
       mpXOffset->setValue(mpXOffset->value() + delta);
       mXOffsetPrev = value;
@@ -286,13 +291,13 @@ void ImageAdjustWidget::updateOffset(double value)
    else if (pSender == mpYOffsetWheel)
    {
       double delta = value - mYOffsetPrev;
-      if (delta > (mpYOffsetWheel->maxValue() / 2))
+      if (delta > (mpYOffsetWheel->maximum() / 2))
       {
-         delta -= mpYOffsetWheel->maxValue();
+         delta -= mpYOffsetWheel->maximum();
       }
-      else if (-delta > (mpYOffsetWheel->maxValue() / 2))
+      else if (-delta > (mpYOffsetWheel->maximum() / 2))
       {
-         delta += mpYOffsetWheel->maxValue();
+         delta += mpYOffsetWheel->maximum();
       }
       mpYOffset->setValue(mpYOffset->value() + delta);
       mYOffsetPrev = value;
@@ -494,7 +499,7 @@ bool ImageAdjustWidget::deserialize(SessionItemDeserializer& deserializer)
 
    for (DOMNode* pChild = pRootElement->getFirstChild(); pChild != NULL; pChild = pChild->getNextSibling())
    {
-      DOMElement* pElement = static_cast<DOMElement*>(pChild);
+//      DOMElement* pElement = static_cast<DOMElement*>(pChild);
       if (XMLString::equals(pChild->getNodeName(), X("ViewId")))
       {
          std::string viewid = A(pChild->getTextContent());

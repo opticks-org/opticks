@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -670,10 +670,10 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       if (isdFilename.isEmpty() == true)
       {
          // An ISD filename has not yet been set, so check for an existing file based on the raster filename
-         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
-         if (pFileDescriptor != NULL)
+         const FileDescriptor* pFileDescriptor2 = pDescriptor->getFileDescriptor();
+         if (pFileDescriptor2 != NULL)
          {
-            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
+            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor2->getFilename().getFullPathAndName()));
             QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
             if (isdInfo.exists() == true)
             {

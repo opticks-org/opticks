@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -20,13 +20,13 @@
 #include "QueryOptionsWidget.h"
 
 #include <QtCore/QFile>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QPushButton>
-#include <QtGui/QProgressBar>
-#include <QtGui/QRadioButton>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QTabWidget>
 
 #include <algorithm>
 #include <boost/bind.hpp>

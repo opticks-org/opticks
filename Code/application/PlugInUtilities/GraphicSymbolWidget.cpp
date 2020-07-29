@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,10 +11,10 @@
 #include "AppVerify.h"
 #include "DesktopServices.h"
 
-#include <QtGui/QListWidget>
-#include <QtGui/QLabel>
-#include <QtGui/QGridLayout>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QSpinBox>
 
 #include <vector>
 #include <string>

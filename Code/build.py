@@ -457,24 +457,24 @@ class WindowsBuilder(Builder):
             "64" if self.is_64_bit else "32")
 
         # Qt DLLs for ArcProxy
-        if self.verbosity > 1:
-            print("Gathering Qt dll's needed for ArcProxy...")
-        proxy_dir = join(self.get_binaries_dir(build_dir),
-            "PlugIns", "ArcProxy")
-        if not os.path.exists(proxy_dir):
-            os.makedirs(proxy_dir)
-
-        proxy_dll_names = []
-        if self.build_debug_mode:
-            proxy_dll_names = ["QtCored4.dll", "QtNetworkd4.dll"]
-        else:
-            proxy_dll_names = ["QtCore4.dll", "QtNetwork4.dll"]
-        for proxy_dll_name in proxy_dll_names:
-            shutil.copy2(join(self.depend_path, "32",
-                "lib", proxy_dll_name),
-                join(proxy_dir, proxy_dll_name))
-        if self.verbosity > 1:
-            print("Done gathering Qt dll's needed for ArcProxy")
+        #if self.verbosity > 1:
+        #    print("Gathering Qt dll's needed for ArcProxy...")
+        #proxy_dir = join(self.get_binaries_dir(build_dir),
+        #    "PlugIns", "ArcProxy")
+        #if not os.path.exists(proxy_dir):
+        #    os.makedirs(proxy_dir)
+		#
+        #proxy_dll_names = []
+        #if self.build_debug_mode:
+        #    proxy_dll_names = ["Qt5Cored.dll", "Qt5Networkd.dll"]
+        #else:
+        #    proxy_dll_names = ["Qt5Core.dll", "Qt5Network.dll"]
+        #for proxy_dll_name in proxy_dll_names:
+        #    shutil.copy2(join(self.depend_path, "32",
+        #        "lib", proxy_dll_name),
+        #        join(proxy_dir, proxy_dll_name))
+        #if self.verbosity > 1:
+        #    print("Done gathering Qt dll's needed for ArcProxy")
 
         return bin_path
 

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2014 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,10 +10,10 @@
 #ifndef OPTIONSLASIMPORTER_H__
 #define OPTIONSLASIMPORTER_H__
 
-#include <QtGui/QComboBox>
-#include <QtGui/QWidget>
-#include <QtGui/QLineEdit>
-#include <QtGui/QLabel>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QLabel>
 
 class OptionLasImporter : public QObject
 {

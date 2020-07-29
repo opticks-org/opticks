@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -15,8 +15,7 @@
 #include "glCommon.h"
 #include "TypesFile.h"
 
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
+#include "GpuProgram.h"
 
 #include <vector>
 
@@ -32,7 +31,7 @@ public:
    ~GpuTile();
 
    void setupTile(void* pData, EncodingType encodingType, unsigned int index);
-   void draw(CGparameter outputCgTextureParam, GLfloat textureMode);
+   void draw(GpuProgram* pProgram, GLfloat textureMode);
 
    ImageFilter *createFilter(ImageFilterDescriptor *pDescriptor);
    ImageFilter *getFilter(ImageFilterDescriptor *pDescriptor) const;
@@ -42,6 +41,7 @@ public:
    void freezeFilter(ImageFilterDescriptor *pDescriptor, bool toggle = true);
    bool getFilterFreezeFlag(ImageFilterDescriptor *pDescriptor) const;
    unsigned int readFilterBuffer(GLint xCoord, GLint yCoord, GLsizei width, GLsizei height, GLvoid* pPixels);
+   unsigned int writeFilterBuffer( GLint tileOffsetX, GLint tileOffsetY,GLint xCoord, GLint yCoord, GLint width,GLint height, GLint chipWidth, GLint chipHeight, GLvoid* pPixels);
 
    bool isTextureReady(unsigned int index) const;
 

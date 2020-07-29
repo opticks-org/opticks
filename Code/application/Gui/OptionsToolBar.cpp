@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2015 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,9 +9,9 @@
 
 #include "OptionsToolBar.h"
 
-#include <QtGui/QSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QVBoxLayout>
 
 #include "ConfigurationSettings.h"
 #include "LabeledSection.h"

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -30,14 +30,14 @@
 #include "Units.h"
 
 #include <QtCore/QRegExp>
-#include <QtGui/QApplication>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QComboBox>
 #include <QtGui/QFocusEvent>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 #include <QtGui/QRegExpValidator>
 
 #include <algorithm>
@@ -437,8 +437,8 @@ void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool e
       pDataTypeItem->setText(0, "Intensity Data Type");
       if (pPointDescriptor->hasIntensityData())
       {
-         string dataTypeText = StringUtilities::toDisplayString(pPointDescriptor->getIntensityDataType());
-         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
+         string dataTypeText2 = StringUtilities::toDisplayString(pPointDescriptor->getIntensityDataType());
+         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText2));
       }
       else
       {
@@ -451,8 +451,8 @@ void DataDescriptorWidget::setDataDescriptor(DataDescriptor* pDescriptor, bool e
       pDataTypeItem->setText(0, "Classification Data Type");
       if (pPointDescriptor->hasClassificationData())
       {
-         string dataTypeText = StringUtilities::toDisplayString(pPointDescriptor->getClassificationDataType());
-         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText));
+         string dataTypeText2 = StringUtilities::toDisplayString(pPointDescriptor->getClassificationDataType());
+         pDataTypeItem->setText(1, QString::fromStdString(dataTypeText2));
       }
       else
       {

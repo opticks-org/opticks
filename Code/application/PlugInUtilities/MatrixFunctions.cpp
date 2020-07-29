@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -101,7 +101,8 @@ bool MatrixFunctions::getEigenvalues(const double** pSymmetricMatrix,
    // Compute the eigenvalues and eigenvectors.
    Matrix eigenvectors;
    DiagonalMatrix eigenvalues;
-   EigenValues(sourceMatrix, eigenvalues, eigenvectors, false);
+   EigenValues(sourceMatrix, eigenvalues, eigenvectors);
+   SortSV(eigenvalues, eigenvectors, false);
 
    // Copy eigenvalues to pEigenvalues.
    if (pEigenvalues != NULL)
@@ -272,7 +273,14 @@ bool MatrixFunctions::computeSingularValueDecomposition(const double** pMatrix, 
    {
       // Solve the equation. Throws an exception on invalid input or when unable to converge.
       SVD(inputMatrix, outputMatrix, columnMatrix, orthogonalMatrix,
-         computeColumnMatrix, computeOrthogonalMatrix, sortResults);
+		  computeColumnMatrix, computeOrthogonalMatrix);
+	  if (sortResults == true)
+	  {
+		  if (computeColumnMatrix & computeOrthogonalMatrix) SortSV(outputMatrix, columnMatrix, orthogonalMatrix);
+		  else if (computeColumnMatrix) SortSV(outputMatrix, columnMatrix);
+		  else if (computeOrthogonalMatrix) SortSV(outputMatrix, orthogonalMatrix);
+		  else SortDescending(outputMatrix);
+	  }
    }
    catch (const RBD_COMMON::BaseException&)
    {

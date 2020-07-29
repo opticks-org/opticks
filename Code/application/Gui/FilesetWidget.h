@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,11 +10,11 @@
 #ifndef FILESETWIDGET_H
 #define FILESETWIDGET_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTreeWidgetItem>
+#include <QtWidgets/QWidget>
 
 class BatchFileset;
 class CustomTreeWidget;

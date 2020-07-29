@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -107,6 +107,7 @@ bool Jpeg2000Pager::openFile(const std::string& filename)
       return false;
    }
 
+   mpFilename = const_cast<char *>(filename.c_str());
    mpFile = fopen(filename.c_str(), "rb");
    return (mpFile != NULL);
 }
@@ -378,8 +379,8 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 
       fileLength = fileSize - static_cast<size_t>(mOffset);
    }
-
-   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
+   const char *fname = mpFilename;
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
    if (pStream == NULL)
    {
       return NULL;

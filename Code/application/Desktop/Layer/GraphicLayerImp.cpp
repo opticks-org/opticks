@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -36,6 +36,8 @@
 #include "GraphicGroupImp.h"
 #include "GuiFunctors.h"
 #include "LatLonInsertObject.h"
+#include "LayerList.h"
+#include "LayerListImp.h"
 #include "MultiLineTextDialog.h"
 #include "OrthographicView.h"
 #include "PlotWidgetAdapter.h"
@@ -43,6 +45,8 @@
 #include "PolylineObject.h"
 #include "PolylineObjectImp.h"
 #include "ScaleBarObject.h"
+#include "SpatialDataView.h"
+#include "SpatialDataWindow.h"
 #include "SymbolManager.h"
 #include "Undo.h"
 #include "View.h"
@@ -50,10 +54,10 @@
 #include "WidgetImageObjectImp.h"
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 #include <QtOpenGL/QGLWidget>
 
 #include <algorithm>
@@ -78,7 +82,8 @@ GraphicLayerImp::GraphicLayerImp(const string& id, const string& layerName, Data
    mpInsertingObject(NULL),
    mCurrentType(MOVE_OBJECT),
    mpUndoLock(NULL),
-   mHandleSize(4.0)
+   mHandleSize(4.0),
+   mCustomReplicate(false)
 {
    addAcceptableGraphicType(MOVE_OBJECT);
    addAcceptableGraphicType(ROTATE_OBJECT);
@@ -320,6 +325,28 @@ bool GraphicLayerImp::removeObject(GraphicObject* pObject, bool bDelete)
    }
 
    return bSuccess;
+}
+
+bool GraphicLayerImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
+{
+	bool bSuccess = getGroup()->removeObjects(objects, bDelete);
+	if (bSuccess == true)
+	{
+		emit modified();
+		notify(SIGNAL_NAME(Subject, Modified));
+	}
+	
+	return bSuccess;
+}
+
+void GraphicLayerImp::setCustomReplicate(bool replicate)
+{
+	mCustomReplicate = replicate;
+}
+
+bool GraphicLayerImp::getCustomReplicate() const
+{
+	return mCustomReplicate;
 }
 
 bool GraphicLayerImp::hasObject(GraphicObject* pObject) const
@@ -2006,6 +2033,14 @@ void GraphicLayerImp::updateContextMenu(Subject& subject, const string& signal, 
          pMenu->addActionBefore(pDeleteAction, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION,
             APP_GRAPHICLAYER_OBJECT_DELETE_SEPARATOR_ACTION);
       }
+	  if (dynamic_cast<GraphicLayerImp*>(items.front()) == this)
+	  {
+		  // Copy to another view
+		  QAction* pCopyToViewAction = new QAction(QIcon(":/icons/Copy"), "Copy to View", pParent);
+		  pCopyToViewAction->setAutoRepeat(false);
+		  connect(pCopyToViewAction, SIGNAL(triggered()), this, SLOT(copyToView()));
+		  pMenu->addActionBefore(pCopyToViewAction, APP_GRAPHICLAYER_COPY_TO_VIEW_ACTION, APP_GRAPHICLAYER_OBJECT_DELETE_ACTION);
+	  }
    }
    else if (numItems > 1)
    {
@@ -2083,4 +2118,61 @@ void GraphicLayerImp::layerActivated(bool activated)
       completeInsertion();
       deselectAllObjects();
    }
+}
+
+void GraphicLayerImp::copyToView()
+{
+	// get destination view
+	std::vector<Window*> windows;
+	Service<DesktopServices>()->getWindows(SPATIAL_DATA_WINDOW, windows);
+	const SpatialDataView* pThisView = dynamic_cast<SpatialDataView*>(getView());
+	VERIFYNRV(pThisView);
+	QStringList availableViews;
+	QMap<QString, SpatialDataView*> nameMap;
+	for (auto window = windows.begin(); window != windows.end(); ++window)
+	{
+		auto pView = dynamic_cast<SpatialDataView*>(dynamic_cast<SpatialDataWindow*>(*window)->getActiveView());
+		if (pView != pThisView)
+		{
+			QString dname = QString::fromStdString(pView->getDisplayName(true));
+			availableViews.push_back(dname);
+			nameMap.insert(dname, pView);
+		}
+	}
+	QString destination = QInputDialog::getItem(pThisView->getWidget(), "Copy Layer to View", "Destination", availableViews, 0, false);
+	if (!nameMap.contains(destination))
+	{
+		return;
+	}
+	SpatialDataView* pDest = nameMap[destination];
+	VERIFYNRV(pDest);
+	
+	UndoGroup group(pDest, "Copy Graphic Layer to View");
+	if (mCustomReplicate)
+	{
+		notify(SIGNAL_NAME(GraphicLayer, CustomReplicate), boost::any(pDest));
+	}
+	else
+	{
+		// create a layer with a unique name
+		LayerListImp* pLayerList = dynamic_cast<LayerListImp*>(pDest->getLayerList());
+		VERIFYNRV(pLayerList);
+		QString newLayerName = pLayerList->getUniqueLayerName(QString::fromStdString(getName()), getLayerType());
+		if (newLayerName.isEmpty())
+		{
+			return;
+		}
+		GraphicLayer* pNewLayer = dynamic_cast<GraphicLayer*>(pDest->createLayer(getLayerType(), nullptr, newLayerName.toStdString()));
+		std::list<GraphicObject*> objects = getObjects();
+		for (auto object = objects.begin(); object != objects.end(); ++object)
+		{
+			GraphicObject* pNewObject = pNewLayer->addObject((*object)->getGraphicObjectType());
+			if (pNewObject != nullptr)
+			{
+				GraphicObjectImp* pNewObjectImp = dynamic_cast<GraphicObjectImp*>(pNewObject);
+				VERIFYNRV(pNewObjectImp);
+				pNewObjectImp->replicateObject(*object);
+			}
+		}
+	}
 }

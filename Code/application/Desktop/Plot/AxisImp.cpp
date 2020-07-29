@@ -1,17 +1,20 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 #include <qwt_math.h>
 #include <qwt_scale_map.h>
+#include <qwt_compat.h>
+#include <qwt_transform.h>
+
 
 #include "AxisImp.h"
 #include "StringUtilities.h"
@@ -32,7 +35,7 @@ AxisImp::AxisImp(AxisPosition position, QWidget* pParent) :
    mTitleFont(QApplication::font()),
    mTitleColor(Qt::black)
 {
-   setAttribute(Qt::WA_PaintOutsidePaintEvent);
+//   setAttribute(Qt::WA_PaintOutsidePaintEvent);
    mLinearScale.setAttribute(QwtScaleEngine::Floating);
    mLogScale.setAttribute(QwtScaleEngine::Floating);
 
@@ -258,8 +261,10 @@ QSize AxisImp::sizeHint() const
       case QwtScaleDraw::LeftScale:
       case QwtScaleDraw::RightScale:
       {
-         iScaleWidth = mScaleDraw.extent(QPen(Qt::black), labelFont);
-         iScaleHeight = mScaleDraw.minLength(QPen(Qt::black), labelFont);
+         //iScaleWidth = mScaleDraw.extent(QPen(Qt::black), labelFont);
+         //iScaleHeight = mScaleDraw.minLength(QPen(Qt::black), labelFont);
+         iScaleWidth = mScaleDraw.extent(labelFont);
+         iScaleHeight = mScaleDraw.minLength(labelFont);
 
          int iStartWidth = 0;
          int iEndWidth = 0;
@@ -273,8 +278,10 @@ QSize AxisImp::sizeHint() const
       case QwtScaleDraw::TopScale:
       case QwtScaleDraw::BottomScale:
       {
-         iScaleWidth = mScaleDraw.minLength(QPen(Qt::black), labelFont);
-         iScaleHeight = mScaleDraw.extent(QPen(Qt::black), labelFont);
+         //iScaleWidth = mScaleDraw.minLength(QPen(Qt::black), labelFont);
+         //iScaleHeight = mScaleDraw.extent(QPen(Qt::black), labelFont);
+         iScaleWidth = mScaleDraw.minLength(labelFont);
+         iScaleHeight = mScaleDraw.extent(labelFont);
 
          szScale.setWidth(qwtMax(iTitleWidth, iScaleWidth));
          szScale.setHeight(iScaleHeight + iTitleHeight);
@@ -341,7 +348,8 @@ void AxisImp::paintEvent(QPaintEvent* e)
    // Draw to an off-screen pixmap
    QRect rcWidget = rect();
    QPixmap pix(rcWidget.size());
-   pix.fill(this, 0, 0);
+//VS2017   pix.fill(this, 0, 0);
+   pix.fill(Qt::transparent);
 
    QPainter p(&pix);
 
@@ -352,29 +360,37 @@ void AxisImp::paintEvent(QPaintEvent* e)
    switch (mScaleDraw.alignment())
    {
       case QwtScaleDraw::LeftScale:
-         iScaleWidth = mScaleDraw.extent(p.pen(), p.font());
-         iScaleHeight = mScaleDraw.minLength(p.pen(), p.font());
+         //iScaleWidth = mScaleDraw.extent(p.pen(), p.font());
+         //iScaleHeight = mScaleDraw.minLength(p.pen(), p.font());
+         iScaleWidth = mScaleDraw.extent(p.font());
+         iScaleHeight = mScaleDraw.minLength(p.font());
          mScaleDraw.move(rcWidget.right(), rcWidget.y());
          mScaleDraw.setLength(rcWidget.height());
          break;
 
       case QwtScaleDraw::RightScale:
-         iScaleWidth = mScaleDraw.extent(p.pen(), p.font());
-         iScaleHeight = mScaleDraw.minLength(p.pen(), p.font());
+         //iScaleWidth = mScaleDraw.extent(p.pen(), p.font());
+         //iScaleHeight = mScaleDraw.minLength(p.pen(), p.font());
+         iScaleWidth = mScaleDraw.extent(p.font());
+         iScaleHeight = mScaleDraw.minLength(p.font());
          mScaleDraw.move(rcWidget.x(), rcWidget.y());
          mScaleDraw.setLength(rcWidget.height());
          break;
 
       case QwtScaleDraw::TopScale:
-         iScaleWidth = mScaleDraw.minLength(p.pen(), p.font());
-         iScaleHeight = mScaleDraw.extent(p.pen(), p.font());
+         //iScaleWidth = mScaleDraw.minLength(p.pen(), p.font());
+         //iScaleHeight = mScaleDraw.extent(p.pen(), p.font());
+         iScaleWidth = mScaleDraw.minLength(p.font());
+         iScaleHeight = mScaleDraw.extent(p.font());
          mScaleDraw.move(rcWidget.x(), rcWidget.bottom());
          mScaleDraw.setLength(rcWidget.width());
          break;
 
       case QwtScaleDraw::BottomScale:
-         iScaleWidth = mScaleDraw.minLength(p.pen(), p.font());
-         iScaleHeight = mScaleDraw.extent(p.pen(), p.font());
+         //iScaleWidth = mScaleDraw.minLength(p.pen(), p.font());
+         //iScaleHeight = mScaleDraw.extent(p.pen(), p.font());
+         iScaleWidth = mScaleDraw.minLength(p.font());
+         iScaleHeight = mScaleDraw.extent(p.font());
          mScaleDraw.move(rcWidget.x(), rcWidget.y());
          mScaleDraw.setLength(rcWidget.width());
          break;
@@ -453,7 +469,7 @@ void AxisImp::updateScale()
 {
    const QwtScaleDiv& scaleDiv = mScaleDraw.scaleDiv();
    QwtScaleDiv newScaleDiv;
-   QwtScaleTransformation* pScaleTransformation = NULL;
+   QwtTransform* pScaleTransformation = NULL;
 
    double dStart = scaleDiv.lowerBound();
    double dEnd = scaleDiv.upperBound();

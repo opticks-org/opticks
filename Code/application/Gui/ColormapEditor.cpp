@@ -1,6 +1,6 @@
 ﻿/*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,10 +12,10 @@
 #include "HistogramPlotImp.h"
 #include "RasterLayer.h"
 
-#include <QtGui/QColorDialog>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFormLayout>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QMessageBox>
 
 #include <vector>
 

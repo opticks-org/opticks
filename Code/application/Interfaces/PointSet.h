@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -263,5 +263,28 @@ protected:
     */
    virtual ~PointSet() {}
 };
+
+#define POINT_SET_EXT_EXISTS
+
+/**
+ * Extends the PointSet class.
+ *
+ * @see PointSet
+ */
+class PointSetExt : public PointSet
+{
+public:
+   /**
+ 	 *	Creates an empty Point plot object and adds it to the pointset.	The
+ 	 *	created object will not have most of its signals attached. Only	the ones
+ 	 *	relating to extents will be attached. This can be a significant
+ 	 *	performance boost when there are many objects being created.
+ 	 *
+ 	 *	@return The newly created Point
+ 	 *
+ 	 * @notify This method will notify signalPointAdded with any<Point*>.
+ 	 */
+   virtual Point* addQuietPoint() = 0;
+ };
 
 #endif

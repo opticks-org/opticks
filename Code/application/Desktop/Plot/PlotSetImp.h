@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,8 +10,8 @@
 #ifndef PLOTSETIMP_H
 #define PLOTSETIMP_H
 
-#include <QtGui/QMenu>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QTabWidget>
 
 #include "AttachmentPtr.h"
 #include "SessionExplorer.h"
@@ -21,6 +21,7 @@
 #include "View.h"
 #include "XercesIncludes.h"
 #include "xmlwriter.h"
+#include "PlotSet.h"
 
 #include <string>
 #include <vector>

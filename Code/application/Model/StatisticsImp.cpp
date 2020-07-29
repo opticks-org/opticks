@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -595,66 +595,66 @@ bool StatisticsImp::fromXml(DOMNode* pDocument, unsigned int version)
       }
       else if (XMLString::equals(pNode->getNodeName(), X("minimum")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
-            A(pElement->getAttribute(X("value"))));
+            A(pElement2->getAttribute(X("value"))));
          mMinValues[component] = value;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("maximum")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
-            A(pElement->getAttribute(X("value"))));
+            A(pElement2->getAttribute(X("value"))));
          mMaxValues[component] = value;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("average")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
-            A(pElement->getAttribute(X("value"))));
+            A(pElement2->getAttribute(X("value"))));
          mAverageValues[component] = value;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("stddev")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          double value = StringUtilities::fromXmlString<double>(
-            A(pElement->getAttribute(X("value"))));
+            A(pElement2->getAttribute(X("value"))));
          mStandardDeviationValues[component] = value;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("percentile")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          std::vector<double> values;
-         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement2->getTextContent());
          mPercentileValues[component] = values;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("center")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          std::vector<double> values;
-         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement->getTextContent());
+         XmlReader::StrToVector<double, XmlReader::StringStreamAssigner<double> >(values, pElement2->getTextContent());
          mBinCenterValues[component] = values;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("histogram")))
       {
-         DOMElement* pElement = static_cast<DOMElement*>(pNode);
+         DOMElement* pElement2 = static_cast<DOMElement*>(pNode);
          ComplexComponent component = StringUtilities::fromXmlString<ComplexComponent>(
-            A(pElement->getAttribute(X("component"))));
+            A(pElement2->getAttribute(X("component"))));
          std::vector<unsigned int> values;
          XmlReader::StrToVector<unsigned int, XmlReader::StringStreamAssigner<unsigned int> >(values,
-            pElement->getTextContent());
+            pElement2->getTextContent());
          mHistogramValues[component] = values;
       }
       else if (XMLString::equals(pNode->getNodeName(), X("badValues")))

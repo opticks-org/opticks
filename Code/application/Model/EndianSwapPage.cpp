@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 
 EndianSwapPage::EndianSwapPage(void* pSrcData, EncodingType encoding, unsigned int rows, unsigned int columns,
                                unsigned int bytesPerRow, unsigned int interlineBytes, unsigned char* pEndOfSegment) :

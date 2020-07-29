@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -38,6 +38,7 @@ public:
     *  @param   pGpuDescriptor
     *           GPU Program descriptor.
     */
+   explicit GpuProgram();
    explicit GpuProgram(GpuProgramDescriptor* pGpuDescriptor);
 
    /**
@@ -52,14 +53,14 @@ public:
     *
     *  @see  setGpuParameters()
     */
-   void bind();
+   virtual void bind();
 
    /**
     *  Disables the specific GPU program.
     *
     *  @see  bind()
     */
-   void disable();
+   virtual void disable();
 
    /**
     *  Returns the GPU program descriptor from which
@@ -78,19 +79,15 @@ public:
     * to the GPU program's input parameters. The map has the name of the input
     * parameter as its key to get the associated color buffer that has the texture id.
     */
-   void setColorBuffers(const std::map<std::string, ColorBuffer*>& colorBuffers)
+   virtual void setColorBuffers(const std::map<std::string, ColorBuffer*>& colorBuffers)
    {
       mColorBuffers = colorBuffers;
    }
 
-#if defined(CG_SUPPORTED)
-   CGprogram getProgramId()
-   {
-      return mProgramId;
-   }
-#endif
+   virtual void setInput(int textureId);
 
-private: // member methods
+
+protected: // member methods
    /**
     *  Sets the necessary GPU input parameters for the program.
     *
@@ -98,10 +95,6 @@ private: // member methods
     */
    virtual bool setGpuParameters();
 
-#if defined(CG_SUPPORTED)
-   CGprogram mProgramId;
-   CGprofile mProfile;
-#endif
    GpuProgramDescriptor* mpGpuProgramDescriptor;
    GLuint mInputImage;
    std::map<std::string, ColorBuffer*> mColorBuffers;

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -775,9 +775,9 @@ bool RasterFileDescriptorImp::fromXml(DOMNode* pDocument, unsigned int version)
          string bandFile = A(pChild->getTextContent());
          if (bandFile.empty() == false)
          {
-            bool error;
-            FactoryResource<Filename> pTempFilename(StringUtilities::fromXmlString<Filename*>(bandFile, &error));
-            success = !error;
+            bool error2;
+            FactoryResource<Filename> pTempFilename(StringUtilities::fromXmlString<Filename*>(bandFile, &error2));
+            success = !error2;
             if (success)
             {
                mBandFiles.push_back(pTempFilename.release());

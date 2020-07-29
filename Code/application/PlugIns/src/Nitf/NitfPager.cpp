@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -110,7 +110,7 @@ bool Nitf::Pager::parseInputArgs(PlugInArgList* pInputArgList)
          std::string pvtype = dv_cast<std::string>(pMetadata->getAttributeByPath(pvtypeAttributePath));
 
          mFileEncoding = Nitf::nitfImageTypeToEncodingType(nbpp, pvtype);
-         const string bandsbPath[] =
+         const std::string bandsbPath[] =
          {
             Nitf::NITF_METADATA,
             Nitf::TRE_METADATA,
@@ -138,7 +138,7 @@ bool Nitf::Pager::parseInputArgs(PlugInArgList* pInputArgList)
    return rval;
 }
 
-bool Nitf::Pager::openFile(const string& filename)
+bool Nitf::Pager::openFile(const std::string& filename)
 {
    mpImageHandler = Nitf::OssimImageHandlerResource(filename);
    return mpImageHandler.get() != NULL;
@@ -174,7 +174,7 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    // Try to set the output band list.
    // If it cannot succeed (e.g.: for VQ), this is not an error.
-   vector<ossim_uint32> bandList(concurrentBands);
+   std::vector<ossim_uint32> bandList(concurrentBands);
    for (unsigned int band = 0; band < concurrentBands; ++band)
    {
       bandList[band] = bandNumber + band;

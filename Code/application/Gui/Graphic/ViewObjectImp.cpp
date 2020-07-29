@@ -1,18 +1,18 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QMoveEvent>
 #include <QtGui/QResizeEvent>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AppVerify.h"
 #include "Classification.h"
@@ -224,10 +224,10 @@ void ViewObjectImp::setView(View* pView)
          VERIFYNR(connect(mpView, SIGNAL(backgroundColorChanged(const QColor&)), this,
             SLOT(setBackgroundColor(const QColor&))));
 
-         ViewImp* pViewImp = dynamic_cast<ViewImp*>(mpView);
+         ViewImp* pViewImp2 = dynamic_cast<ViewImp*>(mpView);
          if (pViewImp != NULL)
          {
-            VERIFYNR(connect(pViewImp, SIGNAL(displayAreaChanged()), this, SLOT(refresh())));
+            VERIFYNR(connect(pViewImp2, SIGNAL(displayAreaChanged()), this, SLOT(refresh())));
          }
 
          SpatialDataViewImp* pSpatialDataViewImp = dynamic_cast<SpatialDataViewImp*>(mpView);
@@ -626,8 +626,8 @@ bool ViewObjectImp::fromXml(DOMNode *pDocument, unsigned int version)
                {
                   if (XMLString::equals(pTextNode->getNodeName(), X("Graphic")))
                   {
-                     DOMElement* pElement(static_cast<DOMElement*>(pTextNode));
-                     string type(A(pElement->getAttribute(X("type"))));
+                     DOMElement* pElement2(static_cast<DOMElement*>(pTextNode));
+                     string type(A(pElement2->getAttribute(X("type"))));
 
                      GraphicObjectType objectType = StringUtilities::fromXmlString<GraphicObjectType>(type);
                      if (objectType == TEXT_OBJECT)

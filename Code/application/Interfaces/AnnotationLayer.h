@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -41,6 +41,20 @@ public:
     * @return The corrected coordinate.
     */
    virtual LocationType correctCoordinate(const LocationType &coord) const = 0;
+   
+   /**
+    *  Copy a graphic object to the layer.
+	*
+	*  This method adds a graphic object to the layer which is a clone of the specified object.
+	*
+	*  @param pObject
+	*         The object to clone.
+	*
+	*  @return A pointer to the new graphic object. NULL is returned if an error occured.
+	*
+	*  @notify This method will notify Subject::signalModified.
+	*/
+	virtual GraphicObject* cloneObject(const GraphicObject* pObject) = 0;
 
 protected:
    /**

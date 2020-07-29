@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -23,9 +23,9 @@
 #include "ProgressTracker.h"
 #include "RasterElement.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QFormLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QWidget>
 #include <errno.h>
 #include <string.h>
 

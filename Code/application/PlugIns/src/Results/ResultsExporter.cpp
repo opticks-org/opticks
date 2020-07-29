@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -155,10 +155,10 @@ QWidget* ResultsExporter::getExportOptionsWidget(const PlugInArgList *pInArgList
                bool hasGeoData = pResults->isGeoreferenced();
                if (hasGeoData == false)
                {
-                  RasterElement* pParent = dynamic_cast<RasterElement*>(mpResults->getParent());
-                  if (pParent != NULL)
+                  RasterElement* pParent2 = dynamic_cast<RasterElement*>(mpResults->getParent());
+                  if (pParent2 != NULL)
                   {
-                     hasGeoData = pParent->isGeoreferenced();
+                     hasGeoData = pParent2->isGeoreferenced();
                   }
                }
 

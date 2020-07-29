@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,9 +9,9 @@
 
 #include "RpcGui.h"
 
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QSpinBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSpinBox>
 
 RpcGui::RpcGui(QWidget* pParent) :
    QWidget(pParent),

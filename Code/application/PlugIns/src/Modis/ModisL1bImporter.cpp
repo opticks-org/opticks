@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from
@@ -823,12 +823,12 @@ bool ModisL1bImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
             if ((iter->second.first == true) && (iter->second.second == true))
             {
-               RasterElement* pParent = dynamic_cast<RasterElement*>(pRaster->getParent());
-               if ((pParent != NULL) && (pParent->isGeoreferenced() == false))
+               RasterElement* pParent2 = dynamic_cast<RasterElement*>(pRaster->getParent());
+               if ((pParent2 != NULL) && (pParent2->isGeoreferenced() == false))
                {
                   // Do not georeference if the user disabled auto-georeference in the import options dialog
                   const RasterDataDescriptor* pDescriptor =
-                     dynamic_cast<const RasterDataDescriptor*>(pParent->getDataDescriptor());
+                     dynamic_cast<const RasterDataDescriptor*>(pParent2->getDataDescriptor());
                   VERIFY(pDescriptor != NULL);
 
                   const GeoreferenceDescriptor* pGeorefDescriptor = pDescriptor->getGeoreferenceDescriptor();
@@ -841,7 +841,7 @@ bool ModisL1bImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
                      Progress* pProgress = getProgress();
 
                      ExecutableResource geoPlugIn(MODIS_GEOREFERENCE_NAME, std::string(), pProgress, true);
-                     geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pParent);
+                     geoPlugIn->getInArgList().setPlugInArgValue(Executable::DataElementArg(), pParent2);
                      if (geoPlugIn->execute() == true)
                      {
                         // Display the latitude/longitude layer if running the importer in interactive mode
@@ -850,7 +850,7 @@ bool ModisL1bImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
                            SpatialDataView* pView = NULL;
 
                            SpatialDataWindow* pWindow = dynamic_cast<SpatialDataWindow*>(
-                              Service<DesktopServices>()->getWindow(pParent->getName(), SPATIAL_DATA_WINDOW));
+                              Service<DesktopServices>()->getWindow(pParent2->getName(), SPATIAL_DATA_WINDOW));
                            if (pWindow != NULL)
                            {
                               pView = pWindow->getSpatialDataView();
@@ -864,7 +864,7 @@ bool ModisL1bImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
 
                            ExecutableResource geoDisplayPlugIn("Georeference", std::string(), pProgress, true);
                            PlugInArgList& inArgList = geoDisplayPlugIn->getInArgList();
-                           VERIFY(inArgList.setPlugInArgValue(Executable::DataElementArg(), pParent));
+                           VERIFY(inArgList.setPlugInArgValue(Executable::DataElementArg(), pParent2));
                            VERIFY(inArgList.setPlugInArgValue(Executable::ViewArg(), pView));
                            VERIFY(inArgList.setPlugInArgValue("Results Name", &layerName));
                            VERIFY(inArgList.setPlugInArgValue("Create Layer", &createLayer));

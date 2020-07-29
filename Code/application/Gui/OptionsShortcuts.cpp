@@ -1,20 +1,20 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QHeaderView>
 #include <QtGui/QImage>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 #include <QtGui/QPixmap>
-#include <QtGui/QTreeWidgetItem>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QTreeWidgetItem>
+#include <QtWidgets/QVBoxLayout>
 
 #include "ApplicationWindow.h"
 #include "AppVerify.h"
@@ -405,10 +405,10 @@ void OptionsShortcuts::displayContextMenu(const QPoint& pos)
                   QTreeWidgetItem* pDuplicateItem = duplicateItems[i];
                   if (pDuplicateItem != NULL)
                   {
-                     QString shortcut = getShortcut(pDuplicateItem);
+                     QString shortcut2 = getShortcut(pDuplicateItem);
                      if (shortcut.isEmpty() == false)
                      {
-                        pDuplicatesMenu->addAction(shortcut);
+                        pDuplicatesMenu->addAction(shortcut2);
                      }
                   }
                }

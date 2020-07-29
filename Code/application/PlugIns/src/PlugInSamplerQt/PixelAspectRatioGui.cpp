@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -16,11 +16,11 @@
 #include "SpatialDataWindow.h"
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
 
 PixelAspectRatioGui::PixelAspectRatioGui( QWidget* pParent, const char* pName, bool modal )
 : QDialog(pParent)
@@ -29,7 +29,7 @@ PixelAspectRatioGui::PixelAspectRatioGui( QWidget* pParent, const char* pName, b
    {
       setObjectName( "PixelAspectRatioGui" );
    }
-   setModal( FALSE );
+   setModal( false );
 
    QGridLayout* pLayout = new QGridLayout( this );
 

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,10 +10,10 @@
 #ifndef PROPERTIESPLUGINDESCRIPTOR_H
 #define PROPERTIESPLUGINDESCRIPTOR_H
 
-#include <QtGui/QLabel>
-#include <QtGui/QTextEdit>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QWidget>
 
 #include "LabeledSectionGroup.h"
 

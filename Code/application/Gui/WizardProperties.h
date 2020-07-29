@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,9 +10,9 @@
 #ifndef WIZARDPROPERTIES_H
 #define WIZARDPROPERTIES_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QWidget>
 
 #include "AttachmentPtr.h"
 #include "WizardObjectAdapter.h"

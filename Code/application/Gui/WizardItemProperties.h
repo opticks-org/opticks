@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,10 +11,10 @@
 #define WIZARDITEMPROPERTIES_H
 
 #include <QtCore/QMap>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QToolButton>
-#include <QtGui/QTreeWidget>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QTreeWidget>
 
 #include "AttachmentPtr.h"
 #include "WizardItemImp.h"

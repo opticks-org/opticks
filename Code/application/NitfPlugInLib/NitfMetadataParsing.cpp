@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -233,7 +233,8 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
       }
    }
 
-   Nitf::ImageSubheader imageSubheader(fileVersion);
+   Nitf::ImageSubheader imageSubheader(fileVersion, currentImage);
+   
    if (imageSubheader.importMetadata(pImageSubheader, pDescriptor) == false)
    {
       errorMessage += "Unable to import metadata from the image subheader.\n";
@@ -449,7 +450,7 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
 
       if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
       {
-         errorMessage += tagName + " has not been imported.\n";
+         errorMessage += static_cast<std::string>(tagName) + " has not been imported.\n";
          return false;
       }
    }
@@ -525,7 +526,7 @@ bool Nitf::exportMetadata(const RasterDataDescriptor *pDescriptor,
    ossimRefPtr<ossimProperty> pImageProp = pNitf->getProperty("image_header");
    VERIFY(pImageProp != NULL && pImageProp->canCastTo("ossimContainerProperty"));
 
-   Nitf::ImageSubheader imageSubheader(Nitf::VERSION_02_10);
+   Nitf::ImageSubheader imageSubheader(Nitf::VERSION_02_10, -1);
    if (imageSubheader.exportMetadata(pDescriptor, PTR_CAST(ossimContainerProperty, pImageProp.get())) == false)
    {
       return false;

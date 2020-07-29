@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -179,8 +179,8 @@ int BatchApplication::run(int argc, char** argv)
          string extName = autoInfo.fileName().toStdString();
          Aeb extension;
          AebIo io(extension);
-         string errMsg; // ignored
-         if (io.fromFile(autoInfo.filePath().toStdString(), errMsg))
+         string errMsg2; // ignored
+         if (io.fromFile(autoInfo.filePath().toStdString(), errMsg2))
          {
             extName = extension.getName();
          }

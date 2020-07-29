@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,22 +12,22 @@
 #include "FeatureClassDlg.h"
 
 #include <QtCore/QRegExp>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialogButtonBox>
 #include <QtGui/QDoubleValidator>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
 #include <QtGui/QIntValidator>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QRegExpValidator>
-#include <QtGui/QToolButton>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QVBoxLayout>
 
 #include <string>
 #include <vector>

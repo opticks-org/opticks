@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Wizard xmlns="https://comet.balldayton.com/standards/namespaces/2005/v1/comet.xsd" batch="true" menuLocation="" name="Wizard" type="WizardObject" version="3">
+
+  <item batch="true" batchSupported="true" name="Value - in file" type="Value">
+    <location>23 39</location>
+    <output name="in file" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+      <value>file://[[TESTDATA]]/daytonchip.sio</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - importer" type="Value">
+    <location>25 93</location>
+    <output name="importer" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+      <value>SIO Importer</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Import Data Set" type="Wizard">
+    <location>151 35</location>
+    <input name="Progress" originalType="Progress" type="Progress" version="Wizard Node Version 3.0">
+      <validType>Progress</validType>
+    </input>
+    <input name="Filename" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+    </input>
+    <input name="Data Descriptor" originalType="DataDescriptor" type="DataDescriptor" version="Wizard Node Version 3.0">
+      <validType>DataDescriptor</validType>
+    </input>
+    <input name="Importer Name" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+    </input>
+    <output name="Data Set" originalType="DataElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>DataElement</validType>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - exporter" type="Value">
+    <location>299 267</location>
+    <output name="exporter" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+      <value>GeoTIFF Exporter</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Value - out file" type="Value">
+    <location>108 172</location>
+    <output name="out file" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+      <value>file://[[DATADIR]]/SioInTifOut.tif</value>
+    </output>
+  </item>
+
+  <item batch="true" batchSupported="true" name="Export Data Set" type="Wizard">
+    <location>404 48</location>
+    <input name="Progress" originalType="Progress" type="Progress" version="Wizard Node Version 3.0">
+      <validType>Progress</validType>
+    </input>
+    <input name="View" originalType="View" type="View" version="Wizard Node Version 3.0">
+      <validType>View</validType>
+    </input>
+    <input name="Layer" originalType="Layer" type="Layer" version="Wizard Node Version 3.0">
+      <validType>Layer</validType>
+    </input>
+    <input name="Data Element" originalType="DataElement" type="DataElement" version="Wizard Node Version 3.0">
+      <validType>DataElement</validType>
+    </input>
+    <input name="Filename" originalType="Filename" type="Filename" version="Wizard Node Version 3.0">
+      <validType>Filename</validType>
+    </input>
+    <input name="File Descriptor" originalType="FileDescriptor" type="FileDescriptor" version="Wizard Node Version 3.0">
+      <validType>FileDescriptor</validType>
+    </input>
+    <input name="Exporter Name" originalType="string" type="string" version="Wizard Node Version 3.0">
+      <validType>string</validType>
+    </input>
+  </item>
+
+  <connection inputItem="2" inputNode="1" outputItem="0" outputNode="0"/>
+
+  <connection inputItem="2" inputNode="3" outputItem="1" outputNode="0"/>
+
+  <connection inputItem="5" inputNode="3" outputItem="2" outputNode="0"/>
+
+  <connection inputItem="5" inputNode="6" outputItem="3" outputNode="0"/>
+
+  <connection inputItem="5" inputNode="4" outputItem="4" outputNode="0"/>
+
+</Wizard>

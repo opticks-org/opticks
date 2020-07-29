@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F35407E2-1400-4705-BA96-72B330D44D9A}</ProjectGuid>
+    <RootNamespace>TestBed</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\32bitSettings.props" />
+    <Import Project="TestBedMacros.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\AllCommonSettings-Release-32bit.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\ApplicationCommonSettings-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Qt-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Xerces-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\xqilla-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\pthreads.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\qwt.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\glew-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Ossim-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\raptor.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\minizip-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\SimpleApiLib.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\yaml-cpp-release.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\32bitSettings.props" />
+    <Import Project="TestBedMacros.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\AllCommonSettings-Debug-32bit.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\ApplicationCommonSettings-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Qt-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Xerces-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\xqilla-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\pthreads.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\qwt.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\glew-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Ossim-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\raptor.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\minizip-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\SimpleApiLib.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\Code\application\CompileSettings\yaml-cpp-debug.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\64bitSettings.props" />
+    <Import Project="TestBedMacros.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\AllCommonSettings-Release-64bit.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\ApplicationCommonSettings-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Qt-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Xerces-Release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\xqilla-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\pthreads.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\qwt.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\glew-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Ossim-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\raptor.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\minizip-release.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\SimpleApiLib.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\yaml-cpp-release.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\64bitSettings.props" />
+    <Import Project="TestBedMacros.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\AllCommonSettings-Debug-64bit.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\ApplicationCommonSettings-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Qt-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Xerces-Debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\xqilla-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\pthreads.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\qwt.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\glew-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\Ossim-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\raptor.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\minizip-debug.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\SimpleApiLib.props" />
+    <Import Project="$(OPTICKS_CODE_DIR)\application\CompileSettings\yaml-cpp-debug.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\TestBin\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <TypeLibraryName>.\Debug/TestBed.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CPPTESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <DisableSpecificWarnings>4535;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/fixed:no %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>"$(SolutionDir)..\build-testbed.py" --prep --mode=debug --arch=32 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Debug/TestBed.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CPPTESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <DisableSpecificWarnings>4535;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/fixed:no %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>"$(SolutionDir)..\build-testbed.py" --prep --mode=debug --arch=64 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <TypeLibraryName>.\Release/TestBed.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CPPTESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <DisableSpecificWarnings>4535;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>"$(SolutionDir)..\build-testbed.py" --prep --mode=release --arch=32 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <TypeLibraryName>.\Release/TestBed.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>CPPTESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <DisableSpecificWarnings>4535;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ProgramDatabaseFile>
+      </ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <PostBuildEvent>
+      <Message>Prepping for Run...</Message>
+      <Command>"$(SolutionDir)..\build-testbed.py" --prep --mode=release --arch=64 -v</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AnimationTestSuite.cpp" />
+    <ClCompile Include="AnnotationTestSuite.cpp" />
+    <ClCompile Include="AoiTestSuite.cpp" />
+    <ClCompile Include="assert.cpp" />
+    <ClCompile Include="BadValuesTestSuite.cpp" />
+    <ClCompile Include="BandMathTestSuite.cpp" />
+    <ClCompile Include="BatchProcessingTestSuite.cpp" />
+    <ClCompile Include="ClassificationTestSuite.cpp" />
+    <ClCompile Include="DatasetTestSuite.cpp" />
+    <ClCompile Include="DataVariantTestSuite.cpp" />
+    <ClCompile Include="DtedTestSuite.cpp" />
+    <ClCompile Include="DynamicObjectTestSuite.cpp" />
+    <ClCompile Include="EnviTestSuite.cpp" />
+    <ClCompile Include="FileFinderTestSuite.cpp" />
+    <ClCompile Include="GcpTestSuite.cpp" />
+    <ClCompile Include="GeoReferenceTestSuite.cpp" />
+    <ClCompile Include="GeoTiffTestSuite.cpp" />
+    <ClCompile Include="IceTestSuite.cpp" />
+    <ClCompile Include="ImageTestSuite.cpp" />
+    <ClCompile Include="MatrixFunctionsTestSuite.cpp" />
+    <ClCompile Include="MessageLogTestSuite.cpp" />
+    <ClCompile Include="ModelTestSuite.cpp" />
+    <ClCompile Include="ModisTestSuite.cpp" />
+    <ClCompile Include="NitfTestSuite.cpp" />
+    <ClCompile Include="OnDiskSensorDataTestSuite.cpp" />
+    <ClCompile Include="PerformanceTestSuite.cpp" />
+    <ClCompile Include="PicturesTestSuite.cpp" />
+    <ClCompile Include="PlugInTestCase.cpp" />
+    <ClCompile Include="PrincipalComponentAnalysisTestSuite.cpp" />
+    <ClCompile Include="PseudocolorTestSuite.cpp" />
+    <ClCompile Include="SecondMomentMatrixTestSuite.cpp" />
+    <ClCompile Include="SignatureTestSuite.cpp" />
+    <ClCompile Include="SimpleApiTestSuite.cpp" />
+    <ClCompile Include="TestableTestSuite.cpp" />
+    <ClCompile Include="TestBedTestUtilities.cpp" />
+    <ClCompile Include="TestCase.cpp" />
+    <ClCompile Include="TestMain.cpp" />
+    <ClCompile Include="TestSuite.cpp" />
+    <ClCompile Include="TestSuiteNewSession.cpp" />
+    <ClCompile Include="TiePointTestSuite.cpp" />
+    <ClCompile Include="UndoTestSuite.cpp" />
+    <ClCompile Include="UtilityTestSuite.cpp" />
+    <ClCompile Include="ViewTestSuite.cpp" />
+    <ClCompile Include="XmlTestSuite.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="assert.h" />
+    <ClInclude Include="HighResolutionTimer.h" />
+    <ClInclude Include="PlugInTestCase.h" />
+    <ClInclude Include="TestBedTestUtilities.h" />
+    <ClInclude Include="TestCase.h" />
+    <ClInclude Include="TestSuite.h" />
+    <ClInclude Include="TestSuiteNewSession.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NitfImportFileList.txt" />
+    <None Include="TestList.txt" />
+    <None Include="TestListAutobuildSolarisFull.txt" />
+    <None Include="TestListAutobuildSolarisQuick.txt" />
+    <None Include="TestListAutobuildWinFull.txt" />
+    <None Include="TestListAutobuildWinQuick.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,13 +1,13 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 
 #include "CartesianPlotAdapter.h"
 #include "CartesianPlotImp.h"
@@ -307,7 +307,7 @@ void CartesianPlotImp::setXScaleType(ScaleType scaleType)
       mXScaleType = scaleType;
       emit xScaleTypeChanged(mXScaleType);
       notify(SIGNAL_NAME(CartesianPlot, XScaleTypeChanged), boost::any(mXScaleType));
-      updateExtents();
+      updateExtents(true);
       zoomExtents();
    }
 }
@@ -319,7 +319,7 @@ void CartesianPlotImp::setYScaleType(ScaleType scaleType)
       mYScaleType = scaleType;
       emit yScaleTypeChanged(mYScaleType);
       notify(SIGNAL_NAME(CartesianPlot, YScaleTypeChanged), boost::any(mYScaleType));
-      updateExtents();
+      updateExtents(true);
       zoomExtents();
    }
 }

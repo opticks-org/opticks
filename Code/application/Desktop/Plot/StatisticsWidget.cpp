@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -14,10 +14,10 @@
 #include "StatisticsWidget.h"
 #include "StringUtilities.h"
 
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QTableWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTableWidget>
 
 StatisticsWidget::StatisticsWidget(HistogramPlotImp* pPlot, QWidget* pParent) :
    QWidget(pParent),

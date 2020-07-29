@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -345,7 +345,7 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile, false);
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(parameters.outfile, false);
    if (pStream == NULL)
    {
       opj_image_destroy(pImage);

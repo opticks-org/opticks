@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,10 +11,7 @@
 
 #include "AppConfig.h"
 #include "AppAssert.h"
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
-#endif
-#include "DependencyConfigs.h"
+#include "GlSlContext.h"
 #include "DynamicObject.h"
 #include "GpuProgramDescriptor.h"
 #include "ImageBuffer.h"
@@ -22,6 +19,7 @@
 #include "ImageUtilities.h"
 #include "GpuResourceManager.h"
 #include "MessageLogResource.h"
+#include "GlShaderGpuProgram.h"
 
 #include <algorithm>
 #include <string>
@@ -52,10 +50,25 @@ ImageFilter::ImageFilter(ImageFilterDescriptor *pDescriptor) :
    {
       try
       {
-         GpuProgram* pGpuProgram = new GpuProgram(*iter);
-         if (pGpuProgram != NULL)
+         // check to see if this is a shader program - JO 08/06/2018
+         GpuProgramDescriptor* pDescriptor2 = *iter;
+         if (pDescriptor2->getName().find(".glsl") != std::string::npos)
          {
-            mGpuPrograms.push_back(pGpuProgram);
+            // this is a shader gpu program
+            GlShaderGpuProgram* pShaderProgram = new GlShaderGpuProgram(*iter);
+            pShaderProgram->initialize();
+            if (pShaderProgram != NULL)
+            {
+               mGpuPrograms.push_back(pShaderProgram);
+            }
+         }
+         else
+         {
+            GpuProgram* pGpuProgram = new GpuProgram(*iter);
+            if (pGpuProgram != NULL)
+            {
+               mGpuPrograms.push_back(pGpuProgram);
+            }
          }
       }
       catch (AssertException& assertException)
@@ -329,13 +342,11 @@ bool ImageFilter::populateTextureParameters(ColorBuffer* pInputColorBuffer)
       return false;
    }
 
-#if defined(CG_SUPPORTED)
-   CgContext* pCgContext = CgContext::instance();
-   if (pCgContext == NULL)
+   GlSlContext* pGlSlContext = GlSlContext::instance();
+   if (pGlSlContext == NULL)
    {
       return false;
    }
-#endif
 
    bool success = false;
 
@@ -353,78 +364,84 @@ bool ImageFilter::populateTextureParameters(ColorBuffer* pInputColorBuffer)
          return false;
       }
 
-      string parameterName;
-      DataVariant parameterValue;
-#if defined(CG_SUPPORTED)
-      vector<CGparameter> programParameters = 
-         pCgContext->getParameters((*gpuProgramIter)->getProgramId());
-      vector<CGparameter>::const_iterator progParameterIter = programParameters.begin();
-      while (progParameterIter != programParameters.end())
-      {
-         parameterName = cgGetParameterName(*progParameterIter);
-         parameterValue = pParameters->getAttribute(parameterName);
-         if (parameterValue.isValid())
-         {
-            // get the type of the parameter
-            CGtype cgParameterType = cgGetParameterNamedType(*progParameterIter);
-            if (cgParameterType == CG_SAMPLERRECT)
-            {
-               // check to see if color buffer was already created
-               map<string, ColorBuffer*>::const_iterator colorBufferIter = colorBuffers.find(parameterName);
-               if (colorBufferIter == colorBuffers.end())
-               {
-                  if (colorBuffers.empty())
+      GlShaderGpuProgram* pShaderProgram = dynamic_cast<GlShaderGpuProgram*>(*gpuProgramIter);
+
+      int ProgramObject = pShaderProgram->getProgramObjectId();
+
+      std::vector<std::string> parameterNames;
+      pParameters->getAttributeNames(parameterNames);
+
+      std::vector<std::string>::iterator iter;
+      for (iter = parameterNames.begin(); iter != parameterNames.end(); iter++) {
+         std::string parameterName = *iter;
+
+         // get entry point for parameter into GPU program
+         int inputParameter = glGetUniformLocation(ProgramObject, parameterName.c_str());
+
+         // check to make sure parameter entry point is valid
+         if (inputParameter != -1) {
+            // get the value for the parameter
+            DataVariant parameterValue = gpuProgramDescriptor.getParameter(parameterName);
+            if (parameterValue.isValid()) {
+               // TODO : This needs to query the type but this isn't possible
+               // in GLSL. Our GIC file needs to be queried for the type.
+               // Right now, "0" means the type is a texture.
+               if ((parameterName.compare("inputImage") == 0) || (parameterName.compare("estimateImage") == 0) || (parameterName.compare("filteredImage") == 0)) {
+                  
+                  // check to see if color buffer was already created
+                  map<string, ColorBuffer*>::const_iterator colorBufferIter = colorBuffers.find(parameterName);
+                  if (colorBufferIter == colorBuffers.end())
                   {
-                     DataVariant value(pInputColorBuffer->getTextureObjectId());
-                     if (value.isValid())
+                     if (colorBuffers.empty())
                      {
-                        gpuProgramDescriptor.setParameter(parameterName, value);
+                        DataVariant value(pInputColorBuffer->getTextureObjectId());
+                        if (value.isValid())
+                        {
+                           gpuProgramDescriptor.setParameter(parameterName, value);
+                        }
+
+                        colorBuffers.insert(pair<const string, ColorBuffer*>(parameterName, pInputColorBuffer));
+
                      }
+                     else
+                     {
+                        ColorBuffer* pColorBuffer = copyColorBuffer(pInputColorBuffer);
+                        if (pColorBuffer == NULL)
+                        {
+                           return false;
+                        }
 
-                     colorBuffers.insert(pair<const string, ColorBuffer*>(parameterName, pInputColorBuffer));
+                        success = attachToImageBuffer(pColorBuffer);
+                        if (success == false)
+                        {
+                           delete pColorBuffer;
+                           pColorBuffer = NULL;
+                           return false;
+                        }
 
+                        DataVariant value(pColorBuffer->getTextureObjectId());
+                        if (value.isValid())
+                        {
+                           gpuProgramDescriptor.setParameter(parameterName, value);
+                        }
+
+                        colorBuffers.insert(pair<const string, ColorBuffer*>(parameterName, pColorBuffer));
+
+                        mBuffers.push_back(pColorBuffer);  
+                     }
                   }
                   else
                   {
-                     ColorBuffer* pColorBuffer = copyColorBuffer(pInputColorBuffer);
-                     if (pColorBuffer == NULL)
-                     {
-                        return false;
-                     }
-
-                     success = attachToImageBuffer(pColorBuffer);
-                     if (success == false)
-                     {
-                        delete pColorBuffer;
-                        pColorBuffer = NULL;
-                        return false;
-                     }
-
-                     DataVariant value(pColorBuffer->getTextureObjectId());
+                     DataVariant value(colorBufferIter->second->getTextureObjectId());
                      if (value.isValid())
                      {
                         gpuProgramDescriptor.setParameter(parameterName, value);
                      }
-
-                     colorBuffers.insert(pair<const string, ColorBuffer*>(parameterName, pColorBuffer));
-
-                     mBuffers.push_back(pColorBuffer);  
-                  }
-               }
-               else
-               {
-                  DataVariant value(colorBufferIter->second->getTextureObjectId());
-                  if (value.isValid())
-                  {
-                     gpuProgramDescriptor.setParameter(parameterName, value);
                   }
                }
             }
          }
-
-         ++progParameterIter;
       }
-#endif
       ++gpuProgramIter;
    }
 

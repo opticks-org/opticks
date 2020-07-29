@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -52,13 +52,13 @@ namespace BandBinningUtilities
       // This is an implementation detail for DataAccessorImpl since it requires start and stop bands to be ordered.
       // It also provides a nice way to display the grouped bands to the user.
       // This is performed after the removal of invalid bands so that invalid bands are not checked.
-      for (std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >::iterator iter = groupedBands.begin();
-         iter != groupedBands.end();
-         ++iter)
+      for (std::vector<std::pair<DimensionDescriptor, DimensionDescriptor> >::iterator iter2 = groupedBands.begin();
+         iter2 != groupedBands.end();
+         ++iter2)
       {
-         if (iter->first > iter->second)
+         if (iter2->first > iter2->second)
          {
-            std::swap(iter->first, iter->second);
+            std::swap(iter2->first, iter2->second);
             modified = true;
          }
       }

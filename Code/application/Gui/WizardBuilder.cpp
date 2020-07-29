@@ -1,20 +1,20 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QDockWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMenu>
-#include <QtGui/QToolBar>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QToolBar>
 
 #include "AppVerify.h"
 #include "MenuBarImp.h"

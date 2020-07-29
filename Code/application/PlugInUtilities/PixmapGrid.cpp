@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,6 +10,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
+#include "QtWidgets/qdrawutil.h"
 
 #include "PixmapGrid.h"
 
@@ -198,7 +199,8 @@ void PixmapGrid::paintEvent(QPaintEvent* pEvent)
 {
    QRect rcWidget = rect();
    QPixmap pix(rcWidget.size());
-   pix.fill(this, 0, 0);
+   //VS2017   pix.fill(this, 0, 0);
+   pix.fill(Qt::transparent);
 
    QPainter p(&pix);
    p.setPen(QPen(Qt::black, 2));

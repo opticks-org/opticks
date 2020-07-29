@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -220,8 +220,8 @@ bool ColladaImporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgL
          }
       }
       ++count;
-      int curPercent = (count * 100) / geomIds.size();
-      pProgress->updateProgress("Reading geometry...", curPercent, NORMAL);
+      int curPercent2 = (count * 100) / geomIds.size();
+      pProgress->updateProgress("Reading geometry...", curPercent2, NORMAL);
    }
 
    return true;

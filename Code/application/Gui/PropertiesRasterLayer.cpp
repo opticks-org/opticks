@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -8,25 +8,23 @@
  */
 
 #include <QtCore/QStringList>
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QStackedWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QStackedWidget>
 
 #include "DependencyConfigs.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
-#if defined (CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 #include "ComplexComponentComboBox.h"
 #include "DesktopServices.h"
 #include "DynamicObject.h"
@@ -296,12 +294,10 @@ PropertiesRasterLayer::PropertiesRasterLayer() :
    pAccelerationGrid->setColumnStretch(1, 10);
 
    bool bUnsupported = true;
-#if defined (CG_SUPPORTED)
-   if (CgContext::instance() != NULL)
+   if (GlSlContext::instance() != NULL)
    {
       bUnsupported = false;
    }
-#endif
 
    if (bUnsupported == true)
    {
@@ -1102,15 +1098,7 @@ void PropertiesRasterLayer::enableFilterCheck(bool bEnable)
 
 void PropertiesRasterLayer::enableFilterCombo(bool bEnable)
 {
-   if ((mInitializing == false) && (bEnable == true))
-   {
-      Service<DesktopServices>()->showSuppressibleMsgDlg(APP_NAME,  "<b>This is an EXPERIMENTAL feature!</b><br/>"
-         "Enabling image filtering uses additional system resources when generating the image for display.<br/>"
-         "For large data sets it is possible for the system to run out of resources, which could have adverse "
-         "effects including application shutdown or system reboot.", MESSAGE_WARNING, 
-         getFilterWarningDialogId(), this);
-   }
-   else if (bEnable == false)
+   if (bEnable == false)
    {
       mpFilterList->clearSelection();
    }

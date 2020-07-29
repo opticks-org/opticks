@@ -1,6 +1,6 @@
 /*
 * The information in this file is
-* Copyright(c) 2008 Ball Aerospace & Technologies Corporation
+* Copyright(c) 2020 Ball Aerospace & Technologies Corporation
 * and is subject to the terms and conditions of the
 * GNU Lesser General Public License Version 2.1
 * The license text is available from   
@@ -32,23 +32,23 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
-#include <QtGui/QAction>
-#include <QtGui/QActionGroup>
-#include <QtGui/QApplication>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QActionGroup>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QComboBox>
 #include <QtGui/QDoubleValidator>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHeaderView>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QInputDialog>
 #include <QtGui/QIntValidator>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
-#include <QtGui/QToolButton>
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QTreeWidgetItem>
 
 #include <algorithm>
 #include <string>

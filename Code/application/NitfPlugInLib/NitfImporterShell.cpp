@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -81,7 +81,7 @@ vector<ImportDescriptor*> Nitf::NitfImporterShell::getImportDescriptors(const st
    }
 
    const ossimNitfFileHeaderV2_X* pFileHeader =
-      dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader().get());
+      dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
    if (pFileHeader == NULL)
    {
       return vector<ImportDescriptor*>();
@@ -176,14 +176,15 @@ bool Nitf::NitfImporterShell::createRasterPager(RasterElement* pRaster) const
    FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
    VERIFY(pFileDescriptor != NULL);
 
-   const string& datasetLocation = pFileDescriptor->getDatasetLocation();
-   if (datasetLocation.empty() == true)
+   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   VERIFYRV(pMetadata, NULL);
+   auto pIndexVariant = pMetadata->getAttribute("Image Index");
+   unsigned int imageSegment = 99999;
+   if (!pIndexVariant.getValue(imageSegment))
    {
       return false;
    }
-
-   string imageSegmentText = datasetLocation.substr(1);
-   unsigned int imageSegment = StringUtilities::fromDisplayString<unsigned int>(imageSegmentText) - 1;
+   --imageSegment;  // need 0 based for data structures
 
    // Create the resource to execute the pager
    ExecutableResource pPlugIn;
@@ -197,7 +198,6 @@ bool Nitf::NitfImporterShell::createRasterPager(RasterElement* pRaster) const
    const RasterElement* pElement = getRasterElement();
    if (pElement != NULL)
    {
-      const DynamicObject* pMetadata = pElement->getMetadata();
       VERIFYRV(pMetadata, NULL);
 
       const string attributePath[] =
@@ -260,8 +260,8 @@ EncodingType Nitf::NitfImporterShell::ossimImageHeaderToEncodingType(const ossim
 }
 
 bool Nitf::NitfImporterShell::validate(const DataDescriptor* pDescriptor,
-                                       const vector<const DataDescriptor*>& importedDescriptors,
-                                       string& errorMessage) const
+   const vector<const DataDescriptor*>& importedDescriptors,
+   string& errorMessage) const
 {
    if (pDescriptor == NULL)
    {
@@ -274,16 +274,18 @@ bool Nitf::NitfImporterShell::validate(const DataDescriptor* pDescriptor,
 
    string filename = pFileDescriptor->getFilename().getFullPathAndName();
 
-   // Get the image segment being validated
-   const string& datasetLocation = pFileDescriptor->getDatasetLocation();
-   VERIFY(datasetLocation.empty() == false);
-
-   string imageSegmentText = datasetLocation.substr(1);
-   ossim_uint32 imageSegment = StringUtilities::fromDisplayString<unsigned int>(imageSegmentText) - 1;
-
    // Check for J2K compression, which can be imported without ossim
    const DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFY(pMetadata != NULL);
+
+   auto pIndexVariant = pMetadata->getAttribute("Image Index");
+   unsigned int imageSegment = 99999;
+   if (!pIndexVariant.getValue(imageSegment))
+   {
+      errorMessage = "Can't determine image index!";
+      return false;
+   }
+   --imageSegment;  // need 0 based for data structures
 
    const string attributePath[] =
    {
@@ -1117,57 +1119,57 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
             }
 
             // Data type
-            EncodingType dataType = INT1UBYTE;
+            EncodingType dataType2 = INT1UBYTE;
             if (bitsPerElement <= 8)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT1SBYTE;
+                  dataType2 = INT1SBYTE;
                }
                else
                {
-                  dataType = INT1UBYTE;
+                  dataType2 = INT1UBYTE;
                }
             }
             else if (bitsPerElement <= 16)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT2SBYTES;
+                  dataType2 = INT2SBYTES;
                }
                else
                {
-                  dataType = INT2UBYTES;
+                  dataType2 = INT2UBYTES;
                }
             }
             else if (bitsPerElement <= 32)
             {
                if (pImage->comps->sgnd)
                {
-                  dataType = INT4SBYTES;
+                  dataType2 = INT4SBYTES;
                }
                else
                {
-                  dataType = INT4UBYTES;
+                  dataType2 = INT4UBYTES;
                }
             }
             else if (bitsPerElement <= 64)
             {
-               dataType = FLT8BYTES;
+               dataType2 = FLT8BYTES;
             }
 
-            if (dataType != pDescriptor->getDataType())
+            if (dataType2 != pDescriptor->getDataType())
             {
-               pDescriptor->setDataType(dataType);
+               pDescriptor->setDataType(dataType2);
             }
 
             // Rows
             unsigned int numRows = pImage->comps->h;
             if (numRows != pFileDescriptor->getRowCount())
             {
-               vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(numRows, true, false, true);
-               pDescriptor->setRows(rows);
-               pFileDescriptor->setRows(rows);
+               vector<DimensionDescriptor> rows2 = RasterUtilities::generateDimensionVector(numRows, true, false, true);
+               pDescriptor->setRows(rows2);
+               pFileDescriptor->setRows(rows2);
             }
 
             // Columns
@@ -1184,10 +1186,10 @@ ImportDescriptor* Nitf::NitfImporterShell::getImportDescriptor(const string& fil
             unsigned int numBands = pImage->numcomps;
             if (numBands != pFileDescriptor->getBandCount())
             {
-               vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(numBands, true, false,
+               vector<DimensionDescriptor> bands2 = RasterUtilities::generateDimensionVector(numBands, true, false,
                   true);
-               pDescriptor->setBands(bands);
-               pFileDescriptor->setBands(bands);
+               pDescriptor->setBands(bands2);
+               pFileDescriptor->setBands(bands2);
             }
 
             // Cleanup
@@ -1275,7 +1277,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
       fileLength = static_cast<size_t>(ftell(pFile.get()));
    }
 
-   opj_stream_t* pStream = opj_stream_create_file_stream(pFile.get(), fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(filename.c_str(), fileLength, true);
    if (pStream == NULL)
    {
       return NULL;

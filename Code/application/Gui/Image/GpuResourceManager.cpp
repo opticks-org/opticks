@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -38,7 +38,6 @@ GpuResourceManager* Service<GpuResourceManager>::get() const
 
 GpuResourceManager::~GpuResourceManager()
 {
-#if defined(CG_SUPPORTED)
    vector<GLuint>::iterator textureIter = mTextures.begin();
    while (textureIter != mTextures.end())
    {
@@ -46,7 +45,6 @@ GpuResourceManager::~GpuResourceManager()
       glDeleteTextures(1, &(*textureIter));
       ++textureIter;
    }
-#endif
 }
 
 GpuResourceManager::GpuResourceManager()
@@ -55,7 +53,6 @@ GpuResourceManager::GpuResourceManager()
 
 PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum accessMode)
 {
-#if defined(CG_SUPPORTED)
    if (glewGetExtension("GL_ARB_pixel_buffer_object"))
    {
       try
@@ -68,7 +65,6 @@ PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum
          MessageResource msg(assertMessage, "app", "D48723A5-E838-479F-BEA0-0FBF4D3A4E18");
       }
    }
-#endif
 
    return NULL;
 }
@@ -76,7 +72,6 @@ PixelBufferObject *GpuResourceManager::getPixelBufferObject(int numBytes, GLenum
 ImageBuffer *GpuResourceManager::allocateImageBuffer()
 {
    ImageBuffer* pImageBuffer = NULL;
-#ifdef CG_SUPPORTED
    if (glewGetExtension("GL_EXT_framebuffer_object"))
    {
       pImageBuffer = new FrameBuffer();
@@ -88,7 +83,6 @@ ImageBuffer *GpuResourceManager::allocateImageBuffer()
       pImageBuffer = new ImagePBuffer();
    }
 #endif
-#endif
    return pImageBuffer;
 }
 
@@ -96,7 +90,6 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
                                            GLsizei height, GLenum textureFormat, GLenum dataType)
 {
    GLuint textureObjectId = 0;
-#if defined(CG_SUPPORTED)
    // check format and size of requested texture to see if it can be created
    if (!ImageUtilities::isTextureValid(textureTarget, internalFormat, width, height, textureFormat, dataType) )
    {
@@ -182,13 +175,11 @@ GLuint GpuResourceManager::allocateTexture(GLenum textureTarget, GLint internalF
       // store texture object id
       mTextures.push_back(textureObjectId);
    }
-#endif
    return textureObjectId;
 }
 
 void GpuResourceManager::deallocateTexture(GLuint textureId)
 {
-#if defined(CG_SUPPORTED)
    vector<GLuint>::iterator textureIter = mTextures.begin();
    while (textureIter != mTextures.end())
    {
@@ -203,7 +194,6 @@ void GpuResourceManager::deallocateTexture(GLuint textureId)
       }
       textureIter++;
    }
-#endif
 }
 
 float GpuResourceManager::getGpuScalingFactor(GLenum textureFormat)
@@ -230,7 +220,6 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor, GLenum tex
    bool factorFound = false;
    scalingFactor = 3.0f;  // value for ForceWare versions 94.22 and earlier
 
-#ifdef CG_SUPPORTED
    unsigned int texWidth(64);
    unsigned int texHeight(64);
 
@@ -291,9 +280,6 @@ bool GpuResourceManager::determineScalingFactor(float& scalingFactor, GLenum tex
          factorFound = true;
       }
    }
-#else
-   factorFound = true;
-#endif
 
    return factorFound;
 }

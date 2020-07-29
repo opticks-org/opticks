@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,7 +9,7 @@
 
 #include <math.h>
 
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include "AppAssert.h"
 #include "AppConfig.h"
@@ -822,6 +822,58 @@ bool GraphicGroupImp::removeObject(GraphicObject* pObject, bool bDelete)
    }
 
    return false;
+}
+
+bool GraphicGroupImp::removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete)
+{
+	GraphicLayerImp* pLayer = dynamic_cast<GraphicLayerImp*>(getLayer());
+	if (pLayer == nullptr)
+	{
+		return false;
+	}
+	
+	View* pView = pLayer->getView();
+	if (pView == nullptr)
+	{
+		return false;
+	}
+	
+	pLayer->completeInsertion();
+	for (auto pObject : objects)
+	{
+		pLayer->deselectObject(pObject);
+	}
+	
+	for (auto it = mObjects.begin(); it != mObjects.end() && !objects.empty(); )
+	{
+		GraphicObject* pObject = *it;
+		auto ipObject = objects.find(pObject);
+		if (ipObject != objects.end())
+		{
+			it = mObjects.erase(it);
+			objects.erase(ipObject);
+			DisconnectObject(this)(pObject);
+			notify(SIGNAL_NAME(GraphicGroup, ObjectRemoved), boost::any(pObject));
+			
+			if (bDelete == true)
+			{
+				pView->addUndoAction(new RemoveGraphicObject(dynamic_cast<GraphicGroup*>(this), pObject));
+				
+				GraphicObjectImp* pObjectImp = dynamic_cast<GraphicObjectImp*>(pObject);
+				delete pObjectImp;
+			}
+		}
+		else
+		{
+			++it;
+		}
+	}
+	
+	UndoLock undoLock(pView);
+	updateBoundingBox();
+	emit modified();
+	
+	return objects.empty();  // return true if all objects were removed
 }
 
 void GraphicGroupImp::removeAllObjects(bool bDelete)

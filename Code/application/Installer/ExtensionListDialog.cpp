@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -19,14 +19,14 @@
 #include "InstallWizard.h"
 #include "ProgressResource.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHeaderView>
-#include <QtGui/QListWidget>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QStandardItemModel>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QVBoxLayout>
 
 ExtensionListDialog::ExtensionListDialog(QWidget* pParent) : QDialog(pParent)
 {
@@ -113,7 +113,7 @@ void ExtensionListDialog::install()
    dlg.setConfirmOverwrite(false);
    dlg.setReadOnly(true);
    dlg.setResolveSymlinks(true);
-   dlg.setFilters(QStringList() << "Extension Bundles (*.aeb)" << "Extension Metadata (install.rdf)" << "All Files (*)");
+   dlg.setNameFilters(QStringList() << "Extension Bundles (*.aeb)" << "Extension Metadata (install.rdf)" << "All Files (*)");
    dlg.setWindowTitle("Select extensions");
    dlg.restoreState(state);
 

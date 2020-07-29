@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,10 +11,10 @@
 #define DOCKWINDOWWIDGET_H
 
 #include <boost/any.hpp>
-#include <QtGui/QCheckBox>
-#include <QtGui/QListWidget>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QWidget>
 
 #include "DesktopServices.h"
 

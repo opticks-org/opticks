@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,27 +22,32 @@
     <ProjectGuid>{4848789B-87B2-49B2-AF93-8F1B6AA7DB18}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Opticks</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -59,12 +64,11 @@
     <Import Project="CompileSettings\Xerces-Debug.props" />
     <Import Project="CompileSettings\xqilla-debug.props" />
     <Import Project="CompileSettings\ApplicationCommonSettings-Debug.props" />
-    <Import Project="CompileSettings\Cg.props" />
     <Import Project="CompileSettings\glew-debug.props" />
     <Import Project="CompileSettings\raptor.props" />
     <Import Project="CompileSettings\minizip-debug.props" />
-    <Import Project="CompileSettings\yaml-cpp.props" />
     <Import Project="CompileSettings\EnableWarnings.props" />
+    <Import Project="CompileSettings\yaml-cpp-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -77,12 +81,11 @@
     <Import Project="CompileSettings\Xerces-Release.props" />
     <Import Project="CompileSettings\xqilla-release.props" />
     <Import Project="CompileSettings\ApplicationCommonSettings-Release.props" />
-    <Import Project="CompileSettings\Cg.props" />
     <Import Project="CompileSettings\glew-release.props" />
     <Import Project="CompileSettings\raptor.props" />
     <Import Project="CompileSettings\minizip-release.props" />
-    <Import Project="CompileSettings\yaml-cpp.props" />
     <Import Project="CompileSettings\EnableWarnings.props" />
+    <Import Project="CompileSettings\yaml-cpp-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -95,12 +98,11 @@
     <Import Project="CompileSettings\Xerces-Debug.props" />
     <Import Project="CompileSettings\xqilla-debug.props" />
     <Import Project="CompileSettings\ApplicationCommonSettings-Debug.props" />
-    <Import Project="CompileSettings\Cg.props" />
     <Import Project="CompileSettings\glew-debug.props" />
     <Import Project="CompileSettings\raptor.props" />
     <Import Project="CompileSettings\minizip-debug.props" />
-    <Import Project="CompileSettings\yaml-cpp.props" />
     <Import Project="CompileSettings\EnableWarnings.props" />
+    <Import Project="CompileSettings\yaml-cpp-debug.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -113,12 +115,12 @@
     <Import Project="CompileSettings\Xerces-Release.props" />
     <Import Project="CompileSettings\xqilla-release.props" />
     <Import Project="CompileSettings\ApplicationCommonSettings-Release.props" />
-    <Import Project="CompileSettings\Cg.props" />
     <Import Project="CompileSettings\glew-release.props" />
     <Import Project="CompileSettings\raptor.props" />
     <Import Project="CompileSettings\minizip-release.props" />
-    <Import Project="CompileSettings\yaml-cpp.props" />
     <Import Project="CompileSettings\EnableWarnings.props" />
+    <Import Project="CompileSettings\zlib.props" />
+    <Import Project="CompileSettings\yaml-cpp-release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -164,6 +166,9 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>
       </AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -173,6 +178,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>yaml-cpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
@@ -245,6 +251,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\build.py" />
+    <None Include="..\commonutils.py" />
     <None Include="..\Release\DefaultSettings\1-ApplicationDefaults.cfg" />
     <None Include="..\Release\DefaultSettings\2-ApplicationMode.cfg" />
     <None Include="..\Release\DefaultSettings\25-XmlRpc.cfg" />
@@ -282,6 +290,7 @@
     <None Include="..\Release\Templates\MultipleImages.spg" />
     <None Include="..\Release\Templates\SingleImage.spg" />
     <None Include="..\Release\Templates\ZoomedImages.spg" />
+    <None Include="..\update-build-revision.py" />
     <None Include="Gui\res\application.ico" />
   </ItemGroup>
   <ItemGroup>

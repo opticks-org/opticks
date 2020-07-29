@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,15 +9,15 @@
 
 #include <QtCore/QDateTime>
 #include <QtCore/QString>
-#include <QtGui/QAction>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
 
 #include "AnimationControllerAdapter.h"
 #include "AnimationFrame.h"
@@ -494,10 +494,10 @@ void AnimationServicesImp::newController()
       }
 
       QString type = pTypeCombo->currentText();
-      FrameType frameType = StringUtilities::fromDisplayString<FrameType>(type.toStdString());
-      VERIFYNRV(frameType.isValid() == true);
+      FrameType frameType2 = StringUtilities::fromDisplayString<FrameType>(type.toStdString());
+      VERIFYNRV(frameType2.isValid() == true);
 
-      AnimationController* pController = createAnimationController(name.toStdString(), frameType);
+      AnimationController* pController = createAnimationController(name.toStdString(), frameType2);
       if (pController != NULL)
       {
          AnimationToolBar* pToolBar = static_cast<AnimationToolBar*>(pDesktop->getWindow("Animation", TOOLBAR));

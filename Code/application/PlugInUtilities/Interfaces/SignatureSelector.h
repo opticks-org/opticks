@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,13 +12,13 @@
 
 #include <QtCore/QRegExp>
 #include <QtCore/QStringList>
-#include <QtGui/QAction>
-#include <QtGui/QDialog>
-#include <QtGui/QLayout>
-#include <QtGui/QListWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTreeWidgetItem>
 
 #include "ModelServices.h"
 #include "PlugInManagerServices.h"

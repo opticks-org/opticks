@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -168,7 +168,17 @@ void PolygonObjectImp::moveHandle(int handle, LocationType pixel, bool bMaintain
       }
       else
       {
+//goffena
+#if defined(WIN_API)
+#pragma warning( push )
+#pragma warning( disable: 4389 )
+#endif
          vector<unsigned int>::iterator itr = find(mPaths.begin(), mPaths.end(), movedVertex+1);
+//goffena
+#if defined(WIN_API)
+#pragma warning( pop )
+#endif
+
          if (itr != mPaths.end()) // last in a path
          {
             endPiece = true;

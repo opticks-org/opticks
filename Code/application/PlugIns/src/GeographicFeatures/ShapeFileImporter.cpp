@@ -1,14 +1,14 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 #include "Any.h"
 #include "AnnotationElement.h"
@@ -48,7 +48,7 @@
 #include <vector>
 #include <cctype>
 
-#include <QtGui/QLayout>
+#include <QtWidgets/QLayout>
 
 using namespace std;
 

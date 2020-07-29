@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -15,6 +15,8 @@
 #include "RasterFileDescriptor.h"
 #include "RasterUtilities.h"
 #include "OssimAppMemorySource.h"
+
+#include <algorithm>
 
 #include <ossim/imaging/ossimImageDataFactory.h>
 #include <ossim/imaging/ossimImageWriter.h>
@@ -53,8 +55,8 @@ ossimRefPtr<ossimImageData> OssimAppMemorySource::getTile(const ossimIrect& rect
    int numRows = maxy-miny+1;
    int numCols = maxx-minx+1;
 
-   maxx = min(maxx, static_cast<int>(mExportDescriptor.getColumnCount()-1));
-   maxy = min(maxy, static_cast<int>(mExportDescriptor.getRowCount()-1));
+   maxx = std::min(maxx, static_cast<int>(mExportDescriptor.getColumnCount()-1));
+   maxy = std::min(maxy, static_cast<int>(mExportDescriptor.getRowCount()-1));
    unsigned int bands = mExportDescriptor.getBandCount();
 
    int occupiedRows = maxy-miny+1;

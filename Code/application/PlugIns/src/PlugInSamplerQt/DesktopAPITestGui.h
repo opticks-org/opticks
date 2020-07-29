@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,12 +10,12 @@
 #ifndef DESKTOPAPITESTGUI_H
 #define DESKTOPAPITESTGUI_H
 
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
 
 #include "AttachmentPtr.h"
 #include "PlotWidget.h"

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,12 +10,12 @@
 #include "AddQueriesDlg.h"
 #include "AppVerify.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QDialogButtonBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QDialogButtonBox>
 
 AddQueriesDlg::AddQueriesDlg(const std::vector<std::string>& fields, QWidget* pParent) :
    QDialog(pParent)

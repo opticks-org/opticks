@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -25,14 +25,14 @@
 #include "xmlreader.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QComboBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 
 #include <algorithm>
 #include <memory>
@@ -118,10 +118,10 @@ void DisplaySelectionWidget::initializeFromQueries(const std::vector<DisplayQuer
 {
    mpTree->clear();
    createAllObjectsEntry();
-   bool bAttributeSet = false;
+//   bool bAttributeSet = false;
    for (unsigned int i = 0; i < queries.size(); i++)
    {
-      bool bAdd = false;
+//      bool bAdd = false;
       QTreeWidgetItem* pItem = new QTreeWidgetItem(mpTree);
 
       ColorType color = queries[i].getLineColor();

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2013 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from
@@ -12,8 +12,8 @@
 #include "OptionsGeographicFeatures.h"
 #include "PlugInRegistration.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QVBoxLayout>
 
 REGISTER_PLUGIN(OpticksGeographicFeatures, OptionsGeographicFeatures, OptionQWidgetWrapper<OptionsGeographicFeatures>);
 

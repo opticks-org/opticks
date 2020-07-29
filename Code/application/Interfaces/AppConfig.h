@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -33,7 +33,6 @@
    #elif defined(_WIN32)
       #define PTR_SIZE 4
    #endif
-   #define CG_SUPPORTED
 
    //platform defines
    #define SLASH std::string("\\")
@@ -45,9 +44,7 @@
    #define DEG_CHAR std::string("°")
    #define OPENCOLLADA_SUPPORT
 
-#if _MSC_VER < 1900
-   #define snprintf _snprintf
-#endif
+//goffena   #define snprintf _snprintf
 
    #include <stddef.h>
    #define DISAMBIGUATE_TEMPLATE

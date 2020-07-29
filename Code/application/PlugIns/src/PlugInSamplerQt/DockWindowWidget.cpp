@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -8,12 +8,12 @@
  */
 
 #include <QtCore/QEvent>
-#include <QtGui/QHeaderView>
-#include <QtGui/QInputDialog>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 
 #include "AddPlotDlg.h"
 #include "AppVerify.h"

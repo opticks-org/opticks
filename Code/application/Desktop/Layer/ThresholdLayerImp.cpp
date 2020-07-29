@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -1004,9 +1004,9 @@ void ThresholdLayerImp::setDisplayedBand(DimensionDescriptor band)
 
       vector<Layer*> linkedLayers = getLinkedLayers();
 
-      for(vector<Layer*>::iterator iter = linkedLayers.begin(); iter != linkedLayers.end(); iter)
+      for(vector<Layer*>::iterator iter2 = linkedLayers.begin(); iter2 != linkedLayers.end(); iter2)
       {
-         ThresholdLayerImp *pLayer = dynamic_cast<ThresholdLayerImp*>(*iter);
+         ThresholdLayerImp *pLayer = dynamic_cast<ThresholdLayerImp*>(*iter2);
          if(pLayer != NULL)
          {
             pLayer->setDisplayedBand(band);

@@ -269,7 +269,6 @@
 <qresource prefix="/licenses">
    <file alias="boost">BoostLicense.txt</file>
    <file alias="cfitsio">CfitsioLicense.txt</file>
-   <file alias="cg">CgLicense.txt</file>
    <file alias="curl">CurlLicense.txt</file>
    <file alias="ehs">EhsLicense.txt</file>
    <file alias="expat">ExpatLicense.txt</file>

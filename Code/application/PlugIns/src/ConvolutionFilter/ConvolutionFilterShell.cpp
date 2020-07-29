@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -32,8 +32,8 @@
 #include "Undo.h"
 
 #include <QtCore/QStringList>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 namespace
 {
@@ -133,8 +133,8 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    pResult->copyClassification(mInput.mpRaster);
    pResult->getMetadata()->merge(mInput.mpDescriptor->getMetadata()); //copy original metadata
    //chip metadata by bands
-   vector<DimensionDescriptor> orgBands = mInput.mpDescriptor->getBands();
-   vector<DimensionDescriptor> newBands;
+   std::vector<DimensionDescriptor> orgBands = mInput.mpDescriptor->getBands();
+   std::vector<DimensionDescriptor> newBands;
    newBands.reserve(mInput.mBands.size());
    for (unsigned int index = 0; index < mInput.mBands.size(); ++index)
    {

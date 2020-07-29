@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -3881,7 +3881,7 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
          string ubap = dv_cast<string>(pExistingBandsb->getAttribute(fieldName));
          tre.setAttribute(fieldName, ubap);
 
-         unsigned int bandcount(0);
+         unsigned int bandcount2(0);
 
          for (vector<DimensionDescriptor>::const_iterator iter = exportBands.begin();
             iter != exportBands.end(); ++iter)
@@ -3891,39 +3891,39 @@ TreExportStatus Nitf::BandsbParser::exportMetadata(const RasterDataDescriptor &d
             unsigned int origBandNum = iter->getOriginalNumber();
 
             stringstream bandStreamStr;
-            bandStreamStr << "#" << bandcount;
+            bandStreamStr << "#" << bandcount2;
             string bandNumStr(bandStreamStr.str());
 
             stringstream origBandStreamStr;
             origBandStreamStr << "#" << origBandNum;
             string origBandNumStr(origBandStreamStr.str());
 
-            ++bandcount;
+            ++bandcount2;
 
-            string fieldName;
+            string fieldName2;
             string origFieldName;
 
             switch (bapf)
             {
                case 'I':
                {
-                  fieldName = BANDSB::APN + auxbStr + bandNumStr;
+                  fieldName2 = BANDSB::APN + auxbStr + bandNumStr;
                   origFieldName = BANDSB::APN + auxbStr + origBandNumStr;
-                  tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+                  tre.setAttribute(fieldName2, pExistingBandsb->getAttribute(origFieldName));
                   break;
                }
                case 'R':
                {
-                  fieldName = BANDSB::APR + auxbStr + bandNumStr;
+                  fieldName2 = BANDSB::APR + auxbStr + bandNumStr;
                   origFieldName = BANDSB::APR + auxbStr + origBandNumStr;
-                  tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+                  tre.setAttribute(fieldName2, pExistingBandsb->getAttribute(origFieldName));
                   break;
                }
                case 'A':
                {
-                  fieldName = BANDSB::APA + auxbStr + bandNumStr;
+                  fieldName2 = BANDSB::APA + auxbStr + bandNumStr;
                   origFieldName = BANDSB::APA + auxbStr + origBandNumStr;
-                  tre.setAttribute(fieldName, pExistingBandsb->getAttribute(origFieldName));
+                  tre.setAttribute(fieldName2, pExistingBandsb->getAttribute(origFieldName));
                   break;
                }
                default:

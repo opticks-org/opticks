@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -22,7 +22,6 @@ CopyrightInformation::CopyrightInformation()
    setProductionStatus(APP_IS_PRODUCTION_RELEASE);
    setDescriptorId("{3FA82540-856C-43e3-8B8D-232409A7C47A}");
    addDependencyCopyright("Boost", Service<UtilityServices>()->getTextFromFile(":/licenses/boost"));
-   addDependencyCopyright("Cg", Service<UtilityServices>()->getTextFromFile(":/licenses/cg"));
    addDependencyCopyright("Expat", Service<UtilityServices>()->getTextFromFile(":/licenses/expat"));
    addDependencyCopyright("EHS", Service<UtilityServices>()->getTextFromFile(":/licenses/ehs"));
    addDependencyCopyright("FFmpeg", Service<UtilityServices>()->getTextFromFile(":/licenses/ffmpeg"));

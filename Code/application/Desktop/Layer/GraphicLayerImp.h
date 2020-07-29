@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -19,6 +19,7 @@
 #include <list>
 #include <set>
 #include <memory>
+#include <unordered_set>
 
 #include <QtCore/QPoint>
 #include <QtGui/QColor>
@@ -82,6 +83,7 @@ public:
 
    virtual GraphicObject* addObject(const GraphicObjectType& objectType, LocationType point);
    virtual bool removeObject(GraphicObject* pObject, bool bDelete);
+   virtual bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete);
    virtual bool hasObject(GraphicObject* pObject) const;
    virtual std::list<GraphicObject*> getObjects() const;
    virtual std::list<GraphicObject*> getObjects(const GraphicObjectType& objectType) const;
@@ -108,6 +110,9 @@ public:
    virtual void deleteSelectedObjects();
    virtual void clear();
    void replicateObject(GraphicObject *pDest, GraphicObject *pSource);
+   
+   virtual void setCustomReplicate(bool replicate);
+   virtual bool getCustomReplicate() const;
 
    void nudgeSelectedObjects(int x, int y);
    void moveSelectedObjects(LocationType delta);
@@ -223,6 +228,7 @@ protected:
 
 protected slots:
    void deleteObject();
+   void copyToView();
 
 signals:
    void objectAdded(GraphicObject* pObject);
@@ -267,6 +273,8 @@ private:
     *  Determines if the object type is a physical object that is seen on the layer
     */
    bool isVisibleObjectType(GraphicObjectType eType) const;
+   
+   bool mCustomReplicate;
 };
 
 #define GRAPHICLAYERADAPTEREXTENSION_CLASSES \
@@ -283,6 +291,10 @@ private:
    bool removeObject(GraphicObject* pObject, bool bDelete) \
    { \
       return impClass::removeObject(pObject, bDelete); \
+   } \
+   bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) \
+   { \
+      return impClass::removeObjects(objects, bDelete); \
    } \
    void getObjects(std::list<GraphicObject*>& objects) const \
    { \
@@ -400,6 +412,14 @@ private:
    GraphicObject* hit(LocationType sceneCoord) const \
    { \
       return impClass::hit(sceneCoord); \
+   } \
+   void setCustomReplicate(bool replicate) \
+   { \
+      impClass::setCustomReplicate(replicate); \
+   } \
+   bool getCustomReplicate() const \
+   { \
+      return impClass::getCustomReplicate(); \
    }
 
 #endif

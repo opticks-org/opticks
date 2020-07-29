@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -17,6 +17,8 @@
 #include "Slot.h"
 
 #include <QtCore/QMimeData>
+#include <QtCore/QDataStream>
+#include <QtCore/QIODevice>
 
 using namespace std;
 
@@ -37,7 +39,7 @@ AnimationModel::AnimationModel(QObject* pParent) :
       }
    }
 
-   setSupportedDragActions(Qt::MoveAction);
+//   setSupportedDragActions(Qt::MoveAction);
 
    // Connections
    mpAnimationServices.addSignal(SIGNAL_NAME(AnimationServices, ControllerCreated),
@@ -52,6 +54,10 @@ AnimationModel::AnimationModel(QObject* pParent) :
    {
       mpAnimationToolBar.reset(pToolBar);
    }
+}
+Qt::DropActions AnimationModel::supportedDragActions() const
+{
+   return Qt::MoveAction;
 }
 
 AnimationModel::~AnimationModel()

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,14 +9,14 @@
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
-#include <QtGui/QApplication>
-#include <QtGui/QColorDialog>
-#include <QtGui/QCompleter>
-#include <QtGui/QDirModel>
-#include <QtGui/QFileDialog>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QCompleter>
+#include <QtWidgets/QDirModel>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
 #include <QtGui/QImage>
-#include <QtGui/QLayout>
+#include <QtWidgets/QLayout>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
@@ -1174,7 +1174,8 @@ bool CustomTreeWidget::eventFilter(QObject* pObject, QEvent* pEvent)
                   {
                      int keys[4] = { 0, 0, 0, 0 };
 
-                     unsigned int index = 0;
+//                     unsigned int index = 0;
+                     int index = 0;
                      for (index = 0; index < mShortcut.count(); ++index)
                      {
                         keys[index] = mShortcut[index];

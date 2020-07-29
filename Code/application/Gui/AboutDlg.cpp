@@ -1,22 +1,22 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QApplication>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QTableWidget>
-#include <QtGui/QPushButton>
-#include <QtGui/QTabWidget>
-#include <QtGui/QTextEdit>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QVBoxLayout>
 
 #include "AboutDlg.h"
 #include "Aeb.h"
@@ -162,8 +162,10 @@ AboutDlg::AboutDlg(QWidget* parent) :
    pPlugInBrandingTable->setSelectionMode(QAbstractItemView::NoSelection);
    pPlugInBrandingTable->verticalHeader()->hide();
    pPlugInBrandingTable->setHorizontalHeaderLabels(QStringList() << "Name" << "Description" << "Version");
-   pPlugInBrandingTable->horizontalHeader()->setClickable(false);
-   pPlugInBrandingTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+//   pPlugInBrandingTable->horizontalHeader()->setClickable(false);
+   pPlugInBrandingTable->horizontalHeader()->setSectionsClickable(false);
+//   pPlugInBrandingTable->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+   pPlugInBrandingTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
    pPlugInBrandingTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
    int itemCount = 0;
    for(list<const Aeb*>::const_iterator aeb = aebs.begin(); aeb != aebs.end(); ++aeb, ++itemCount)

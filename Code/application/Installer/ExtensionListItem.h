@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,7 +10,7 @@
 #ifndef EXTENSIONLISTITEM_H__
 #define EXTENSIONLISTITEM_H__
 
-#include <QtGui/QListWidgetItem>
+#include <QtWidgets/QListWidgetItem>
 
 class QDialogButtonBox;
 class QLabel;
@@ -52,10 +52,12 @@ public:
    void setUseUninstallHelper(bool v);
 
 private slots:
+   void accepted();
    void about();
    void uninstall();
 
 signals:
+   void finished(QWidget* pEditor);
    void modified();
 
 private:

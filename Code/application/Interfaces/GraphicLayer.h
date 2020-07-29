@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -18,6 +18,7 @@
 
 #include <list>
 #include <string>
+#include <unordered_set>
 
 class GraphicObject;
 
@@ -82,6 +83,13 @@ public:
     *  not included in the layer.
     */
    SIGNAL_METHOD(GraphicLayer, ObjectInsertionCompleted);
+   
+   /**
+    *  Emitted with boost::any<> when replication needs to occur.
+	*
+	*  @see getCustomReplicate()
+	*/
+	SIGNAL_METHOD(GraphicLayer, CustomReplicate);
 
    /**
     *  Adds a new graphic object to the layer.
@@ -104,6 +112,29 @@ public:
     *  @see     removeObject()
     */
    virtual GraphicObject* addObject(const GraphicObjectType& objectType) = 0;
+   
+   /**
+    *  Set the custom replication state of the layer.
+	*
+	*  @param replicate
+	*         True if custom replication is set for this layer, else false.
+	*
+	*  @see getCustomReplicate()
+	*/
+	virtual void setCustomReplicate(bool replicate) = 0;
+	
+	/**
+	 *  Get the custom replication state of the layer.
+	 *
+	 *  When set to true, the normal replication process for this layer will be skipped
+	 *  and a CustomReplicate signal will be emitted. The plug-in managing this layer is
+	 *  responsible for replicating the layer in the specified view.
+	 *
+	 *  @return The custom replication state of the layer.
+	 *
+	 *  @see signalCustomReplicate()
+	 */
+	 virtual bool getCustomReplicate() const = 0;
 
    /**
     *  Removes an graphic object from the layer.
@@ -121,6 +152,23 @@ public:
     *  @see     addObject()
     */
    virtual bool removeObject(GraphicObject* pObject, bool bDelete) = 0;
+   
+   /**
+    *  Removes multiple graphic objects from the layer.
+	*
+	*  @param  objects
+	*          The graphic objects to remove.
+	*  @param  bDelete
+	*          The flag should be set to true to delete the objects. If it is
+	*          false, the objects are not deleted.
+	*
+	*  @return true if the objects were successfully removed, otherwise false.
+	*
+	*  @notify This method will notify Subject::signalModified.
+	*
+	*  @see    addObject()
+	*/
+	virtual bool removeObjects(std::unordered_set<GraphicObject*>& objects, bool bDelete) = 0;
 
    /**
     *  Retrieves all graphic objects in the layer.

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -43,17 +43,17 @@
 #include <math.h>
 #include <vector>
 
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFileDialog>
 #include <QtGui/QIcon>
-#include <QtGui/QLayout>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QRadioButton>
-#include <QtGui/QSpinBox>
-#include <QtGui/QWidgetAction>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QWidgetAction>
 
 using namespace std;
 using XERCES_CPP_NAMESPACE_QUALIFIER DOMElement;

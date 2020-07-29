@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,6 +9,7 @@
 
 #include <qwt_scale_engine.h>
 #include <qwt_scale_div.h>
+#include <qwt_compat.h>
 
 #include "CartesianGridlinesImp.h"
 #include "CartesianPlotImp.h"
@@ -117,7 +118,7 @@ void CartesianGridlinesImp::updateLocations()
 
    if (scaleType == SCALE_LOG)
    {
-      QwtLog10ScaleEngine logScale;
+      QwtLogScaleEngine logScale;
       logScale.autoScale(maxMajorTicks, dMin, dMax, dStepSize);
       scaleDivision = logScale.divideScale(dMin, dMax, maxMajorTicks, maxMinorTicks);
    }

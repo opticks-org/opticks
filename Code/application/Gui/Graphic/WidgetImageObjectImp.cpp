@@ -1,16 +1,16 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QMessageBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QVBoxLayout>
 
 #include "WidgetImageObjectImp.h"
 #include "AppVersion.h"
@@ -37,7 +37,8 @@ bool WidgetImageObjectImp::setWidget(QWidget* pWidget)
       return false;
    }
 
-   QPixmap pixmap = QPixmap::grabWidget(pWidget);
+//VS2017   QPixmap pixmap = QPixmap::grabWidget(pWidget);
+   QPixmap pixmap = pWidget->grab();
    return setWidgetImage(pixmap.toImage());
 }
 

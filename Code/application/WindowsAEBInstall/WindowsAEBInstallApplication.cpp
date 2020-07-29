@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -25,7 +25,7 @@
 #include <QtCore/QDirIterator>
 #include <QtCore/QFile>
 #include <QtCore/QString>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QFont>
 
 #include <vector>
@@ -176,8 +176,8 @@ int WindowsAEBInstallApplication::run(int argc, char** argv)
             { // scope the AebIo so we don't hold a handle to the aeb file and can delete it below
                Aeb extension;
                AebIo io(extension);
-               string errMsg; // ignored
-               if (io.fromFile(autoInfo.filePath().toStdString(), errMsg))
+               string errMsg2; // ignored
+               if (io.fromFile(autoInfo.filePath().toStdString(), errMsg2))
                {
                   extName = extension.getName();
                }

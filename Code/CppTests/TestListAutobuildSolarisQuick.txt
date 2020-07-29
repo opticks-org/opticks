@@ -1,0 +1,47 @@
+###If you put an '#' character
+###as the first character of the line, the 
+###entire line will be commented out.
+###These tests currently work
+
+###OnDiskSensorData is slow, so do not run it in the quick build
+Animation:+All -FrameRate
+Annotation:+All
+Aoi:+All -SerializeLayer
+BadValues:+All
+BandMath:+All
+Batch:+All -NitfExportCornerCoordinatesTest
+Classification:+All -Classification
+Dataset:+All -AutoImport
+DataVariant:+All
+Dted:+All
+DynamicObject:+All
+Envi:+All
+FileFinder:+All
+GeoReference:+All -Orientation
+GeoTiff:+All
+Gcp:+All -SerializeLayer
+Ice:+All
+Image:+All
+MatrixFunctions:+All
+MessageLog:+All
+Model:+All
+Modis:+All -Import
+#Commented out NitfImport due to the fact that it can potentially take a long time to run.
+Nitf:+All -NitfImport
+OnDiskSensorData:-All
+# Jpeg should be re-enabled and tested once qt has been build to use
+# the jpeg library from Dependencies
+Pictures:+All -Jpeg
+PrincipalComponentAnalysis:+All
+Pseudocolor:+All -SerializeDeserialize
+SecondMomentMatrix:+All
+Signature:+All
+Testable: +All
+TiePoint:+All -SerializeLayer
+Undo:+All
+Utility:+All
+View:+All -LayerCreateWithOffsetAndScaling -DockWindowNotify
+Xml: +All
+
+###This suite tests performance and takes a while to run
+#Performance:+All

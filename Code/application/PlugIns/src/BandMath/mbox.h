@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -15,8 +15,8 @@
 #define MB_OK_CANCEL         3
 #define MB_OK_CANCEL_ALWAYS  4
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialog>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialog>
 
 class MBox : public QDialog
 {

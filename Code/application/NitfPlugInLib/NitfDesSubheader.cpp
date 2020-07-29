@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -131,6 +131,11 @@ string Nitf::DesSubheader::getMetadataPath() const
    stringstream indexStr;
    indexStr << "DES_" << setw(3) << setfill('0') << mIndex;
    return Nitf::NITF_METADATA + "/" + Nitf::DES_METADATA + "/" + indexStr.str();
+}
+
+unsigned int Nitf::DesSubheader::getIndex() const
+{
+   return mIndex;
 }
 
 FactoryResource<DynamicObject> Nitf::DesSubheader::createDefaultsDynamicObject(

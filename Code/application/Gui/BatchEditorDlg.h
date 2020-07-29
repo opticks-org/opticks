@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -11,11 +11,11 @@
 #define BATCHEDITORDLG_H
 
 #include <QtCore/QStringList>
-#include <QtGui/QAction>
-#include <QtGui/QComboBox>
-#include <QtGui/QLabel>
-#include <QtGui/QMainWindow>
-#include <QtGui/QStackedWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStackedWidget>
 
 #include <vector>
 

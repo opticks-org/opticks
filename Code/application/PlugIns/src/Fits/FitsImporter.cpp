@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -930,9 +930,14 @@ CachedPage::UnitPtr FitsRasterPager::fetchUnit(DataRequest* pOriginalRequest)
    long maxInRow = std::min(pOriginalRequest->getConcurrentRows(),
       pDesc->getRowCount() - pOriginalRequest->getStartRow().getOnDiskNumber());
    long pixcnt = maxInRow * pDesc->getColumnCount();
+//goffena below
+//   long pStartPix[3] = { 1,
+//                        pOriginalRequest->getStartRow().getOnDiskNumber() + 1,
+//                        pOriginalRequest->getStartBand().getOnDiskNumber() + 1 };
    long pStartPix[3] = {1,
-                        pOriginalRequest->getStartRow().getOnDiskNumber() + 1,
-                        pOriginalRequest->getStartBand().getOnDiskNumber() + 1};
+                        static_cast<long>(pOriginalRequest->getStartRow().getOnDiskNumber() + 1),
+                        static_cast<long>(pOriginalRequest->getStartBand().getOnDiskNumber() + 1)};
+//goffena above
    int status = 0;
 
    size_t bufsize = pixcnt * pDesc->getBytesPerElement();

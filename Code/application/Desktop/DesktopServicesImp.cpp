@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -16,14 +16,14 @@
 #endif
 
 #include <QtCore/QUrl>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QBitmap>
 #include <QtGui/QCursor>
 #include <QtGui/QDesktopServices>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QPixmap>
-#include <QtGui/QStatusBar>
+#include <QtWidgets/QStatusBar>
 
 #include "AnnotationLayerImp.h"
 #include "AoiLayerImp.h"

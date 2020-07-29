@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2009 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from
@@ -8,13 +8,13 @@
  */
 
 #include <QtCore/QEvent>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFormLayout>
-#include <QtGui/QFrame>
-#include <QtGui/QLabel>
-#include <QtGui/QLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
 
 #include "AppVerify.h"
 #include "FilterWidget.h"

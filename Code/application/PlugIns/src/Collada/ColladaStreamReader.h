@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2011 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -165,7 +165,7 @@ private:
    std::vector<std::string> mGeometryIds;
    std::vector<Opticks::Location<float, 3>> mVertices;
    std::vector<std::vector<unsigned int>> mPolygons;
-   std::vector<const COLLADAFW::VisualScene> mScenes;
+   std::vector<COLLADAFW::VisualScene> mScenes;
    double mRotation;
    std::string mCurrentElement;
    std::string mFilename;

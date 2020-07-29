@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -80,31 +80,31 @@ namespace ArcProxyLib
             {
                if(tmp[0] == "USER")
                {
-                  mUser = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mUser = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "PASSWORD")
                {
-                  mPassword = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mPassword = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "DATABASE")
                {
-                  mDatabase = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mDatabase = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "SERVER")
                {
-                  mServer = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mServer = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "INSTANCE")
                {
-                  mInstance = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mInstance = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "VERSION")
                {
-                  mVersion = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mVersion = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "FEATURECLASS")
                {
-                  mFeatureClass = QUrl::fromPercentEncoding(tmp[1].toAscii()).toStdString();
+                  mFeatureClass = QUrl::fromPercentEncoding(tmp[1].toLatin1()).toStdString();
                }
                else if(tmp[0] == "CONNECTIONTYPE")
                {

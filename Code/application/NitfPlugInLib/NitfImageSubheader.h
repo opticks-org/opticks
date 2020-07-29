@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -32,8 +32,11 @@ namespace Nitf
        *
        * @param fileVersion
        *        Either Nitf::VERSION_02_00 or Nitf::VERSION_02_10.
+       *
+       * @param index
+       *        The index of this image.
        */
-      ImageSubheader(const std::string& fileVersion);
+      ImageSubheader(const std::string& fileVersion, unsigned int index);
 
       /**
        * Adds NITF ImageSubheader metadata to the DynamicObject.
@@ -48,6 +51,13 @@ namespace Nitf
       bool importMetadata(const ossimPropertyInterface* pHeader, RasterDataDescriptor* pDescriptor);
 
       std::string getMetadataPath() const;
+
+      /**
+       * Accessor for the segment index.
+       *
+       * @return The segment index.
+       */
+      unsigned int getIndex() const;
 
       FactoryResource<DynamicObject> createDefaultsDynamicObject(const RasterDataDescriptor* pDescriptor);
 
@@ -165,17 +175,19 @@ namespace Nitf
    private:
       ImageSubheader& operator=(const ImageSubheader& rhs);
 
-      static bool getGCPsFromUtmMgrs(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromUtmMgrs(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromUtm(const string& iCords, const string& iGeolo,
-         const LocationType gcpPixels[], unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromUtm(const std::string& iCords, const std::string& iGeolo,
+         const LocationType gcpPixels[], unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromGeographic(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromGeographic(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
 
-      static bool getGCPsFromDecimalDegrees(const string& iGeolo, const LocationType gcpPixels[],
-         unsigned int numGcpPixels, list<GcpPoint>& gcps);
+      static bool getGCPsFromDecimalDegrees(const std::string& iGeolo, const LocationType gcpPixels[],
+         unsigned int numGcpPixels, std::list<GcpPoint>& gcps);
+
+      const unsigned int mIndex;
    };
 }
 

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -128,10 +128,10 @@ extern "C"
       if (pWizard == NULL)
       {
          // open using a path relative to the default wizard path
-         const Filename* pFilename = Service<ConfigurationSettings>()->getSettingWizardPath();
-         if (pFilename != NULL)
+         const Filename* pFilename2 = Service<ConfigurationSettings>()->getSettingWizardPath();
+         if (pFilename2 != NULL)
          {
-            filename = pFilename->getFullPathAndName() + "/" + filename;
+            filename = pFilename2->getFullPathAndName() + "/" + filename;
             pWizard = WizardUtilities::readWizard(filename);
          }
       }

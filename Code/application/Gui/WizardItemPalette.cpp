@@ -1,15 +1,15 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
  * http://www.gnu.org/licenses/lgpl.html
  */
 
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QMenu>
+#include <QtWidgets/QMenu>
 #include <QtGui/QPainter>
 
 #include "DataVariantEditor.h"
@@ -325,7 +325,7 @@ QMimeData* WizardItemPalette::WizardItemList::mimeData(const QList<QListWidgetIt
    QString dataText = itemNames.join("@@!!@@");
 
    QMimeData* pData = new QMimeData();
-   pData->setData("text/x-wizarditem", dataText.toAscii());
+   pData->setData("text/x-wizarditem", dataText.toLatin1());
 
    return pData;
 }

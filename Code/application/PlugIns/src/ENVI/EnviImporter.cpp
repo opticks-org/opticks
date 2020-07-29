@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -503,7 +503,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                         if (pField != NULL)
                         {
                            double pixelSize = 1.0;
-                           if (sscanf(pField->mValue.c_str(), "%g", &pixelSize) == 1)
+                           if (sscanf(pField->mValue.c_str(), "%lg", &pixelSize) == 1)
                            {
                               pDescriptor->setXPixelSize(pixelSize);
                               pFileDescriptor->setXPixelSize(pixelSize);
@@ -514,7 +514,7 @@ vector<ImportDescriptor*> EnviImporter::getImportDescriptors(const string& filen
                         if (pField != NULL)
                         {
                            double pixelSize = 1.0;
-                           if (sscanf(pField->mValue.c_str(), "%g", &pixelSize) == 1)
+                           if (sscanf(pField->mValue.c_str(), "%lg", &pixelSize) == 1)
                            {
                               pDescriptor->setYPixelSize(pixelSize);
                               pFileDescriptor->setYPixelSize(pixelSize);

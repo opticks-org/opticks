@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -46,11 +46,11 @@
 #include <boost/bind.hpp>
 #include <boost/any.hpp>
 
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFrame>
-#include <QtGui/QMenu>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QVBoxLayout>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE

@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -313,7 +313,13 @@ const vector<string>& PlugInArgImp::getArgTypes()
 
 PlugInArgImp* PlugInArgImp::fromSettings(QDataStream& reader)
 {
-   string name;
+//goffena
+#if defined(WIN_API)
+#pragma warning( push )
+#pragma warning( disable: 4456 )
+#endif
+
+	string name;
    READ_STR_FROM_STREAM(name);
    string type;
    READ_STR_FROM_STREAM(type);
@@ -327,7 +333,7 @@ PlugInArgImp* PlugInArgImp::fromSettings(QDataStream& reader)
    READ_FROM_STREAM(haveDefaultDeepCopy);
    if (haveDefaultDeepCopy)
    {
-      string type;
+//goffena      string type;
       string xmlValue;
       READ_STR_FROM_STREAM(type);
       READ_STR_FROM_STREAM(xmlValue);
@@ -361,6 +367,13 @@ PlugInArgImp* PlugInArgImp::fromSettings(QDataStream& reader)
       pArg->mpActualValueShallowCopy = NULL;
    }
    READ_FROM_STREAM(pArg->mActualSet);
+
+   //goffena
+#if defined(WIN_API)
+#pragma warning( pop )
+#endif
+
+
    return pArg.release();
 }
 

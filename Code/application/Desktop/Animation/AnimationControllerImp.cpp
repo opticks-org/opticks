@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,15 +10,15 @@
 #include <sys/timeb.h>
 
 #include <QtCore/QString>
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QDoubleSpinBox>
-#include <QtGui/QFrame>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QGridLayout>
 #include <QtGui/QIcon>
-#include <QtGui/QLabel>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMessageBox>
 
 #include "AnimationAdapter.h"
 #include "AnimationControllerImp.h"
@@ -68,7 +68,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    mStopBumper(-1.0),
    mPlaybackStartFrame(mStartFrame),
    mPlaybackStopFrame(mStopFrame),
-   mFrequency(60),
+   mFrequency(30),
    mMinimumFrameRate(mFrequency, 1),
    mInterval(AnimationController::getSettingFrameSpeedSelection() / mFrequency),
    mState(STOP),
@@ -176,6 +176,7 @@ AnimationControllerImp::AnimationControllerImp(FrameType frameType, const string
    VERIFYNR(connect(mpResetBumpersAction, SIGNAL(triggered()), this, SLOT(resetBumpers())));
    VERIFYNR(connect(mpStoreBumpersAction, SIGNAL(triggered()), this, SLOT(storeBumpers())));
    VERIFYNR(connect(mpRestoreBumpersAction, SIGNAL(triggered()), this, SLOT(restoreBumpers())));
+   VERIFYNR(connect(mpCanDropFramesAction, SIGNAL(toggled(bool)), this, SLOT(canDropFramesToggled(bool))));
 }
 
 AnimationControllerImp::~AnimationControllerImp()
@@ -372,6 +373,18 @@ void AnimationControllerImp::destroyAnimation(Animation* pAnimation)
 FrameType AnimationControllerImp::getFrameType() const
 {
    return mFrameType;
+}
+
+double AnimationControllerImp::getGranularity() const
+{
+   return AnimationController::getSettingFrameSpeedSelection() / mFrequency;
+}
+
+double AnimationControllerImp::lockToGranularity(double frameValue) const
+{
+   double granularity = getGranularity();
+   double lockedFrameValue = static_cast<int>((frameValue - mPlaybackStartFrame) / granularity + 1e-5) * granularity + mPlaybackStartFrame;
+   return lockedFrameValue;
 }
 
 void AnimationControllerImp::setCurrentFrame(double frameValue)
@@ -624,7 +637,7 @@ void AnimationControllerImp::stepForward()
       const double startValue = pAnimation->getStartValue();
       const double stopValue = pAnimation->getStopValue();
       double animationNext;
-      if (currentFrame < startValue)
+      if (currentFrame < startValue && !getCanDropFrames())
       {
          // All frames are after currentFrame, so use the start frame
          animationNext = startValue;
@@ -636,16 +649,24 @@ void AnimationControllerImp::stepForward()
       }
       else
       {
-         // If the animation is after currentFrame, use the animation's current frame
-         const double animationCurr = pAnimation->getNextFrameValue(PLAY_FORWARD, 0);
-         if (animationCurr > currentFrame)
+         if (getCanDropFrames())
          {
-            animationNext = animationCurr;
+            double granularity = getGranularity();
+            animationNext = lockToGranularity(currentFrame + granularity);
          }
          else
          {
-            // Otherwise, use the next frame
-            animationNext = pAnimation->getNextFrameValue(PLAY_FORWARD, 1);
+            // If the animation is after currentFrame, use the animation's current frame
+            const double animationCurr = pAnimation->getNextFrameValue(PLAY_FORWARD, 0);
+            if (animationCurr > currentFrame)
+            {
+               animationNext = animationCurr;
+            }
+            else
+            {
+               // Otherwise, use the next frame
+               animationNext = pAnimation->getNextFrameValue(PLAY_FORWARD, 1);
+            }
          }
       }
 
@@ -692,23 +713,31 @@ void AnimationControllerImp::stepBackward()
          // All frames are after currentFrame (no frames should be displayed)
          animationPrev = -1;
       }
-      else if (currentFrame > stopValue)
+      else if (currentFrame > stopValue && !getCanDropFrames())
       {
          // All frames are before currentFrame, so use the stop frame
          animationPrev = stopValue;
       }
       else
       {
-         // If the animation is before currentFrame, use the animation's current frame
-         const double animationCurr = pAnimation->getNextFrameValue(PLAY_BACKWARD, 0);
-         if (animationCurr < currentFrame)
+         if (getCanDropFrames())
          {
-            animationPrev = animationCurr;
+            double granularity = getGranularity();
+            animationPrev = lockToGranularity(currentFrame - granularity);
          }
          else
          {
-            // Otherwise, use the previous frame
-            animationPrev = pAnimation->getNextFrameValue(PLAY_BACKWARD, 1);
+            // If the animation is before currentFrame, use the animation's current frame
+            const double animationCurr = pAnimation->getNextFrameValue(PLAY_BACKWARD, 0);
+            if (animationCurr < currentFrame)
+            {
+               animationPrev = animationCurr;
+            }
+            else
+            {
+               // Otherwise, use the previous frame
+               animationPrev = pAnimation->getNextFrameValue(PLAY_BACKWARD, 1);
+            }
          }
       }
 
@@ -940,7 +969,7 @@ bool AnimationControllerImp::event(QEvent* pEvent)
          VERIFYNR(pActiveController != NULL);
          pActiveController->advance();
          QApplication::processEvents();
-         QApplication::processEvents(QEventLoop::DeferredDeletion);
+//         QApplication::processEvents(QEventLoop::DeferredDeletion);
          if (mppActiveController != mRunningControllers.end() && pActiveController == *mppActiveController)
          {
             ++mppActiveController;
@@ -978,7 +1007,14 @@ void AnimationControllerImp::advance()
    else
    {
       mMaxCurrentTime = currentTime + 1000.0*smallestDecrement(1/60.0);
-      elapsedTime = currentTime - mEffectiveCurrentTime;
+      if (getCanDropFrames())
+      {
+         elapsedTime = expectedTime;
+      }
+      else
+      {
+         elapsedTime = currentTime - mEffectiveCurrentTime;
+      }
       mEffectiveCurrentTime = currentTime;
    }
    double intervalMultiplier = elapsedTime / expectedTime;
@@ -1006,6 +1042,11 @@ void AnimationControllerImp::advance()
             if (mPlaybackStartFrame != mPlaybackStopFrame)
             {
                nextFrame = mCurrentFrame - (mInterval * intervalMultiplier);
+               if (getCanDropFrames())
+               {
+                  double oldFrame = nextFrame;
+                  nextFrame = lockToGranularity(nextFrame);
+               }
             }
             else
             {
@@ -1022,6 +1063,11 @@ void AnimationControllerImp::advance()
       else
       {
          nextFrame = mCurrentFrame + (mInterval * intervalMultiplier);
+         if (getCanDropFrames())
+         {
+            double oldFrame = nextFrame;
+            nextFrame = lockToGranularity(nextFrame);
+         }
       }
    }
    else if (mState == PLAY_BACKWARD)
@@ -1042,6 +1088,11 @@ void AnimationControllerImp::advance()
             if (mPlaybackStartFrame != mPlaybackStopFrame)
             {
                nextFrame = mCurrentFrame + (mInterval * intervalMultiplier);
+               if (getCanDropFrames())
+               {
+                  double oldFrame = nextFrame;
+                  nextFrame = lockToGranularity(nextFrame);
+               }
             }
             else
             {
@@ -1058,11 +1109,17 @@ void AnimationControllerImp::advance()
       else
       {
          nextFrame = mCurrentFrame - (mInterval * intervalMultiplier);
+         if (getCanDropFrames())
+         {
+            double oldFrame = nextFrame;
+            nextFrame = lockToGranularity(nextFrame);
+         }
       }
    }
 
    // Set the next value as the current value
-   setCurrentFrame(getNextValue(nextFrame));
+   double modNextFrame = getNextValue(nextFrame);
+   setCurrentFrame(modNextFrame);
 }
 
 void AnimationControllerImp::destroyAnimation()
@@ -1093,7 +1150,13 @@ void AnimationControllerImp::setCanDropFrames(bool drop)
    if (getCanDropFrames() != drop)
    {
       mpCanDropFramesAction->setChecked(drop);
+      notify(SIGNAL_NAME(AnimationController, CanDropFramesChanged), boost::any(drop));
    }
+}
+
+void AnimationControllerImp::canDropFramesToggled(bool drop)
+{
+   notify(SIGNAL_NAME(AnimationController, CanDropFramesChanged), boost::any(drop));
 }
 
 bool AnimationControllerImp::getCanDropFrames() const
@@ -1105,6 +1168,7 @@ double AnimationControllerImp::getNextValue(double value) const
 {
    double newValue = value;
    AnimationState state = getAnimationState();
+   unsigned int step = 2;
    if (state == PLAY_FORWARD)
    {
       for (vector<Animation*>::const_iterator iter = mAnimations.begin();
@@ -1113,7 +1177,7 @@ double AnimationControllerImp::getNextValue(double value) const
          Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
-         double movieValue = pAnimation->getNextFrameValue(state, 2);
+         double movieValue = pAnimation->getNextFrameValue(state, step);
          if (movieValue >= 0)
          {
             newValue = min(newValue, movieValue);
@@ -1132,7 +1196,7 @@ double AnimationControllerImp::getNextValue(double value) const
          Animation* pAnimation = *iter;
          VERIFYRV(pAnimation != NULL, -1.0);
 
-         double movieValue = pAnimation->getNextFrameValue(state, 1);
+         double movieValue = pAnimation->getNextFrameValue(state, step-1);
          if (movieValue >= 0)
          {
             newValue = max(newValue, movieValue);

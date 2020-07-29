@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -10,12 +10,12 @@
 #ifndef PROPERTIESANNOTATIONLAYER_H
 #define PROPERTIESANNOTATIONLAYER_H
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QLabel>
-#include <QtGui/QListWidget>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QWidget>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QWidget>
 
 #include "Modifier.h"
 

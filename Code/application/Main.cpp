@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -12,12 +12,12 @@
 #include "InteractiveApplication.h"
 #include "SystemServicesImp.h"
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtOpenGL/qgl.h>
 
 int main(int argc, char** argv)
 {
-   QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
+   //VS2017_FIX_ME    QGL::setPreferredPaintEngine(QPaintEngine::OpenGL);
 
    // The QApplication will strip its args from argc/argv, so we want to do 
    // this before putting the command-line args into our ArgumentList, or we

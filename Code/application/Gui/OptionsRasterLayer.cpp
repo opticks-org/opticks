@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -9,9 +9,7 @@
 
 #include "DependencyConfigs.h"
 #include "AppConfig.h"
-#if defined(CG_SUPPORTED)
-#include "CgContext.h"
-#endif
+#include "GlSlContext.h"
 #include "ComplexComponentComboBox.h"
 #include "CustomTreeWidget.h"
 #include "DynamicObject.h"
@@ -25,17 +23,17 @@
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-#include <QtGui/QAction>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDoubleSpinBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtGui/QDoubleValidator>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QGridLayout>
 #include <QtGui/QIntValidator>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMenu>
-#include <QtGui/QPushButton>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QVBoxLayout>
 
 #include <limits>
 #include <memory>
@@ -201,12 +199,10 @@ OptionsRasterLayer::OptionsRasterLayer() :
    pLayout->addWidget(pColorCompositesSection, 10);
 
    bool systemSupportsGpuImage = false;
-#if defined(CG_SUPPORTED)
-   if (CgContext::instance() != NULL)
+   if (GlSlContext::instance() != NULL)
    {
       systemSupportsGpuImage = true;
    }
-#endif
 
    mpUseGpuImage->setEnabled(systemSupportsGpuImage);
 

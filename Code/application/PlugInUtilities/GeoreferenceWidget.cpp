@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2012 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -19,14 +19,14 @@
 #include "RasterDataDescriptor.h"
 #include "Slot.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QFrame>
-#include <QtGui/QLabel>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLineEdit>
-#include <QtGui/QListWidget>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QStyleOptionButton>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QFrame>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QStyleOptionButton>
 
 #include <boost/any.hpp>
 #include <vector>

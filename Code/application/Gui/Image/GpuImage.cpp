@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2007 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -8,7 +8,7 @@
  */
 
 #include "GpuImage.h"
-#include "CgContext.h"
+#include "GlSlContext.h"
 #include "ColorBuffer.h"
 #include "ConfigurationSettings.h"
 #include "DataAccessor.h"
@@ -36,24 +36,18 @@ bool GpuImage::mAlwaysAlpha = true;
 bool GpuImage::mAlphaConfigChecked = false;
 
 GpuImage::GpuImage() :
-   mGrayscaleProgram(0),
-   mColormapProgram(0),
+   mGrayscaleProgram(),
+   mColormapProgram(),
    mColormapTexture(0),
-   mRgbProgram(0),
-   mpCgProgram(NULL),
-   mFragmentProfile(CG_PROFILE_UNKNOWN),
-   mInputTexture(0),
+   mRgbProgram(),
+   mGpuProgramObject(-1),
    mPreviousBand(0)
 {
-   // Load the Cg programs and fragment profile
-   CgContext* pCgContext = CgContext::instance();
-   if (pCgContext != NULL)
-   {
-      mGrayscaleProgram = pCgContext->loadFragmentProgram("GrayscaleDisplay.cg");
-      mColormapProgram = pCgContext->loadFragmentProgram("ColormapDisplay.cg");
-      mRgbProgram = pCgContext->loadFragmentProgram("RgbDisplay.cg");
-      mFragmentProfile = pCgContext->getFragmentProfile();
-   }
+   GlSlContext* pGlSlContext = GlSlContext::instance();
+
+   mGrayscaleProgram.initialize();
+   mColormapProgram.initialize();
+   mRgbProgram.initialize();
    
    if (mAlphaConfigChecked == false)
    {
@@ -64,14 +58,12 @@ GpuImage::GpuImage() :
 
 GpuImage::~GpuImage()
 {
-   // Unload and destroy Cg programs
-   CgContext* pCgContext = CgContext::instance();
-   if (pCgContext != NULL)
-   {
-      pCgContext->destroyCgProgram("GrayscaleDisplay.cg");
-      pCgContext->destroyCgProgram("ColormapDisplay.cg");
-      pCgContext->destroyCgProgram("RgbDisplay.cg");
-   }
+   GlSlContext* pGlSlontext = GlSlContext::instance();
+
+   // Unload and destory the shader programs
+   mGrayscaleProgram.dispose();
+   mColormapProgram.dispose();
+   mRgbProgram.dispose();
 }
 
 // Grayscale
@@ -1257,72 +1249,55 @@ bool GpuImage::isFilterEnabled(ImageFilterDescriptor *pDescriptor) const
 
 void GpuImage::initializeGrayscale()
 {
-   // Update the active Cg program
-   if (mpCgProgram != &mGrayscaleProgram)
-   {
-      // Cg program
-      mpCgProgram = &mGrayscaleProgram;
+   GlSlContext* pGlSlontext = GlSlContext::instance();
 
-      // Cg parameters
-      CgContext* pCgContext = CgContext::instance();
-      if (pCgContext != NULL)
-      {
-         mCgParameters = pCgContext->getParameters(*mpCgProgram);
-      }
+   if (mGpuProgramObject != mGrayscaleProgram.getProgramObjectId())
+   {
+      mGrayscaleProgram.initialize();
+      mGpuProgramObject = mGrayscaleProgram.getProgramObjectId();
    }
 }
 
 void GpuImage::initializeColormap(const vector<ColorType>& colorMap)
 {
-   // Update the active Cg program
-   if (mpCgProgram != &mColormapProgram)
+   GlSlContext* pGlSlontext = GlSlContext::instance();
+   if (mGpuProgramObject != mColormapProgram.getProgramObjectId())
    {
-      // Cg program
-      mpCgProgram = &mColormapProgram;
-
-      // Cg parameters
-      CgContext* pCgContext = CgContext::instance();
-      if (pCgContext != NULL)
+      mColormapProgram.initialize();
+      mGpuProgramObject = mColormapProgram.getProgramObjectId();
+   }
+   if (mColorMapChanged || static_cast<GLuint>(mColormapTexture) == 0)
+   {
+      unsigned int numColors = colorMap.size();
+      vector<unsigned char> colors(numColors * 4);
+      for (unsigned int i = 0, textureIndex = 0; i < numColors; ++i)
       {
-         mCgParameters = pCgContext->getParameters(*mpCgProgram);
+         ColorType color = colorMap[i];
+         colors[textureIndex++] = color.mRed;
+         colors[textureIndex++] = color.mGreen;
+         colors[textureIndex++] = color.mBlue;
+         colors[textureIndex++] = color.mAlpha;
       }
-   }
 
-   unsigned int numColors = colorMap.size();
-   vector<unsigned char> colors(numColors * 4);
-   for (unsigned int i = 0, textureIndex = 0; i < numColors; ++i)
-   {
-      ColorType color = colorMap[i];
-      colors[textureIndex++] = color.mRed;
-      colors[textureIndex++] = color.mGreen;
-      colors[textureIndex++] = color.mBlue;
-      colors[textureIndex++] = color.mAlpha;
-   }
-
-   mColormapTexture = GlTextureResource(1);
-   if (static_cast<GLuint>(mColormapTexture) != 0)
-   {
-      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
-      glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+      mColormapTexture = GlTextureResource(1);
+      if (static_cast<GLuint>(mColormapTexture) != 0)
+      {
+         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
+         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+         //glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, numColors, 1, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, &colors[0]);
+         glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, numColors, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &colors[0]);
+         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+      }
    }
 }
 
 void GpuImage::initializeRgb()
 {
-   // Update the active Cg program
-   if (mpCgProgram != &mRgbProgram)
+   GlSlContext* pGlSlontext = GlSlContext::instance();
+   if (mGpuProgramObject != mRgbProgram.getProgramObjectId())
    {
-      // Cg program
-      mpCgProgram = &mRgbProgram;
-
-      // Cg parameters
-      CgContext* pCgContext = CgContext::instance();
-      if (pCgContext != NULL)
-      {
-         mCgParameters = pCgContext->getParameters(*mpCgProgram);
-      }
+      mRgbProgram.initialize();
+      mGpuProgramObject = mRgbProgram.getProgramObjectId();
    }
 }
 
@@ -1403,10 +1378,24 @@ void GpuImage::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
       return;
    }
 
+   GlShaderGpuProgram* pProgram = NULL;
+   if (mGpuProgramObject == mGrayscaleProgram.getProgramObjectId()) {
+      pProgram = &mGrayscaleProgram;
+   }
+   else if (mGpuProgramObject == mColormapProgram.getProgramObjectId()) {
+      pProgram = &mColormapProgram;
+   }
+   else if (mGpuProgramObject == mRgbProgram.getProgramObjectId()) {
+      pProgram = &mRgbProgram;
+   }
+   else
+      return;
+   
    // Enable the fragment profile and bind the display program
-   cgGLEnableProfile(mFragmentProfile);
-   cgGLBindProgram(*mpCgProgram);
-   setCgParameterValues();
+   const ImageData& imageInfo = getImageData();
+
+   pProgram->bind();
+   pProgram->setParameterValues(imageInfo, getAlpha(), mColormapTexture);
 
    // Draw the tiles
    for (vector<Tile*>::const_iterator iter = tiles.begin(); iter != tiles.end(); ++iter)
@@ -1414,121 +1403,12 @@ void GpuImage::drawTiles(const vector<Tile*>& tiles, GLfloat textureMode)
       GpuTile* pTile = dynamic_cast<GpuTile*>(*iter);
       if (pTile != NULL)
       {
-         pTile->draw(mInputTexture, textureMode);
+         pTile->draw(pProgram, textureMode);
       }
    }
 
    // Disable the profile
-   cgGLDisableProfile(mFragmentProfile);
-}
-
-void GpuImage::setCgParameterValues()
-{
-   const ImageData& imageInfo = getImageData();
-
-   unsigned int numParameters = mCgParameters.size();
-   for (unsigned int i = 0; i < numParameters; ++i)
-   {
-      const char* pParameterName = cgGetParameterName(mCgParameters.at(i));
-      if (pParameterName != NULL)
-      {
-         if ((strcmp(pParameterName, "texCoord") != 0) && (strcmp(pParameterName, "outputColor") != 0))
-         {
-            if (strcmp(pParameterName, "inputImage") == 0)
-            {
-               mInputTexture = mCgParameters.at(i);
-            }
-            else if (strcmp(pParameterName, "colorMap") == 0)
-            {
-               cgGLSetTextureParameter(mCgParameters.at(i), mColormapTexture);
-               cgGLEnableTextureParameter(mCgParameters.at(i));
-            }
-            else if (strcmp(pParameterName, "numColors") == 0)
-            {
-               GLint numColors = 0;
-               glBindTexture(GL_TEXTURE_RECTANGLE_ARB, mColormapTexture);
-               glGetTexLevelParameteriv(GL_TEXTURE_RECTANGLE_ARB, 0, GL_TEXTURE_WIDTH, &numColors);
-
-               cgGLSetParameter1f(mCgParameters.at(i), static_cast<float>(numColors));
-            }
-            else if ((strcmp(pParameterName, "dataMax") == 0) || (strcmp(pParameterName, "redDataMax") == 0) ||
-               (strcmp(pParameterName, "greenDataMax") == 0) || (strcmp(pParameterName, "blueDataMax") == 0))
-            {
-               EncodingType dataType = FLT4BYTES;
-               if ((imageInfo.mRawType[0] == imageInfo.mRawType[1]) &&
-                  (imageInfo.mRawType[0] == imageInfo.mRawType[2]))
-               {
-                  if ((strcmp(pParameterName, "dataMax") == 0) || (strcmp(pParameterName, "redDataMax") == 0))
-                  {
-                     dataType = imageInfo.mRawType[0];
-                  }
-                  else if (strcmp(pParameterName, "greenDataMax") == 0)
-                  {
-                     dataType = imageInfo.mRawType[1];
-                  }
-                  else if (strcmp(pParameterName, "blueDataMax") == 0)
-                  {
-                     dataType = imageInfo.mRawType[2];
-                  }
-               }
-
-               if ((dataType == INT1UBYTE) || (dataType == INT1SBYTE))
-               {
-                  cgGLSetParameter1f(mCgParameters.at(i), getScale<unsigned char>());
-               }
-               else if ((dataType == INT2UBYTES) || (dataType == INT2SBYTES))
-               {
-                  cgGLSetParameter1f(mCgParameters.at(i), getScale<unsigned short>());
-               }
-               else
-               {
-                  cgGLSetParameter1f(mCgParameters.at(i), getScale<float>());
-               }
-            }
-            else if ((strcmp(pParameterName, "lowerValue") == 0) || (strcmp(pParameterName, "redLowerValue") == 0))
-            {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[0]),
-                  imageInfo.mRawType[0]);
-               cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
-            }
-            else if ((strcmp(pParameterName, "upperValue") == 0) || (strcmp(pParameterName, "redUpperValue") == 0))
-            {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints1[1]),
-                  imageInfo.mRawType[0]);
-               cgGLSetParameter1f(mCgParameters.at(i), upperValue);
-            }
-            else if (strcmp(pParameterName, "greenLowerValue") == 0)
-            {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[0]),
-                  imageInfo.mRawType[1]);
-               cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
-            }
-            else if (strcmp(pParameterName, "greenUpperValue") == 0)
-            {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints2[1]),
-                  imageInfo.mRawType[1]);
-               cgGLSetParameter1f(mCgParameters.at(i), upperValue);
-            }
-            else if (strcmp(pParameterName, "blueLowerValue") == 0)
-            {
-               float lowerValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[0]),
-                  imageInfo.mRawType[2]);
-               cgGLSetParameter1f(mCgParameters.at(i), lowerValue);
-            }
-            else if (strcmp(pParameterName, "blueUpperValue") == 0)
-            {
-               float upperValue = getTextureStretchValue(static_cast<float>(imageInfo.mKey.mStretchPoints3[1]),
-                  imageInfo.mRawType[2]);
-               cgGLSetParameter1f(mCgParameters.at(i), upperValue);
-            }
-            else if (strcmp(pParameterName, "alpha") == 0)
-            {
-               float alpha = static_cast<float>(getAlpha());
-               cgGLSetParameter1f(mCgParameters.at(i), alpha);
-            }
-         }
-      }
-   }
+   pProgram->disable();
 }
 
 float GpuImage::getTextureStretchValue(float rawValue, EncodingType dataType) const
@@ -1554,7 +1434,8 @@ float GpuImage::getTextureStretchValue(float rawValue, EncodingType dataType) co
 void GpuImage::setActiveTileSet(const ImageKey &key)
 {
    ImageKey defaultImageKey;
-   if (mpCgProgram == &mGrayscaleProgram)
+
+   if (mGpuProgramObject == mGrayscaleProgram.getProgramObjectId())
    {
       if (mGrayscaleImageKey == defaultImageKey)
       {
@@ -1563,7 +1444,7 @@ void GpuImage::setActiveTileSet(const ImageKey &key)
 
       Image::setActiveTileSet(mGrayscaleImageKey);
    }
-   else if (mpCgProgram == &mColormapProgram)
+   else if (mGpuProgramObject == mColormapProgram.getProgramObjectId())
    {
       if (mColormapImageKey == defaultImageKey)
       {
@@ -1572,7 +1453,7 @@ void GpuImage::setActiveTileSet(const ImageKey &key)
 
       Image::setActiveTileSet(mColormapImageKey);
    }
-   else if (mpCgProgram == &mRgbProgram)
+   else if (mGpuProgramObject == mRgbProgram.getProgramObjectId())
    {
       if (mRgbImageKey == defaultImageKey)
       {
