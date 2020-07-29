@@ -18,9 +18,6 @@
 #include "RgbGpuProgram.h"
 #include "ColormapGpuProgram.h"
 
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
-
 #include <vector>
 
 class BadValues;
