@@ -35,7 +35,6 @@
 #include <QtWidgets/QWhatsThis>
 #include <QtCore/QMimeData>
 
-#include "DependencyConfigs.h"
 #include "AboutDlg.h"
 #include "Aeb.h"
 #include "AebIo.h"

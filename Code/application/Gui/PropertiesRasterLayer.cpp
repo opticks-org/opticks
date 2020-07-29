@@ -21,7 +21,6 @@
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QStackedWidget>
 
-#include "DependencyConfigs.h"
 #include "AppConfig.h"
 #include "AppVersion.h"
 #include "GlSlContext.h"
