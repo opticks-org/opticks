@@ -262,6 +262,7 @@ void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& ban
 {
    if (pWavelengths != mpWavelengths)
    {
+      beginResetModel();
       // Update the wavelengths
       mpWavelengths = pWavelengths;
 
@@ -279,9 +280,9 @@ void WavelengthModel::setWavelengths(const std::vector<DimensionDescriptor>& ban
       }
 
       mActiveBands.clear();
-
       // Reset the internal state of the model
-      reset();
+      resetInternalData(); // Does this do anything? What?
+      endResetModel();
    }
 }
 
@@ -292,7 +293,8 @@ void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescrip
    {
       return;
    }
-
+   
+   beginResetModel();
    mActiveBands.resize(bands.size());
    for (std::vector<DimensionDescriptor>::size_type i = 0; i < bands.size(); ++i)
    {
@@ -306,7 +308,8 @@ void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescrip
    }
 
    std::sort(mActiveBands.begin(), mActiveBands.end());
-
+   endResetModel();
+   
    QModelIndex topLeft = createIndex(0, 0);
    QModelIndex bottomRight = createIndex(static_cast<int>(mAllBands.size() - 1), 0);
    emit dataChanged(topLeft, bottomRight);
@@ -314,5 +317,7 @@ void WavelengthModel::updateActiveWavelengths(const std::vector<DimensionDescrip
 
 void WavelengthModel::updateData()
 {
-   reset();
+   beginResetModel();
+   resetInternalData();  // Does this do anything? What?
+   endResetModel();
 }

@@ -18,9 +18,20 @@
 
 #include <limits>
 #include <memory>
+#include <iostream>
 #include <string.h>
 #include <ossim/matrix/newmat.h>
 #include <ossim/matrix/newmatap.h>
+#include <ossim/ossimConfig.h>
+
+#if defined __has_include
+   #if __has_include ("ossim/ossimVersion.h")   /* not portable */
+   #include <ossim/ossimVersion.h>
+   #endif
+#endif
+
+#define OSSIM_VERSION_NUMBER (100*100*(OSSIM_MAJOR_VERSION_NUMBER) + 100*(OSSIM_MINOR_VERSION_NUMBER) + (OSSIM_PATCH_VERSION_NUMBER))
+
 
 using namespace NEWMAT;
 using namespace std;
@@ -321,7 +332,7 @@ bool MatrixFunctions::computeSingularValueDecomposition(const double** pMatrix, 
 
    return true;
 }
-
+#if OSSIM_VERSION_NUMBER < 10900
 bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, const double* pRhs,
    const int& numRows, const int& numColsLhs)
 {
@@ -352,7 +363,7 @@ bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, 
    try
    {
       // Solve the equation. Throws an exception on invalid input or when unable to converge.
-      SVDSolve(resultVector, lhsMatrix, rhsVector);
+      SVDSolve(resultVector, lhsMatrix, rhsVector);      
    }
    catch (const RBD_COMMON::BaseException&)
    {
@@ -364,3 +375,67 @@ bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, 
    memcpy(pResult, pData, resultVector.Storage() * sizeof(pData[0]));
    return true;
 }
+#else
+// ossim 1.9.0 doesn't have an explicit SVDSolve() function, so we'll use Eigen's
+//
+#include <eigen3/Eigen/SVD>
+
+// Type is float or double
+/* template typename specializations are preferable to typedefs... for --std=c++0x and above.
+template <typename Type>  using EigenVector    = Eigen::Matrix<Type,Eigen::Dynamic,1>; ///< column vector
+template <typename Type>  using EigenRowVector = Eigen::Matrix<Type,1,Eigen::Dynamic>; ///< row vector
+*/
+typedef class Eigen::Matrix<double,Eigen::Dynamic,1> EigenVectorType; ///< column vector
+typedef class Eigen::Matrix<double,1,Eigen::Dynamic> EigenRowVectorType; ///< row vector
+typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> EigenMatrixType; ///< columnMajor Matrix
+typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> EigenRowMatrixType; ///< rowMajor Matrix 
+
+
+bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, const double* pRhs,
+   const int& numRows, const int& numColsLhs)
+{
+   if (pResult == NULL || pLhs == NULL || pRhs == NULL || numRows < numColsLhs || numColsLhs <= 0)
+   {
+      return false;
+   }
+
+   // Copy pLhs into a Matrix.
+   EigenRowMatrixType lhsMatrix(numRows, numColsLhs);
+   double* pData = lhsMatrix.data();
+   VERIFY(pData != NULL);
+   for (int row = 0; row < numRows; ++row)
+   {
+      memcpy(pData + row * numColsLhs, pLhs[row], numColsLhs * sizeof(pData[0]));
+   }
+
+   // Copy pRhs into a ColumnVector.
+   EigenVectorType rhsVector(numRows);
+   pData = rhsVector.data();
+   VERIFY(pData != NULL);
+   memcpy(pData, pRhs, rhsVector.size() * sizeof(pData[0]));
+
+   try
+   {
+#if (EIGEN_VERSION_AT_LEAST(3,2,90))
+      Eigen::BDCSVD<EigenMatrixType> SVD(lhsMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#else
+      Eigen::JacobiSVD<EigenMatrixType> SVD(lhsMatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#endif
+      EigenVectorType resultVector = SVD.solve(rhsVector);
+      VERIFY(resultVector.rows() == numColsLhs);
+
+      pData = resultVector.data();
+      VERIFY(pData != NULL);
+      memcpy(pResult, pData, resultVector.size() * sizeof(pData[0]));
+   }
+   catch (...)
+   {
+      // Is there an Opticks error widget or macro we should use here rather than stderr?
+      std::cerr << "Unknown exception in MatrixFunctions::solveLinearEquation() SVD" << std::endl;
+      return false;
+   }
+   return true;
+}
+#endif
+
+

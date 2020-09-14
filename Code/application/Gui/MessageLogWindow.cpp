@@ -515,8 +515,11 @@ void MessageLogWindowModel::setMessageLog(MessageLog* pLog)
 {
    if (pLog != mpLog.get())
    {
+      beginResetModel();
       mpLog.reset(pLog);
-      reset();
+      mPropertyCache.clear();
+      resetInternalData(); // Does this do anything? What?
+      endResetModel();
    }
 }
 

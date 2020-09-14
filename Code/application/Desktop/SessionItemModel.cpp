@@ -31,7 +31,7 @@ SessionItemModel::SessionItemModel(QObject* pParent) :
    QAbstractItemModel(pParent),
    mpRootWrapper(new SessionItemWrapper(this, NULL))
 {
-	setSupportedDragActions(Qt::MoveAction);
+//	setSupportedDragActions(Qt::MoveAction);
 }
 
 SessionItemModel::~SessionItemModel()

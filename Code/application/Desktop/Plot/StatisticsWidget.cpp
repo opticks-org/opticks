@@ -33,7 +33,7 @@ StatisticsWidget::StatisticsWidget(HistogramPlotImp* pPlot, QWidget* pParent) :
    mpStats->setColumnCount(2);
    mpStats->setRowCount(5);
    mpStats->horizontalHeader()->hide();
-   mpStats->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+   mpStats->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
    mpStats->verticalHeader()->hide();
    mpStats->setItem(0, 0, new QTableWidgetItem("Minimum Value"));
    mpStats->setItem(1, 0, new QTableWidgetItem("Maximum Value"));

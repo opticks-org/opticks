@@ -85,7 +85,7 @@ if (!(expr)) \
 /** @def VERIFY(expr)
  *  @brief If \a expr is false, log a message and return false from the current function.
  */
-#define VERIFY(expr) VERIFYRV(expr, false)
+#define VERIFY(expr) VERIFYRV(expr, 0)
 
 /** @def VERIFYNRV(expr)
  *  @brief If \a expr is false, log a message and return from the current function.

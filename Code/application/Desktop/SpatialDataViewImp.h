@@ -482,7 +482,7 @@ private slots:
       \
       /* Set the image data */ \
       unsigned char* pBits = image.bits(); \
-      int iBytes = image.numBytes(); \
+      int iBytes = image.sizeInBytes(); \
       \
       spBuffer = new (std::nothrow) unsigned char[iBytes]; \
       if ((pBits == NULL) || (spBuffer == NULL)) \
@@ -497,7 +497,7 @@ private slots:
       iWidth = image.width(); \
       iHeight = image.height(); \
       iDepth = image.depth(); \
-      iNumColors = image.numColors(); \
+      iNumColors = image.colorCount(); \
       \
       return true; \
    } \

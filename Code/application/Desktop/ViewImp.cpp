@@ -859,7 +859,7 @@ bool ViewImp::getCurrentImage(QImage &image)
       {
          image.convertToFormat(QImage::Format_ARGB32);
          QImage tmpImage = fbo.toImage().convertToFormat(image.format());
-         memcpy(image.bits(), tmpImage.bits(), image.numBytes());
+         memcpy(image.bits(), tmpImage.bits(), image.sizeInBytes());
       }
 
       painter.endNativePainting();

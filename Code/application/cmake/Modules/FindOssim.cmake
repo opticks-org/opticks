@@ -1,9 +1,9 @@
-find_path(Ossim_INCLUDE_DIR ossim/ossimConfig.h)
-
-find_file(ossimConfig_h NAMES ossimConfig.h PATH_SUFFIXES ossim)
+find_path(Ossim_INCLUDE_DIR ossimConfig.h HINTS ${Ossim_INCLUDE_DIR} PATH_SUFFIXES ossim)
+message(STATUS "Ossim_INCLUDE_DIR: " ${Ossim_INCLUDE_DIR})
+set(ossimConfig_h ${Ossim_INCLUDE_DIR}/ossim/ossimConfig.h)
 file(STRINGS "${ossimConfig_h}" OSSIM_VERSION_STRING REGEX "^#.*define OSSIM_VERSION +.*$")
 if(NOT OSSIM_VERSION_STRING)
-   find_file(ossimVersion_h NAMES ossimVersion.h PATH_SUFFIXES ossim)
+   set(ossimVersion_h ${Ossim_INCLUDE_DIR}/ossim/ossimVersion.h)
    message(STATUS "ossimVersion_h: ${ossimVersion_h}")
    if(EXISTS "${ossimVersion_h}")
       file(STRINGS "${ossimVersion_h}" OSSIM_VERSION_STRING REGEX "^#.*define OSSIM_VERSION +.*$")

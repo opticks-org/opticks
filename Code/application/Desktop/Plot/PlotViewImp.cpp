@@ -773,7 +773,7 @@ void PlotViewImp::selectObjects(const QRegion& selectionRegion, bool bSelect)
 
                // Add the object to the selection list if the object region
                // is contained entirely within the selection region
-               if (selectionRegion.intersect(objectRegion) == objectRegion)
+               if (selectionRegion.intersected(objectRegion) == objectRegion)
                {
                   objects.push_back(pObject);
                }
@@ -810,7 +810,7 @@ void PlotViewImp::selectObjects(const QRegion& selectionRegion, const PointSet* 
             QRegion objectRegion = getObjectRegion(pPoint);
 
             // Select the object if the object region is contained entirely within the selection region
-            if (selectionRegion.intersect(objectRegion) == objectRegion)
+            if (selectionRegion.intersected(objectRegion) == objectRegion)
             {
                pPoint->setSelected(bSelect);
             }

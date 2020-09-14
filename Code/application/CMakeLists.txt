@@ -183,7 +183,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 
 # Qt/Qwt configuration boilerplate shared with Spectral
 set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
-include(ConfigureQtQwt)
+include(ConfigureQt5Qwt6)
 unset(DEPENDENCY_PATH)
 
 find_package(Boost 1.45.0 REQUIRED)
@@ -211,7 +211,8 @@ find_package(avformat)
 find_package(avutil)
 find_package(swscale)
 find_package(cfitsio)
-find_package(Cg) #optional, still need to work
+set(Cg_FOUND 0)
+#find_package(Cg) #optional, still need to work
 find_package(Gdal)
 find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
