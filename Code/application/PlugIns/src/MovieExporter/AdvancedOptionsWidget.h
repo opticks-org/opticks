@@ -14,6 +14,8 @@
 
 #include <string>
 
+#include "MovieExporter.h"
+
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
@@ -49,8 +51,8 @@ public:
    void setDiaSize(int val);
    int getOutputBufferSize() const;
    void setOutputBufferSize(int val);
-   int getFlags() const;
-   void setFlags(int val);
+   codec_flag_t getFlags() const;
+   void setFlags(codec_flag_t val);
 
 private:
    AdvancedOptionsWidget(const AdvancedOptionsWidget& rhs);

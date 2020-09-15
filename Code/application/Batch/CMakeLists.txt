@@ -28,7 +28,7 @@ target_link_libraries(OpticksBatch
     ${PTHREADS_LIBRARY}
 )
 if(HAVE_QT5)
-   target_link_libraries(OpticksBatch  ${Qwt5ForQt5_LIBRARY})
+   target_link_libraries(OpticksBatch  ${Qwt6ForQt5_LIBRARY})
 else()
    target_link_libraries(OpticksBatch  ${Qwt5ForQt4_LIBRARY})
 endif()

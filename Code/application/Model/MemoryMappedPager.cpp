@@ -3,7 +3,7 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -275,7 +275,7 @@ bool MemoryMappedPager::execute(PlugInArgList* pInputArgList, PlugInArgList* pOu
    catch (...)
    {
       VERIFY(false);
-   } 
+   }
    VERIFY(!mMatrices.empty());
 
    return true;
@@ -315,7 +315,7 @@ RasterPage* MemoryMappedPager::getPage(DataRequest* pOriginalRequest, DimensionD
          dynamic_cast<const RasterFileDescriptor*>(mpDataDescriptor->getFileDescriptor());
       if (pFileDescriptor == NULL)
       {
-         return false;
+         return NULL;
       }
 
       interleave = pFileDescriptor->getInterleaveFormat();
@@ -462,14 +462,14 @@ void MemoryMappedPager::releasePage(RasterPage* pPage)
       {
          //we leased the page out from this instance,
          //so now we can release the resources used for it.
-         
+
          //destroy the memory mapped section of the file
          //associated with that page
          foundIter->second->release(pOurPage->getMemoryMappedMatrixView());
 
          //remove the page from the vector
          mCurrentlyLeasedPages.erase(foundIter);
-         
+
          //delete the actual page that we allocated earlier
          //in the getPage() method.
          delete pOurPage;

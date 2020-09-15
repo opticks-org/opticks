@@ -1,6 +1,6 @@
 /*
  * The information in this file is
- * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
+ * Copyright(c) 2010 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
  * The license text is available from   
@@ -296,9 +296,9 @@ void AdvancedOptionsWidget::setOutputBufferSize(int val)
    }
 }
 
-int AdvancedOptionsWidget::getFlags() const
+codec_flag_t AdvancedOptionsWidget::getFlags() const
 {
-   int flags = 0;
+   codec_flag_t flags = 0;
    if (mpQScale->isChecked())
    {
       flags |= CODEC_FLAG_QSCALE;
@@ -317,7 +317,7 @@ int AdvancedOptionsWidget::getFlags() const
    }
    if (mpTrellis->isChecked())
    {
-      flags |= CODEC_FLAG_TRELLIS_QUANT;
+      flags |= OPTICKS_CODEC_FLAG_TRELLIS_QUANT;
    }
    if (mpAcPred->isChecked())
    {
@@ -343,13 +343,13 @@ int AdvancedOptionsWidget::getFlags() const
    return flags;
 }
 
-void AdvancedOptionsWidget::setFlags(int val)
+void AdvancedOptionsWidget::setFlags(codec_flag_t val)
 {
    mpQScale->setChecked(val & CODEC_FLAG_QSCALE);
    mpQPel->setChecked(val & CODEC_FLAG_QPEL);
    mpGmc->setChecked(val & CODEC_FLAG_GMC);
    mpNormalizeAqp->setChecked(val & CODEC_FLAG_NORMALIZE_AQP);
-   mpTrellis->setChecked(val & CODEC_FLAG_TRELLIS_QUANT);
+   mpTrellis->setChecked(val & OPTICKS_CODEC_FLAG_TRELLIS_QUANT);
    mpAcPred->setChecked(val & CODEC_FLAG_AC_PRED);
    mpCbpRd->setChecked(val & CODEC_FLAG_CBP_RD);
    mpQpRd->setChecked(val & CODEC_FLAG_QP_RD);

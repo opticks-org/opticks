@@ -3,7 +3,7 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -294,7 +294,7 @@ void TiePointPage::gcpLayerDeleted(Subject &subject, const string &signal, const
          GcpLayer* pCopy = NULL;
          if (pView != NULL)
          {
-            pCopy = static_cast<GcpLayer*>(pGcpLayer->copy(false));
+            pCopy = static_cast<GcpLayer*>(pGcpLayer->copy(0));
             if (pCopy != NULL)
             {
                pView->addLayer(pCopy);
@@ -308,7 +308,7 @@ void TiePointPage::gcpLayerDeleted(Subject &subject, const string &signal, const
          GcpLayer* pCopy = NULL;
          if (pView != NULL)
          {
-            pCopy = static_cast<GcpLayer*>(pGcpLayer->copy(false));
+            pCopy = static_cast<GcpLayer*>(pGcpLayer->copy(0));
             if (pCopy != NULL)
             {
                pView->addLayer(pCopy);
@@ -714,7 +714,7 @@ void TiePointPage::deriveTiePoint()
          VERIFYNRV(pElement != NULL);
          mpTiePoints = static_cast<TiePointList*>(pElement);
          VERIFYNRV(mpTiePoints != NULL);
-       
+
          mpTiePoints->setMissionDatasetName(missionDatasetName);
          mpTiePoints->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &TiePointPage::tiePointListDeleted));
       }
@@ -828,7 +828,7 @@ void TiePointPage::removeTiePoint()
 
       delete pItem;
    }
-   enableTiePointActions();   
+   enableTiePointActions();
 }
 
 void TiePointPage::removeGcp()

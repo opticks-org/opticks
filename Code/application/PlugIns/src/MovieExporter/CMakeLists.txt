@@ -33,33 +33,20 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${avutil_INCLUDE_DIRS})
 include_directories(${avformat_INCLUDE_DIRS})
 include_directories(${avcodec_INCLUDE_DIRS})
-if(swscale_FOUND)
 include_directories(${swscale_INCLUDE_DIRS})
-endif()
 add_definitions(${avutil_DEFINITIONS})
 add_definitions(${avformat_DEFINITIONS})
 add_definitions(${avcodec_DEFINITIONS})
 add_library(MovieExporter SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
-if(swscale_FOUND)
-    target_link_libraries(MovieExporter
-        ${Opticks_LIBRARIES}
-        ${QT_LIBRARIES}    
-        ${Xerces_LIBRARIES}
-        ${avutil_LIBRARIES}
-        ${avformat_LIBRARIES}
-        ${avcodec_LIBRARIES}
-        ${swscale_LIBRARIES}
-    )
-else()
-    target_link_libraries(MovieExporter
-        ${Opticks_LIBRARIES}
-        ${QT_LIBRARIES}    
-        ${Xerces_LIBRARIES}
-        ${avutil_LIBRARIES}
-        ${avformat_LIBRARIES}
-        ${avcodec_LIBRARIES}
-    )
-endif()
+target_link_libraries(MovieExporter
+    ${Opticks_LIBRARIES}
+    ${QT_LIBRARIES}    
+    ${Xerces_LIBRARIES}
+    ${avutil_LIBRARIES}
+    ${avformat_LIBRARIES}
+    ${avcodec_LIBRARIES}
+    ${swscale_LIBRARIES}
+)
 if(WIN32)
     install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     install(TARGETS MovieExporter RUNTIME DESTINATION PlugIns/debug CONFIGURATIONS Debug)

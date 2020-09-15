@@ -41,6 +41,9 @@
 #include <stdio.h>
 #include <vector>
 #include <xtiffio.h>
+#if TIFFLIB_VERSION > 20100615
+#include "tif_dir.h"
+#endif
 
 using namespace std;
 
@@ -48,7 +51,7 @@ REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFImporter);
 
 namespace
 {
-   #if TIFFLIB_VERSION != 20100615
+   #if TIFFLIB_VERSION > 20100615
       // Unfortunately, the methods in this namespace are tightly coupled to the implementation of libtiff.
       // The crux of the problem is that there does not seem to be a reasonable way to get a TIFFTagValue from the API.
       // The next best option is to call TIFFGetField, which does not act the same for every tag.
@@ -103,13 +106,17 @@ namespace
             return false;
          }
 
-         pString = strchr(pString, NULL) + 1;
+         pString = strchr(pString, 0) + 1;
       }
 
       return true;
    }
 
+#if TIFFLIB_VERSION > 20100615
+   bool setMetadata(const TIFFField* pFieldInfo, uint32 count, void* pValues, DynamicObject* pMetadata)
+ #else
    bool setMetadata(const TIFFFieldInfo* pFieldInfo, uint32 count, void* pValues, DynamicObject* pMetadata)
+#endif
    {
       if (pFieldInfo == NULL || pMetadata == NULL)
       {
@@ -184,8 +191,11 @@ namespace
       const uint32 count, DynamicObject* pMetadata, string& message)
    {
       VERIFY(pTiffFile != NULL && count > 0 && pMetadata != NULL);
-
+#if TIFFLIB_VERSION > 20100615
+      const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#else
       const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#endif
       VERIFY(pFieldInfo != NULL);
 
       vector<T> values(count);
@@ -214,7 +224,11 @@ namespace
    {
       VERIFY(pTiffFile != NULL && pMetadata != NULL);
 
+#if TIFFLIB_VERSION > 20100615
+      const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#else
       const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#endif
       VERIFY(pFieldInfo != NULL);
 
       T* pValue = NULL;
@@ -258,7 +272,11 @@ namespace
       const uint32 count, DynamicObject* pMetadata, string& message)
    {
       VERIFY(pTiffFile != NULL && count != 0 && pMetadata != NULL);
+#if TIFFLIB_VERSION > 20100615
+      const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#else
       const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#endif
       VERIFY(pFieldInfo != NULL);
 
       // TIFFTAG_COLORMAP and TIFFTAG_TRANSFERFUNCTION have up to 3 children
@@ -287,7 +305,11 @@ namespace
    {
       VERIFY(pTiffFile != NULL && pMetadata != NULL);
 
+#if TIFFLIB_VERSION > 20100615
+      const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#else
       const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
+#endif
       VERIFY(pFieldInfo != NULL);
 
       uint32 count = 0;
@@ -670,10 +692,10 @@ bool GeoTIFFImporter::populateDataDescriptor(RasterDataDescriptor* pDescriptor)
       if (isdFilename.isEmpty() == true)
       {
          // An ISD filename has not yet been set, so check for an existing file based on the raster filename
-         const FileDescriptor* pFileDescriptor2 = pDescriptor->getFileDescriptor();
-         if (pFileDescriptor2 != NULL)
+         const FileDescriptor* pFileDescriptor = pDescriptor->getFileDescriptor();
+         if (pFileDescriptor != NULL)
          {
-            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor2->getFilename().getFullPathAndName()));
+            QFileInfo tiffInfo(QString::fromStdString(pFileDescriptor->getFilename().getFullPathAndName()));
             QFileInfo isdInfo(tiffInfo.absolutePath() + "/" + tiffInfo.completeBaseName() + ".xml");
             if (isdInfo.exists() == true)
             {

@@ -3,7 +3,7 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -78,7 +78,7 @@ namespace Nitf
        * exported.  This should contain any defaults to be exported.
        * This is most useful if the RasterElement wasn't originally a NITF file.
        *
-       * Second, the DynamicObject for this header from the DataDescriptor's metadata 
+       * Second, the DynamicObject for this header from the DataDescriptor's metadata
        * object is exported.  This should contain metadata as imported from a NITF.
        *
        * @param pDescriptor
@@ -88,7 +88,7 @@ namespace Nitf
        *
        * @return True if the operation was successful, false otherwise.
        */
-      bool exportMetadata(const RasterDataDescriptor *pDescriptor, 
+      bool exportMetadata(const RasterDataDescriptor *pDescriptor,
          ossimContainerProperty *pExportHeader);
 
    protected:
@@ -132,7 +132,7 @@ namespace Nitf
        * @return True if the operation succeeded, false otherwise.
        */
       bool exportMetadata(const RasterDataDescriptor *pDescriptor,
-         const DynamicObject *pDynObj, 
+         const DynamicObject *pDynObj,
          ossimContainerProperty *pProperties);
 
       /**
@@ -143,8 +143,8 @@ namespace Nitf
        * for import.  See importMetadataValue for an example.
        */
       typedef bool(*ImportFunction)(const ossimPropertyInterface *pProperties,
-         RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const std::string& appName, 
+         RasterDataDescriptor *pDescriptor,
+         DynamicObject *pDynObj, const std::string& appName,
          const std::string& ossimName);
 
       /**
@@ -154,8 +154,8 @@ namespace Nitf
        * Write functions which follow this typedef to add custom behavior
        * for import.  See exportMetadataValue for an example.
        */
-      typedef bool(*ExportFunction)(const RasterDataDescriptor *pDescriptor, 
-         const DataVariant &prop, 
+      typedef bool(*ExportFunction)(const RasterDataDescriptor *pDescriptor,
+         const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName);
 
@@ -196,7 +196,7 @@ namespace Nitf
          }
 
          DataVariant var;
-         string value = pProp->valueToString();
+         std::string value = pProp->valueToString();
          if (var.fromXmlString(TypeConverter::toString<T>(), value) == DataVariant::SUCCESS)
          {
             return pDynObj->setAttribute(appName, var);
@@ -224,8 +224,8 @@ namespace Nitf
        * @return True if the metadata was successfully exported, false otherwise.
        */
       template<typename T>
-      static bool exportMetadataValue(const RasterDataDescriptor *pDescriptor, 
-         const DataVariant &prop, 
+      static bool exportMetadataValue(const RasterDataDescriptor *pDescriptor,
+         const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName)
       {
@@ -235,7 +235,7 @@ namespace Nitf
             return false;
          }
 
-         string stringValue = StringUtilities::toXmlString(*pT);
+         std::string stringValue = StringUtilities::toXmlString(*pT);
          if (!stringValue.empty())
          {
             ossimRefPtr<ossimProperty> pProperty = pProperties->getProperty(ossimName);
@@ -285,7 +285,7 @@ namespace Nitf
        *
        * @return True if the metadata was successfully exported, false otherwise.
        */
-      static bool exportBinaryData(const RasterDataDescriptor *pDescriptor, 
+      static bool exportBinaryData(const RasterDataDescriptor *pDescriptor,
          const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName);
@@ -327,7 +327,7 @@ namespace Nitf
        *
        * @return True if the metadata was successfully exported, false otherwise.
        */
-      static bool exportColor(const RasterDataDescriptor *pDescriptor, 
+      static bool exportColor(const RasterDataDescriptor *pDescriptor,
          const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName);
@@ -369,7 +369,7 @@ namespace Nitf
        *
        * @return True if the metadata was successfully exported, false otherwise.
        */
-      static bool exportDateCCYYMMDDhhmmss(const RasterDataDescriptor *pDescriptor, 
+      static bool exportDateCCYYMMDDhhmmss(const RasterDataDescriptor *pDescriptor,
          const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName);
@@ -391,8 +391,8 @@ namespace Nitf
        * @return True if the metadata was successfully imported, false otherwise.
        */
       static bool importDateCCYYMMDD(const ossimPropertyInterface *pPropertyInterface,
-         RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const std::string& appName, 
+         RasterDataDescriptor *pDescriptor,
+         DynamicObject *pDynObj, const std::string& appName,
          const std::string& ossimName);
 
       /**
@@ -411,7 +411,7 @@ namespace Nitf
        *
        * @return True if the metadata was successfully exported, false otherwise.
        */
-      static bool exportDateCCYYMMDD(const RasterDataDescriptor *pDescriptor, 
+      static bool exportDateCCYYMMDD(const RasterDataDescriptor *pDescriptor,
          const DataVariant &prop,
          ossimContainerProperty *pProperties, const std::string& appName,
          const std::string& ossimName);
@@ -433,8 +433,8 @@ namespace Nitf
        * @return True if the metadata was successfully imported, false otherwise.
        */
       static bool importDateDDHHMMSSZMONYY(const ossimPropertyInterface *pPropertyInterface,
-         RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const std::string& appName, 
+         RasterDataDescriptor *pDescriptor,
+         DynamicObject *pDynObj, const std::string& appName,
          const std::string& ossimName);
 
       /**
@@ -454,8 +454,8 @@ namespace Nitf
        * @return True if the metadata was successfully imported, false otherwise.
        */
       static bool importDateYYMMDD(const ossimPropertyInterface *pPropertyInterface,
-         RasterDataDescriptor *pDescriptor, 
-         DynamicObject *pDynObj, const std::string& appName, 
+         RasterDataDescriptor *pDescriptor,
+         DynamicObject *pDynObj, const std::string& appName,
          const std::string& ossimName);
 
       /**

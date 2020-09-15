@@ -110,18 +110,26 @@ set (HEADER_FILES
     Image/GlSlContext.h
     Image/ColorBuffer.h
     Image/FrameBuffer.h
+    Image/GlProgram.h
+    Image/GlShaderGpuProgram.h
+    Image/GlSlContext.h
     Image/GpuImage.h
     Image/GpuProgram.h
     Image/GpuProgramDescriptorAdapter.h
+    Image/GpuResourceManager.h
     Image/GpuTile.h
+    Image/GrayscaleGpuProgram.h
     Image/ImageBuffer.h
     Image/ImageFilter.h
     Image/ImageFilterDescriptorAdapter.h
+    Image/ImageFilterDescriptorImp.h
+    Image/ImageFilterManager.h
     Image/ImageLoader.h
     Image/ImagePBO.h
     Image/ImagePBuffer.h
     Image/ImageUtilities.h
     Image/PixelBufferObject.h
+    Image/RgbGpuProgram.h
 )
 set (SOURCE_FILES
     GLView/DrawUtil.cpp
@@ -164,10 +172,28 @@ set (SOURCE_FILES
     Graphic/TriangleObjectImp.cpp
     Graphic/ViewObjectImp.cpp
     Graphic/WidgetImageObjectImp.cpp
+    Image/ColorBuffer.cpp
+    Image/ColormapGpuProgram.cpp
+    Image/FrameBuffer.cpp
+    Image/GlProgram.cpp
+    Image/GlShaderGpuProgram.cpp
+    Image/GlSlContext.cpp
+    Image/GpuImage.cpp
+    Image/GpuProgram.cpp
     Image/GpuProgramDescriptorImp.cpp
     Image/GpuResourceManager.cpp
+    Image/GpuTile.cpp
+    Image/GrayscaleGpuProgram.cpp
+    Image/ImageBuffer.cpp
+    Image/ImageFilter.cpp
     Image/ImageFilterDescriptorImp.cpp
     Image/ImageFilterManager.cpp
+    Image/ImageLoader.cpp
+    Image/ImagePBO.cpp
+    Image/ImagePBuffer.cpp
+    Image/ImageUtilities.cpp
+    Image/PixelBufferObject.cpp
+    Image/RgbGpuProgram.cpp
     Undo/AoiLayerUndo.cpp
     Undo/GcpLayerUndo.cpp
     Undo/GcpListUndo.cpp

@@ -3,7 +3,7 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -234,7 +234,7 @@ ModuleDescriptor* ModuleDescriptor::getModule(const std::string& filename, map<s
    pModule->mpModule = pDynMod;
    pModule->mModuleVersion = version;
    pModule->initializePlugInInformation(plugInIds);
-  
+
    return pModule;
 #else
    return NULL;
@@ -390,7 +390,7 @@ PlugIn* ModuleDescriptor::createInterface(PlugInDescriptorImp* pDescriptor)
 
 const bool ModuleDescriptor::isValidatedModule() const
 {
-   // TODO : Come up with test that uses name, version, and description 
+   // TODO : Come up with test that uses name, version, and description
    // to generate a checksum that is tested against validationKey.
 
    return (mModuleVersion != MOD_ONE) || (mValidationKey == "YES");
@@ -438,7 +438,7 @@ ModuleDescriptor* ModuleDescriptor::fromSettings(const DynamicObject& settings)
    bool hasSetting = settings.getAttribute("details").getValue(details);
    if (hasSetting == false)
    {
-      return false;
+      return NULL;
    }
    QByteArray moduleBlob = QByteArray::fromBase64(QByteArray::fromRawData(details.c_str(), details.size()));
    QDataStream reader(&moduleBlob, QIODevice::ReadOnly);
@@ -488,7 +488,7 @@ bool ModuleDescriptor::populateFromSettings(QDataStream& reader)
 
    for (unsigned int i = 0; i < mPlugInTotal; ++i)
    {
-      PlugInDescriptorImp* pDescriptor = 
+      PlugInDescriptorImp* pDescriptor =
          PlugInDescriptorImp::fromSettings(reader);
       if (pDescriptor == NULL)
       {

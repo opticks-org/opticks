@@ -46,6 +46,8 @@
 #include <ossim/support_data/ossimNitfFile.h>
 #include <ossim/support_data/ossimNitfUnknownTag.h>
 #include <ossim/support_data/ossimNitfTagFactoryRegistry.h>
+#include <ossim/ossimConfig.h>
+#include "OssimVersion.h"
 
 using namespace Nitf;
 using namespace Nitf::TRE;
@@ -433,7 +435,11 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
    map<string, TrePlugInResource>::iterator pParser = parsers.find(tagName);
    if (pParser == parsers.end())
    {
+#if OSSIM_VERSION_NUMBER<10900
       pParser = parsers.insert(make_pair(tagName, TrePlugInResource(tagName))).first;
+#else
+      pParser = parsers.insert(make_pair(tagName.string(), TrePlugInResource(tagName))).first;
+#endif
    }
 
    if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
@@ -450,7 +456,11 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
 
       if (pParser->second.parseTag(*pRegTag.get(), *pTag.get(), *pDescriptor, errorMessage) == false)
       {
+#if OSSIM_VERSION_NUMBER<10900
          errorMessage += static_cast<std::string>(tagName) + " has not been imported.\n";
+#else
+         errorMessage += tagName.string() + " has not been imported.\n";
+#endif
          return false;
       }
    }
@@ -458,7 +468,11 @@ bool Nitf::addTagToMetadata(const unsigned int& ownerIndex, const ossimNitfTagIn
    // Parse the TRE info.
    FactoryResource<DynamicObject> pTagInfo;
    VERIFY(pTagInfo.get() != NULL);
+#if OSSIM_VERSION_NUMBER<10900
    VERIFY(pTagInfo->setAttribute("Tag Type", string(tagInfo.getTagType())));
+#else
+   VERIFY(pTagInfo->setAttribute("Tag Type", string(tagInfo.getTagType().string())));
+#endif
    VERIFY(pTagInfo->setAttribute("Owner Index", ownerIndex));
 
    // Determine how many (if any) tags of this name already exist.

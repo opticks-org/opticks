@@ -14,6 +14,7 @@
 #include "DynamicObject.h"
 #include "NitfPager.h"
 #include "NitfUtilities.h"
+#include "OssimVersion.h"
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "PlugInRegistration.h"
@@ -31,8 +32,7 @@
 #include <ossim/imaging/ossimImageWriterFactoryRegistry.h>
 #include <ossim/imaging/ossimBandSelector.h>
 #include <ossim/init/ossimInit.h>
-
-#include <QtCore/QString>
+#include <ossim/ossimConfig.h>
 
 REGISTER_PLUGIN(OpticksNitf, Pager, Nitf::Pager);
 
@@ -169,7 +169,9 @@ CachedPage::UnitPtr Nitf::Pager::fetchUnit(DataRequest *pOriginalRequest)
 
    ossimNitfTileSource* pTileSource = PTR_CAST(ossimNitfTileSource, mpImageHandler.get());
    VERIFYRV(pTileSource != NULL, CachedPage::UnitPtr());
+#if OSSIM_VERSION_NUMBER < 10900
    pTileSource->setExpandLut(false);
+#endif
    mpImageHandler->setCurrentEntry(mSegment);
 
    // Try to set the output band list.

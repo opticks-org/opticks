@@ -7,11 +7,11 @@ endif()
 find_library(YamlCpp_LIBRARY_RELEASE NAMES yaml-cpp yaml)
 find_library(YamlCpp_LIBRARY_DEBUG NAMES yaml-cppd)
 
-include(SelectLibraryConfigurations)
-select_library_configurations(YamlCpp) #sets YamlCpp_LIBRARY using YamlCpp_LIBRARY_DEBUG and YamlCpp_LIBRARY_RELEASE
-
 mark_as_advanced(YamlCpp_INCLUDE_DIR)
 set(YamlCpp_INCLUDE_DIRS ${YamlCpp_INCLUDE_DIR})
+
+include(SelectLibraryConfigurations)
+select_library_configurations(YamlCpp) #sets YamlCpp_LIBRARY using YamlCpp_LIBRARY_DEBUG and YamlCpp_LIBRARY_RELEASE
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(YamlCpp REQUIRED_VARS YamlCpp_INCLUDE_DIR YamlCpp_LIBRARY)
@@ -80,3 +80,13 @@ if(YAMLCPP_FOUND)
 endif()
 
 set(YamlCpp_FOUND ${YAMLCPP_FOUND})
+
+if(NOT ${YamlCpp_VERSION_NUMBER} EQUAL 205)
+   string(REPLACE "/yaml-cpp" "" YamlCpp_INCLUDE_DIR "${YamlCpp_INCLUDE_DIR}")
+   if(YamlCpp_INCLUDE_DIR STREQUAL "/usr/include")
+      set(YamlCpp_INCLUDE_DIR "")
+   endif()
+   message(STATUS "truncating YamlCpp_INCLUDE_DIR to ${YamlCpp_INCLUDE_DIR}")
+   mark_as_advanced(YamlCpp_INCLUDE_DIR)
+   set(YamlCpp_INCLUDE_DIRS ${YamlCpp_INCLUDE_DIR})
+endif()

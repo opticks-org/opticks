@@ -537,7 +537,7 @@ bool PCA::getInputSpecification(PlugInArgList*& pArgList)
       VERIFY(pArgList->addArg<string>("Transform Type", NULL, 
          "Type of statistics matrix to be used by PCA (Covariance, Second Moment, or Correlation Coefficient)."));
       VERIFY(pArgList->addArg<bool>("Use AOI", false, "Whether to perform PCA over a specific AOI."));
-      VERIFY(pArgList->addArg<string>("AOI Name", false, "Name of AOI to perform PCA over, if applicable."));
+      VERIFY(pArgList->addArg<string>("AOI Name", NULL, "Name of AOI to perform PCA over, if applicable."));
       VERIFY(pArgList->addArg<int>("Components", NULL, "Number of components."));
       VERIFY(pArgList->addArg<EncodingType>("Output Encoding Type", NULL, "Encoding type for the output of PCA."));
       VERIFY(pArgList->addArg<int>("Max Scale Value", NULL, "Value to which the maximum component should be scaled."));

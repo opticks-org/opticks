@@ -15,7 +15,7 @@
 #include "ImageFilter.h"
 #include "DynamicObject.h"
 #include "GlSlContext.h"
-
+#include <cfloat>
 
 /**
 * Default Constructor.
@@ -201,9 +201,7 @@ bool GlShaderGpuProgram::setGpuParameters()
                glUniform1f(inputParameter, floatParameter);
                GLenum error = glGetError();
                if (error != GL_NO_ERROR) {
-                  char tmpChar[20];
-                  itoa(error, tmpChar, 10);
-                  MessageResource msg("setGpuParameters Error:" + parameterName + std::string(tmpChar), "app", "{4A6C698A-5D90-4F35-BC51-2B3FE5A8A256}");
+                  MessageResource msg("setGpuParameters Error:" + parameterName + std::to_string(error), "app", "{4A6C698A-5D90-4F35-BC51-2B3FE5A8A256}");
                }
             } 
          }
@@ -339,9 +337,7 @@ void GlShaderGpuProgram::setParameterValues( Image::ImageData imageInfo, float a
          
          GLenum error = glGetError();
          if (error != GL_NO_ERROR) {
-            char tmpChar[20];
-            itoa(error, tmpChar, 10);
-            MessageResource msg("setGpuParameters Error:" + parameterName + " " + std::string(tmpChar), "app", "{4A6C698A-5D90-4F35-BC51-2B3FE5A8A256}");
+            MessageResource msg("setGpuParameters Error:" + parameterName + " " + std::to_string(error), "app", "{4A6C698A-5D90-4F35-BC51-2B3FE5A8A256}");
             MessageResource msgVen("Vendor :" + std::string((const char*)glGetString(GL_VENDOR)), "app", "{E98F466A-3574-4F60-9F05-1035B6B16D46}");
             MessageResource msgRen("Renderer :" + std::string((const char*)glGetString(GL_RENDERER)), "app", "{338BF11C-6346-4D5C-A0E0-30B917DB05C2}");
             MessageResource msgVer("Version :" + std::string((const char*)glGetString(GL_VERSION)), "app", "{5CC7A8A6-AA44-4406-999F-5F00B7148EF1}");
