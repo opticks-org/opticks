@@ -667,7 +667,6 @@ target_link_libraries(Opticks
     )
  if(HAVE_QT5)
     target_link_libraries(Opticks  ${Qwt6ForQt5_LIBRARY})
-    #target_link_libraries(Opticks "-losg")
  else()
     target_link_libraries(Opticks  ${Qwt5ForQt4_LIBRARY})
  endif()

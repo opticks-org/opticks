@@ -11,8 +11,8 @@ if(Qwt6ForQt5_INCLUDE_DIR AND EXISTS "${Qwt6ForQt5_INCLUDE_DIR}/qwt_global.h")
     set(Qwt6ForQt5_PATCH_VERSION "${Qwt6ForQt5_VERSION_PATCH}")
 endif()
 
-find_library(Qwt6ForQt5_LIBRARY_RELEASE NAMES qwt)
-find_library(Qwt6ForQt5_LIBRARY_DEBUG   NAMES qwt)
+find_library(Qwt6ForQt5_LIBRARY_RELEASE NAMES qwt-qt5)
+find_library(Qwt6ForQt5_LIBRARY_DEBUG   NAMES qwt-qt5)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(Qwt6ForQt5) #sets Qwt6ForQt5_LIBRARY using Qwt6ForQt5_LIBRARY_DEBUG and Qwt6ForQt5_LIBRARY_RELEASE
