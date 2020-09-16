@@ -205,14 +205,13 @@ find_package(geotiff REQUIRED)
 find_package(proj REQUIRED)
 
 #----- Optional packages -----
-#Need components for Cg
+# ffmpeg packages for MovieExporter plugin
 find_package(avcodec)
 find_package(avformat)
 find_package(avutil)
 find_package(swscale)
+
 find_package(cfitsio)
-set(Cg_FOUND 0)
-#find_package(Cg) #optional, still need to work
 find_package(Gdal)
 find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
