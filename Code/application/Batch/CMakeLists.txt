@@ -26,17 +26,9 @@ target_link_libraries(OpticksBatch
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
+    ${Qwt6ForQt5_LIBRARY}
 )
-if(HAVE_QT5)
-   target_link_libraries(OpticksBatch  ${Qwt6ForQt5_LIBRARY})
-else()
-   target_link_libraries(OpticksBatch  ${Qwt5ForQt4_LIBRARY})
-endif()
 
-if(CG_FOUND)
-    target_link_libraries(OpticksBatch
-        ${Cg_LIBRARIES})
-endif()
 set_target_properties(OpticksBatch PROPERTIES DEBUG_POSTFIX "d")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_target_properties(OpticksBatch PROPERTIES OUTPUT_NAME "linuxBatch")

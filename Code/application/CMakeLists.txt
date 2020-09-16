@@ -233,9 +233,7 @@ find_package(MsHelpCompiler)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(EXPAT REQUIRED) #needed for raptor static library provided in pre-built dependencies
 endif()
-if(Cg_FOUND)
-    set(CG_SUPPORTED 1)
-endif()
+
 if(OpenCollada_FOUND)
    set(OPENCOLLADA_SUPPORT 1)
 endif()
@@ -391,9 +389,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${Glew_INCLUDE_DIRS})
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include_directories(${EXPAT_INCLUDE_DIRS})
-endif()
-if(CG_FOUND)
-include_directories(${Cg_INCLUDE_DIRS})
 endif()
 
 add_definitions(-DAPPLICATION_XERCES)
@@ -664,12 +659,8 @@ target_link_libraries(Opticks
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
+    ${Qwt6ForQt5_LIBRARY}
     )
- if(HAVE_QT5)
-    target_link_libraries(Opticks  ${Qwt6ForQt5_LIBRARY})
- else()
-    target_link_libraries(Opticks  ${Qwt5ForQt4_LIBRARY})
- endif()
 
 set_target_properties(Opticks PROPERTIES DEBUG_POSTFIX "d")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -683,10 +674,7 @@ if(WIN32)
         ${QT_QTMAIN_LIBRARY}
     )
 endif()
-if(CG_FOUND)
-    target_link_libraries(Opticks
-        ${Cg_LIBRARIES})
-endif()
+
 if (EXISTS "CppTests" AND IS_DIRECTORY "CppTests")
     add_subdirectory(CppTests)
 endif()

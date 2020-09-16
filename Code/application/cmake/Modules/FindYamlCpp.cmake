@@ -43,7 +43,7 @@ if(YAMLCPP_FOUND)
       message(ERROR " could not find YamlCpp header ${Parser_h}")
    endif()
 
-  message(STATUS "YamlCPP headers ${Yaml_h} ${Parser_h} ${Node_h}")
+  # message(STATUS "YamlCPP headers: ${Yaml_h} ${Parser_h} ${Node_h}")
   file(STRINGS ${Parser_h} Parser_GetNextDocument_Str REGEX "GetNextDocument")
   file(STRINGS ${Node_h}   Node_GetType_Str REGEX "GetType")
 
