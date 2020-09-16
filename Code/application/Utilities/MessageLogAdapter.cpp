@@ -11,7 +11,7 @@
 
 using namespace std;
 
-MessageLogAdapter::MessageLogAdapter(const char* name, const char* path, QFile *journal) :
+MessageLogAdapter::MessageLogAdapter(const char* name, const char* path, QFILE *journal) :
    MessageLogImp(name, path, journal)
 {}
 

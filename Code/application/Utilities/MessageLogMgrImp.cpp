@@ -38,21 +38,88 @@ MessageLogMgrImp::MessageLogMgrImp() :
       }
    }
 
-   mpJournal = new QTemporaryFile(QString::fromStdString(mLogPath) + "/journ");
-   mpJournal->open(QIODevice::WriteOnly);
-   mpJournal->setPermissions(QFile::WriteOwner);
+   std::string journalFilename = (mLogPath + "/jour");
 
+#if HAVE_QSAVEFILE
+   {
+       // QSaveFile doesn't have a TemporaryFile constructor, so we open
+       // an empty QTemporaryFile, grab its fileName, close the QTemporaryFile,
+       // and reuse it's fileName as soon as practically possible.
+       QString tmpFilename;
+       {
+           QTemporaryFile tmpFile(QString::fromStdString(journalFilename));
+           tmpFile.open();
+           tmpFilename = tmpFile.fileName();
+       }
+       mpJournal = new QSaveFile(tmpFilename);
+   }
+#else
+   QTemporaryFile* pTempFile = new QTemporaryFile(QString::fromStdString(journalFilename));
+   mpJournal = pTempFile;
+   if (pTempFile != NULL)
+   {
+       pTempFile->setAutoRemove(false);
+   }
+#endif
+   if ((mpJournal == NULL) || !mpJournal->open(QIODevice::WriteOnly))
+   {
+         string msg("Unable to open journal file ");
+         msg += mpJournal->fileName().toStdString();
+         msg += " for writing ";
+         // As logFile hasn't been created yet either, write message to stderr
+         std::cerr << msg << std::endl;
+   }
+   else
+   {
+#if HAVE_QSAVEFILE
+       mpJournal->setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
+#else
+       mpJournal->setPermissions(QFile::ReadUser | QFile::WriteUser);
+#endif
+   }
    // Create a default session log
    createLog(Service<SessionManager>()->getName());
 }
 
+// This should be unnecessary, as at this point the MessageLogs should already be finalized
+void MessageLogMgrImp::finalize()
+{
+    for( std::map<std::string, MessageLog*>::iterator liter=mLogMap.begin(); liter!= mLogMap.end(); ++liter )
+    {
+        const std::string & logName = liter->first;
+        MessageLog* pLog = liter->second;
+        if(pLog)
+        {
+            for( std::vector<Message*>::iterator miter=pLog->begin(); miter!=pLog->end(); ++miter)
+            {
+                Message* pMsg = *miter;
+                if( pMsg && !pMsg->isFinalized() )
+                {
+                    pMsg->finalize();
+                }
+            }
+        }
+    }
+}
+
 MessageLogMgrImp::~MessageLogMgrImp()
 {
+   finalize();
    notify(SIGNAL_NAME(Subject, Deleted));
    clear();
 
+#if HAVE_QSAVEFILE
+   mpJournal->commit();
+   // If you really want to treat the journal file as a temporary,
+   // you may unlink it here. But then the only time you might ever see the
+   // journal is when the Opticks application is actually running --
+   // and then only if it has been committed. For now we'll
+   // leave it on disk, and see what useful gets written.
+   // unlink(mpJournal->fileName().toStdString().c_str());
+#else
    mpJournal->close();
    mpJournal->remove();
+#endif
    delete mpJournal;
    mpJournal = NULL;
 }
