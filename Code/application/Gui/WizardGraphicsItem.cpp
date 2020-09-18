@@ -706,9 +706,6 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       //   imageType = "Unknown";
       //}
 
-      // imageType = Qt::escape(imageType);
-      // originalType = Qt::escape(originalType);
-
       originalType = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + originalType;
    }
 
@@ -720,9 +717,6 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       //{
       //   imageType = "Unknown";
       //}
-
-      // imageType = Qt::escape(imageType);
-      // type = Qt::escape(type);
 
       type = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + type;
    }
@@ -740,9 +734,6 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
          //{
          //   imageType = "Unknown";
          //}
-
-         // imageType = Qt::escape(imageType);
-         // validType = Qt::escape(validType);
 
          validType = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + validType;
          validTypes.append(validType);

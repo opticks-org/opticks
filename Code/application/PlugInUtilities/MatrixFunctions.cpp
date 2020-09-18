@@ -22,16 +22,7 @@
 #include <string.h>
 #include <ossim/matrix/newmat.h>
 #include <ossim/matrix/newmatap.h>
-#include <ossim/ossimConfig.h>
-
-#if defined __has_include
-   #if __has_include ("ossim/ossimVersion.h")   /* not portable */
-   #include <ossim/ossimVersion.h>
-   #endif
-#endif
-
-#define OSSIM_VERSION_NUMBER (100*100*(OSSIM_MAJOR_VERSION_NUMBER) + 100*(OSSIM_MINOR_VERSION_NUMBER) + (OSSIM_PATCH_VERSION_NUMBER))
-
+#include "OssimVersion.h"
 
 using namespace NEWMAT;
 using namespace std;
@@ -363,7 +354,7 @@ bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, 
    try
    {
       // Solve the equation. Throws an exception on invalid input or when unable to converge.
-      SVDSolve(resultVector, lhsMatrix, rhsVector);      
+      SVDSolve(resultVector, lhsMatrix, rhsVector);
    }
    catch (const RBD_COMMON::BaseException&)
    {

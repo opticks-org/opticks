@@ -32,8 +32,6 @@ typedef uint32_t codec_flag_t;
 #define OPTICKS_CODEC_FLAG_TRELLIS_QUANT  CODEC_FLAG_TRELLIS_QUANT
 #endif
 
-
-
 #include <boost/rational.hpp>
 #include <memory>
 
