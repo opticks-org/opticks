@@ -64,26 +64,42 @@ MessageLogImp::MessageLogImp(const char* name, const char* path, QFILE* journal)
    string extension = ".log";
    if ((path[strlen(path)-1] != string("\\").at(0)) && (path[strlen(path)-1] != string("/").at(0)))
    {
-      fname = (string)path + SLASH + fname + extension;
+      fname = string(path) + SLASH + fname + extension;
    }
    else
    {
-      fname = (string)path + fname + extension;
+      fname = string(path) + fname + extension;
    }
    mpJournalWriter = new QTextStream(mpJournal);
 
-#if HAVE_QSAVEFILE
-   mpLogFile = new QSaveFile(QString::fromStdString(fname));
-   if ((mpLogFile == NULL) || !mpLogFile->open(QIODevice::WriteOnly)) //  QSaveFile
-#else
-   QTemporaryFile* pTempFile = new QTemporaryFile(QString::fromStdString(fname));
-   if (pTempFile != NULL)
+   // fname is already unique. For consistency, just append the mpJournal file's unique extension:
+   QString tmpFilename;
+   int jourIdx;
+   if((jourIdx=mpJournal->fileName().lastIndexOf("/jour.")) > -1)
    {
-      pTempFile->setAutoRemove(false);
-      mpLogFile = pTempFile;
+       tmpFilename = QString::fromStdString(fname) + mpJournal->fileName().mid(jourIdx+5);
    }
-   if ((mpLogFile == NULL) || !mpLogFile->open(QIODevice::WriteOnly | QIODevice::Append)) // QFile
+   else
+   {
+       // Didn't find one.
+       // We don't want to use a QTemporaryFile directly, as with Qt5 QTemporaryFiles won't be
+       // reliably written to disk. But we do want a unique filename, so we open a QTemporaryFile
+       // just long enough to get a valid filename, close it, then immediately open a QFile or
+       // QSaveFile with that name.
+       QTemporaryFile tmpFile(QString::fromStdString(fname));
+       tmpFile.open();
+       tmpFilename = tmpFile.fileName();
+   }
+
+#if HAVE_QSAVEFILE
+   mpLogFile = new QSaveFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly); // QSaveFile::open() does not recognize QIODevice::Append
+#else
+   mpLogFile = new QFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly | QIODevice::Append);  // Why Append mode? This filename is unique.
 #endif
+
+   if ((mpLogFile == NULL) || !mpLogFile->open(openMode))
    {
        string msg("Unable to open log file ");
        msg += mpLogFile->fileName().toStdString();
@@ -93,7 +109,7 @@ MessageLogImp::MessageLogImp(const char* name, const char* path, QFILE* journal)
        Service<ApplicationServices> pApplication;
        if (pApplication->isBatch() == true)
        {
-           cerr << msg << endl;
+           cerr << msg << std::endl;
        }
        else
        {
@@ -114,11 +130,7 @@ MessageLogImp::MessageLogImp(const char* name, const char* path, QFILE* journal)
    }
    else
    {
-#if HAVE_QSAVEFILE
        mpLogFile->setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
-#else
-       mpLogFile->setPermissions(QFile::ReadUser | QFile::WriteUser);
-#endif
    }
 
    mpWriter = new XMLWriter("messagelog");
@@ -137,7 +149,8 @@ MessageLogImp::~MessageLogImp()
    if (mpLogFile != NULL)
    {
       QTextStream stream(mpLogFile);
-      stream << serialize().c_str() << flush;
+      stream << serialize().c_str();
+      stream.flush();
       mpLogFile->flush();
 #if HAVE_QSAVEFILE
       mpLogFile->commit(); // QSaveFile is commit(), QFile is close()
@@ -334,7 +347,7 @@ void MessageLogImp::messageAdded(Subject& subject, const string& signal, const b
    *mpJournalWriter << mpLogName.c_str() << " - ADDED "
       << ((pStpImp != NULL) ? "Step" : "Message")
       << "[" << ((pStpImp != NULL) ? pStpImp : pMsgImp)->getStringId().c_str() << "] "
-      << pMsg->getAction().c_str() << endl << flush;
+      << pMsg->getAction().c_str() << endl;
    notify(SIGNAL_NAME(MessageLog, MessageAdded), v);
 }
 
@@ -353,7 +366,7 @@ void MessageLogImp::messageModified(Subject& subject, const string& signal, cons
       << ((pStpImp != NULL) ? "Step" : "Message")
       << "[" << ((pStpImp != NULL) ? pStpImp : pMsgImp)->getStringId().c_str() << "."
       << pMsg->getProperties()->getNumAttributes() << "] "
-      << endl << flush;
+      << endl;
    notify(SIGNAL_NAME(MessageLog, MessageModified), v);
 }
 
@@ -388,7 +401,7 @@ void MessageLogImp::messageHidden(Subject& subject, const string& signal, const 
          break;
       }
    }
-   *mpJournalWriter << endl << flush;
+   *mpJournalWriter << endl;
    notify(SIGNAL_NAME(MessageLog, MessageHidden), v);
 }
 

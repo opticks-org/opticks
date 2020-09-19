@@ -40,28 +40,26 @@ MessageLogMgrImp::MessageLogMgrImp() :
 
    std::string journalFilename = (mLogPath + "/jour");
 
+   // We don't want to use a QTemporaryFile directly, as with Qt5 QTemporaryFiles won't be
+   // reliably written to disk. But we do want a unique filename, so we open a QTemporaryFile
+   // just long enough to get a unique filename, close it, then immediately open a QFile or
+   // QSaveFile with that name.
+   QString tmpFilename;
+   {
+       QTemporaryFile tmpFile(QString::fromStdString(journalFilename));
+       tmpFile.open();
+       tmpFilename = tmpFile.fileName();
+   }
+
 #if HAVE_QSAVEFILE
-   {
-       // QSaveFile doesn't have a TemporaryFile constructor, so we open
-       // an empty QTemporaryFile, grab its fileName, close the QTemporaryFile,
-       // and reuse it's fileName as soon as practically possible.
-       QString tmpFilename;
-       {
-           QTemporaryFile tmpFile(QString::fromStdString(journalFilename));
-           tmpFile.open();
-           tmpFilename = tmpFile.fileName();
-       }
-       mpJournal = new QSaveFile(tmpFilename);
-   }
+   mpJournal = new QSaveFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly);  // QSaveFile::open() does not recognize QIODevice::Append
 #else
-   QTemporaryFile* pTempFile = new QTemporaryFile(QString::fromStdString(journalFilename));
-   mpJournal = pTempFile;
-   if (pTempFile != NULL)
-   {
-       pTempFile->setAutoRemove(false);
-   }
+   mpJournal = new QFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly | QIODevice::Append); // Why Append mode? This filename is unique.
 #endif
-   if ((mpJournal == NULL) || !mpJournal->open(QIODevice::WriteOnly))
+
+   if ((mpJournal == NULL) || !mpJournal->open(openMode))
    {
          string msg("Unable to open journal file ");
          msg += mpJournal->fileName().toStdString();
@@ -71,11 +69,7 @@ MessageLogMgrImp::MessageLogMgrImp() :
    }
    else
    {
-#if HAVE_QSAVEFILE
        mpJournal->setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
-#else
-       mpJournal->setPermissions(QFile::ReadUser | QFile::WriteUser);
-#endif
    }
    // Create a default session log
    createLog(Service<SessionManager>()->getName());
@@ -118,7 +112,7 @@ MessageLogMgrImp::~MessageLogMgrImp()
    // unlink(mpJournal->fileName().toStdString().c_str());
 #else
    mpJournal->close();
-   mpJournal->remove();
+//   mpJournal->remove();
 #endif
    delete mpJournal;
    mpJournal = NULL;
