@@ -44,6 +44,8 @@ public:
    void setValueRange(double dMin, double dMax);
    double getMinimumValue() const;
    double getMaximumValue() const;
+   void setValueModulus(double modulus);
+   double getValueModulus() const;
    std::vector<double> getMajorTickLocations() const;
    std::vector<double> getMinorTickLocations() const;
    int getMaxNumMajorTicks() const;
@@ -89,8 +91,18 @@ private:
    class ScaleDraw : public QwtScaleDraw
    {
    public:
-      ScaleDraw() {}
+      ScaleDraw() : mModulus(0.) {}
       ~ScaleDraw() {}
+	  
+	  void setModulus(double modulus)
+	  {
+		  mModulus = modulus;
+	  }
+	  
+	  double getModulus() const
+	  {
+		  return mModulus;
+	  }
 
       void setLabelFormat(const QString& strFormat)
       {
@@ -106,6 +118,10 @@ private:
       QwtText label(double value) const
       {
          QString strValue;
+		 if (mModulus != 0.)
+		 {
+			 value = std::fmod(value, mModulus);
+		 }
          if (mFormat.isEmpty() == false)
          {
             strValue.sprintf(mFormat.toLatin1(), value);
@@ -121,6 +137,7 @@ private:
 
    private:
       QString mFormat;
+	  double mModulus;
    };
 
    QwtLinearScaleEngine mLinearScale;
@@ -184,6 +201,14 @@ private:
    double getMaximumValue() const \
    { \
       return impClass::getMaximumValue(); \
+   } \
+   void setValueModulus(double modulus) \
+   { \
+      impClass::setValueModulus(modulus); \
+   } \
+   double getValueModulus() const \
+   { \
+	  return impClass::getValueModulus(); \
    } \
    std::vector<double> getMajorTickLocations() const \
    { \

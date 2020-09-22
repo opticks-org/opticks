@@ -167,6 +167,16 @@ double AxisImp::getMaximumValue() const
    return scaleDiv.upperBound();
 }
 
+void AxisImp::setValueModulus(double modulus)
+{
+	mScaleDraw.setModulus(modulus);
+}
+
+double AxisImp::getValueModulus() const
+{
+	return mScaleDraw.getModulus();
+}
+
 vector<double> AxisImp::getMajorTickLocations() const
 {
    vector<double> majorTicks;

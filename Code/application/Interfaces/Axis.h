@@ -144,6 +144,26 @@ public:
     *  @return  The maximum value of the axis.
     */
    virtual double getMaximumValue() const = 0;
+   
+   /**
+    *  Set the value modulus which will be applied to labels when drawing.
+	*
+	*  For example, when displaying arc degrees, a modulus of 360 will cause axis
+	*  labels to display as 358, 359, 0, 1.
+	*
+	*  @param modulus
+	*         The new modulus value. A value of 0 (the default) will not calculate a modulus.
+	*/
+   virtual void setValueModulus(double modulus) = 0;
+   
+   /**
+    *  Get the current value modulus.
+	*
+	*  @see setValueModulus()
+	*
+	*  @return The current value modulus or 0 if modulus isn't applied to labels.
+	*/
+   virtual double getValueModulus() const = 0;
 
    /**
     *  Returns the values of all major tick mark locations.
