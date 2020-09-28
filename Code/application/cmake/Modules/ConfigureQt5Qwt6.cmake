@@ -46,6 +46,7 @@ if(EXISTS ${QT_QMAKE_EXECUTABLE})
    # TODO: Determine if CMAKE_AUTOMOC etc may be used instead of qt5_wrap_cpp() etc. macros below.
    #       Might simplify things a bit if they can.
    #       See https://cmake.org/cmake/help/v3.12/prop_tgt/AUTOMOC.html#prop_tgt:AUTOMOC
+   # set(CMAKE_INCLUDE_CURRENT_DIR ON)
    # set(CMAKE_AUTOMOC ON)
    # set(CMAKE_AUTORCC ON)
    # set(CMAKE_AUTOUIC ON)
