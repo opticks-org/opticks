@@ -1,0 +1,28 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- task: PythonScript@0
+  inputs:
+    scriptSource: inline
+    script: from urllib.request import urlretrieve; urlretrieve('http://opticks.org/downloads/working_deps/dependencies64_vs2017_updates.7z', 'Dependencies/dependencies64_vs2017_updates.7z')
+- task: ExtractFiles@1
+  inputs:
+    archiveFilePatterns: 'Dependencies/dependencies64_vs2017_updates.7z'
+    destinationFolder: 'Dependencies'
+    cleanDestinationFolder: false
+- task: MSBuild@1
+  inputs:
+    solution: 'Code/application/Opticks.sln'
+    msbuildArchitecture: 'x64'
+    platform: 'x64'
+    configuration: 'Release'
+    maximumCpuCount: true
