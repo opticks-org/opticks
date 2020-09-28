@@ -18,9 +18,19 @@
 #if defined(LINUX)
 #undef OFFSET_T_DEFINED
 #endif
+extern "C" {
 #include "avformat.h"
 #include "avutil.h"
+}
 #pragma warning(pop)
+
+#if !defined(CODEC_FLAG_TRELLIS_QUANT)
+typedef uint64_t codec_flag_t;
+#define OPTICKS_CODEC_FLAG_TRELLIS_QUANT  0xf00000000LL    // CODEC_FLAG_CLOSED_GOP is 0x80000000, we need twice that
+#else
+typedef uint32_t codec_flag_t;
+#define OPTICKS_CODEC_FLAG_TRELLIS_QUANT  CODEC_FLAG_TRELLIS_QUANT
+#endif
 
 #include <boost/rational.hpp>
 #include <memory>
@@ -70,10 +80,17 @@ public:
             }
             av_freep(&pFormat->streams[i]);
          }
+#if (LIBAVFORMAT_VERSION_INT < ((52<<16)))
          if (pFormat->pb.opaque != NULL)
          {
             url_fclose(&pFormat->pb);
          }
+#else
+         if (pFormat->pb->opaque != NULL)
+         {
+            url_fclose(pFormat->pb);
+         }
+#endif
          av_free(pFormat);
       }
    }
@@ -191,7 +208,7 @@ public:
 protected:
    virtual bool setAvCodecOptions(AVCodecContext* pContext);
    virtual bool open_video(AVFormatContext* pFormat, AVStream* pVideoStream);
-   virtual AVFrame* alloc_picture(int pixFmt, int width, int height);
+   virtual AVFrame* alloc_picture(PixelFormat pixFmt, int width, int height);
    virtual bool write_video_frame(AVFormatContext* pFormat, AVStream* pVideoStream);
 
    virtual AVOutputFormat* getOutputFormat() const = 0;

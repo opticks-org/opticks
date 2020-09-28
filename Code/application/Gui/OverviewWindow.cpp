@@ -423,7 +423,7 @@ void OverviewWindow::changeTrailOpacity()
 {
    int oldAlpha = static_cast<int>(mTrailColor.mAlpha / 2.550f + 0.5);
    bool bOk;
-   int newAlpha = QInputDialog::getInteger(this, "Set Overview Trail Opacity",
+   int newAlpha = QInputDialog::getInt(this, "Set Overview Trail Opacity",
       "Set from 0% (transparent) to 100% (opaque)", oldAlpha, 0, 100, 1, &bOk);
    if (bOk)
    {
@@ -447,7 +447,7 @@ void OverviewWindow::changeTrailOpacity()
 void OverviewWindow::changeTrailThreshold()
 {
    bool bOk;
-   int newZoom = QInputDialog::getInteger(this, "Set Trail Zoom Threshold",
+   int newZoom = QInputDialog::getInt(this, "Set Trail Zoom Threshold",
       "Set lowest zoom percentage for marking Trail.\nThis action will reset the Overview Trail.", 
       mZoomThreshold, 1, 1000, 10, &bOk);
    if (bOk)

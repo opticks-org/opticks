@@ -10,9 +10,15 @@
 #ifndef MESSAGELOGIMP_H
 #define MESSAGELOGIMP_H
 
-#include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QTextStream>
+#if HAVE_QSAVEFILE
+#include <QtCore/QSaveFile>
+typedef QSaveFile QFILE;
+#else
+#include <QtCore/QFile>
+typedef QFile QFILE;
+#endif
 
 #include "MessageLog.h"
 #include "SerializableImp.h"
@@ -102,7 +108,7 @@ public:
    /**
     *  Construct a new message log
     */
-   MessageLogImp(const char* name, const char* path, QFile *journal);
+   MessageLogImp(const char* name, const char* path, QFILE *journal);
    virtual ~MessageLogImp();
 
    virtual Message *createMessage(const std::string &action,
@@ -133,7 +139,7 @@ public: // serialize functionality
 
 public:
    const std::string& getLogName() const;
-   QFile* mpLogFile;
+   QFILE* mpLogFile;
 
 protected: // Observer
    void messageDeleted(Subject &subject, const std::string &signal, const boost::any &v);
@@ -146,7 +152,7 @@ private:
    Filename* mpFilename;
    std::vector<Message*> mMessageList;
    Step* mpCurrentStep;
-   QFile* mpJournal;
+   QFILE* mpJournal;
    QTextStream* mpJournalWriter;
    XMLWriter* mpWriter;
 };

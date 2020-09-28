@@ -45,7 +45,6 @@ WindowModel::WindowModel(QObject* pParent) :
 {
    setSourceModel(new WindowSourceModel(this));
    setDynamicSortFilter(true);
-   setSupportedDragActions(Qt::MoveAction);
 }
 
 WindowModel::~WindowModel()

@@ -706,7 +706,7 @@ void WizardView::dropEvent(QDropEvent* pEvent)
       return;
    }
 
-   QString dataText = QString::fromAscii(pData->data("text/x-wizarditem"));
+   QString dataText = QString::fromLatin1(pData->data("text/x-wizarditem"));
    if (dataText.isEmpty() == true)
    {
       return;

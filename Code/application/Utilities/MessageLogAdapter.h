@@ -18,7 +18,7 @@
 class MessageLogAdapter : public MessageLog, public MessageLogImp MESSAGELOGADAPTEREXTENSION_CLASSES
 {
 public:
-   MessageLogAdapter(const char* name, const char* path, QFile *journal);
+   MessageLogAdapter(const char* name, const char* path, QFILE *journal);
    virtual ~MessageLogAdapter();
 
    // TypeAwareObject

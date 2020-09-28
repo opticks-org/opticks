@@ -183,7 +183,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 
 # Qt/Qwt configuration boilerplate shared with Spectral
 set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
-include(ConfigureQtQwt)
+include(ConfigureQt5Qwt6)
 unset(DEPENDENCY_PATH)
 
 find_package(Boost 1.45.0 REQUIRED)
@@ -205,13 +205,13 @@ find_package(geotiff REQUIRED)
 find_package(proj REQUIRED)
 
 #----- Optional packages -----
-#Need components for Cg
+# ffmpeg packages for MovieExporter plugin
 find_package(avcodec)
 find_package(avformat)
 find_package(avutil)
 find_package(swscale)
+
 find_package(cfitsio)
-find_package(Cg) #optional, still need to work
 find_package(Gdal)
 find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
@@ -232,9 +232,7 @@ find_package(MsHelpCompiler)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(EXPAT REQUIRED) #needed for raptor static library provided in pre-built dependencies
 endif()
-if(Cg_FOUND)
-    set(CG_SUPPORTED 1)
-endif()
+
 if(OpenCollada_FOUND)
    set(OPENCOLLADA_SUPPORT 1)
 endif()
@@ -390,9 +388,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${Glew_INCLUDE_DIRS})
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include_directories(${EXPAT_INCLUDE_DIRS})
-endif()
-if(CG_FOUND)
-include_directories(${Cg_INCLUDE_DIRS})
 endif()
 
 add_definitions(-DAPPLICATION_XERCES)
@@ -663,12 +658,8 @@ target_link_libraries(Opticks
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
+    ${Qwt6ForQt5_LIBRARY}
     )
- if(HAVE_QT5)
-    target_link_libraries(Opticks  ${Qwt5ForQt5_LIBRARY})
- else()
-    target_link_libraries(Opticks  ${Qwt5ForQt4_LIBRARY})
- endif()
 
 set_target_properties(Opticks PROPERTIES DEBUG_POSTFIX "d")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -682,10 +673,7 @@ if(WIN32)
         ${QT_QTMAIN_LIBRARY}
     )
 endif()
-if(CG_FOUND)
-    target_link_libraries(Opticks
-        ${Cg_LIBRARIES})
-endif()
+
 if (EXISTS "CppTests" AND IS_DIRECTORY "CppTests")
     add_subdirectory(CppTests)
 endif()

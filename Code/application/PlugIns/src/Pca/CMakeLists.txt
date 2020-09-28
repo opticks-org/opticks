@@ -17,11 +17,8 @@ include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
-if(HAVE_QT5)
-   include_directories(${Qwt5ForQt5_INCLUDE_DIRS})
-else()
-   include_directories(${Qwt5ForQt4_INCLUDE_DIRS})
-endif()
+include_directories(${Qwt6ForQt5_INCLUDE_DIRS})
+
 include(${QT_USE_FILE})
 qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
@@ -31,12 +28,8 @@ target_link_libraries(Pca
     ${QT_LIBRARIES}    
     ${Ossim_LIBRARIES}
     ${Xerces_LIBRARIES}
+    ${Qwt6ForQt5_LIBRARY}
     )
-if(HAVE_QT5)
-   target_link_libraries(Pca ${Qwt5ForQt5_LIBRARY})
-else()
-   target_link_libraries(Pca ${Qwt5ForQt4_LIBRARY})
-endif()
  
 if(WIN32)
     install(TARGETS Pca RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

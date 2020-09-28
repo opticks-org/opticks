@@ -3,12 +3,12 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
 #ifndef MODULEDESCRIPTOR_H
-#define MODULEDESCRIPTOR_H 
+#define MODULEDESCRIPTOR_H
 
 #include "DateTimeImp.h"
 #include "DynamicModule.h"
@@ -134,7 +134,7 @@ private:
    ModuleDescriptor(const ModuleDescriptor& rhs);
 };
 
-#define READ_FROM_STREAM(var) reader >> var; if (reader.status() != QDataStream::Ok) { return false; }
+#define READ_FROM_STREAM(var) reader >> var; if (reader.status() != QDataStream::Ok) { return NULL; }
 #define READ_STR_FROM_STREAM(var) QString qStr##var; READ_FROM_STREAM(qStr##var) var = qStr##var.toStdString();
 
 #endif

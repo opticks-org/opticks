@@ -77,7 +77,7 @@ DataDescriptorWidget::DataDescriptorWidget(QWidget* pParent) :
    if (pHeader != NULL)
    {
       pHeader->setSortIndicatorShown(false);
-      pHeader->setMovable(false);
+      pHeader->setSectionsMovable(false);
       pHeader->setStretchLastSection(true);
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->resizeSection(0, 150);

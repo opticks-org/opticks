@@ -3,7 +3,7 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
 
@@ -76,7 +76,7 @@ void ModelServicesImp::destroy()
    mDestroyed = true;
 }
 
-ModelServicesImp::ModelServicesImp() : 
+ModelServicesImp::ModelServicesImp() :
    SettableSessionItemAdapter("{543BF9C3-2861-4240-ADD7-6748C3BF4F90}")
 {
    mElementTypes.push_back("AnnotationElement");
@@ -493,7 +493,7 @@ DataElement* ModelServicesImp::getElement(const string& name, const string& type
 {
    if (name.empty() == true)
    {
-      return false;
+      return NULL;
    }
 
    Key key(name, pParent);
@@ -511,7 +511,7 @@ DataElement* ModelServicesImp::getElement(const vector<string>& designator, cons
 {
    if (designator.empty())
    {
-      return false;
+      return NULL;
    }
    DataElement* pElement = NULL;
    for (vector<string>::const_iterator part = designator.begin(); part != designator.end(); ++part)
@@ -699,7 +699,7 @@ bool ModelServicesImp::setElementName(DataElement* pElement, const string& name)
    VERIFY(removeElement(pElement));
    dynamic_cast<DataElementImp*>(pElement)->setName(name);
    VERIFY(addElement(pElement));
-   
+
    return true;
 }
 

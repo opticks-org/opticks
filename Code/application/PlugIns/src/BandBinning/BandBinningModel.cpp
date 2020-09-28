@@ -218,8 +218,10 @@ void BandBinningModel::setGroupedBands(
 {
    if (groupedBands != mGroupedBands)
    {
+      beginResetModel();
       mGroupedBands = groupedBands;
-      reset();
+      resetInternalData(); // Does this do anything? What?
+      endResetModel();
    }
 }
 

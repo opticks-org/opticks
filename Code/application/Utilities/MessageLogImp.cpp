@@ -23,12 +23,14 @@
 #include <vector>
 
 #include <QtCore/QString>
+#include <QtCore/QTextStream>
 #include <QtCore/QTemporaryFile>
+#include <QMessageBox>
 
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
-MessageLogImp::MessageLogImp(const char* name, const char* path, QFile* journal) :
+MessageLogImp::MessageLogImp(const char* name, const char* path, QFILE* journal) :
          mpLogName(name),
          mpCurrentStep(NULL),
          mpJournal(journal),
@@ -62,35 +64,73 @@ MessageLogImp::MessageLogImp(const char* name, const char* path, QFile* journal)
    string extension = ".log";
    if ((path[strlen(path)-1] != string("\\").at(0)) && (path[strlen(path)-1] != string("/").at(0)))
    {
-      fname = (string)path + SLASH + fname + extension;
+      fname = string(path) + SLASH + fname + extension;
    }
    else
    {
-      fname = (string)path + fname + extension;
+      fname = string(path) + fname + extension;
    }
    mpJournalWriter = new QTextStream(mpJournal);
 
-   QTemporaryFile* pTempFile = new QTemporaryFile(QString::fromStdString(fname));
-   if (pTempFile != NULL)
+   // fname is already unique. For consistency, just append the mpJournal file's unique extension:
+   QString tmpFilename;
+   int jourIdx;
+   if((jourIdx=mpJournal->fileName().lastIndexOf("/jour.")) > -1)
    {
-      pTempFile->setAutoRemove(false);
-      mpLogFile = pTempFile;
+       tmpFilename = QString::fromStdString(fname) + mpJournal->fileName().mid(jourIdx+5);
    }
-   if ((mpLogFile == NULL) || !mpLogFile->open(QIODevice::WriteOnly | QIODevice::Append))
+   else
    {
-      Service<ApplicationServices> pApplication;
-      if (pApplication->isBatch() == true)
-      {
-         string msg("Unable to open log file ");
-         msg += mpLogFile->fileName().toStdString();
-         msg += ": ";
-         msg += mpLogFile->errorString().toStdString();
-         // if we are in batch mode, output a message to stderr
-         cerr << msg << endl;
-      }
+       // Didn't find one.
+       // We don't want to use a QTemporaryFile directly, as with Qt5 QTemporaryFiles won't be
+       // reliably written to disk. But we do want a unique filename, so we open a QTemporaryFile
+       // just long enough to get a valid filename, close it, then immediately open a QFile or
+       // QSaveFile with that name.
+       QTemporaryFile tmpFile(QString::fromStdString(fname));
+       tmpFile.open();
+       tmpFilename = tmpFile.fileName();
+   }
 
-      delete mpLogFile;
-      mpLogFile = NULL;
+#if HAVE_QSAVEFILE
+   mpLogFile = new QSaveFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly); // QSaveFile::open() does not recognize QIODevice::Append
+#else
+   mpLogFile = new QFile(tmpFilename);
+   QIODevice::OpenMode openMode(QIODevice::WriteOnly | QIODevice::Append);  // Why Append mode? This filename is unique.
+#endif
+
+   if ((mpLogFile == NULL) || !mpLogFile->open(openMode))
+   {
+       string msg("Unable to open log file ");
+       msg += mpLogFile->fileName().toStdString();
+       msg += ": ";
+       msg += mpLogFile->errorString().toStdString();
+       // if we are in batch mode, output a message to stderr
+       Service<ApplicationServices> pApplication;
+       if (pApplication->isBatch() == true)
+       {
+           cerr << msg << std::endl;
+       }
+       else
+       {
+          // put up a warning window:
+           QMessageBox::warning(NULL, // MessageLogImp has no QObject* parent. Put it here if it does.
+                                "Log File Error",
+                                msg.c_str(),
+                                QMessageBox::Ignore,
+                                QMessageBox::NoButton);
+
+       }
+
+       if(mpLogFile != NULL)
+       {
+           delete mpLogFile;
+           mpLogFile = NULL;
+       }
+   }
+   else
+   {
+       mpLogFile->setPermissions(QFileDevice::ReadUser | QFileDevice::WriteUser);
    }
 
    mpWriter = new XMLWriter("messagelog");
@@ -102,24 +142,31 @@ MessageLogImp::~MessageLogImp()
 {
    MessageAdapter* pClosed(new MessageAdapter("Log Closed", "app", "3620CAD7-3535-4716-9686-E024E201481F"));
    pClosed->finalize();
-   pClosed->getId()(size()+1);
-   if ((mpWriter != NULL) && (mpLogFile != NULL))
+   pClosed->getId()(size()+1); // What does this do? Is pClosed used again?
+   delete pClosed;
+   pClosed = NULL;
+
+   if (mpLogFile != NULL)
    {
       QTextStream stream(mpLogFile);
       stream << serialize().c_str();
+      stream.flush();
+      mpLogFile->flush();
+#if HAVE_QSAVEFILE
+      mpLogFile->commit(); // QSaveFile is commit(), QFile is close()
+#else
+      mpLogFile->close();
+#endif
+      delete mpLogFile;
+      mpLogFile = NULL;
    }
+   
    if (mpWriter != NULL)
    {
       delete mpWriter;
       mpWriter = NULL;
    }
 
-   if (mpLogFile != NULL)
-   {
-      mpLogFile->close();
-      delete mpLogFile;
-      mpLogFile = NULL;
-   }
    if (mpJournalWriter != NULL)
    {
       delete mpJournalWriter;
@@ -142,6 +189,7 @@ MessageLogImp::~MessageLogImp()
          MessageImp* pCurMsgImp = dynamic_cast<MessageImp*>(pCurMsg);
          if (pCurMsgImp != NULL)
          {
+            pCurMsgImp->finalize();
             delete pCurMsgImp;
          }
       }
@@ -149,6 +197,16 @@ MessageLogImp::~MessageLogImp()
    mMessageList.clear();
 
    notify(SIGNAL_NAME(Subject, Deleted));
+
+   if (mpJournal != NULL)
+   {
+#if HAVE_QSAVEFILE
+      mpJournal->commit(); // QSaveFile is commit(), QFile is close()
+#else
+      mpJournal->close();
+#endif
+   }
+
 }
 
 Message* MessageLogImp::createMessage(const string& action, const string& component, const string& key,
@@ -289,7 +347,7 @@ void MessageLogImp::messageAdded(Subject& subject, const string& signal, const b
    *mpJournalWriter << mpLogName.c_str() << " - ADDED "
       << ((pStpImp != NULL) ? "Step" : "Message")
       << "[" << ((pStpImp != NULL) ? pStpImp : pMsgImp)->getStringId().c_str() << "] "
-      << pMsg->getAction().c_str() << endl << flush;
+      << pMsg->getAction().c_str() << endl;
    notify(SIGNAL_NAME(MessageLog, MessageAdded), v);
 }
 
@@ -308,7 +366,7 @@ void MessageLogImp::messageModified(Subject& subject, const string& signal, cons
       << ((pStpImp != NULL) ? "Step" : "Message")
       << "[" << ((pStpImp != NULL) ? pStpImp : pMsgImp)->getStringId().c_str() << "."
       << pMsg->getProperties()->getNumAttributes() << "] "
-      << endl << flush;
+      << endl;
    notify(SIGNAL_NAME(MessageLog, MessageModified), v);
 }
 
@@ -343,7 +401,7 @@ void MessageLogImp::messageHidden(Subject& subject, const string& signal, const 
          break;
       }
    }
-   *mpJournalWriter << endl << flush;
+   *mpJournalWriter << endl;
    notify(SIGNAL_NAME(MessageLog, MessageHidden), v);
 }
 

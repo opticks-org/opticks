@@ -96,8 +96,8 @@
 #error "Linux support requires a 64-bit x86 (AMD64) processor"
 #endif
 
-#if !defined(__GNUC__) || __GNUC__ != 4
-#error "Linux support requires version 4 of the GNU g++ compiler"
+#if !defined(__GNUC__) || __GNUC__ < 4
+#error "Linux support requires version 4 or higher of the GNU g++ compiler"
 #endif
 
    #include <stddef.h>
