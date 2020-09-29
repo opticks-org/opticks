@@ -558,7 +558,7 @@ GraphicLayer* pLayer = pTemp->getLayer();
 <b>Description:</b>
 The \#define HDF4_SUPPORT was removed.
 It was used before to identify those platforms that we supported HDF4 on (Solaris, Win32).
-%Opticks now supports Hdf4 on all available platforms (Solaris, Win32, Win64), so the \#define was removed.
+%Opticks now supports Hdf4 on all available platforms (Linux, Win64), so the \#define was removed.
 
 <b>Procedure:</b>
 If you were relying on the HDF4_SUPPORT define, please remove it from your code.

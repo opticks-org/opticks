@@ -1,17 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -25,18 +17,6 @@
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
@@ -52,40 +32,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="CompileSettings\32bitSettings.props" />
-    <Import Project="CompileSettings\Macros.props" />
-    <Import Project="CompileSettings\AllCommonSettings-Debug-32bit.props" />
-    <Import Project="CompileSettings\pthreads.props" />
-    <Import Project="CompileSettings\qwt.props" />
-    <Import Project="CompileSettings\Qt-Debug.props" />
-    <Import Project="CompileSettings\Xerces-Debug.props" />
-    <Import Project="CompileSettings\xqilla-debug.props" />
-    <Import Project="CompileSettings\ApplicationCommonSettings-Debug.props" />
-    <Import Project="CompileSettings\glew-debug.props" />
-    <Import Project="CompileSettings\raptor.props" />
-    <Import Project="CompileSettings\minizip-debug.props" />
-    <Import Project="CompileSettings\EnableWarnings.props" />
-    <Import Project="CompileSettings\yaml-cpp-debug.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="CompileSettings\32bitSettings.props" />
-    <Import Project="CompileSettings\Macros.props" />
-    <Import Project="CompileSettings\AllCommonSettings-Release-32bit.props" />
-    <Import Project="CompileSettings\pthreads.props" />
-    <Import Project="CompileSettings\qwt.props" />
-    <Import Project="CompileSettings\Qt-Release.props" />
-    <Import Project="CompileSettings\Xerces-Release.props" />
-    <Import Project="CompileSettings\xqilla-release.props" />
-    <Import Project="CompileSettings\ApplicationCommonSettings-Release.props" />
-    <Import Project="CompileSettings\glew-release.props" />
-    <Import Project="CompileSettings\raptor.props" />
-    <Import Project="CompileSettings\minizip-release.props" />
-    <Import Project="CompileSettings\EnableWarnings.props" />
-    <Import Project="CompileSettings\yaml-cpp-release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -127,33 +73,6 @@
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir>$(BuildDir)\Binaries-$(Platform)-$(Configuration)\Bin\</OutDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Release/Opticks.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
-    </ClCompile>
-    <ResourceCompile>
-      <Culture>0x0409</Culture>
-      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
-    </ResourceCompile>
-    <Link>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-    </Link>
-    <PostBuildEvent>
-      <Message>Prepping for Run...</Message>
-      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=32 -v</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -183,35 +102,6 @@
     <PostBuildEvent>
       <Message>Prepping for Run...</Message>
       <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=release --arch=64 -v</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Midl>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MkTypLibCompatible>true</MkTypLibCompatible>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Debug/Opticks.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AssemblerListingLocation>
-      </AssemblerListingLocation>
-      <BrowseInformationFile>
-      </BrowseInformationFile>
-    </ClCompile>
-    <ResourceCompile>
-      <Culture>0x0409</Culture>
-      <ResourceOutputFileName>$(IntDir)%(Filename).res</ResourceOutputFileName>
-    </ResourceCompile>
-    <Link>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-    </Link>
-    <PostBuildEvent>
-      <Message>Prepping for Run...</Message>
-      <Command>python.exe "$(CODE_DIR)\build.py" --prep --mode=debug --arch=32 -v</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
