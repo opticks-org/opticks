@@ -31,7 +31,7 @@
       #define PTR_SIZE 8
       #define BROKEN_INLINE_HINT __declspec(noinline)
    #elif defined(_WIN32)
-      #define PTR_SIZE 4
+      #error "Window 32-bit is no longer supported."
    #endif
 
    //platform defines

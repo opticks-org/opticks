@@ -695,9 +695,6 @@
     <ClCompile Include="GLView\Tile.cpp">
       <Filter>GLView</Filter>
     </ClCompile>
-    <ClCompile Include="Image\CgContext.cpp">
-      <Filter>Image</Filter>
-    </ClCompile>
     <ClCompile Include="Image\ColorBuffer.cpp">
       <Filter>Image</Filter>
     </ClCompile>
@@ -923,6 +920,24 @@
     <ClCompile Include="$(BuildDir)\Moc\Gui\moc_OptionsToolBar.cpp">
       <Filter>moc</Filter>
     </ClCompile>
+    <ClCompile Include="Image\ColormapGpuProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GlProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GlShaderGpuProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GlSlContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GrayscaleGpuProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\RgbGpuProgram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AoiToolBarAdapter.h">
@@ -1008,9 +1023,6 @@
     </ClInclude>
     <ClInclude Include="GLView\Tile.h">
       <Filter>GLView</Filter>
-    </ClInclude>
-    <ClInclude Include="Image\CgContext.h">
-      <Filter>Image</Filter>
     </ClInclude>
     <ClInclude Include="Image\ColorBuffer.h">
       <Filter>Image</Filter>
@@ -1269,6 +1281,24 @@
     </ClInclude>
     <ClInclude Include="Undo\ViewUndo.h">
       <Filter>Undo</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\ColormapGpuProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GlProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GlShaderGpuProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GlSlContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GrayscaleGpuProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\RgbGpuProgram.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
