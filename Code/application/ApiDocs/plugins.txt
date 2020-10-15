@@ -182,8 +182,8 @@ In order to use this approach on either Windows or Solaris, you need to perform 
 -# On Windows, if you wished to run your plug-ins in debug mode, you would need to perform the following additional steps:
    -# Rename the existing Bin folder in the installation to Bin-release
    -# Rename the existing PlugIns folder in the installation to PlugIns-release
-   -# Create a new Bin folder in the installation by copying either the SDK_HOME\\Build\\Binaries-Win32-Debug\\Bin or SDK_HOME\\Build\\Binaries-x64-Debug\\Bin folder depending on whether you are trying to run 32-bit or 64-bit plug-ins respectively.
-   -# Create a new PlugIns folder in the installation by copying either the SDK_HOME\\Build\\Binaries-Win32-Debug\\PlugIns or SDK_HOME\\Build\\Binaries-x64-Debug\\PlugIns folder depending on whether you are trying to run 32-bit or 64-bit plug-ins respectively.
+   -# Create a new Bin folder in the installation by copying either the SDK_HOME\\Build\\Binaries-x64-Debug\\Bin folder.
+   -# Create a new PlugIns folder in the installation by copying either the SDK_HOME\\Build\\Binaries-x64-Debug\\PlugIns folder.
    -# Copy your compiled plug-in (i.e. .dll or .so) into the PlugIns folder that you just created in the installation folder.
    -# Copy any third party dependency libraries (i.e. .dll or .so's that are not plug-ins) into the Bin that you just created in the installation folder.
    -# At this point, you could run your plug-ins in debug mode.
@@ -199,8 +199,6 @@ You will need to perform the following steps:
 -# Create a UserSettings folder in the WS_HOME folder.
 -# Create a Build folder in the WS_HOME folder.
 -# On Windows, perform the following steps:
-   -# If you will run plug-ins in release 32-bit mode, then copy the Bin and PlugIns folder from SDK_HOME\\Build\\Binaries-Win32-Release into WS_HOME\\Build\\Binaries-Win32-Release folder.
-   -# If you will run plug-ins in debug 32-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-Win32-Debug into WS_HOME\\Build\\Binaries-Win32-Debug folder.
    -# If you will run plug-ins in release 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Release into WS_HOME\\Build\\Binaries-x64-Release folder.
    -# If you will run plug-ins in debug 64-bit mode, then copy the Bin and PlugIns folder from the SDK_HOME\\Build\\Binaries-x64-Debug into WS_HOME\\Build\\Binaries-x64-Debug folder.
 -# On Solaris, perform the following steps:

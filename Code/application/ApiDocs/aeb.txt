@@ -9,18 +9,14 @@ In addition to the standard AEBL verbs, %Opticks defined the following verbs in 
    
 Platform strings are defined as: os-procarch-compiler-debugmode
 Valid values are:
- - os: win32, win64, solaris, linux, unknown
+ - os: win32 (no longer supported in Opticks 5.x), win64, solaris (no longer supported in Opticks 4.10.x), linux, unknown
  - procarch: x86, sparc, x86_64, unknown
  - compiler: msvc8.1, msvc10.0, studio11, studio12, gcc4, unknown
  - debugmode: debug, release
 
 Combinations currently recognized in %Opticks are:
- - win32-x86-msvc10.0-debug
- - win32-x86-msvc10.0-release
  - win64-x86-msvc10.0-debug
  - win64-x86-msvc10.0-release
- - solaris-sparc-studio12-debug
- - solaris-sparc-studio12-release
  - linux-x86_x64-gcc4-debug
  - linux-x86_x64-gcc4-release
  

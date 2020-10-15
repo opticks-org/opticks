@@ -381,8 +381,6 @@ class WindowsBuilder(Builder):
             arch_args = []
             if self.is_64_bit:
                 arch_args.append("BITS=64")
-            else:
-                arch_args.append("BITS=32")
             self.run_scons(os.path.abspath("application"),
                self.build_debug_mode, concurrency, env, clean, extra_args+arch_args)
             if self.verbosity > 1:
@@ -428,9 +426,6 @@ class WindowsBuilder(Builder):
         return "Binaries-%s-%s.zip" % (self.platform, self.mode)
 
     def get_doxygen_path(self):
-        doxygen_path = join(self.depend_path, "32", "bin", "doxygen.exe")
-        if os.path.exists(doxygen_path):
-            return doxygen_path
         doxygen_path = join(self.depend_path, "64", "bin", "doxygen.exe")
         return doxygen_path
 
@@ -453,8 +448,7 @@ class WindowsBuilder(Builder):
         if build_dir is None:
             build_dir = "Build"
 
-        bin_path = self.generic_prep_to_run(build_dir, "Windows",
-            "64" if self.is_64_bit else "32")
+        bin_path = self.generic_prep_to_run(build_dir, "Windows", "64")
 
         # Qt DLLs for ArcProxy
         #if self.verbosity > 1:
@@ -481,6 +475,7 @@ class WindowsBuilder(Builder):
     def build_in_msbuild(self, solutionfile, debug,
                          build_64_bit, concurrency,
                          msbuildpath, environ, clean):
+		assert(build_64_bit)
         if not os.path.exists(msbuildpath):
             raise ScriptException("MS Build path is invalid")
     
@@ -490,8 +485,6 @@ class WindowsBuilder(Builder):
             config = "Release"
         if build_64_bit:
             platform = "x64"
-        else:
-            platform = "Win32"
 
         msbuild_exec = join(msbuildpath, "msbuild.exe")
         arguments = [msbuild_exec, solutionfile]
@@ -671,7 +664,7 @@ def main(args):
                  "if you don't have Visual C++ installed. "\
                  "The default is to use vcbuild")
         options.add_option("--arch", dest="arch", action="store",
-            type="choice", choices=["32","64"], help="Use 32 or 64.")
+            type="choice", choices=["64"], help="Deprecated.")
         options.set_defaults(msbuild=msbuild_path,
             ms_help_compiler=ms_help_compiler_path, arch="64",
             use_scons=False)

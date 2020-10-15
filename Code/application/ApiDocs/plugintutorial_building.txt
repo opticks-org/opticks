@@ -83,7 +83,6 @@ You will need to have downloaded and installed %Opticks (<a href="https://optick
 <li>Preparing to run on Windows
 
 Copy the pre-built tutorial and sample plug-ins (PlugInSampler.dll, PlugInSamplerHdf.dll, PlugInSamplerQt.dll, Tutorial.dll) from the appropriate SDK_HOME\\Build\\Binaries-YY-ZZ folder\\PlugIns to your %Opticks installation's plug-in folder.
-If you want to run %Opticks 32-bit, you will copy them from the SDK_HOME\\Build\\Binaries-Win32-release\\PlugIns folder to the "PlugIns" folder where you installed 32-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
 If you want to run %Opticks 64-bit, you will copy them from the SDK_HOME\\Build\\Binaries-x64-release\\PlugIns folder to the "PlugIns" folder where you installed 64-bit %Opticks (i.e. C:\\Program Files\\%Opticks\\4.2.0\\PlugIns).
 </li>
 <li>Preparing to run on Solaris

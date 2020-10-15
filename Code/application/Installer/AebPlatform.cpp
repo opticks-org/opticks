@@ -53,7 +53,7 @@ std::string AebPlatform::currentPlatform()
    // Operating system
 #if defined(_WIN64)
    platform += "win64";
-#elif defined(_WIN32)
+#elif defined(_WIN32)  // not supported anymore but we will keep this here anyway.
    platform += "win32";
 #elif defined(SOLARIS)
    platform += "solaris";

@@ -30,9 +30,6 @@ Add the following SDK directories to the INCLUDE and LIB directories of your com
 Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
 <table>
 <tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
-<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
-<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
-<tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
 <tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\Interfaces</li><li>SDK_HOME\\application\\PlugInLib</li><li>SDK_HOME\\application\\PlugInUtilities\\Interfaces</li><li>SDK_HOME\\application\\PlugInUtilities\\pthreads-wrapper</li></ul></td></tr>
 <tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
 <tr><td>Libraries</td><td><ul><li>PlugInLib.lib</li><li>PlugInUtilities.lib</li></ul></td></tr>
@@ -116,9 +113,6 @@ If you are using any of these more advanced parts of the SDK, see below for the 
 Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
 <table>
 <tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
-<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
-<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
-<tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
 <tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\HdfPlugInLib</li></ul></td></tr>
 <tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
 <tr><td>Libraries</td><td><ul><li>HdfPlugInLib.lib</li></ul></td></tr>
@@ -141,9 +135,6 @@ Add the listed SDK libraries in the table below to your link line when creating 
 Add the listed SDK libraries in the table below to your link line when creating the .dll or .so for your plug-in.
 <table>
 <tr><th>Platform</th><th>Configuration</th><th>Architecture</th><th>C++ Compiler/Linker Setting</th><th>Full Path</th></tr>
-<tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">32-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
-<tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-win32-debug\\Lib\\</li></ul></td></tr>
-<tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
 <tr><td rowspan="3">Windows</td><td rowspan="3">Debug</td><td rowspan="3">64-bit</td><td>INCLUDE directory</td><td><ul><li>SDK_HOME\\application\\NitfPlugInLib</li></ul></td></tr>
 <tr><td>LIB directory</td><td><ul><li>SDK_HOME\\Build-Binaries-x64-debug\\Lib\\</li></ul></td></tr>
 <tr><td>Libraries</td><td><ul><li>NitfPlugInLib.lib</li></ul></td></tr>
