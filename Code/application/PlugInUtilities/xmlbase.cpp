@@ -268,6 +268,7 @@ void XmlBase::logSimpleMessage(std::string msg)
    }
 }
 
+#pragma runtime_checks("c", off) // boost CRC will trigger this in debug mode so we temporarily disable it
 XMLByte* XmlBase::encodeBase64(const unsigned int* pData, XMLSize_t size, XMLSize_t* pOutLen, std::string* pChecksum)
 {
    boost::crc_ccitt_type crc;
@@ -315,6 +316,7 @@ XMLByte* XmlBase::encodeBase64(const unsigned int* pData, XMLSize_t size, XMLSiz
    delete [] bytes;
    return b64repr;
 }
+#pragma runtime_checks("c", restore) // restore the check
 
 unsigned int* XmlBase::decodeBase64(const XMLByte* pData, XMLSize_t size, const std::string& checksum)
 {

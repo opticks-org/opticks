@@ -14,6 +14,7 @@
 #include "ConfigurationSettings.h"
 #include "EnumWrapper.h"
 #include "LabeledSectionGroup.h"
+#include "MovieExporter.h"
 
 #include <string>
 
@@ -50,7 +51,7 @@ public:
    SETTING(BQuantFactor, MovieExporter, float, 0.0);
    SETTING(BQuantOffset, MovieExporter, float, 0.0);
    SETTING(DiaSize, MovieExporter, int, 0);
-   SETTING(Flags, MovieExporter, int, 0);
+   SETTING(Flags, MovieExporter, codec_flag_t, 0);
    SETTING(OutputBufferSize, MovieExporter, int, 0);
 
    void applyChanges();

@@ -177,7 +177,7 @@ string HdfUtilities::hdf4TypeToString(long type, size_t count)
 
 bool HdfUtilities::readHdf4Attribute(int32 obj_id, int32 attr_index, DataVariant& var)
 {
-   char name[MAX_NC_NAME];
+   char name[H4_MAX_NC_NAME];
    int32 type = 0;
    int32 count = 0;
 

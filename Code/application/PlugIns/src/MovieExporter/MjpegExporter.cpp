@@ -55,12 +55,18 @@ bool MjpegExporter::setAvCodecOptions(AVCodecContext* pContext)
    {
       return false;
    }
+#if defined(CODEC_FLAG_TRELLIS_QUANT)
    if (pContext->flags & CODEC_FLAG_TRELLIS_QUANT)
    {
       // Trellis quantization will cause the MJPEG coder to crash
       pContext->trellis = 0;
       pContext->flags = pContext->flags ^ CODEC_FLAG_TRELLIS_QUANT;
    }
+#elif defined(OPTICKS_CODEC_FLAG_TRELLIS_QUANT)
+      /// \todo: Will Trellis quantization still cause newer OpenJpeg MJPEG coders to crash? Need to test
+      pContext->trellis = 0;
+      pContext->flags = pContext->flags ^ OPTICKS_CODEC_FLAG_TRELLIS_QUANT;
+#endif
    // Need to use the special YUVJ420P color format for MJPEG instead of regular YUV420P
    pContext->pix_fmt = PIX_FMT_YUVJ420P;
    return true;

@@ -40,6 +40,8 @@
 #include "TiePointLayer.h"
 #include "TypeConverter.h"
 
+#include <string.h>
+
 namespace
 {
    std::vector<std::string> splitIdentifier(const std::string& name)

@@ -3,10 +3,10 @@
  * Copyright(c) 2020 Ball Aerospace & Technologies Corporation
  * and is subject to the terms and conditions of the
  * GNU Lesser General Public License Version 2.1
- * The license text is available from   
+ * The license text is available from
  * http://www.gnu.org/licenses/lgpl.html
  */
-
+#include <gdal_priv.h>  /// gdal_priv.h defines MSVCPedanticBool, which must be applied consistently. So include it first
 #include "AppVersion.h"
 #include "CachedPager.h"
 #include "DynamicObject.h"
@@ -26,7 +26,6 @@
 #include "UtilityServices.h"
 
 #include <boost/algorithm/string/erase.hpp>
-#include <gdal_priv.h>
 
 REGISTER_PLUGIN_BASIC(OpticksGdalImporter, GdalImporter);
 
@@ -215,7 +214,7 @@ std::vector<ImportDescriptor*> GdalImporter::getImportDescriptors(const std::str
       pImportDescriptor->setDataDescriptor(RasterUtilities::generateRasterDataDescriptor(
          *dsname, NULL, pDataset->GetRasterYSize(), pDataset->GetRasterXSize(), pDataset->GetRasterCount(),
          BSQ, encoding, IN_MEMORY));
-      RasterFileDescriptor* pFileDesc = 
+      RasterFileDescriptor* pFileDesc =
          dynamic_cast<RasterFileDescriptor*>(RasterUtilities::generateAndSetFileDescriptor(
          pImportDescriptor->getDataDescriptor(), filename, *dsname, Endian::getSystemEndian()));
       if (pFileDesc != NULL && pDataset->GetGCPCount() > 0)

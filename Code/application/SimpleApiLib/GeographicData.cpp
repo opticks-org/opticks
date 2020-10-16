@@ -11,6 +11,8 @@
 #include "GeographicData.h"
 #include "SimpleApiErrors.h"
 
+#include <string.h>
+
 extern "C"
 {
    uint32_t getGcpCount(DataElement* pList)

@@ -51,6 +51,10 @@
    #define HIDE_UNUSED_VARIABLE_WARNING
 
    #define GL_CALLBACK CALLBACK
+
+   #ifndef _THROW0
+   #define _THROW0() noexcept
+   #endif
 #elif defined (__SUNPRO_CC)
    #include <sys/isa_defs.h>
 
@@ -92,8 +96,8 @@
 #error "Linux support requires a 64-bit x86 (AMD64) processor"
 #endif
 
-#if !defined(__GNUC__) || __GNUC__ != 4
-#error "Linux support requires version 4 of the GNU g++ compiler"
+#if !defined(__GNUC__) || __GNUC__ < 4
+#error "Linux support requires version 4 or higher of the GNU g++ compiler"
 #endif
 
    #include <stddef.h>
@@ -105,7 +109,6 @@
    #include <endian.h>
    #define UNIX_API
    #define LINUX
-   #define CG_SUPPORTED
    #define EXPORT_SYMBOL 
 
    #if __BYTE_ORDER == __LITTLE_ENDIAN

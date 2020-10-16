@@ -220,7 +220,7 @@ void TiePointEditor::goToRow()
 
    bool bOk = true;
 
-   int row = QInputDialog::getInteger(this, "Go To Tie Point",
+   int row = QInputDialog::getInt(this, "Go To Tie Point",
       "Enter the tie point number to display at the top of the table", currentRow + 1, 1, numRows, 1, &bOk);
    if (bOk)
    {

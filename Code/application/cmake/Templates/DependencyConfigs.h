@@ -1,0 +1,8 @@
+#ifndef DEPENDENCYCONFIGS_H
+#define DEPENDENCYCONFIGS_H
+
+#cmakedefine CG_SUPPORTED
+#cmakedefine JPEG2000_SUPPORT
+#cmakedefine OPENCOLLADA_SUPPORT
+
+#endif

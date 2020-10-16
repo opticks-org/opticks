@@ -399,7 +399,7 @@ void PropertiesPseudocolorLayer::addClass()
    // Get a unique value from the user for the class
    while (isUnique == false)
    {
-      classValue = QInputDialog::getInteger(this, "New Class", "Enter the data value to associate with the new class:",
+      classValue = QInputDialog::getInt(this, "New Class", "Enter the data value to associate with the new class:",
          classValue, numeric_limits<int>::min(), numeric_limits<int>::max(), 1, &ok);
       if (ok == false)
       {

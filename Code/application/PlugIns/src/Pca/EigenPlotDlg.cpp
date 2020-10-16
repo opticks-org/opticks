@@ -13,7 +13,6 @@
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QPushButton>
 
-#include <qwt_compat.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_layout.h>
@@ -47,7 +46,7 @@ EigenPlotDlg::EigenPlotDlg(QWidget* parent) :
    QwtScaleEngine* pLinearScale = mpPlot->axisScaleEngine(QwtPlot::xBottom);
    pLinearScale->setAttribute(QwtScaleEngine::Floating);
 
-   QwtLogScaleEngine* pLogScale = new QwtLogScaleEngine();
+   QwtLog10ScaleEngine* pLogScale = new QwtLog10ScaleEngine();
    pLogScale->setAttribute(QwtScaleEngine::Floating);
    mpPlot->setAxisScaleEngine(QwtPlot::yLeft, pLogScale);
 
@@ -59,6 +58,7 @@ EigenPlotDlg::EigenPlotDlg(QWidget* parent) :
    pPlotCanvas->setFrameStyle(QFrame::NoFrame);
 
    QwtPlotLayout* pPlotLayout = mpPlot->plotLayout();
+   pPlotLayout->setMargin(5);
 
    QwtPlotGrid* pPlotGrid = new QwtPlotGrid();
    pPlotGrid->setPen(QPen(Qt::DotLine));
@@ -152,7 +152,7 @@ bool EigenPlotDlg::setEigenValues(double* yVals, int numVals)
 
    mpCurve = new QwtPlotCurve("Eigen Value Plot");
    mpCurve->setPen(QPen(Qt::black));
-   mpCurve->setSamples(xVals, yVals, numVals);
+   mpCurve->setData(xVals, yVals, numVals);
    mpCurve->attach(mpPlot);
 
    mpPlot->replot();
@@ -177,8 +177,8 @@ bool EigenPlotDlg::eventFilter(QObject* pObject, QEvent* pEvent)
 
                // Get the component number and eigen value
                int iIndex = mpCurve->closestPoint(ptMouse);
-               int iComponentValue = static_cast<int>(mpCurve->data()->sample(iIndex).x());
-               double dEigenValue = mpCurve->data()->sample(iIndex).y();
+               int iComponentValue = static_cast<int>(mpCurve->x(iIndex));
+               double dEigenValue = mpCurve->y(iIndex);
 
                // Update the plot axis title
                QString strTitle;

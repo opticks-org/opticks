@@ -33,7 +33,6 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include <qwt_compat.h>
 #include <qwt_knob.h>
 #include <qwt_slider.h>
 #include <qwt_wheel.h>
@@ -81,7 +80,7 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    QLabel* pXShiftLabel = new QLabel("X Shift:", pOffsetScaleGroup);
    pShiftLayout->addWidget(pXShiftLabel);
    mpXOffsetWheel = new QwtWheel(pOffsetScaleGroup);
-   //TODO mpXOffsetWheel->setValid(false);
+   mpXOffsetWheel->setValid(false);
    mpXOffsetWheel->setOrientation(Qt::Horizontal);
    pShiftLayout->addWidget(mpXOffsetWheel);
    mpXOffset = new QDoubleSpinBox(pOffsetScaleGroup);
@@ -90,8 +89,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pShiftLayout->addWidget(mpXOffset);
    pShiftLayout->addSpacing(10);
 
-   //TODO mpXOffsetWheel->setPeriodic(true);
-   mpXOffsetWheel->setRange(0, 10000); // TODO , 1, 100);
+   mpXOffsetWheel->setPeriodic(true);
+   mpXOffsetWheel->setRange(0, 10000, 1, 100);
    mpXOffsetWheel->setTotalAngle(36000);
    mXOffsetPrev = mpXOffsetWheel->value();
 
@@ -105,8 +104,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pShiftLayout->addWidget(mpYOffset);
    pShiftLayout->addStretch(10);
 
-   //TODO mpYOffsetWheel->setPeriodic(true);
-   mpYOffsetWheel->setRange(0, 10000); //TODO  , 1, 100);
+   mpYOffsetWheel->setPeriodic(true);
+   mpYOffsetWheel->setRange(0, 10000, 1, 100);
    mpYOffsetWheel->setTotalAngle(36000);
    mYOffsetPrev = mpYOffsetWheel->value();
 
@@ -141,12 +140,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    // 15fps is usually plenty for the typical use case
    // and a larger range on the knob makes it difficult to
    // adjust since 1fps is a very small movement.
-   mpFramerateKnob->setLowerBound(0.0);
-   mpFramerateKnob->setUpperBound(15.0);
-   mpFramerateKnob->setPageSteps(1);
-   mpFramerateKnob->setLowerBound(0);
-   mpFramerateKnob->setUpperBound(15);
-   mpFramerateKnob->setPageSteps(3);
+   mpFramerateKnob->setRange(0.0, 15.0, 1);
+   mpFramerateKnob->setScale(0, 15, 3);
    pFbgLayout->addWidget(mpFramerateKnob, 0, 0, 4, 1);
 
    QLabel* pAutoFlickerRateLabel = new QLabel("Automated Flicker Rate (fps):", pFlickerBlendGroup);
@@ -183,8 +178,8 @@ ImageAdjustWidget::ImageAdjustWidget(WorkspaceWindow* pWindow, QWidget* pParent)
    pFbgLayout->addWidget(mpTransparencyLabel, 5, 0, 1, 3);
    mpAlpha = new QwtSlider(pFlickerBlendGroup);
    mpAlpha->setAutoFillBackground(false);
-   //TODO mpAlpha->setScalePosition(QwtSlider::BottomScale);
-   //TODO mpAlpha->setBgStyle(QwtSlider::BgSlot);
+   mpAlpha->setScalePosition(QwtSlider::BottomScale);
+   mpAlpha->setBgStyle(QwtSlider::BgSlot);
    pFbgLayout->addWidget(mpAlpha, 6, 0, 1, 3);
 
    pFbgLayout->setRowStretch(7, 10);
@@ -277,13 +272,13 @@ void ImageAdjustWidget::updateOffset(double value)
    if (pSender == mpXOffsetWheel)
    {
       double delta = value - mXOffsetPrev;
-      if (delta > (mpXOffsetWheel->maximum() / 2))
+      if (delta > (mpXOffsetWheel->maxValue() / 2))
       {
-         delta -= mpXOffsetWheel->maximum();
+         delta -= mpXOffsetWheel->maxValue();
       }
-      else if (-delta > (mpXOffsetWheel->maximum() / 2))
+      else if (-delta > (mpXOffsetWheel->maxValue() / 2))
       {
-         delta += mpXOffsetWheel->maximum();
+         delta += mpXOffsetWheel->maxValue();
       }
       mpXOffset->setValue(mpXOffset->value() + delta);
       mXOffsetPrev = value;
@@ -291,13 +286,13 @@ void ImageAdjustWidget::updateOffset(double value)
    else if (pSender == mpYOffsetWheel)
    {
       double delta = value - mYOffsetPrev;
-      if (delta > (mpYOffsetWheel->maximum() / 2))
+      if (delta > (mpYOffsetWheel->maxValue() / 2))
       {
-         delta -= mpYOffsetWheel->maximum();
+         delta -= mpYOffsetWheel->maxValue();
       }
-      else if (-delta > (mpYOffsetWheel->maximum() / 2))
+      else if (-delta > (mpYOffsetWheel->maxValue() / 2))
       {
-         delta += mpYOffsetWheel->maximum();
+         delta += mpYOffsetWheel->maxValue();
       }
       mpYOffset->setValue(mpYOffset->value() + delta);
       mYOffsetPrev = value;

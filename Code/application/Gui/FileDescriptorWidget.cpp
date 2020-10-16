@@ -66,7 +66,7 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    if (pHeader != NULL)
    {
       pHeader->setSortIndicatorShown(false);
-      pHeader->setMovable(false);
+      pHeader->setSectionsMovable(false);
       pHeader->setStretchLastSection(true);
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->resizeSection(0, 150);
@@ -127,7 +127,7 @@ FileDescriptorWidget::FileDescriptorWidget(QWidget* parent) :
    if (pHeader != NULL)
    {
       pHeader->setSortIndicatorShown(true);
-      pHeader->setMovable(false);
+      pHeader->setSectionsMovable(false);
       pHeader->setStretchLastSection(false);
       pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       pHeader->resizeSection(0, 75);

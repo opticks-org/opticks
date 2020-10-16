@@ -23,7 +23,7 @@ public:
    AnimationModel(QObject* pParent = 0);
    virtual ~AnimationModel();
 
-   virtual Qt::DropActions AnimationModel::supportedDragActions() const;
+   virtual Qt::DropActions supportedDragActions() const;
       
    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
    virtual Qt::DropActions supportedDropActions() const;

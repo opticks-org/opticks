@@ -12,6 +12,7 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 
+#include <algorithm>
 #include <limits>
 
 //goffena below

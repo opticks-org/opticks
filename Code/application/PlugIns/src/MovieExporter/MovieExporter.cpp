@@ -29,6 +29,12 @@
 #include "View.h"
 #include "ViewResolutionWidget.h"
 
+#if USE_SWSCALE
+extern "C" {
+#include "swscale.h" // from ffmpeg to replace img_convert()
+}
+#endif
+
 #include <QtCore/QString>
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
@@ -37,6 +43,8 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <cassert>
+
 using boost::rational;
 using boost::rational_cast;
 using namespace std;
@@ -97,7 +105,7 @@ extern "C" void av_log_callback(void* pPtr, int level, const char* pFmt, va_list
 extern "C" static void av_log_callback(void* pPtr, int level, const char* pFmt, va_list vl)
 #endif
 {
-   if (level > av_log_level)
+   if (level > av_log_get_level())
    {
       return;
    }
@@ -550,7 +558,7 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
    double interval = pController->getIntervalMultiplier() * framerate.denominator() / framerate.numerator();
 
    // export the frames
-   AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGBA32, pCodecContext->width, pCodecContext->height);
+   AVFrame* pTmpPicture = alloc_picture(PIX_FMT_RGB32, pCodecContext->width, pCodecContext->height);
    if (pTmpPicture == NULL)
    {
       QString msg("Unable to allocate frame buffer of size %1 x %2");
@@ -622,7 +630,27 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       classPositionBottom = QPoint(bottomX, pCodecContext->height - 1);
    }
 
-   // make sure controller is not running prior to export. Save current state and restore after export finished
+#if USE_SWSCALE
+   SwsContext* pSwsContext = NULL;
+   {
+      AVPicture* src = reinterpret_cast<AVPicture*>(mpPicture);
+      AVPicture* dst = reinterpret_cast<AVPicture*>(pTmpPicture);
+      int srcWidth  = pCodecContext->width;
+      int srcHeight = pCodecContext->height;
+      int dstWidth  = pCodecContext->width;
+      int dstHeight = pCodecContext->height;
+      PixelFormat srcFormat = pCodecContext->pix_fmt;
+      PixelFormat dstFormat = PIX_FMT_RGB32;
+      int flags = SWS_FAST_BILINEAR; // Or SWS_BICUBIC, etc. Are flags used at all when src and dst images are same size?
+
+      pSwsContext = sws_getContext (srcWidth, srcHeight, srcFormat,
+                                               dstWidth, dstHeight, dstFormat,
+                                               flags, NULL, NULL, NULL);
+      assert(pSwsContext != NULL);
+   }
+#endif
+
+// make sure controller is not running prior to export. Save current state and restore after export finished
    AnimationState savedAnimationState = pController->getAnimationState();
    pController->setAnimationState(STOP);
 
@@ -746,12 +774,24 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
       {
          pView->getCurrentImage(image);
       }
+#if USE_SWSCALE
+      AVPicture* src = reinterpret_cast<AVPicture*>(mpPicture);
+      AVPicture* dst = reinterpret_cast<AVPicture*>(pTmpPicture);
+      int srcHeight = pCodecContext->height;
+
+      int resultHeight = sws_scale (pSwsContext, src->data, src->linesize,
+                                    0, srcHeight, dst->data, dst->linesize);
+
+      assert(resultHeight == srcHeight);
+#else
+      // img_convert() has been deprecated for a *very* long time. Use sws_scale() instead.
       img_convert(reinterpret_cast<AVPicture*>(mpPicture),
          pCodecContext->pix_fmt,
          reinterpret_cast<AVPicture*>(pTmpPicture),
-         PIX_FMT_RGBA32,
+         PIX_FMT_RGB32,
          pCodecContext->width,
          pCodecContext->height);
+#endif
       if (!write_video_frame(pFormat, pVideoStream))
       {
          // reset resources to close output file so it can be deleted
@@ -767,6 +807,13 @@ bool MovieExporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgLis
          return false;
       }
    }
+#if USE_SWSCALE
+   if(pSwsContext)
+   {
+       sws_freeContext (pSwsContext);
+   }
+#endif
+
    for (int frame = 0; frame < pCodecContext->delay; ++frame)
    {
       write_video_frame(pFormat, pVideoStream);
@@ -1139,7 +1186,7 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
    pContext->b_quant_offset = OptionsMovieExporter::getSettingBQuantOffset();
    pContext->dia_size = OptionsMovieExporter::getSettingDiaSize();
    mVideoOutbufSize = OptionsMovieExporter::getSettingOutputBufferSize();
-   int newFlags = OptionsMovieExporter::getSettingFlags();
+   codec_flag_t newFlags = OptionsMovieExporter::getSettingFlags();
    if (mpOptionWidget.get() != NULL)
    {
       AdvancedOptionsWidget* pAdvancedWidget = mpOptionWidget->getAdvancedWidget();
@@ -1160,8 +1207,8 @@ bool MovieExporter::setAvCodecOptions(AVCodecContext* pContext)
       newFlags = pAdvancedWidget->getFlags();
    }
    pContext->me_method = StringUtilities::fromXmlString<Motion_Est_ID>(meMethod);
-   pContext->flags |= newFlags;
-   if (pContext->flags & CODEC_FLAG_TRELLIS_QUANT)
+   pContext->flags |= (newFlags & UINT_MAX); // codec_flag_type might be u_int64_t, but pContext->flags is int or uint, so clear high-order bits
+   if (pContext->flags & OPTICKS_CODEC_FLAG_TRELLIS_QUANT || newFlags & OPTICKS_CODEC_FLAG_TRELLIS_QUANT)
    {
       pContext->trellis = 1;
    }
@@ -1221,7 +1268,7 @@ bool MovieExporter::open_video(AVFormatContext* pFormat, AVStream* pVideoStream)
    return true;
 }
 
-AVFrame* MovieExporter::alloc_picture(int pixFmt, int width, int height)
+AVFrame* MovieExporter::alloc_picture(PixelFormat pixFmt, int width, int height)
 {
    AVFrame* pPicture = avcodec_alloc_frame();
    VERIFYRV(pPicture, NULL);

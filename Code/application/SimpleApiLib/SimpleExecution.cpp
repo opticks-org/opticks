@@ -20,6 +20,8 @@
 #include "WizardUtilities.h"
 #include <stdexcept>
 
+#include <string.h>
+
 extern "C"
 {
    ExecutableAgent* createPlugIn(const char* pName, int batch)

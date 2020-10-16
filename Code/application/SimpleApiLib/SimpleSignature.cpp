@@ -12,6 +12,8 @@
 #include "SimpleApiErrors.h"
 #include "SimpleSignature.h"
 
+#include <string.h>
+
 extern "C"
 {
    uint32_t getSignatureDataSetCount(DataElement* pSig)

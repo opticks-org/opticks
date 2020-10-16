@@ -34,8 +34,8 @@
 /**
  *  \cond INTERNAL
  */
-#define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_3_1::
-namespace xercesc_3_1
+#define XERCES_CPP_NAMESPACE_QUALIFIER xercesc_3_2::
+namespace xercesc_3_2
 {
    class BinInputStream;
    class DOMLSParser;

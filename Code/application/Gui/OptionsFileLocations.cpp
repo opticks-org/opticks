@@ -47,7 +47,7 @@ namespace
       if (pHeader != NULL)
       {
          pHeader->setSortIndicatorShown(true);
-         pHeader->setMovable(false);
+         pHeader->setSectionsMovable(false);
          pHeader->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
       }
 

@@ -706,10 +706,7 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       //   imageType = "Unknown";
       //}
 
-      imageType = Qt::escape(imageType);
-      originalType = Qt::escape(originalType);
-
-      originalType = "<img source=\"" + imageType + "\">" + originalType;
+      originalType = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + originalType;
    }
 
    QString type = QString::fromStdString(pNode->getType());
@@ -721,10 +718,7 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
       //   imageType = "Unknown";
       //}
 
-      imageType = Qt::escape(imageType);
-      type = Qt::escape(type);
-
-      type = "<img source=\"" + imageType + "\">" + type;
+      type = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + type;
    }
 
    QStringList validTypes;
@@ -741,10 +735,7 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
          //   imageType = "Unknown";
          //}
 
-         imageType = Qt::escape(imageType);
-         validType = Qt::escape(validType);
-
-         validType = "<img source=\"" + imageType + "\">" + validType;
+         validType = "<img source=\"" + imageType.toHtmlEscaped() + "\">" + validType;
          validTypes.append(validType);
       }
    }
@@ -756,7 +747,7 @@ QString WizardGraphicsItem::getNodeToolTip(WizardNode* pNode) const
    }
    else
    {
-      description = Qt::escape(description);
+      description = description.toHtmlEscaped();
    }
 
    // The type and description text obtained above has the <, >, &, and " characters converted to valid

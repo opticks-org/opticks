@@ -72,7 +72,7 @@ bool Hdf4ImporterShell::getFileData(Hdf4File& parsedFile) const
       int32 i = 0;
       for (; i < lNumFileAttributes; i++)
       {
-         char name[MAX_NC_NAME];
+         char name[H4_MAX_NC_NAME];
          int32 type = 0;
          int32 count = 0;
          iSuccess = SDattrinfo(*pFile, i, name, &type, &count);
@@ -92,9 +92,9 @@ bool Hdf4ImporterShell::getFileData(Hdf4File& parsedFile) const
          Hdf4DatasetResource pDatasetId(*pFile, i);
          if (pDatasetId.get() != NULL && *pDatasetId != FAIL)
          {
-            char datasetName[MAX_NC_NAME];
+            char datasetName[H4_MAX_NC_NAME];
             int32 lNumDimensions = 0;
-            int32 lDimensionSizes[MAX_VAR_DIMS];
+            int32 lDimensionSizes[H4_MAX_VAR_DIMS];
             int32 lDataType = 0;
             int32 lNumAttributes = 0;
 
@@ -169,7 +169,7 @@ bool Hdf4ImporterShell::getFileData(Hdf4File& parsedFile) const
                      int32 j = 0;
                      for (j = 0; j < lNumAttributes; j++)
                      {
-                        char name[MAX_NC_NAME];
+                        char name[H4_MAX_NC_NAME];
                         int32 type = 0;
                         int32 count = 0;
                         iSuccess = SDattrinfo(*pDatasetId, j, name, &type, &count);
@@ -203,7 +203,7 @@ void* Hdf4ImporterShell::loadDatasetFromFile(const Hdf4File& parsedFile, const H
    int32 numDims = 0;
    int32 dataType = 0;
    int32 numAttr = 0;
-   int32 dimSizes[MAX_VAR_DIMS] = {0};
+   int32 dimSizes[H4_MAX_VAR_DIMS] = {0};
 
    char* pDatasetName = const_cast<char*>(dataset.getName().c_str());
 

@@ -213,13 +213,13 @@ public:
 
    DataValueWrapper* copy() const
    {
-      DataValueWrapper* pData = new DataVariantValue(&(this->DISAMBIGUATE_TEMPLATE mValue));
+      DataValueWrapper* pData = new DataVariantValue(&(this->mValue)); // T is not a template, it's a typename or class
       return pData;
    }
 
    void* getValue()
    {
-      return &(this->DISAMBIGUATE_TEMPLATE mValue);
+      return &(this->mValue);
    }
 
    bool operator==(const DataValueWrapper& rhs) const
@@ -355,7 +355,7 @@ public:
 
    void* getValue()
    {
-      return dynamic_cast<T*>(&(this->DISAMBIGUATE_TEMPLATE mValue));
+      return dynamic_cast<T*>(&(this->mValue));
    }
 
    bool operator==(const DataValueWrapper& rhs) const
@@ -513,7 +513,7 @@ public:
       if (pValue != NULL)
       {
          const vector<T*>& localValue = *pValue;
-         this->DISAMBIGUATE_TEMPLATE mValue.reserve(localValue.size());
+         this->mValue.reserve(localValue.size());
          typename vector<T*>::const_iterator ppItem;
          for (ppItem = localValue.begin(); ppItem != localValue.end(); ++ppItem)
          {
@@ -524,7 +524,7 @@ public:
                if (pDst != NULL && pSrc != NULL)
                {
                   *pDst = *pSrc;
-                  this->DISAMBIGUATE_TEMPLATE mValue.push_back(dynamic_cast<T*>(pDst));
+                  this->mValue.push_back(dynamic_cast<T*>(pDst));
                }
             }
          }
@@ -533,9 +533,9 @@ public:
 
    ~DataVariantVectorPtr()
    {
-      for (unsigned int i = 0; i < this->DISAMBIGUATE_TEMPLATE mValue.size(); ++i)
+      for (unsigned int i = 0; i < mValue.size(); ++i)
       {
-         U* pItem = dynamic_cast<U*>(this->DISAMBIGUATE_TEMPLATE mValue[i]);
+         U* pItem = dynamic_cast<U*>(mValue[i]);
          if (pItem != NULL)
          {
             delete pItem;
@@ -564,13 +564,13 @@ public:
 
    string getTypeName() const
    {
-      return TypeConverter::toString(&(this->DISAMBIGUATE_TEMPLATE mValue));
+      return TypeConverter::toString(&(mValue));
    }
 
    string toXmlString(DataVariant::Status* pStatus) const
    {
       bool error;
-      string retValue = StringUtilities::toXmlString(this->DISAMBIGUATE_TEMPLATE mValue, &error);
+      string retValue = StringUtilities::toXmlString(mValue, &error);
       if (pStatus != NULL)
       {
          *pStatus = (error == true ? DataVariant::FAILURE : DataVariant::SUCCESS);
@@ -584,7 +584,7 @@ public:
       vector<T*> tempValue = StringUtilities::fromXmlString<vector<T*> >(text, &error);
       if (!error)
       {
-         this->DISAMBIGUATE_TEMPLATE mValue = tempValue;
+         mValue = tempValue;
       }
       return (error == true ? DataVariant::FAILURE : DataVariant::SUCCESS);
    }
@@ -592,7 +592,7 @@ public:
    string toDisplayString(DataVariant::Status* pStatus) const
    {
       bool error;
-      string retValue = StringUtilities::toDisplayString(this->DISAMBIGUATE_TEMPLATE mValue, &error);
+      string retValue = StringUtilities::toDisplayString(mValue, &error);
       if (pStatus != NULL)
       {
          *pStatus = (error == true ? DataVariant::FAILURE : DataVariant::SUCCESS);
@@ -606,30 +606,30 @@ public:
       vector<T*> tempValue = StringUtilities::fromDisplayString<vector<T*> >(text, &error);
       if (!error)
       {
-         this->DISAMBIGUATE_TEMPLATE mValue = tempValue;
+         mValue = tempValue;
       }
       return (error == true ? DataVariant::FAILURE : DataVariant::SUCCESS);
    }
 
    bool toXml(XMLWriter* pWriter) const
    {
-      return toXmlVectorHelper<T*>(pWriter, this->DISAMBIGUATE_TEMPLATE mValue);
+      return toXmlVectorHelper<T*>(pWriter, mValue);
    }
 
    bool fromXml(DOMNode* pDocument, unsigned int version)
    {
-      return fromXmlVectorHelper<T*>(pDocument, version, this->DISAMBIGUATE_TEMPLATE mValue);
+      return fromXmlVectorHelper<T*>(pDocument, version, mValue);
    }
 
    DataValueWrapper* copy() const
    {
-      DataValueWrapper* pData = new DataVariantVectorPtr<T, U>(&(this->DISAMBIGUATE_TEMPLATE mValue));
+      DataValueWrapper* pData = new DataVariantVectorPtr<T, U>(&(mValue));
       return pData;
    }
 
    void* getValue()
    {
-      return &(this->DISAMBIGUATE_TEMPLATE mValue);
+      return &(mValue);
    }
 
    bool operator==(const DataValueWrapper& rhs) const
@@ -637,13 +637,13 @@ public:
       if (getType() == rhs.getType())
       {
          const vector<T*>& rhsValue = static_cast<const DataVariantVectorPtr<T, U>&>(rhs).mValue;
-         if (this->DISAMBIGUATE_TEMPLATE mValue.size() != rhsValue.size())
+         if (mValue.size() != rhsValue.size())
          {
             return false;
          }
          typename vector<T*>::const_iterator ppT, ppTrhs;
-         for (ppT = this->DISAMBIGUATE_TEMPLATE mValue.begin(), ppTrhs = rhsValue.begin(); 
-            ppT != this->DISAMBIGUATE_TEMPLATE mValue.end() && ppTrhs != rhsValue.end(); 
+         for (ppT = mValue.begin(), ppTrhs = rhsValue.begin();
+            ppT != mValue.end() && ppTrhs != rhsValue.end();
             ++ppT, ++ppTrhs)
          {
             if (*dynamic_cast<U*>(*ppT) != *dynamic_cast<U*>(*ppTrhs))

@@ -422,7 +422,11 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    }
 
    // Add new modules and update existing modules
-   string autoImporter = "AutoImporter" + dlExtension;
+   string autoImporter = "AutoImporter";
+#if defined(DEBUG)
+   autoImporter += "d";
+#endif
+   autoImporter += dlExtension;
    finder.findFile(plugInPath, "*" + dlExtension);
 
    bool bSuccess = finder.findNextFile();
