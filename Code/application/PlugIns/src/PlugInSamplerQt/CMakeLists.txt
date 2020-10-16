@@ -98,6 +98,7 @@ source_group(moc FILES ${MOC_OUTFILES})
 add_library(PlugInSamplerQt SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES} ${UI_OUTFILES})
 target_link_libraries(PlugInSamplerQt
     ${Opticks_LIBRARIES}
+	${OPENGL_LIBRARIES}
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
 )

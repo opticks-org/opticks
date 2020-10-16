@@ -45,6 +45,7 @@ include_directories(${Opticks_HdfPlugInLib_INCLUDE_DIR})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
 add_library(Ice SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
+
 target_link_libraries(Ice
     ${Opticks_LIBRARIES}
     ${Opticks_HdfPlugInLib_LIBRARY}
