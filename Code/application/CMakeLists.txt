@@ -19,6 +19,7 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 if(CMAKE_MAJOR_VERSION GREATER 2)
   cmake_policy(SET CMP0043 NEW)
   cmake_policy(SET CMP0048 NEW)
+  cmake_policy(SET CMP0020 NEW)
 endif()
 
 if(CMAKE_MAJOR_VERSION GREATER 2)
@@ -183,10 +184,10 @@ set(OpenGL_GL_PREFERENCE GLVND)
 
 # Qt/Qwt configuration boilerplate shared with Spectral
 set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
-include(ConfigureQt5Qwt6)
+include(ConfigureQt5Qwt5)
 unset(DEPENDENCY_PATH)
 
-find_package(Boost 1.45.0 REQUIRED)
+find_package(Boost 1.45.0 REQUIRED COMPONENTS atomic)
 find_package(Xerces REQUIRED)
 find_package(XQilla REQUIRED)
 find_package(Minizip REQUIRED)
@@ -658,7 +659,7 @@ target_link_libraries(Opticks
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
-    ${Qwt6ForQt5_LIBRARY}
+    ${Qwt5ForQt5_LIBRARY}
     )
 
 set_target_properties(Opticks PROPERTIES DEBUG_POSTFIX "d")

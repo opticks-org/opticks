@@ -26,7 +26,7 @@ target_link_libraries(OpticksBatch
     ${Raptor_LIBRARIES}
     ${Glew_LIBRARIES}
     ${PTHREADS_LIBRARY}
-    ${Qwt6ForQt5_LIBRARY}
+    ${Qwt5ForQt5_LIBRARY}
 )
 
 set_target_properties(OpticksBatch PROPERTIES DEBUG_POSTFIX "d")

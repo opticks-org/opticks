@@ -34,7 +34,7 @@ set (MOC_HEADERS
 )
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${Qwt6ForQt5_INCLUDE_DIRS})
+include_directories(${Qwt5ForQt5_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
 include(${QT_USE_FILE})
@@ -44,6 +44,7 @@ add_library(DataFusion SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${H
 target_link_libraries(DataFusion
     ${Opticks_LIBRARIES}
     ${QT_LIBRARIES}    
+	${Qwt5ForQt5_LIBRARY}
     ${Xerces_LIBRARIES}
 )
 if(WIN32)

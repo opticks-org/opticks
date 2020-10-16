@@ -141,7 +141,7 @@ private:
    };
 
    QwtLinearScaleEngine mLinearScale;
-   QwtLogScaleEngine mLogScale;
+   QwtLog10ScaleEngine mLogScale;
    ScaleDraw mScaleDraw;
    int mMaxMajorTicks;
    int mMaxMinorTicks;

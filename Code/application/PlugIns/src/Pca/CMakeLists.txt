@@ -17,7 +17,7 @@ include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
-include_directories(${Qwt6ForQt5_INCLUDE_DIRS})
+include_directories(${Qwt5ForQt5_INCLUDE_DIRS})
 
 include(${QT_USE_FILE})
 qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
@@ -28,7 +28,7 @@ target_link_libraries(Pca
     ${QT_LIBRARIES}    
     ${Ossim_LIBRARIES}
     ${Xerces_LIBRARIES}
-    ${Qwt6ForQt5_LIBRARY}
+    ${Qwt5ForQt5_LIBRARY}
     )
  
 if(WIN32)
