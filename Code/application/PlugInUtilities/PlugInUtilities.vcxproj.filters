@@ -373,9 +373,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ModifierWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_MuHttpServer.cpp">
-      <Filter>moc</Filter>
-    </ClCompile>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_MutuallyExclusiveListWidget.cpp">
       <Filter>moc</Filter>
     </ClCompile>
@@ -583,9 +580,6 @@
     <ClCompile Include="GraphicViewWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImageHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ImageResolutionWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -632,9 +626,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MipMappedTextures.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MuHttpServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MultiThreadedAlgorithm.cpp">
@@ -912,9 +903,6 @@
     <CustomBuild Include="Interfaces\GraphicTextWidget.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
-    <CustomBuild Include="Interfaces\ImageHandler.h">
-      <Filter>Interfaces</Filter>
-    </CustomBuild>
     <CustomBuild Include="Interfaces\LabeledSection.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
@@ -928,9 +916,6 @@
       <Filter>Interfaces</Filter>
     </CustomBuild>
     <CustomBuild Include="Interfaces\ModifierWidget.h">
-      <Filter>Interfaces</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Interfaces\MuHttpServer.h">
       <Filter>Interfaces</Filter>
     </CustomBuild>
     <CustomBuild Include="Interfaces\MutuallyExclusiveListWidget.h">

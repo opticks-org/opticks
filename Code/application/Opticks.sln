@@ -86,8 +86,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShapeFileExporter", "PlugIn
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NitfCommonTre", "PlugIns\src\NitfCommonTre\NitfCommonTre.vcxproj", "{860D2864-451B-42C1-9D5D-7F54E4EA9754}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XmlRpc", "PlugIns\src\XmlRpc\XmlRpc.vcxproj", "{140590C9-ED72-44A6-B0F0-E4337452D490}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kml", "PlugIns\src\Kml\Kml.vcxproj", "{76D580B6-FFB6-4D04-AAEE-2885297D7494}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial", "PlugIns\src\Tutorial\Tutorial.vcxproj", "{93926B8A-738B-4DEB-9045-AE7C0BB4ABD4}"
@@ -308,8 +306,6 @@ Global
 		{860D2864-451B-42C1-9D5D-7F54E4EA9754}.Debug|x64.Build.0 = Debug|x64
 		{860D2864-451B-42C1-9D5D-7F54E4EA9754}.Release|x64.ActiveCfg = Release|x64
 		{860D2864-451B-42C1-9D5D-7F54E4EA9754}.Release|x64.Build.0 = Release|x64
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Debug|x64.ActiveCfg = Debug|x64
-		{140590C9-ED72-44A6-B0F0-E4337452D490}.Release|x64.ActiveCfg = Release|x64
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Debug|x64.ActiveCfg = Debug|x64
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Debug|x64.Build.0 = Debug|x64
 		{76D580B6-FFB6-4D04-AAEE-2885297D7494}.Release|x64.ActiveCfg = Release|x64

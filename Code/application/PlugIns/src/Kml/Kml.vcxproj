@@ -41,7 +41,6 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Debug.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Debug.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
-    <Import Project="..\..\..\CompileSettings\ehs-debug.props" />
     <Import Project="..\..\..\CompileSettings\zlib.props" />
     <Import Project="..\..\..\CompileSettings\minizip-debug.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
@@ -55,7 +54,6 @@
     <Import Project="..\..\..\CompileSettings\Xerces-Release.props" />
     <Import Project="..\..\..\CompileSettings\Qt-Release.props" />
     <Import Project="..\..\..\CompileSettings\pthreads.props" />
-    <Import Project="..\..\..\CompileSettings\ehs-release.props" />
     <Import Project="..\..\..\CompileSettings\zlib.props" />
     <Import Project="..\..\..\CompileSettings\minizip-release.props" />
     <Import Project="..\..\..\CompileSettings\EnableWarnings.props" />
@@ -116,23 +114,11 @@
   <ItemGroup>
     <ClCompile Include="Kml.cpp" />
     <ClCompile Include="KmlExporter.cpp" />
-    <ClCompile Include="KMLServer.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_KMLServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Kml.h" />
     <ClInclude Include="KmlExporter.h" />
-    <CustomBuild Include="KMLServer.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PlugInLib\PlugInLib.vcxproj">

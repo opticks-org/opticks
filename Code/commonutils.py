@@ -174,7 +174,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         la(join("plugins", "platforms", "qwindowsd.dll"), "platforms")
         lla("libossim.so.1")
         lla("libcurl.so.4")
-        lla("libehs.so.1")
         lla("libopencv_core.so.2.2")
         lla("libopencv_imgproc.so.2.2")
         lla("libopencv_ml.so.2.2")
@@ -217,7 +216,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
         bla("hdf5.dll") #needed for GDAL
         bla("proj.dll") #needed for OGR
         if is_debug:
-            bla("ehsd.dll")
             bla("opencv_core220d.dll")
             bla("opencv_imgproc220d.dll")
             bla("opencv_ml220d.dll")
@@ -254,7 +252,6 @@ def get_dependencies(dependencies_path, platform, is_debug, arch):
             la(join("lib", "Qt5Widgetsd.dll"))
             la(join("lib", "Qt5PrintSupportd.dll"))
         else:
-            bla("ehs.dll")
             bla("opencv_haartraining.exe")
             bla("opencv_traincascade.exe")
             bla("opencv_core220.dll")

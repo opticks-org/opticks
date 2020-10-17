@@ -9,9 +9,6 @@
       <UniqueIdentifier>{ce15864e-f077-45fe-9d6a-a9807246f6dc}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
-    <Filter Include="moc">
-      <UniqueIdentifier>{b7070ca1-539a-4763-8120-cb34ded899ce}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Kml.cpp">
@@ -20,14 +17,8 @@
     <ClCompile Include="KmlExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KMLServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ModuleManager.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_KMLServer.cpp">
-      <Filter>moc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,10 +28,5 @@
     <ClInclude Include="KmlExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="KMLServer.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
   </ItemGroup>
 </Project>

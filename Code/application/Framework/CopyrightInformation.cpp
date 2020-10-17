@@ -23,7 +23,6 @@ CopyrightInformation::CopyrightInformation()
    setDescriptorId("{3FA82540-856C-43e3-8B8D-232409A7C47A}");
    addDependencyCopyright("Boost", Service<UtilityServices>()->getTextFromFile(":/licenses/boost"));
    addDependencyCopyright("Expat", Service<UtilityServices>()->getTextFromFile(":/licenses/expat"));
-   addDependencyCopyright("EHS", Service<UtilityServices>()->getTextFromFile(":/licenses/ehs"));
    addDependencyCopyright("FFmpeg", Service<UtilityServices>()->getTextFromFile(":/licenses/ffmpeg"));
    addDependencyCopyright("GLEW", Service<UtilityServices>()->getTextFromFile(":/licenses/glew"));
    addDependencyCopyright("IJG", Service<UtilityServices>()->getTextFromFile(":/licenses/ijg"));

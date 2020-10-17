@@ -155,7 +155,7 @@ Add the listed SDK libraries in the table below to your link line when creating 
 </ul>
 
 When compiling more advanced plug-ins you may need to compile and link against certain third-party libraries.
-Using certain parts of our SDK requires compiling and linking against the following third-party libraries: Xerces, xqilla, Boost, pthreads, Qt, ehs, ossim, Hdf4, and Hdf5.
+Using certain parts of our SDK requires compiling and linking against the following third-party libraries: Xerces, xqilla, Boost, pthreads, Qt, ossim, Hdf4, and Hdf5.
 We provide pre-built binaries of all necessary third-party libraries on the %Opticks website at <a href="https://opticks.ballforge.net/" target="_blank">https://opticks.ballforge.net/</a>.
 Please see \ref dependencies for more details on acquiring those dependencies and then compiling and linking against them.
 

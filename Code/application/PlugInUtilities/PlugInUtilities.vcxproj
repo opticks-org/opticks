@@ -38,7 +38,6 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Release-64bit.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
-    <Import Project="..\CompileSettings\ehs.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\Qt-Release.props" />
@@ -53,7 +52,6 @@
     <Import Project="..\CompileSettings\Macros.props" />
     <Import Project="..\CompileSettings\AllCommonSettings-Debug-64bit.props" />
     <Import Project="..\CompileSettings\pthreads.props" />
-    <Import Project="..\CompileSettings\ehs.props" />
     <Import Project="..\CompileSettings\Xerces.props" />
     <Import Project="..\CompileSettings\ApplicationCommonSettings.props" />
     <Import Project="..\CompileSettings\Qt-Debug.props" />
@@ -636,16 +634,6 @@
     <ClInclude Include="Interfaces\GeoPoint.h" />
     <ClInclude Include="Interfaces\GlContextSave.h" />
     <ClInclude Include="Interfaces\GlTextureResource.h" />
-    <CustomBuild Include="Interfaces\ImageHandler.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-    </CustomBuild>
     <CustomBuild Include="Interfaces\InterpolationComboBox.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
@@ -707,16 +695,6 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp</Outputs>
-    </CustomBuild>
-    <CustomBuild Include="Interfaces\MuHttpServer.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Filename).h...</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTBIN)\moc.exe" "%(FullPath)" -o "$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp"
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildDir)\Moc\$(ProjectName)\moc_%(Filename).cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Interfaces\MultiThreadedAlgorithm.h" />
     <CustomBuild Include="Interfaces\MutuallyExclusiveListWidget.h">
@@ -860,7 +838,6 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_LineWidthComboBox.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_Modifier.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ModifierWidget.cpp" />
-    <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_MuHttpServer.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_MutuallyExclusiveListWidget.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_NameTypeValueDlg.cpp" />
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_PanLimitTypeComboBox.cpp" />
@@ -931,7 +908,6 @@
     <ClCompile Include="GraphicTriangleWidget.cpp" />
     <ClCompile Include="GraphicUnitsWidget.cpp" />
     <ClCompile Include="GraphicViewWidget.cpp" />
-    <ClCompile Include="ImageHandler.cpp" />
     <ClCompile Include="ImageResolutionWidget.cpp" />
     <ClCompile Include="InfoBar.cpp" />
     <ClCompile Include="InterpolationComboBox.cpp" />
@@ -948,7 +924,6 @@
     <ClCompile Include="MgrsDatum.cpp" />
     <ClCompile Include="MgrsEngine.cpp" />
     <ClCompile Include="MipMappedTextures.cpp" />
-    <ClCompile Include="MuHttpServer.cpp" />
     <ClCompile Include="MultiThreadedAlgorithm.cpp" />
     <ClCompile Include="MutuallyExclusiveListWidget.cpp" />
     <ClCompile Include="NameTypeValueDlg.cpp" />
