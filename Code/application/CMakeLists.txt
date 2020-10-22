@@ -1,5 +1,5 @@
 set(Opticks_VERSION "5.0.0Unofficial") # Change project(Opticks) below when VERSION becomes an official dotted-decimal
-cmake_minimum_required (VERSION 2.8.3)
+cmake_minimum_required (VERSION 2.8.12)
 
 # Order is important on this. It MUST be before project()
 if(DEFINED CMAKE_BUILD_TYPE)
@@ -56,10 +56,6 @@ endif("${isSystemDir}" STREQUAL "-1")
 # Location of the Dependencies directory. On some platforms and configurations, it may not be necessary, but it's still searched.
 if(NOT IS_DIRECTORY ${Opticks_DEPENDENCIES})
     set(Opticks_DEPENDENCIES $ENV{OPTICKSDEPENDENCIES} CACHE PATH "Location of Opticks pre-built dependencies")
-    if(NOT IS_DIRECTORY ${Opticks_DEPENDENCIES})
-        get_filename_component(Opticks_DEFAULT_DEPENDENCIES "${Opticks_SOURCE_DIR}/../../Dependencies" ABSOLUTE)
-        set(Opticks_DEPENDENCIES ${Opticks_DEFAULT_DEPENDENCIES} CACHE PATH "Location of Opticks pre-built dependencies" FORCE)
-    endif()
 endif()
 Message(STATUS "Setting Opticks_DEPENDENCIES to ${Opticks_DEPENDENCIES}")
 if(NOT IS_DIRECTORY "${Opticks_DEPENDENCIES}")
@@ -68,15 +64,17 @@ if(NOT IS_DIRECTORY "${Opticks_DEPENDENCIES}")
    set(Opticks_DEPENDENCIES "" CACHE PATH "Location of Opticks pre-built dependencies")
 endif()
 
-# 64-bit or 32-bit dependencies?
-if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 4)
-    set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/32)
-elseif(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
-    set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/64)
-endif()
+if(IS_DIRECTORY ${Opticks_DEPENDENCIES})
+	# 64-bit or 32-bit dependencies?
+	if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 4)
+	    set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/32)
+	elseif(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
+	    set(OPTICKS_DEP_PATH ${Opticks_DEPENDENCIES}/64)
+	endif()
 
-#set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${OPTICKS_DEP_PATH}")
-set(CMAKE_PREFIX_PATH "${OPTICKS_DEP_PATH}") # Spectral experience with TBB suggests this might make finding Dependencies packages more reliably against competing system packages.
+	#set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${OPTICKS_DEP_PATH}")
+	set(CMAKE_PREFIX_PATH "${OPTICKS_DEP_PATH}") # Spectral experience with TBB suggests this might make finding Dependencies packages more reliably against competing system packages.
+endif()
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG) #-DDEBUG only for debug configurations
@@ -174,18 +172,17 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_REQUIRED_LIBRARIES -pthread)
     set(PTHREADS_LIBRARY ${CMAKE_REQUIRED_LIBRARIES})
 endif()
-#verify that pthreads is working
-CHECK_CXX_SOURCE_COMPILES("#include \"pthread.h\"\nint main(char* argc, int argv) { pthread_attr_t attr; return pthread_attr_init(&attr); }" PTHREAD_WORKS)
-if(NOT PTHREAD_WORKS)
-   message(FATAL_ERROR "pthreads code cannot be built on this system.")
-endif()
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Qt/Qwt configuration boilerplate shared with Spectral
-set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
-include(ConfigureQt5Qwt5)
-unset(DEPENDENCY_PATH)
+if(IS_DIRECTORY ${OPTICKS_DEP_PATH})
+	set(DEPENDENCY_PATH ${OPTICKS_DEP_PATH})
+	include(ConfigureQt5Qwt5)
+	unset(DEPENDENCY_PATH)
+else()
+	include(ConfigureQt5Qwt5)
+endif()
 
 find_package(Boost 1.45.0 REQUIRED COMPONENTS atomic)
 find_package(Xerces REQUIRED)
