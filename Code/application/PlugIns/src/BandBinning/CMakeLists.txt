@@ -17,7 +17,7 @@ include(${QT_USE_FILE})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS} ${Xerces_INCLUDE_DIRS})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(BandBinning SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 target_link_libraries(BandBinning

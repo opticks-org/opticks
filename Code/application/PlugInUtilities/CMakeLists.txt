@@ -335,7 +335,7 @@ include_directories(
     ${Opticks_SOURCE_DIR}/Gui/GLView
     ${Opticks_SOURCE_DIR}/Utilities
 )
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(PlugInUtilities STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 set_target_properties(PlugInUtilities PROPERTIES OUTPUT_NAME opticks-pluginutilities)
@@ -355,7 +355,7 @@ if(ehs_FOUND AND pcre_FOUND AND pme_FOUND)
        ImageHandler.cpp
        MuHttpServer.cpp
     )
-    qt4_wrap_cpp(SERVER_MOC_OUTFILES ${SERVER_MOC_HEADERS})
+    qt5_wrap_cpp(SERVER_MOC_OUTFILES ${SERVER_MOC_HEADERS})
     source_group(moc FILES ${SERVER_MOC_OUTFILES})
     include_directories(${ehs_INCLUDE_DIRS} ${pcre_INCLUDE_DIRS} ${pme_INCLUDE_DIRS})
     add_library(ServerUtilities STATIC ${SERVER_SOURCE_FILES} ${SERVER_MOC_HEADERS} ${SERVER_MOC_OUTFILES})

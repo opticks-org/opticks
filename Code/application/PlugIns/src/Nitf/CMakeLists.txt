@@ -33,7 +33,7 @@ include_directories(${Xerces_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 include_directories(${Opticks_NitfPlugInLib_INCLUDE_DIR})
 include_directories(${OpenJpeg_INCLUDE_DIRS})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(Nitf SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 target_link_libraries(Nitf
