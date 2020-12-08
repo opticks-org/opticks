@@ -9,7 +9,6 @@ set (SOURCE_FILES
 set (MOC_HEADERS
     ResultsOptionsWidget.h
 )
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)

@@ -35,7 +35,6 @@ set (SOURCE_FILES
 set (MOC_HEADERS
     OptionsIceExporter.h
 )
-include(${QT_USE_FILE})
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_definitions(${Hdf5_DEFINITIONS})

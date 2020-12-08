@@ -29,7 +29,6 @@ set (MOC_HEADERS
    ShapeFileOptionsWidget.h
    ShapeFileTypes.h
    )
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${shapelib_INCLUDE_DIRS} ${Xerces_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)

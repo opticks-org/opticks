@@ -19,7 +19,6 @@ set (MOC_HEADERS
     XmlRpcCallback.h
     XmlRpcServer.h
 )
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Opticks_ServerUtilities_INCLUDE_DIR})
 add_definitions(-DAPPLICATION_XERCES)

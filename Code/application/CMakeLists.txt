@@ -193,9 +193,8 @@ find_package(Raptor REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glew REQUIRED)
-find_package(Ossim REQUIRED) #would like to make optional
-#TODO: Make ossim finder fail if it's not the Ball version
-find_package(Hdf4 COMPONENTS SD REQUIRED)
+find_package(Ossim) #TODO: is this optional?
+find_package(Hdf4 COMPONENTS SD REQUIRED) #TODO: make this optional
 find_package(Hdf5 REQUIRED)
 find_package(shapelib REQUIRED)
 find_package(tiff REQUIRED)
@@ -374,7 +373,6 @@ include_directories(
     ${Opticks_SOURCE_DIR}/Utilities
     ${Opticks_SOURCE_DIR}/Wizard
 )
-include(${QT_USE_FILE})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${Xerces_INCLUDE_DIRS})
 include_directories(${XQilla_INCLUDE_DIRS})

@@ -18,7 +18,6 @@ set (MOC_HEADERS
 set (UI_FILES
     ConvolutionMatrixWidget.ui
 )
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenCv_INCLUDE_DIRS})

@@ -13,8 +13,8 @@ if(Hdf4_INCLUDE_DIR AND EXISTS "${Hdf4_INCLUDE_DIR}/h4config.h")
     set(Hdf4_PATCH_VERSION "${Hdf4_VERSION_PATCH}")
 endif()
 
-find_library(Hdf4_LIBRARY_RELEASE NAMES hd${Hdf4_COMPACT_VERSION_STRING}m df dfalt PATHS /usr/lib64/hdf)
-find_library(Hdf4_LIBRARY_DEBUG NAMES hd${Hdf4_COMPACT_VERSION_STRING}md PATHS /usr/lib64/hdf)
+find_library(Hdf4_LIBRARY_RELEASE NAMES hd${Hdf4_COMPACT_VERSION_STRING}m hdf dfalt PATHS /usr/lib64/hdf)
+find_library(Hdf4_LIBRARY_DEBUG NAMES hd${Hdf4_COMPACT_VERSION_STRING}md hdf_D PATHS /usr/lib64/hdf)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(Hdf4)

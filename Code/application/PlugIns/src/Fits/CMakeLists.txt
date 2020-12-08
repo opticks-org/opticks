@@ -5,7 +5,6 @@ set (SOURCE_FILES
     FitsImporter.cpp
     ModuleManager.cpp
 ) 
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})

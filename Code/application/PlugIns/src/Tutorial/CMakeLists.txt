@@ -13,7 +13,6 @@ set (SOURCE_FILES
     Tutorial4.cpp
     Tutorial5.cpp
 ) 
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)

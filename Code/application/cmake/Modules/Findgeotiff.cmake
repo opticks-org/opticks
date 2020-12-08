@@ -9,8 +9,8 @@ if(geotiff_INCLUDE_DIR AND EXISTS "${geotiff_INCLUDE_DIR}/geotiff.h")
     set(geotiff_VERSION_STRING "${geotiff_MAJOR_VERSION}.${geotiff_MINOR_VERSION}.${geotiff_PATCH_VERSION}")
 endif()
 
-find_library(geotiff_LIBRARY_RELEASE NAMES geotiff)
-find_library(geotiff_LIBRARY_DEBUG NAMES geotiffd)
+find_library(geotiff_LIBRARY_RELEASE NAMES geotiff geotiff_i)
+find_library(geotiff_LIBRARY_DEBUG NAMES geotiffd geotiff_d geotiff_d_i)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(geotiff) #sets geotiff_LIBRARY using geotiff_LIBRARY_DEBUG and geotiff_LIBRARY_RELEASE

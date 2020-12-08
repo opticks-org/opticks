@@ -1,4 +1,4 @@
-find_path(Raptor_INCLUDE_DIR raptor.h)
+find_path(Raptor_INCLUDE_DIR raptor.h PATH_SUFFIXES raptor)
 
 find_library(Raptor_LIBRARY_RELEASE NAMES raptor)
 find_library(Raptor_LIBRARY_DEBUG NAMES raptord)

@@ -83,7 +83,6 @@ set (MOC_HEADERS
    ShapeFileImporter.h
    ShapelibProxy.h
 )
-include(${QT_USE_FILE})
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 include_directories(${Opticks_INCLUDE_DIRS})

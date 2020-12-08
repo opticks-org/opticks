@@ -14,7 +14,6 @@ set (MOC_HEADERS
     bm.h
     mbox.h
 )
-include(${QT_USE_FILE})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS} ${Xerces_INCLUDE_DIRS})

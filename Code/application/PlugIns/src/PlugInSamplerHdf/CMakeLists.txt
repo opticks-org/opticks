@@ -5,7 +5,6 @@ set (SOURCE_FILES
     SampleHdf4Importer.cpp
     ModuleManager.cpp
 ) 
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Hdf4_INCLUDE_DIRS})
 include_directories(${Opticks_HdfPlugInLib_INCLUDE_DIR})
