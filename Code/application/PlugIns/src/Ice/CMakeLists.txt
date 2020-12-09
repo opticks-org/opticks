@@ -50,7 +50,7 @@ target_link_libraries(Ice
     ${Opticks_HdfPlugInLib_LIBRARY}
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
-    ${Hdf5_LIBRARIES}
+    hdf5::hdf5
 	${PTHREADS_LIBRARY}
 )
 if(WIN32)

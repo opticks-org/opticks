@@ -18,7 +18,7 @@ target_link_libraries(Hdf
     ${Opticks_HdfPlugInLib_LIBRARY}
     ${Xerces_LIBRARIES}
     ${Hdf4_LIBRARIES}
-    ${Hdf5_LIBRARIES}
+    hdf5::hdf5
     ${PTHREADS_LIBRARY}
 )
 if(WIN32)

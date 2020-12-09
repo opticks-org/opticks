@@ -194,8 +194,9 @@ find_package(ZLIB REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Glew REQUIRED)
 find_package(Ossim) #TODO: is this optional?
-find_package(Hdf4 COMPONENTS SD REQUIRED) #TODO: make this optional
-find_package(Hdf5 REQUIRED)
+find_package(Hdf4 COMPONENTS SD REQUIRED)
+find_package(szip REQUIRED)
+find_package(HDF5 REQUIRED)
 find_package(shapelib REQUIRED)
 find_package(tiff REQUIRED)
 find_package(geotiff REQUIRED)
@@ -213,13 +214,6 @@ find_package(Gdal)
 find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
 find_package(OpenJpeg)
-find_package(ehs)
-find_package(pcre)
-find_package(pme)
-
-if(ehs_FOUND)
-   include_directories(${ehs_INCLUDE_DIRS})
-endif()
 
 set(OLD_CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${OPTICKS_DEP_PATH}/tools/graphviz")
@@ -255,8 +249,10 @@ add_subdirectory(PlugInUtilities)
 set(Opticks_LIBRARIES PlugInLib PlugInUtilities)
 add_subdirectory(HdfPlugInLib)
 set(Opticks_HdfPlugInLib_LIBRARY HdfPlugInLib)
-add_subdirectory(NitfPlugInLib)
-set(Opticks_NitfPlugInLib_LIBRARY NitfPlugInLib)
+if(Ossim_FOUND)
+  add_subdirectory(NitfPlugInLib)
+  set(Opticks_NitfPlugInLib_LIBRARY NitfPlugInLib)
+endif()
 #----- Done adding public libraries -----
 #----- Adding plug-ins -----
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/LibPrivate")
@@ -300,9 +296,7 @@ add_subdirectory(PlugIns/src/Georeference)
 add_subdirectory(PlugIns/src/Hdf)
 add_subdirectory(PlugIns/src/Ice)
 add_subdirectory(PlugIns/src/ImageComparison)
-if(Opticks_ServerUtilities_FOUND)
-    add_subdirectory(PlugIns/src/Kml)
-endif()
+add_subdirectory(PlugIns/src/Kml)
 if(WIN32) 
     add_subdirectory(PlugIns/src/LegacyModule)
 endif()
@@ -320,8 +314,10 @@ if(avcodec_FOUND AND avformat_FOUND AND avutil_FOUND)
    endif()
    add_subdirectory(PlugIns/src/MovieExporter)
 endif()
-add_subdirectory(PlugIns/src/Nitf)
-add_subdirectory(PlugIns/src/NitfCommonTre)
+if(Ossim_FOUND)
+   add_subdirectory(PlugIns/src/Nitf)
+   add_subdirectory(PlugIns/src/NitfCommonTre)
+endif()
 if(OpenCv_FOUND)
    add_subdirectory(PlugIns/src/ObjectFinding)
 endif()
@@ -339,11 +335,6 @@ add_subdirectory(PlugIns/src/Tutorial)
 add_subdirectory(PlugIns/src/Wavelength)
 add_subdirectory(PlugIns/src/WizardExecutor)
 add_subdirectory(PlugIns/src/WizardItems)
-if(Opticks_ServerUtilities_FOUND)
-   if(!CMAKE_SYSTEM_NAME STREQUAL "Linux") # Currently broken on linux
-      add_subdirectory(PlugIns/src/XmlRpc)
-   endif()
-endif()
 set(CMAKE_SHARED_LIBRARY_PREFIX "${OLD_SHARED_LIBRARY_PREFIX}")
 
 #----- Done adding plug-ins -----
@@ -652,7 +643,7 @@ target_link_libraries(Opticks
     ${Xerces_LIBRARIES}
     ${XQilla_LIBRARIES}
     ${Raptor_LIBRARIES}
-    ${Glew_LIBRARIES}
+    GLEW::GLEW
     ${PTHREADS_LIBRARY}
     ${Qwt5ForQt5_LIBRARY}
     )
@@ -695,9 +686,14 @@ install(DIRECTORY ${Opticks_SOURCE_DIR}/../Release/DefaultSettings
    ${Opticks_SOURCE_DIR}/../Release/SupportFiles
    ${Opticks_SOURCE_DIR}/../Release/Templates  DESTINATION . FILES_MATCHING
    PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
+#TODO  install(DIRECTORY ${Opticks_SOURCE_DIR}/Interfaces
+#   ${Opticks_SOURCE_DIR}/PlugInLib
+#   ${Opticks_SOURCE_DIR}/HdfPlugInLib ${Opticks_SOURCE_DIR}/NitfPlugInLib
+#   ${Opticks_SOURCE_DIR}/SimpleApiLib DESTINATION include FILES_MATCHING
+#   PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/Interfaces
    ${Opticks_SOURCE_DIR}/PlugInLib
-   ${Opticks_SOURCE_DIR}/HdfPlugInLib ${Opticks_SOURCE_DIR}/NitfPlugInLib
+   ${Opticks_SOURCE_DIR}/HdfPlugInLib
    ${Opticks_SOURCE_DIR}/SimpleApiLib DESTINATION include FILES_MATCHING
    PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/PlugInUtilities/Interfaces

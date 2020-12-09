@@ -1,0 +1,3 @@
+[submodule "Dependencies/vcpkg"]
+	path = Dependencies/vcpkg
+	url = https://github.com/opticks-org/vcpkg.git

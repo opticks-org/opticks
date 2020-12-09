@@ -20,11 +20,8 @@
 #include <memory>
 #include <iostream>
 #include <string.h>
-#include <ossim/matrix/newmat.h>
-#include <ossim/matrix/newmatap.h>
-#include "OssimVersion.h"
+#include <eigen3/Eigen/SVD>
 
-using namespace NEWMAT;
 using namespace std;
 
 namespace
@@ -72,7 +69,7 @@ namespace
       return true;
    }
 }
-
+#if 0 // TODO
 bool MatrixFunctions::getEigenvalues(const double** pSymmetricMatrix,
    double* pEigenvalues, double** pEigenvectors, const int& numRows)
 {
@@ -323,54 +320,7 @@ bool MatrixFunctions::computeSingularValueDecomposition(const double** pMatrix, 
 
    return true;
 }
-#if OSSIM_VERSION_NUMBER < 10900
-bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, const double* pRhs,
-   const int& numRows, const int& numColsLhs)
-{
-   if (pResult == NULL || pLhs == NULL || pRhs == NULL || numRows < numColsLhs || numColsLhs <= 0)
-   {
-      return false;
-   }
-
-   // Copy pLhs into a Matrix.
-   // The Store() method returns an RBD_COMMON::Real, which must be typedef'ed as a double for this code to work.
-   Matrix lhsMatrix(numRows, numColsLhs);
-   double* pData = lhsMatrix.Store();
-   VERIFY(pData != NULL);
-   for (int row = 0; row < numRows; ++row)
-   {
-      memcpy(pData + row * numColsLhs, pLhs[row], numColsLhs * sizeof(pData[0]));
-   }
-
-   // Copy pRhs into a ColumnVector.
-   ColumnVector rhsVector(numRows);
-   pData = rhsVector.Store();
-   VERIFY(pData != NULL);
-   memcpy(pData, pRhs, rhsVector.Storage() * sizeof(pData[0]));
-
-   // Create a ColumnVector to hold the results.
-   ColumnVector resultVector(numColsLhs);
-
-   try
-   {
-      // Solve the equation. Throws an exception on invalid input or when unable to converge.
-      SVDSolve(resultVector, lhsMatrix, rhsVector);
-   }
-   catch (const RBD_COMMON::BaseException&)
-   {
-      return false;
-   }
-
-   pData = resultVector.Store();
-   VERIFY(pData != NULL);
-   memcpy(pResult, pData, resultVector.Storage() * sizeof(pData[0]));
-   return true;
-}
-#else
-// ossim 1.9.0 doesn't have an explicit SVDSolve() function, so we'll use Eigen's
-//
-#include <eigen3/Eigen/SVD>
-
+#endif
 // Type is float or double
 /* template typename specializations are preferable to typedefs... for --std=c++0x and above.
 template <typename Type>  using EigenVector    = Eigen::Matrix<Type,Eigen::Dynamic,1>; ///< column vector
@@ -380,7 +330,6 @@ typedef class Eigen::Matrix<double,Eigen::Dynamic,1> EigenVectorType; ///< colum
 typedef class Eigen::Matrix<double,1,Eigen::Dynamic> EigenRowVectorType; ///< row vector
 typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> EigenMatrixType; ///< columnMajor Matrix
 typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> EigenRowMatrixType; ///< rowMajor Matrix 
-
 
 bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, const double* pRhs,
    const int& numRows, const int& numColsLhs)
@@ -427,6 +376,5 @@ bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, 
    }
    return true;
 }
-#endif
 
 
