@@ -41,9 +41,6 @@
 #include <stdio.h>
 #include <vector>
 #include <xtiffio.h>
-#if TIFFLIB_VERSION > 20100615
-#include "tif_dir.h"
-#endif
 
 using namespace std;
 
@@ -51,15 +48,6 @@ REGISTER_PLUGIN_BASIC(OpticksPictures, GeoTIFFImporter);
 
 namespace
 {
-   #if TIFFLIB_VERSION > 20100615
-      // Unfortunately, the methods in this namespace are tightly coupled to the implementation of libtiff.
-      // The crux of the problem is that there does not seem to be a reasonable way to get a TIFFTagValue from the API.
-      // The next best option is to call TIFFGetField, which does not act the same for every tag.
-      // Because of this, there are many special cases below which are meant to mimic the behavior of TIFFGetField.
-      // When upgrading libtiff, check if a better method exists and use it if feasible.
-      #pragma message("Check for libtiff compatibility.")
-   #endif
-
    bool setMetadata(const string& name, DataVariant& value, DynamicObject* pMetadata)
    {
       VERIFY(name.empty() == false && value.isValid() && pMetadata != NULL);
@@ -112,19 +100,15 @@ namespace
       return true;
    }
 
-#if TIFFLIB_VERSION > 20100615
    bool setMetadata(const TIFFField* pFieldInfo, uint32 count, void* pValues, DynamicObject* pMetadata)
- #else
-   bool setMetadata(const TIFFFieldInfo* pFieldInfo, uint32 count, void* pValues, DynamicObject* pMetadata)
-#endif
    {
       if (pFieldInfo == NULL || pMetadata == NULL)
       {
          return false;
       }
 
-      const string name(pFieldInfo->field_name);
-      switch (pFieldInfo->field_type)
+      const string name(TIFFFieldName(pFieldInfo));
+      switch (TIFFFieldDataType(pFieldInfo))
       {
          case TIFF_UNDEFINED: // Fall through to match behavior in tif_dir.c:862
          case TIFF_BYTE:
@@ -191,15 +175,11 @@ namespace
       const uint32 count, DynamicObject* pMetadata, string& message)
    {
       VERIFY(pTiffFile != NULL && count > 0 && pMetadata != NULL);
-#if TIFFLIB_VERSION > 20100615
       const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#else
-      const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#endif
       VERIFY(pFieldInfo != NULL);
 
       vector<T> values(count);
-      if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, &values[0]) == 0)
+      if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), &values[0]) == 0)
       {
          // The tag was not present in the file
          return false;
@@ -209,9 +189,9 @@ namespace
       // e.g.: TIFFTAG_BITSPERSAMPLE can be TIFF_LONG according to tif_dirinfo.c yet is used as a uint16 in tif_dir.c
       // While it is inefficient to make multiple copies of the vector, this code is only reached by static,
       // non-pointer tags which typically have no more than 2 elements.
-      if (setMetadata<T>(pFieldInfo->field_name, count, &values[0], pMetadata) == false)
+      if (setMetadata<T>(TIFFFieldName(pFieldInfo), count, &values[0], pMetadata) == false)
       {
-         message += "Error processing " + string(pFieldInfo->field_name) + "\n";
+         message += "Error processing " + string(TIFFFieldName(pFieldInfo)) + "\n";
          return false;
       }
 
@@ -224,11 +204,7 @@ namespace
    {
       VERIFY(pTiffFile != NULL && pMetadata != NULL);
 
-#if TIFFLIB_VERSION > 20100615
       const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#else
-      const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#endif
       VERIFY(pFieldInfo != NULL);
 
       T* pValue = NULL;
@@ -238,7 +214,7 @@ namespace
          // The only fields that need this are TIFFTAG_EXTRASAMPLES and TIFFTAG_SUBIFD (tif_dir.c:747, 782)
          // Both of these fields use a uint16 to store the count, so create a temporary uint16
          uint16 count16 = 0;
-         if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, &count16, &pValue) == 0)
+         if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), &count16, &pValue) == 0)
          {
             // The tag was not present in the file
             return false;
@@ -248,7 +224,7 @@ namespace
       }
       else
       {
-         if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, &pValue) == 0)
+         if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), &pValue) == 0)
          {
             // The tag was not present in the file
             return false;
@@ -258,9 +234,9 @@ namespace
       VERIFY(pValue != NULL && count > 0);
 
       // Must call the templated version because values must be copied into a vector to be stored in a DataVariant
-      if (setMetadata<T>(pFieldInfo->field_name, count, pValue, pMetadata) == false)
+      if (setMetadata<T>(TIFFFieldName(pFieldInfo), count, pValue, pMetadata) == false)
       {
-         message += "Error processing " + string(pFieldInfo->field_name) + "\n";
+         message += "Error processing " + string(TIFFFieldName(pFieldInfo)) + "\n";
          return false;
       }
 
@@ -272,16 +248,12 @@ namespace
       const uint32 count, DynamicObject* pMetadata, string& message)
    {
       VERIFY(pTiffFile != NULL && count != 0 && pMetadata != NULL);
-#if TIFFLIB_VERSION > 20100615
       const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#else
-      const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#endif
       VERIFY(pFieldInfo != NULL);
 
       // TIFFTAG_COLORMAP and TIFFTAG_TRANSFERFUNCTION have up to 3 children
       vector<T*> values(3, NULL);
-      if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, &values[0], &values[1], &values[2]) == 0)
+      if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), &values[0], &values[1], &values[2]) == 0)
       {
          // The tag was not present in the file
          return false;
@@ -290,10 +262,10 @@ namespace
       for (uint32 i = 0; i < values.size() && values[i] != NULL; ++i)
       {
          // Must call the templated version because values must be copied into a vector to be stored in a DataVariant
-         if (setMetadata<T>((QString(pFieldInfo->field_name) + QString("-%1").arg(i)).toStdString(),
+         if (setMetadata<T>((QString(TIFFFieldName(pFieldInfo)) + QString("-%1").arg(i)).toStdString(),
             count, values[i], pMetadata) == false)
          {
-            message += "Error processing " + string(pFieldInfo->field_name) + "\n";
+            message += "Error processing " + string(TIFFFieldName(pFieldInfo)) + "\n";
             return false;
          }
       }
@@ -305,34 +277,30 @@ namespace
    {
       VERIFY(pTiffFile != NULL && pMetadata != NULL);
 
-#if TIFFLIB_VERSION > 20100615
       const TIFFField* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#else
-      const TIFFFieldInfo* pFieldInfo = TIFFFieldWithTag(pTiffFile, tag);
-#endif
       VERIFY(pFieldInfo != NULL);
 
       uint32 count = 0;
       void* pValues = NULL;
-      if (pFieldInfo->field_passcount)
+      if (TIFFFieldPassCount(pFieldInfo))
       {
          // Special case
          // Use either a uint16* or uint32* based on field_readcount as is done in tif_dir.c:837
          void* pCount = &count;
          uint16 count16 = 0;
-         if (pFieldInfo->field_readcount != TIFF_VARIABLE2)
+         if (TIFFFieldReadCount(pFieldInfo) != TIFF_VARIABLE2)
          {
             pCount = &count16;
          }
 
-         if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, pCount, &pValues) == 0)
+         if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), pCount, &pValues) == 0)
          {
             // The tag was not present in the file even though libtiff earlier said it was present
-            message += "Unable to retrieve information for " + string(pFieldInfo->field_name) + "\n";
+            message += "Unable to retrieve information for " + string(TIFFFieldName(pFieldInfo)) + "\n";
             return false;
          }
 
-         if (pFieldInfo->field_readcount != TIFF_VARIABLE2)
+         if (TIFFFieldReadCount(pFieldInfo) != TIFF_VARIABLE2)
          {
             count = count16;
          }
@@ -342,21 +310,21 @@ namespace
          // Special case
          // TIFFTAG_DOTRANGE requires either 2 or N arguments
          // Since it cannot be known how many arguments to send, display a warning
-         if (pFieldInfo->field_tag == TIFFTAG_DOTRANGE)
+         if (TIFFFieldTag(pFieldInfo) == TIFFTAG_DOTRANGE)
          {
-            message += "Custom field " + string(pFieldInfo->field_name) + " is not supported.\n";
+            message += "Custom field " + string(TIFFFieldName(pFieldInfo)) + " is not supported.\n";
             return false;
          }
 
          // The data types in this switch must match the ones in tif_dir.c:861
-         switch (pFieldInfo->field_type)
+         switch (TIFFFieldDataType(pFieldInfo))
          {
             case TIFF_ASCII:
             {
                // Special case
                // Make this appear as a string rather than a vector<char>
                count = 1;
-               if (TIFFGetField(pTiffFile, pFieldInfo->field_tag, &pValues) == 0)
+               if (TIFFGetField(pTiffFile, TIFFFieldTag(pFieldInfo), &pValues) == 0)
                {
                   return false;
                }
@@ -368,38 +336,38 @@ namespace
             case TIFF_UNDEFINED:
             {
                return populateStaticTagMetadata<uint8>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_SBYTE:
             {
                return populateStaticTagMetadata<int8>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_SHORT:
             {
                return populateStaticTagMetadata<uint16>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_SSHORT:
             {
                return populateStaticTagMetadata<int16>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_LONG:   // Fall through
             case TIFF_IFD:
             {
                return populateStaticTagMetadata<uint32>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_SLONG:
             {
                return populateStaticTagMetadata<int32>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_RATIONAL:  // Fall through
@@ -407,18 +375,18 @@ namespace
             case TIFF_FLOAT:
             {
                return populateStaticTagMetadata<float>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             case TIFF_DOUBLE:
             {
                return populateStaticTagMetadata<double>(pTiffFile, tag,
-                  pFieldInfo->field_readcount, pMetadata, message);
+                   TIFFFieldReadCount(pFieldInfo), pMetadata, message);
             }
 
             default:
             {
-               message += "Invalid tag type for custom field " + string(pFieldInfo->field_name) + "\n";
+               message += "Invalid tag type for custom field " + string(TIFFFieldName(pFieldInfo)) + "\n";
                return false;
             }
          }
@@ -426,7 +394,7 @@ namespace
 
       if (setMetadata(pFieldInfo, count, pValues, pMetadata) == false)
       {
-         message += "Error processing custom field " + string(pFieldInfo->field_name) + "\n";
+         message += "Error processing custom field " + string(TIFFFieldName(pFieldInfo)) + "\n";
          return false;
       }
 
