@@ -25,4 +25,6 @@ if (WIN32)
   endif (NOT MessageCompiler_EXECUTABLE)
   message(STATUS "Found message compiler: ${MessageCompiler_EXECUTABLE}")
   mark_as_advanced(MessageCompiler_EXECUTABLE)
+
+  find_package_handle_standard_args(MessageCompiler DEFAULT_MSG MessageCompiler_EXECUTABLE)
 endif(WIN32)
