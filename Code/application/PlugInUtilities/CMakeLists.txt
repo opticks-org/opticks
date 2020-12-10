@@ -304,6 +304,7 @@ set (MOC_HEADERS
    )
 if(MSVC)
     set_source_files_properties(StringUtilities.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+    set_source_files_properties(MatrixFunctions.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 if(WIN32)
     find_package(MessageCompiler REQUIRED)

@@ -21,6 +21,10 @@ class RasterElement;
 
 /**
  * A collection of matrix functions.
+ * @deprecated This is a legacy module that's been modified to work with a number of different
+ *             implementations. These days, the header-only Eigen3 library is much better suited
+ *             for C++ use. It's suggested that you use Eigen3 for all new code and think about
+ *             converting existing code.
  */
 namespace MatrixFunctions
 {

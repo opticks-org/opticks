@@ -43,3 +43,6 @@ The repository structure follows a few rules:
 - Include _Fixes #_ messages and links to issues when committing to branches so they are easy to track. These don't need to be in every commit message, just the final one for a branch.
 
 NOTE: You may see some odities in the commit history, tags, etc. since this repository was originally imported from subversion with a fairly complex branch structure.
+
+## Build and Install
+The scons and visual studio projects may remain valid but are not maintained. Builds should use cmake. Instructions are available [here](Code/BUILDING.md).

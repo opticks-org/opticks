@@ -1,4 +1,3 @@
-ffmpeg[swscale]
 szip
 zlib
 xerces-c

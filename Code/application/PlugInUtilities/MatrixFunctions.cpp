@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string.h>
 #include <eigen3/Eigen/SVD>
+#include <eigen/Eigenvalues> 
 
 using namespace std;
 
@@ -69,7 +70,17 @@ namespace
       return true;
    }
 }
-#if 0 // TODO
+
+// Type is float or double
+/* template typename specializations are preferable to typedefs... for --std=c++0x and above.
+template <typename Type>  using EigenVector    = Eigen::Matrix<Type,Eigen::Dynamic,1>; ///< column vector
+template <typename Type>  using EigenRowVector = Eigen::Matrix<Type,1,Eigen::Dynamic>; ///< row vector
+*/
+typedef class Eigen::Matrix<double, Eigen::Dynamic, 1> EigenVectorType; ///< column vector
+typedef class Eigen::Matrix<double, 1, Eigen::Dynamic> EigenRowVectorType; ///< row vector
+typedef class Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> EigenMatrixType; ///< columnMajor Matrix
+typedef class Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> EigenRowMatrixType; ///< rowMajor Matrix 
+
 bool MatrixFunctions::getEigenvalues(const double** pSymmetricMatrix,
    double* pEigenvalues, double** pEigenvectors, const int& numRows)
 {
@@ -79,47 +90,21 @@ bool MatrixFunctions::getEigenvalues(const double** pSymmetricMatrix,
    }
 
    // Copy pSymmetricMatrix into a SymmetricMatrix.
-   SymmetricMatrix sourceMatrix(numRows);
-   const int numValuesStored = sourceMatrix.Storage();
-   if (numValuesStored <= 0)
+   EigenRowMatrixType sourceMatrix(numRows, numRows);
+   double* pData = sourceMatrix.data();
+   if (toSymmetricMatrix(pData, pSymmetricMatrix, numRows) == false)
    {
       return false;
    }
-
-   auto_ptr<double> pSourceMatrixData(new double[numValuesStored]);
-   if (toSymmetricMatrix(pSourceMatrixData.get(), pSymmetricMatrix, numRows) == false)
-   {
-      return false;
-   }
-
-   // The Store() method returns an RBD_COMMON::Real, which must be typedef'ed as a double for this code to work.
-   double* pData = sourceMatrix.Store();
-   VERIFY(pData != NULL);
-   memcpy(pData, pSourceMatrixData.get(), numValuesStored * sizeof(pData[0]));
 
    // Compute the eigenvalues and eigenvectors.
-   Matrix eigenvectors;
-   DiagonalMatrix eigenvalues;
-   EigenValues(sourceMatrix, eigenvalues, eigenvectors);
-   SortSV(eigenvalues, eigenvectors, false);
+   Eigen::EigenSolver<EigenRowMatrixType> solver(sourceMatrix);
 
-   // Copy eigenvalues to pEigenvalues.
-   if (pEigenvalues != NULL)
+   memcpy(pEigenvalues, solver.eigenvalues().data(), numRows * sizeof(double));
+   for (int row = 0; row < numRows; ++row)
    {
-      pData = eigenvalues.Store();
-      VERIFY(pData != NULL);
-      memcpy(pEigenvalues, pData, numRows * sizeof(pData[0]));
-   }
-
-   // Copy eigenvectors to pEigenvectors.
-   if (pEigenvectors != NULL)
-   {
-      pData = eigenvectors.Store();
-      VERIFY(pData != NULL);
-      for (int row = 0; row < numRows; ++row)
-      {
-         memcpy(pEigenvectors[row], pData + row * numRows, numRows * sizeof(pData[0]));
-      }
+       auto rowData = solver.eigenvectors().row(row);
+       memcpy(pEigenvectors[row], rowData.data(), numRows * sizeof(double));
    }
 
    return true;
@@ -132,29 +117,16 @@ bool MatrixFunctions::invertSquareMatrix1D(double* pDestination, const double* p
       return false;
    }
 
-   // Copy pSource into a SquareMatrix.
-   // The Store() method returns an RBD_COMMON::Real, which must be typedef'ed as a double for this code to work.
-   SquareMatrix sourceMatrix(numRows);
-   double* pData = sourceMatrix.Store();
-   VERIFY(pData != NULL);
-   const size_t matrixSizeBytes = numRows * numRows * sizeof(pData[0]);
-   memcpy(pData, pSource, matrixSizeBytes);
+   EigenRowMatrixType sourceMatrix(numRows, numRows);
+   memcpy(sourceMatrix.data(), pSource, numRows * sizeof(double));
 
-   // Invert sourceMatrix and copy the calculated results into pDestination.
-   try
+   auto pivlu = sourceMatrix.fullPivLu();
+   if (!pivlu.isInvertible())
    {
-      // Throws an exception when trying to invert a non-invertible matrix.
-      InvertedMatrix invertedMatrix = sourceMatrix.i();
-      GeneralMatrix* pResultsMatrix = invertedMatrix.Evaluate();
-      VERIFY(pResultsMatrix != NULL);
-      pData = pResultsMatrix->Store();
-      VERIFY(pData != NULL);
-      memcpy(pDestination, pData, matrixSizeBytes);
+       return false;
    }
-   catch (const RBD_COMMON::BaseException&)
-   {
-      return false;
-   }
+   auto inverse = pivlu.inverse();
+   Eigen::Map<EigenRowMatrixType>(pDestination, numRows, numRows) = inverse;
 
    return true;
 }
@@ -166,33 +138,22 @@ bool MatrixFunctions::invertSquareMatrix2D(double** pDestination, const double**
       return false;
    }
 
-   // Copy pSource into a SquareMatrix.
-   // The Store() method returns an RBD_COMMON::Real, which must be typedef'ed as a double for this code to work.
-   SquareMatrix sourceMatrix(numRows);
-   double* pData = sourceMatrix.Store();
-   VERIFY(pData != NULL);
+   EigenRowMatrixType sourceMatrix(numRows, numRows);
    for (int row = 0; row < numRows; ++row)
    {
-      memcpy(pData + row * numRows, pSource[row], numRows * sizeof(pData[0]));
+       memcpy(sourceMatrix.data() + row * numRows, pSource[row], numRows * sizeof(double));
    }
 
-   // Invert sourceMatrix and copy the calculated results into pDestination.
-   try
+   auto pivlu = sourceMatrix.fullPivLu();
+   if (!pivlu.isInvertible())
    {
-      // Throws an exception when trying to invert a non-invertible matrix.
-      InvertedMatrix invertedMatrix = sourceMatrix.i();
-      GeneralMatrix* pResultsMatrix = invertedMatrix.Evaluate();
-      VERIFY(pResultsMatrix != NULL);
-      pData = pResultsMatrix->Store();
-      VERIFY(pData != NULL);
-      for (int row = 0; row < numRows; ++row)
-      {
-         memcpy(pDestination[row], pData + row * numRows, numRows * sizeof(pData[0]));
-      }
+       return false;
    }
-   catch (const RBD_COMMON::BaseException&)
+   auto inverse = pivlu.inverse();
+
+   for (int row = 0; row < numRows; ++row)
    {
-      return false;
+       Eigen::Map<EigenRowVectorType>(pDestination[row], numRows) = inverse.row(row);
    }
 
    return true;
@@ -242,6 +203,7 @@ bool MatrixFunctions::invertRasterElement(RasterElement* pDestination, const Ras
    return invertSquareMatrix1D(pDestinationData, pSourceData, static_cast<int>(numRows));
 }
 
+#if 0
 bool MatrixFunctions::computeSingularValueDecomposition(const double** pMatrix, double* pSingularValues,
    double** pColumnMatrix, double** pOrthogonalMatrix, const int& numRows, const int& numCols)
 {
@@ -321,15 +283,6 @@ bool MatrixFunctions::computeSingularValueDecomposition(const double** pMatrix, 
    return true;
 }
 #endif
-// Type is float or double
-/* template typename specializations are preferable to typedefs... for --std=c++0x and above.
-template <typename Type>  using EigenVector    = Eigen::Matrix<Type,Eigen::Dynamic,1>; ///< column vector
-template <typename Type>  using EigenRowVector = Eigen::Matrix<Type,1,Eigen::Dynamic>; ///< row vector
-*/
-typedef class Eigen::Matrix<double,Eigen::Dynamic,1> EigenVectorType; ///< column vector
-typedef class Eigen::Matrix<double,1,Eigen::Dynamic> EigenRowVectorType; ///< row vector
-typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> EigenMatrixType; ///< columnMajor Matrix
-typedef class Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> EigenRowMatrixType; ///< rowMajor Matrix 
 
 bool MatrixFunctions::solveLinearEquation(double* pResult, const double** pLhs, const double* pRhs,
    const int& numRows, const int& numColsLhs)

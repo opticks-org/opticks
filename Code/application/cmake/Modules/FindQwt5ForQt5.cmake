@@ -11,15 +11,11 @@ if(Qwt5ForQt5_INCLUDE_DIR AND EXISTS "${Qwt5ForQt5_INCLUDE_DIR}/qwt_global.h")
     set(Qwt5ForQt5_PATCH_VERSION "${Qwt5ForQt5_VERSION_PATCH}")
 endif()
 
-find_library(Qwt5ForQt5_LIBRARY_RELEASE NAMES qwt5-qt5 qwt-qt5 PATH_SUFFIXES qwt5)
-find_library(Qwt5ForQt5_LIBRARY_DEBUG   NAMES qwt5-qt5 qwt-qt5 PATH_SUFFIXES qwt5)
+find_library(Qwt5ForQt5_LIBRARY_RELEASE NAMES qwt5-qt5)
+find_library(Qwt5ForQt5_LIBRARY_DEBUG   NAMES qwt5-qt5d)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(Qwt5ForQt5) #sets Qwt5ForQt5_LIBRARY using Qwt5ForQt5_LIBRARY_DEBUG and Qwt5ForQt5_LIBRARY_RELEASE
-if(NOT Qwt5ForQt5_LIBRARY)
-   set(Qwt5ForQt5_LIBRARY optimized ${Qwt5ForQt5_LIBRARY_RELEASE} debug ${Qwt5ForQt5_LIBRARY_DEBUG})
-   set(Qwt5ForQt5_LIBRARY ${Qwt5ForQt5_LIBRARY} CACHE FILEPATH "The Qwt5ForQt5 library")
-endif()
 
 set(Qwt5ForQt5_INCLUDE_DIRS ${Qwt5ForQt5_INCLUDE_DIR})
 mark_as_advanced(Qwt5ForQt5_INCLUDE_DIR)
