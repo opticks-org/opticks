@@ -1,6 +1,8 @@
 set(Opticks_VERSION "5.0.0Unofficial") # Change project(Opticks) below when VERSION becomes an official dotted-decimal
 cmake_minimum_required (VERSION 2.8.12)
 
+set(VCPKG_APPLOCAL_DEPS OFF)
+
 # Order is important on this. It MUST be before project()
 if(DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Choose the type of build. options are: None, Debug, Release, RelWithDebInfo, MinSizeRel")
