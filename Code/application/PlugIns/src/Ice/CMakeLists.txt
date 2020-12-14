@@ -50,8 +50,8 @@ target_link_libraries(Ice
     ${Opticks_HdfPlugInLib_LIBRARY}
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
-    hdf5::hdf5
-	${PTHREADS_LIBRARY}
+    ${PTHREADS_LIBRARY}
+    ${Hdf5_LIBRARIES}
 )
 if(WIN32)
     install(TARGETS Ice RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

@@ -33,7 +33,7 @@ You can configure Opticks from the command line with the following commands exec
 Visual Studio installed and the default version for cmake is not the correct version. This is the optional `-G`.
 
 ```
-cmake -B Build -S application -A x64 -G "Visual Studio 15 2017 [Win64]"
+cmake -B Build -S application -A x64 -G "Visual Studio 15 2017"
 ```
 
 If you are using vcpkg you should use the vcpkg toolchain integration.

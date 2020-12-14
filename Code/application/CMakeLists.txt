@@ -1,7 +1,7 @@
 set(Opticks_VERSION "5.0.0Unofficial") # Change project(Opticks) below when VERSION becomes an official dotted-decimal
 cmake_minimum_required (VERSION 2.8.12)
 
-set(VCPKG_APPLOCAL_DEPS OFF)
+#set(VCPKG_APPLOCAL_DEPS OFF)
 
 # Order is important on this. It MUST be before project()
 if(DEFINED CMAKE_BUILD_TYPE)
@@ -150,6 +150,7 @@ if(WIN32)
     configure_file(cmake/Templates/Opticks.vcxproj.user "${CMAKE_BINARY_DIR}")
     configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
     configure_file(cmake/Templates/opticks-debug.dep "${CMAKE_BINARY_DIR}/bin")
+    file(MAKE_DIRECTORY ${Opticks_SOURCE_DIR}/../Release/Temp)
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Opticks)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
@@ -199,8 +200,8 @@ find_package(Glew REQUIRED)
 find_package(Ossim) #TODO: is this optional?
 find_package(Hdf4 COMPONENTS SD REQUIRED)
 find_package(szip REQUIRED)
-find_package(HDF5 REQUIRED)
 find_package(shapelib REQUIRED)
+find_package(Hdf5 REQUIRED)
 find_package(tiff REQUIRED)
 find_package(geotiff REQUIRED)
 find_package(proj REQUIRED)
@@ -672,7 +673,7 @@ feature_summary(WHAT ALL)
 
 set(CODEDIR ${Opticks_SOURCE_DIR}/..)
 if(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 4)
-   set(BITS "32")
+   message(CRITICAL " 32-bit builds are no longer supported")
 elseif(CMAKE_CXX_SIZEOF_DATA_PTR EQUAL 8)
    set(BITS "64")
 endif()
@@ -688,26 +689,20 @@ install(DIRECTORY ${Opticks_SOURCE_DIR}/../Release/DefaultSettings
    ${Opticks_SOURCE_DIR}/../Release/Extensions
    ${Opticks_SOURCE_DIR}/../Release/SupportFiles
    ${Opticks_SOURCE_DIR}/../Release/Templates  DESTINATION . FILES_MATCHING
-   PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
-#TODO  install(DIRECTORY ${Opticks_SOURCE_DIR}/Interfaces
-#   ${Opticks_SOURCE_DIR}/PlugInLib
-#   ${Opticks_SOURCE_DIR}/HdfPlugInLib ${Opticks_SOURCE_DIR}/NitfPlugInLib
-#   ${Opticks_SOURCE_DIR}/SimpleApiLib DESTINATION include FILES_MATCHING
-#   PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
+   PATTERN "*" PATTERN ".git*" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/Interfaces
    ${Opticks_SOURCE_DIR}/PlugInLib
-   ${Opticks_SOURCE_DIR}/HdfPlugInLib
+   ${Opticks_SOURCE_DIR}/HdfPlugInLib ${Opticks_SOURCE_DIR}/NitfPlugInLib
    ${Opticks_SOURCE_DIR}/SimpleApiLib DESTINATION include FILES_MATCHING
-   PATTERN "*.h" PATTERN ".svn" EXCLUDE PATTERN "_svn" EXCLUDE)
+   PATTERN "*.h" PATTERN ".git*" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/PlugInUtilities/Interfaces
    ${Opticks_SOURCE_DIR}/PlugInUtilities/pthreads-wrapper DESTINATION
-   include/PlugInUtilities FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE
-   PATTERN "_svn" EXCLUDE)
+   include/PlugInUtilities FILES_MATCHING PATTERN "*.h" PATTERN ".git*" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/PlugIns/src/Aspam
    ${Opticks_SOURCE_DIR}/PlugIns/src/PlugInSampler
    ${Opticks_SOURCE_DIR}/PlugIns/src/PlugInSamplerHdf
    ${Opticks_SOURCE_DIR}/PlugIns/src/PlugInSamplerQt
    ${Opticks_SOURCE_DIR}/PlugIns/src/Tutorial DESTINATION examples/PlugIns/src
-   FILES_MATCHING PATTERN "*" PATTERN ".svn" PATTERN ".git" EXCLUDE PATTERN "_svn" EXCLUDE)
+   FILES_MATCHING PATTERN "*" PATTERN ".git*" EXCLUDE)
 install(DIRECTORY ${Opticks_SOURCE_DIR}/cmake/Modules DESTINATION cmake FILES_MATCHING
-   PATTERN "*" PATTERN ".svn" PATTERN ".git" EXCLUDE PATTERN "_svn" EXCLUDE)
+   PATTERN "*" PATTERN ".git*" EXCLUDE)

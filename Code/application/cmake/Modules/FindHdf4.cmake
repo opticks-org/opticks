@@ -25,7 +25,7 @@ if(NOT SD_FOUND_INDEX EQUAL -1)
         set(Hdf4_FOUND_SD_HEADER 1)
     endif()
     find_library(Hdf4_SD_LIBRARY_RELEASE NAMES hm${Hdf4_COMPACT_VERSION_STRING}m mfhdf mfhdfalt PATHS /usr/lib64/hdf)
-    find_library(Hdf4_SD_LIBRARY_DEBUG NAMES hm${Hdf4_COMPACT_VERSION_STRING}md PATHS /usr/lib64/hdf)
+    find_library(Hdf4_SD_LIBRARY_DEBUG NAMES hm${Hdf4_COMPACT_VERSION_STRING}md mfhdf_D PATHS /usr/lib64/hdf)
     select_library_configurations(Hdf4_SD)
 endif()
 

@@ -7,7 +7,7 @@ set (SOURCE_FILES
     HyperionImporter.cpp
     ModuleManager.cpp
 ) 
-add_definitions(${Hdf5_DEFINTIONS})
+add_definitions(${Hdf5_DEFINITIONS})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Hdf5_INCLUDE_DIRS})
 include_directories(${Hdf4_INCLUDE_DIRS})
@@ -18,8 +18,8 @@ target_link_libraries(Hdf
     ${Opticks_HdfPlugInLib_LIBRARY}
     ${Xerces_LIBRARIES}
     ${Hdf4_LIBRARIES}
-    hdf5::hdf5
     ${PTHREADS_LIBRARY}
+    ${Hdf5_LIBRARIES}
 )
 if(WIN32)
     install(TARGETS Hdf RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
