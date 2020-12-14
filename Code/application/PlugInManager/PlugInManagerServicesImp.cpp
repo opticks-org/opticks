@@ -113,7 +113,9 @@ DynamicModule* PlugInManagerServicesImp::getDynamicModule(const string& value)
    //Only attempt to load a plug-in .dll if it's not in the excluded list.
    QFileInfo modulePath(QString::fromStdString(value));
    QString fileName = modulePath.fileName().toLower();
-   if (std::find(mExcludedPlugIns.begin(), mExcludedPlugIns.end(), fileName.toStdString()) != mExcludedPlugIns.end())
+   // There are lots of qt5 dll's so we'll just check for anything that starts with qt5 instead of individually listing them
+   if (std::find(mExcludedPlugIns.begin(), mExcludedPlugIns.end(), fileName.toStdString()) != mExcludedPlugIns.end()
+       || fileName.startsWith("qt5"))
    {
       return new DynamicModuleImp();
    }
