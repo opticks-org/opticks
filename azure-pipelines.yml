@@ -13,7 +13,7 @@ jobs:
 
     variables:
         - name: VCPKG_BINARY_SOURCES
-          value: 'clear;nuget,dependencies,readwrite'
+          value: 'clear;nuget,https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json,readwrite'
 
     steps:
       - task: NuGetAuthenticate@0
@@ -23,9 +23,7 @@ jobs:
 
       - script: .\Dependencies\vcpkg\bootstrap-vcpkg.bat
         displayName: Bootstrap vcpkg
-        
-      - script: nuget.exe sources list
-        
+                
       - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows --debug
         displayName: install vcpkg dependencies
 
