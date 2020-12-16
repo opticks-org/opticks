@@ -7,11 +7,6 @@ trigger:
 - master
 
 jobs:
-  - template: azure-devops/build-windows.yml
-    parameters:
-      name: 'Windows_VS2017_x64'
-      targetPlatform: x64
-      image: 'vs2017-win2016'
   - job: Windows_VS2017_x64
     pool:
       vmImage: 'windows-latest'
