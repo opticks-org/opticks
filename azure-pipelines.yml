@@ -6,23 +6,27 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'vs2017-win2016'
-
-steps:
-- task: PythonScript@0
-  inputs:
-    scriptSource: inline
-    script: from urllib.request import urlretrieve; urlretrieve('http://opticks.org/downloads/working_deps/dependencies64_vs2017_updates.7z', 'Dependencies/dependencies64_vs2017_updates.7z')
-- task: ExtractFiles@1
-  inputs:
-    archiveFilePatterns: 'Dependencies/dependencies64_vs2017_updates.7z'
-    destinationFolder: 'Dependencies'
-    cleanDestinationFolder: false
-- task: MSBuild@1
-  inputs:
-    solution: 'Code/application/Opticks.sln'
-    msbuildArchitecture: 'x64'
-    platform: 'x64'
-    configuration: 'Release'
-    maximumCpuCount: true
+jobs:
+  - template: azure-devops/build-windows.yml
+    parameters:
+      name: 'Windows_VS2017_x64'
+      targetPlatform: x64
+      image: 'vs2017-win2016'
+  - job: Windows_VS2017_x64
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - script: git submodule update --init Dependencies\vcpkg
+        displayName: Checkout vcpkg submodule
+      - script: .\Dependencies\vcpkg\bootstrap-vcpkg.bat
+        displayName: Bootstrap vcpkg
+      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows
+        displayName: install vcpkg dependencies
+      - task: CMake@1
+        inputs:
+          cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../Dependencies/vcpkg/scripts/buildsystems/vcpkg.cmake ../Code/application'
+      - task: MSBuild@1
+        inputs:
+          solution: 'build\ALL_BUILD.vcxproj'
+          maximumCpuCount: true
+          platform: 'x64'
