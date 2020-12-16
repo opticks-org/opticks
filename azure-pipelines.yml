@@ -30,7 +30,7 @@ jobs:
           command: custom
           arguments: 'setapikey BuildPipeline -Source dependencies'
       
-      - task: NuGetCommand@3
+      - task: NuGetCommand@2
         inputs:
           command: custom
           arguments: 'sources list'
