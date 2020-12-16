@@ -28,7 +28,7 @@ jobs:
         displayName: Set nuget api key
         inputs:
           command: custom
-          arguments: 'nuget setapikey BuildPipeline -Source dependencies'
+          arguments: 'setapikey BuildPipeline -Source dependencies'
           
 
       - script: git submodule update --init Dependencies\vcpkg
