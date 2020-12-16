@@ -18,7 +18,7 @@ jobs:
     steps:
       - task: NuGetAuthenticate@0
       
-      - task: NuGetCommand@2
+      - task: NuGetCommand@1
         displayName: Setup nuget repo
         inputs:
           command: custom
@@ -29,7 +29,11 @@ jobs:
         inputs:
           command: custom
           arguments: 'setapikey BuildPipeline -Source dependencies'
-          
+      
+      - task: NuGetCommand@3
+        inputs:
+          command: custom
+          arguments: 'sources list'
 
       - script: git submodule update --init Dependencies\vcpkg
         displayName: Checkout vcpkg submodule
