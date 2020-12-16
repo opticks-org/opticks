@@ -10,16 +10,27 @@ jobs:
   - job: Windows_VS2017_x64
     pool:
       vmImage: 'windows-latest'
+
+    variables:
+        - name: VCPKG_BINARY_SOURCES
+          value: 'clear;nuget,dependencies,readwrite'
+
     steps:
+      - task: NuGetAuthenticate@0
+
       - script: git submodule update --init Dependencies\vcpkg
         displayName: Checkout vcpkg submodule
+
       - script: .\Dependencies\vcpkg\bootstrap-vcpkg.bat
         displayName: Bootstrap vcpkg
-      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows
+        
+      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows 
         displayName: install vcpkg dependencies
+
       - task: CMake@1
         inputs:
           cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../Dependencies/vcpkg/scripts/buildsystems/vcpkg.cmake ../Code/application'
+
       - task: MSBuild@1
         inputs:
           solution: 'build\ALL_BUILD.vcxproj'
