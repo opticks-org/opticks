@@ -13,10 +13,23 @@ jobs:
 
     variables:
         - name: VCPKG_BINARY_SOURCES
-          value: 'clear;nuget,https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json,readwrite'
+          value: 'clear;nuget,dependencies,readwrite'
 
     steps:
       - task: NuGetAuthenticate@0
+      
+      - task: NuGetCommand@2
+        displayName: Setup nuget repo
+        inputs:
+          command: custom
+          arguments: 'sources add -name dependencies -Source https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json'
+          
+      - task: NuGetCommand@2
+        displayName: Set nuget api key
+        inputs:
+          command: custom
+          arguments: 'nuget setapikey BuildPipeline -Source dependencies'
+          
 
       - script: git submodule update --init Dependencies\vcpkg
         displayName: Checkout vcpkg submodule
