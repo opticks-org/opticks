@@ -24,7 +24,7 @@ jobs:
       - script: .\Dependencies\vcpkg\bootstrap-vcpkg.bat
         displayName: Bootstrap vcpkg
         
-      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows 
+      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows --debug
         displayName: install vcpkg dependencies
 
       - task: CMake@1
