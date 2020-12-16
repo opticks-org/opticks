@@ -33,7 +33,7 @@ You can use pre-built binaries on Windows by connecting to the Opticks Azure Art
 C:\dev\opticks> vcpkg fetch nuget
 C:\dev\opticks-org\opticks\Dependencies\vcpkg\downloads\tools\nuget-5.5.1-windows\nuget.exe
 
-C:\dev\opticks> C:\dev\opticks-org\opticks\Dependencies\vcpkg\downloads\tools\nuget-5.5.1-windows\nuget.exe -name OpticksDeps -Source https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json
+C:\dev\opticks> C:\dev\opticks-org\opticks\Dependencies\vcpkg\downloads\tools\nuget-5.5.1-windows\nuget.exe sources add -name OpticksDeps -Source https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json
 
 C:\dev\opticks> C:\dev\opticks-org\opticks\Dependencies\vcpkg\downloads\tools\nuget-5.5.1-windows\nuget.exe setapikey MyName -Source OpticksDeps
 
