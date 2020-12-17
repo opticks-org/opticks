@@ -9,7 +9,7 @@ trigger:
 jobs:
   - job: Windows_VS2017_x64
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'vs2017-win2016'
 
     variables:
         - name: VCPKG_BINARY_SOURCES
