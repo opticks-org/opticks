@@ -29,11 +29,6 @@ jobs:
         inputs:
           command: custom
           arguments: 'setapikey BuildPipeline -Source dependencies'
-      
-      - task: NuGetCommand@2
-        inputs:
-          command: custom
-          arguments: 'sources list'
 
       - script: git submodule update --init Dependencies\vcpkg
         displayName: Checkout vcpkg submodule
@@ -43,6 +38,15 @@ jobs:
                 
       - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows
         displayName: install vcpkg dependencies
+      
+      - task: DeleteFiles@1
+        displayName: Clear temporary vcpkg files
+        inputs:
+          SourceFolder: '.\Dependencies\vcpkg'
+          Contents: |
+            buildtrees
+            downloads
+            packages
 
       - task: CMake@1
         inputs:
@@ -51,5 +55,12 @@ jobs:
       - task: MSBuild@1
         inputs:
           solution: 'build\ALL_BUILD.vcxproj'
+          configuration: Debug
           maximumCpuCount: true
           platform: 'x64'
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Pipeline.Workspace)\Code\Build'
+          artifact: 'Opticks Debug Build'
+          publishLocation: 'pipeline'
