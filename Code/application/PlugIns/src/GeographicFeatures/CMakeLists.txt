@@ -83,8 +83,8 @@ set (MOC_HEADERS
    ShapeFileImporter.h
    ShapelibProxy.h
 )
-include(${QT_USE_FILE})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+find_package(Gdal REQUIRED)
 source_group(moc FILES ${MOC_OUTFILES})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${shapelib_INCLUDE_DIRS})
@@ -97,6 +97,7 @@ target_link_libraries(GeographicFeatures
     ${QT_LIBRARIES}    
     ${shapelib_LIBRARIES}    
     ${Xerces_LIBRARIES}
+    ${GDAL_LIBRARY}
     ${Gdal_LIBRARIES}
 )
 if(WIN32)

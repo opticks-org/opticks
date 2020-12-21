@@ -15,9 +15,7 @@
 #include "GeoAlgorithms.h"
 #include "GraphicLayer.h"
 #include "GraphicObject.h"
-#include "ImageHandler.h"
 #include "Kml.h"
-#include "KMLServer.h"
 #include "Layer.h"
 #include "LayerList.h"
 #include "MultipointObject.h"
@@ -538,6 +536,7 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
          mXml.popAddPoint();
       }
       fileName += ".png";
+#if 0  // TODO
       if (ImageHandler::getSessionItemImage(pLayer, buffer, "PNG", frame))
       {
          mImages[fileName] = bytes;
@@ -545,24 +544,7 @@ void Kml::generateGroundOverlayLayer(Layer* pLayer, bool visible, int order, con
          mXml.addText(fileName.toStdString(), mXml.addElement("href"));
          mXml.popAddPoint();
       }
-   }
-   else
-   {
-      layerId = QUrl::toPercentEncoding(layerId);
-      QString imageUrl(QString("http://localhost:%1/images/%2.png").arg(KMLServer::getSettingKmlServerPort()).arg(
-         layerId));
-      if (frame >= 0)
-      {
-         imageUrl += QString("?frame=%1").arg(frame);
-         mXml.pushAddPoint(mXml.addElement("TimeStamp"));
-         QDateTime dt = QDateTime::currentDateTime();
-         dt.setTime(QTime(0, 0, frame));
-         mXml.addText(dt.toString(Qt::ISODate).toStdString(), mXml.addElement("when"));
-         mXml.popAddPoint();
-      }
-      mXml.pushAddPoint(mXml.addElement("Icon"));
-      mXml.addText(imageUrl.toStdString(), mXml.addElement("href"));
-      mXml.popAddPoint();
+#endif
    }
    generateBoundingBox(pGeoLayer);
 

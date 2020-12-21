@@ -15,14 +15,12 @@ if(Hdf5_INCLUDE_DIR AND EXISTS "${Hdf5_INCLUDE_DIR}/H5public.h")
 endif()
 
 find_library(Hdf5_LIBRARY_RELEASE NAMES hdf5dll hdf5)
-find_library(Hdf5_LIBRARY_DEBUG NAMES hdf5ddll)
+find_library(Hdf5_LIBRARY_DEBUG NAMES hdf5ddll_D hdf5_D)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(Hdf5)
 
-if(Hdf5_LIBRARY_RELEASE MATCHES "^.*hdf5dll\\.lib.*$" OR Hdf5_LIBRARY_DEBUG MATCHES "^.*hdf5ddll\\.lib.*$")
-    set(Hdf5_DEFINITIONS "-D_HDF5USEDLL_" CACHE STRING "HDF5 definitions")
-endif()
+set(Hdf5_DEFINITIONS "-D_HDF5USEDLL_ -DH5_BUILT_AS_DYNAMIC_LIB" CACHE STRING "HDF5 definitions")
 set(Hdf5_INCLUDE_DIRS ${Hdf5_INCLUDE_DIR})
 mark_as_advanced(Hdf5_INCLUDE_DIR)
 mark_as_advanced(Hdf5_DEFINITIONS)

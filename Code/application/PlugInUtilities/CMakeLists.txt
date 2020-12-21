@@ -166,7 +166,6 @@ set (SOURCE_FILES
    GraphicTriangleWidget.cpp
    GraphicUnitsWidget.cpp
    GraphicViewWidget.cpp
-   ImageHandler.cpp
    ImageResolutionWidget.cpp
    InfoBar.cpp
    InterpolationComboBox.cpp
@@ -183,7 +182,6 @@ set (SOURCE_FILES
    MgrsDatum.cpp
    MgrsEngine.cpp
    MipMappedTextures.cpp
-   MuHttpServer.cpp
    MultiThreadedAlgorithm.cpp
    MutuallyExclusiveListWidget.cpp
    NameTypeValueDlg.cpp
@@ -224,10 +222,6 @@ set (SOURCE_FILES
    XmlUtilities.cpp
    xmlwriter.cpp
    )
-#ImageHandler.cpp
-#MuHttpServer.cpp
-#Interfaces/ImageHandler.h
-#Interfaces/MuHttpServer.h
 set (MOC_HEADERS
    Interfaces/AlgorithmDialog.h
    Interfaces/AnimationFrameSpinBox.h
@@ -310,6 +304,7 @@ set (MOC_HEADERS
    )
 if(MSVC)
     set_source_files_properties(StringUtilities.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
+    set_source_files_properties(MatrixFunctions.cpp PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 if(WIN32)
     find_package(MessageCompiler REQUIRED)
@@ -320,8 +315,8 @@ if(WIN32)
     )
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
     list(APPEND HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/EventMessages.h)
+    set_property(SOURCE ${CMAKE_CURRENT_BINARY_DIR}/EventMessages.h PROPERTY SKIP_AUTOGEN ON)
 endif()
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)
@@ -335,7 +330,7 @@ include_directories(
     ${Opticks_SOURCE_DIR}/Gui/GLView
     ${Opticks_SOURCE_DIR}/Utilities
 )
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(PlugInUtilities STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 set_target_properties(PlugInUtilities PROPERTIES OUTPUT_NAME opticks-pluginutilities)
@@ -346,34 +341,4 @@ endif()
 
 target_link_libraries(PlugInUtilities ${Ossim_LIBRARIES})
 
-if(ehs_FOUND AND pcre_FOUND AND pme_FOUND)
-    set (SERVER_MOC_HEADERS
-       Interfaces/ImageHandler.h
-       Interfaces/MuHttpServer.h
-    )
-    set (SERVER_SOURCE_FILES
-       ImageHandler.cpp
-       MuHttpServer.cpp
-    )
-    qt4_wrap_cpp(SERVER_MOC_OUTFILES ${SERVER_MOC_HEADERS})
-    source_group(moc FILES ${SERVER_MOC_OUTFILES})
-    include_directories(${ehs_INCLUDE_DIRS} ${pcre_INCLUDE_DIRS} ${pme_INCLUDE_DIRS})
-    add_library(ServerUtilities STATIC ${SERVER_SOURCE_FILES} ${SERVER_MOC_HEADERS} ${SERVER_MOC_OUTFILES})
-    set_target_properties(ServerUtilities PROPERTIES OUTPUT_NAME opticks-serverutilities)
-    if(NOT MSVC)
-       target_link_libraries(ServerUtilities PlugInLib)
-       target_link_libraries(ServerUtilities PlugInUtilities)
-    endif()
-    target_link_libraries(ServerUtilities
-        ${ehs_LIBRARIES}
-        ${pcre_LIBRARIES}
-        ${pme_LIBRARIES}
-    )
-    set(Opticks_ServerUtilities_FOUND 1 CACHE BOOL "Was ServerUtilities built")
-    set(Opticks_ServerUtilities_INCLUDE_DIR "${Opticks_SOURCE_DIR}/PlugInUtilities/Interfaces" CACHE PATH "ServerUtilities include path")
-    set(Opticks_ServerUtilities_LIBRARY ServerUtilities CACHE STRING "ServerUtilities library")
-    mark_as_advanced(Opticks_ServerUtilities_FOUND)
-    mark_as_advanced(Opticks_ServerUtilities_INCLUDE_DIR)
-    mark_as_advanced(Opticks_ServerUtilities_LIBRARY)
-endif()
 install(TARGETS PlugInUtilities DESTINATION lib)

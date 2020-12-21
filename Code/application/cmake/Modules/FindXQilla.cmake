@@ -1,7 +1,7 @@
 find_path(XQilla_INCLUDE_DIR xqilla/xqilla-simple.hpp)
 
-find_library(XQilla_LIBRARY_RELEASE NAMES xqilla22 xqilla)
-find_library(XQilla_LIBRARY_DEBUG NAMES xqilla22d xqillad)
+find_library(XQilla_LIBRARY_RELEASE NAMES xqilla23 xqilla)
+find_library(XQilla_LIBRARY_DEBUG NAMES xqilla23d xqillad)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(XQilla) #sets XQilla_LIBRARY using XQilla_LIBRARY_DEBUG and XQilla_LIBRARY_RELEASE

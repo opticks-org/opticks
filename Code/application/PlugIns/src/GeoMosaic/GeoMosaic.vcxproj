@@ -101,9 +101,6 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qt4\QtGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_GeoMosaicDlg.cpp" />

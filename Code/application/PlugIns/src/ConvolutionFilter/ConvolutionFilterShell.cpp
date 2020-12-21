@@ -93,7 +93,7 @@ bool ConvolutionFilterShell::execute(PlugInArgList* pInArgList, PlugInArgList* p
    {
       return false;
    }
-   if (!populateKernel() || mInput.mKernel.Nrows() % 2 == 0 || mInput.mKernel.Ncols() % 2 == 0)
+   if (!populateKernel() || mInput.mKernel.rows() % 2 == 0 || mInput.mKernel.cols() % 2 == 0)
    {
       mProgress.report("Invalid kernel.", 0, ERRORS, true);
       return false;
@@ -375,12 +375,12 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
       int startColumn = columnOffset;
       int stopColumn = numResultsCols + columnOffset - 1;
 
-      int yshift = (mInput.mKernel.Nrows() - 1) / 2;
-      int xshift = (mInput.mKernel.Ncols() - 1) / 2;
+      int yshift = (mInput.mKernel.rows() - 1) / 2;
+      int xshift = (mInput.mKernel.cols() - 1) / 2;
 
       FactoryResource<DataRequest> pRequest;
       pRequest->setRows(mInput.mpDescriptor->getActiveRow(std::max(0, startRow - yshift)),
-         mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + mInput.mKernel.Nrows() - yshift)));
+         mInput.mpDescriptor->getActiveRow(std::min(maxRowNum, stopRow + static_cast<int>(mInput.mKernel.rows()) - yshift)));
       pRequest->setColumns(mInput.mpDescriptor->getActiveColumn(startColumn),
          mInput.mpDescriptor->getActiveColumn(stopColumn));
       pRequest->setBands(mInput.mpDescriptor->getActiveBand(mInput.mBands[bandNum]),
@@ -412,12 +412,12 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
             double accum = 0.0;
             if (mInput.mpIterCheck->getPixel(col_index, row_index))
             {
-               for (int kernelrow = 0; kernelrow < mInput.mKernel.Nrows(); kernelrow++)
+               for (int kernelrow = 0; kernelrow < mInput.mKernel.rows(); kernelrow++)
                {
                   int neighbor_row = row_index - yshift + kernelrow;
                   int real_row = std::min(std::max(0, neighbor_row),
                      static_cast<int>(mInput.mpDescriptor->getRowCount()) - 1);
-                  for (int kernelcol = 0; kernelcol < mInput.mKernel.Ncols(); kernelcol++)
+                  for (int kernelcol = 0; kernelcol < mInput.mKernel.cols(); kernelcol++)
                   {
                      int neighbor_col = col_index - xshift + kernelcol;
                      int real_col = std::min(std::max(0, neighbor_col),
@@ -430,7 +430,7 @@ void ConvolutionFilterShell::ConvolutionFilterThread::convolve(const T*)
 
                      double val = 0.0;
                      pModel->getDataValue<T>(reinterpret_cast<T*>(accessor->getColumn()), COMPLEX_MAGNITUDE, 0, val);
-                     accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.Storage();
+                     accum += mInput.mKernel(kernelrow+1, kernelcol+1) * val / mInput.mKernel.size();
                   }
                }
             }
@@ -478,8 +478,8 @@ bool GenericConvolution::getInputSpecification(PlugInArgList*& pInArgList)
    PlugInArg* pArg = Service<PlugInManagerServices>()->getPlugInArg();
    VERIFY(pArg != NULL);
    pArg->setName("Kernel");
-   pArg->setDescription("The convolution kernel as an ossim NEWMAT::Matrix.");
-   pArg->setType("NEWMAT::Matrix");
+   pArg->setDescription("The convolution kernel as an EigenRowMajorXf.");
+   pArg->setType("EigenRowMajorXf");
    pInArgList->addArg(*pArg);
    return true;
 }
@@ -490,14 +490,14 @@ bool GenericConvolution::extractInputArgs(PlugInArgList* pInArgList)
    {
       return false;
    }
-   NEWMAT::Matrix* pMatrix = pInArgList->getPlugInArgValueUnsafe<NEWMAT::Matrix>("Kernel");
+   EigenRowMajorXf* pMatrix = pInArgList->getPlugInArgValueUnsafe<EigenRowMajorXf>("Kernel");
    if (pMatrix == NULL)
    {
       mProgress.report("No kernel specified.", 0, ERRORS, true);
       return false;
    }
    mInput.mKernel = *pMatrix;
-   return mInput.mKernel.Storage() > 0;
+   return mInput.mKernel.size() > 0;
 }
 
 bool GenericConvolution::populateKernel()

@@ -13,7 +13,7 @@
 
 #include "ConfigurationSettings.h"
 #include "ui_ConvolutionMatrixWidget.h"
-#include <ossim/matrix/newmat.h>
+#include <eigen3/Eigen/Dense>
 #include <QtWidgets/QTableWidgetItem>
 #include <QtWidgets/QWidget>
 
@@ -63,7 +63,7 @@ public:
 class FilterSettings
 {
 public:
-   NEWMAT::Matrix mKernel;
+   EigenRowMajorXf mKernel;
    double mDivisor;
    double mOffset;
    bool mFloatOutput;
@@ -84,7 +84,7 @@ protected slots:
    void presetButtonPressed(QAbstractButton* pButton);
 
 protected:
-   NEWMAT::Matrix getCurrentMatrix() const;
+   EigenRowMajorXf getCurrentMatrix() const;
    void saveToConfigurationSettings() const;
    void loadFromConfigurationSettings();
 
