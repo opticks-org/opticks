@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/Opticks/Opticks%20CI/_apis/build/status/opticks-org.opticks?branchName=master)](https://dev.azure.com/Opticks/Opticks%20CI/_build/latest?definitionId=1&branchName=master)  __master__
+
 # Opticks
 Opticks is an open source remote sensing platform.
 
