@@ -61,6 +61,6 @@ jobs:
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: '$(Pipeline.Workspace)\Code\Build'
+          targetPath: 'build'
           artifact: 'Opticks Debug Build'
           publishLocation: 'pipeline'
