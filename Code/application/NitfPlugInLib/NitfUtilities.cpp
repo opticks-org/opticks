@@ -210,15 +210,8 @@ bool Nitf::DtgParseCCYYMMDDssss(const std::string& date,
    return pDateTime != NULL && pDateTime->set(year, month, day, hour, minute, static_cast<unsigned short>(second));
 }
 
-bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, 
-   unsigned short &year, 
-   unsigned short &month, 
-   unsigned short &day, 
-   unsigned short &hour, 
-   unsigned short &min,
-   unsigned short &sec,
-   bool *pDateValid,
-   bool *pTimeValid)
+bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, unsigned short &year, unsigned short &month, unsigned short &day,
+                                 unsigned short &hour, unsigned short &min, unsigned short &sec, bool *pDateValid, bool *pTimeValid)
 {
    if (fDTG.size() < 14)
    {
@@ -294,8 +287,88 @@ bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG,
    return timeValid && dateValid;
 }
 
-bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, 
-   DateTime *pDateTime)
+bool Nitf::DtgParseCCYYMMDDhhmmssns(const std::string& fDTG, unsigned short& year, unsigned short& month,
+   unsigned short& day, unsigned short& hour, unsigned short& min, double& sec, int& precision, bool* pDateValid,
+   bool* pTimeValid)
+{
+   if (fDTG.size() < 24)
+   {
+      if (pTimeValid != NULL)
+      {
+         *pTimeValid = false;
+      }
+      if (pDateValid != NULL)
+      {
+         *pDateValid = false;
+      }
+      return false;
+   }
+
+   bool dateValid = true;
+   bool timeValid = true;
+
+   // Set everything to invalid values
+   year = 0;
+   month = 0;
+   day = 0;
+   hour = 100;
+   min = 100;
+   sec = 100;
+   precision = 0;
+
+   try
+   {
+      year = lexical_cast<unsigned short>(fDTG.substr(0, 4));
+      month = lexical_cast<unsigned short>(fDTG.substr(4, 2));
+      day = lexical_cast<unsigned short>(fDTG.substr(6, 2));
+      hour = lexical_cast<unsigned short>(fDTG.substr(8, 2));
+      min = lexical_cast<unsigned short>(fDTG.substr(10, 2));
+      auto offset = fDTG.find_first_of('-', 12);
+      sec = lexical_cast<double>(fDTG.substr(12, offset-12));
+      precision = 9 - (24 - offset);
+   }
+   catch (const boost::bad_lexical_cast&)
+   {
+      // Do nothing
+   }
+
+   if (year < 1900 || year > 2100)
+   {
+      dateValid = false;
+   }
+   if (month < 1 || month > 12)
+   {
+      dateValid = false;
+   }
+   if (day < 1 || day > maxDayOfMonth[month - 1])
+   {
+      dateValid = false;
+   }
+   if (hour > 23)
+   {
+      timeValid = false;
+   }
+   if (min > 59)
+   {
+      timeValid = false;
+   }
+   if (sec > 59)
+   {
+      timeValid = false;
+   }
+   if (pDateValid != NULL)
+   {
+      *pDateValid = dateValid;
+   }
+   if (pTimeValid != NULL)
+   {
+      *pTimeValid = timeValid;
+   }
+
+   return timeValid && dateValid;
+}
+
+bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG, DateTime *pDateTime)
 {
    unsigned short year;
    unsigned short month;
@@ -312,6 +385,41 @@ bool Nitf::DtgParseCCYYMMDDhhmmss(const string &fDTG,
       if (timeValid == true)
       {
          if (pDateTime == NULL || pDateTime->set(year, month, day, hour, min, sec) == false)
+         {
+            success = false;
+         }
+      }
+      else
+      {
+         if (pDateTime == NULL || pDateTime->set(year, month, day))
+         {
+            success = false;
+         }
+      }
+   }
+
+   return success;
+}
+
+bool Nitf::DtgParseCCYYMMDDhhmmssns(const std::string& fDTG, DateTime* pDateTime, double& fractionalSeconds, int& precision)
+{
+   unsigned short year;
+   unsigned short month;
+   unsigned short day;
+   unsigned short hour;
+   unsigned short min;
+   double sec;
+   double intSec;
+   bool dateValid;
+   bool timeValid;
+
+   bool success = DtgParseCCYYMMDDhhmmssns(fDTG, year, month, day, hour, min, sec, precision, &dateValid, &timeValid);
+   if (dateValid == true)
+   {
+      if (timeValid == true)
+      {
+         fractionalSeconds = modf(sec, &intSec);
+         if (pDateTime == NULL || pDateTime->set(year, month, day, hour, min, static_cast<unsigned int>(intSec)) == false)
          {
             success = false;
          }

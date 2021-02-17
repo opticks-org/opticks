@@ -95,6 +95,15 @@ qt5_wrap_ui(UI_OUTFILES ${UI_FILES})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(PlugInSamplerQt SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES} ${UI_OUTFILES})
+    add_custom_command(TARGET PlugInSamplerQt
+        POST_BUILD
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND ${_VCPKG_POWERSHELL_PATH} -noprofile -executionpolicy Bypass -file "${Opticks_SOURCE_DIR}/cmake/copy_dependencies.ps1"
+                            -targetBinary $<TARGET_FILE:Opticks>
+                            -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
+                            -baseTargetBinaryDir "${CMAKE_BINARY_DIR}/bin"
+                            -OutVariable out
+        )
 target_link_libraries(PlugInSamplerQt
     ${Opticks_LIBRARIES}
 	${OPENGL_LIBRARIES}

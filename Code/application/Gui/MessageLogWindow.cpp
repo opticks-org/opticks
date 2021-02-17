@@ -38,6 +38,10 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* pParent) :
    pMessageTree->setModel(mpModel);
    pMessageTree->setSelectionMode(QAbstractItemView::NoSelection);
    pMessageTree->setRootIsDecorated(true);
+   pMessageTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+   auto pExpandAll = new QAction("Expand All", this);
+   auto pCollapseAll = new QAction("Collapse All", this);
+   pMessageTree->addActions(QList<QAction*>() << pExpandAll << pCollapseAll);
 
    QHeaderView* pHeader = pMessageTree->header();
    if (pHeader != NULL)
@@ -76,10 +80,17 @@ MessageLogWindow::MessageLogWindow(const string& id, QWidget* pParent) :
 
    setLog(mpLogCombo->currentText());
 
+   // Set some reasonable default column widths
+   pMessageTree->setColumnWidth(0, 100);
+   pMessageTree->setColumnWidth(2, 400);
+   pMessageTree->setColumnWidth(5, 150);
+
    // Connections
    VERIFYNR(connect(mpLogCombo, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(setLog(const QString&))));
    mpMsgLogMgr.addSignal(SIGNAL_NAME(MessageLogMgr, LogAdded), Slot(this, &MessageLogWindow::messageLogAdded));
    mpMsgLogMgr.addSignal(SIGNAL_NAME(MessageLogMgr, LogRemoved), Slot(this, &MessageLogWindow::messageLogRemoved));
+   VERIFYNR(connect(pExpandAll, SIGNAL(triggered()), pMessageTree, SLOT(expandAll())));
+   VERIFYNR(connect(pCollapseAll, SIGNAL(triggered()), pMessageTree, SLOT(collapseAll())));
 }
 
 MessageLogWindow::~MessageLogWindow()
@@ -491,6 +502,7 @@ QVariant MessageLogWindowModel::data(const QModelIndex &index, int role) const
 
 bool MessageLogWindowModel::insertRows(int row, int count, const QModelIndex &parent)
 {
+   row = std::min(row, rowCount(parent));  // weird edge case that pops up with a new message log
    beginInsertRows(parent, row, row + count - 1);
    endInsertRows();
    return true;
