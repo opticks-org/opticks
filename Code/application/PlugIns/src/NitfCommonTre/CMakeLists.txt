@@ -21,6 +21,7 @@ set (HEADER_FILES
     NitfMod26aParser.h
     NitfMpd26aParser.h
     NitfMtimfaParser.h
+    NitfMtimsaParser.h
     NitfPatchaParser.h
     NitfPatchbParser.h
     NitfRadsdaParser.h
@@ -61,6 +62,7 @@ set (SOURCE_FILES
     NitfMod26aParser.cpp
     NitfMpd26aParser.cpp
     NitfMtimfaParser.cpp
+    NitfMtimsaParser.cpp
     NitfPatchaParser.cpp
     NitfPatchbParser.cpp
     NitfRadsdaParser.cpp

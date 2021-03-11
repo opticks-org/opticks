@@ -101,12 +101,10 @@ bool Nitf::MicidaParser::fromDynamicObject(const DynamicObject& input, ostream& 
    {
       output << toString(dv_cast<unsigned int>(input.getAttribute(MICIDA::MIIS_CORE_ID_VERSION)), 2);
       const DynamicObject& cameraIds = dv_cast<DynamicObject>(input.getAttribute(MICIDA::CAMERA_IDS));
-      std::vector<std::string> cameraIdsRecs;
-      cameraIds.getAttributeNames(cameraIdsRecs);
-      output << toString<unsigned int>(cameraIdsRecs.size(), 3);
-      for (auto cameraIdName = cameraIdsRecs.begin(); cameraIdName != cameraIdsRecs.end(); ++cameraIdName)
+      output << toString(dv_cast<unsigned int>(cameraIds.getAttribute(MICIDA::NUM_CAMERA_IDS_IN_TRE)), 3);
+      for (auto cameraIdIt = cameraIds.begin(); cameraIdIt != cameraIds.end(); ++cameraIdIt)
       {
-         const DynamicObject& cameraId = dv_cast<DynamicObject>(cameraIds.getAttribute(*cameraIdName));
+         const DynamicObject& cameraId = dv_cast<DynamicObject>(cameraIdIt->second);
          output << sizeString(dv_cast<std::string>(cameraId.getAttribute(MICIDA::CAMERA_ID)), 36);
          auto coreIdLength = dv_cast<unsigned int>(cameraId.getAttribute(MICIDA::CORE_ID_LENGTH));
          output << toString(coreIdLength, 3);

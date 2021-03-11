@@ -150,19 +150,15 @@ bool Nitf::MtimfaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(dv_cast<unsigned int>(input.getAttribute(MTIMFA::TIME_INTERVAL_INDEX)), 6);
       output << toString(dv_cast<unsigned int>(input.getAttribute(MTIMFA::NUM_CAMERAS_DEFINED)), 4);
       const DynamicObject& camerasDefined = dv_cast<DynamicObject>(input.getAttribute(MTIMFA::CAMERAS_DEFINED));
-      std::vector<std::string> camerasDefinedRecs;
-      camerasDefined.getAttributeNames(camerasDefinedRecs);
-      for (auto camerasDefinedName = camerasDefinedRecs.begin(); camerasDefinedName != camerasDefinedRecs.end(); ++camerasDefinedName)
+      for (auto cameraIt = camerasDefined.begin(); cameraIt != camerasDefined.end(); ++cameraIt)
       {
-         const DynamicObject& camera = dv_cast<DynamicObject>(camerasDefined.getAttribute(*camerasDefinedName));
+         const DynamicObject& camera = dv_cast<DynamicObject>(cameraIt->second);
          output << sizeString(dv_cast<std::string>(camera.getAttribute(MTIMFA::CAMERA_ID)), 36);
          output << toString(dv_cast<unsigned int>(camera.getAttribute(MTIMFA::NUM_TEMP_BLOCKS)), 3);
          const DynamicObject& tempBlocks = dv_cast<DynamicObject>(camera.getAttribute(MTIMFA::TEMP_BLOCKS));
-         std::vector<std::string> tempBlocksRecs;
-         tempBlocks.getAttributeNames(tempBlocksRecs);
-         for (auto tempBlocksName = tempBlocksRecs.begin(); tempBlocksName != tempBlocksRecs.end(); ++tempBlocksName)
+         for (auto tempBlockIt = tempBlocks.begin(); tempBlockIt != tempBlocks.end(); ++tempBlockIt)
          {
-            const DynamicObject& tempBlock = dv_cast<DynamicObject>(tempBlocks.getAttribute(*tempBlocksName));
+            const DynamicObject& tempBlock = dv_cast<DynamicObject>(tempBlockIt->second);
             const DynamicObject& startTimestamp = dv_cast<DynamicObject>(tempBlock.getAttribute(MTIMFA::START_TIMESTAMP));
             const DateTime& startDatetime = dv_cast<DateTime>(startTimestamp.getAttribute("TIMESTAMP"));
             double startFrac = dv_cast<double>(startTimestamp.getAttribute("FRACTIONAL_SECONDS"));

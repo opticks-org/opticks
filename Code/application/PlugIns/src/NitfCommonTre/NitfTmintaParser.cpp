@@ -128,11 +128,9 @@ bool Nitf::TmintaParser::fromDynamicObject(const DynamicObject& input, ostream& 
    {
       output << toString(dv_cast<unsigned int>(input.getAttribute(TMINTA::NUM_TIME_INT)), 4);
       const DynamicObject& timeInts = dv_cast<DynamicObject>(input.getAttribute(TMINTA::TIME_INT));
-      std::vector<std::string> timeIntsRecs;
-      timeInts.getAttributeNames(timeIntsRecs);
-      for (auto timeIntName = timeIntsRecs.begin(); timeIntName != timeIntsRecs.end(); ++timeIntName)
+      for (auto timeIntIt = timeInts.begin(); timeIntIt != timeInts.end(); ++timeIntIt)
       {
-         const DynamicObject& timeInt = dv_cast<DynamicObject>(timeInts.getAttribute(*timeIntName));
+         const DynamicObject& timeInt = dv_cast<DynamicObject>(timeIntIt->second);
          output << toString(dv_cast<unsigned int>(timeInt.getAttribute(TMINTA::TIME_INTERVAL_INDEX)), 6);
          const DynamicObject& startTimestamp = dv_cast<DynamicObject>(timeInt.getAttribute(TMINTA::START_TIMESTAMP));
          const DateTime& startDatetime = dv_cast<DateTime>(startTimestamp.getAttribute("TIMESTAMP"));

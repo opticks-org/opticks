@@ -119,13 +119,13 @@ namespace Nitf
    * Imports supported metadata for the specified image into a RasterDataDescriptor.
    *
    * @param currentImage
-   *        The index of the image to import.
+   *        The index of the image to import. If pImageSubheader is NULL, this is ignored.
    * @param pFile
    *        The source file.
    * @param pFileHeader
    *        The header of the source file.
    * @param pImageSubheader
-   *        The current image subheader.
+   *        The current image subheader. If NULL, only the file metadata is set.
    * @param pDescriptor
    *        The RasterDataDescriptor to populate.
    * @param parsers

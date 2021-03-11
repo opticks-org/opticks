@@ -10,6 +10,7 @@
 #include "AppConfig.h"
 #include "AppVersion.h"
 #include "DataVariant.h"
+#include "Location.h"
 #include "NitfCamsdaParser.h"
 #include "NitfConstants.h"
 #include "NitfUtilities.h"
@@ -43,25 +44,14 @@ namespace
       {
          return false;
       }
-      {
-         FactoryResource<DynamicObject> obj;
-         output.setAttribute(name, *obj.get());
-      }
-      DynamicObject& obj = dv_cast<DynamicObject>(output.getAttribute(name));
-      if (!obj.setAttribute("ROW", rrrrr) ||
-         !obj.setAttribute("COL", ccccc))
-      {
-         output.removeAttribute(name);
-         return false;
-      }
+      Opticks::PixelOffset iloc(ccccc, rrrrr);
+      output.setAttribute(name, iloc);
       return true;
    }
 
-   std::string ilocToString(const DynamicObject& obj)
+   std::string ilocToString(const Opticks::PixelOffset& iloc)
    {
-      int rrrrr = dv_cast<int>(obj.getAttribute("ROW"));
-      int ccccc = dv_cast<int>(obj.getAttribute("COL"));
-      return toString(rrrrr, 5) + toString(ccccc, 5);
+      return toString(iloc.mY, 5) + toString(iloc.mX, 5);
    }
 }
 
@@ -101,6 +91,7 @@ bool Nitf::CamsdaParser::toDynamicObject(istream& input, size_t numBytes, Dynami
    readField<unsigned int>(input, output, success, CAMSDA::NUM_CAMERA_SETS, 3, errorMessage, buf);
    unsigned int numCamSetsInTre = 0;
    readAndConvertFromStream(input, numCamSetsInTre, success, CAMSDA::NUM_CAMERA_SETS_IN_TRE, 3, errorMessage, buf);
+   output.setAttribute(CAMSDA::NUM_CAMERA_SETS_IN_TRE, numCamSetsInTre);
    readField<unsigned int>(input, output, success, CAMSDA::FIRST_CAMERA_SET_IN_TRE, 3, errorMessage, buf);
 
    {
@@ -169,25 +160,21 @@ bool Nitf::CamsdaParser::fromDynamicObject(const DynamicObject& input, ostream& 
       output << toString(cameraSets.getNumAttributes(), 3);
       output << toString(dv_cast<unsigned int>(input.getAttribute(CAMSDA::FIRST_CAMERA_SET_IN_TRE)), 3);
 
-      std::vector<std::string> cameraSetRecs;
-      cameraSets.getAttributeNames(cameraSetRecs);
-      for (auto cameraSetName = cameraSetRecs.begin(); cameraSetName != cameraSetRecs.end(); ++cameraSetName)
+      for (auto cameraSetIt = cameraSets.begin(); cameraSetIt != cameraSets.end(); ++cameraSetIt)
       {
          const DynamicObject& cameraSet = dv_cast<DynamicObject>(
-                     dv_cast<DynamicObject>(cameraSets.getAttribute(*cameraSetName))
+                     dv_cast<DynamicObject>(cameraSetIt->second)
                      .getAttribute(CAMSDA::CAMERAS));
-         std::vector<std::string> cameraRecs;
-         cameraSet.getAttributeNames(cameraRecs);
-         output << toString(cameraRecs.size(), 3);
-         for (auto cameraName = cameraRecs.begin(); cameraName != cameraRecs.end(); ++cameraName)
+         output << toString(dv_cast<unsigned int>(cameraSet.getAttribute(CAMSDA::NUM_CAMERA_SETS_IN_TRE)), 3);
+         for (auto cameraSetIt = cameraSet.begin(); cameraSetIt != cameraSet.end(); ++cameraSetIt)
          {
-            const DynamicObject& camera = dv_cast<DynamicObject>(cameraSet.getAttribute(*cameraName));
+            const DynamicObject& camera = dv_cast<DynamicObject>(cameraSetIt->second);
             output << sizeString(dv_cast<std::string>(camera.getAttribute(CAMSDA::CAMERA_ID)), 36);
             output << sizeString(dv_cast<std::string>(camera.getAttribute(CAMSDA::CAMERA_DESC)), 80);
             output << sizeString(dv_cast<std::string>(camera.getAttribute(CAMSDA::LAYER_ID)), 36);
             output << toString(dv_cast<unsigned int>(camera.getAttribute(CAMSDA::IDLVL)), 3);
             output << toString(dv_cast<unsigned int>(camera.getAttribute(CAMSDA::IALVL)), 3);
-            output << ilocToString(dv_cast<DynamicObject>(camera.getAttribute(CAMSDA::ILOC)));
+            output << ilocToString(dv_cast<const Opticks::PixelOffset>(camera.getAttribute(CAMSDA::ILOC)));
             output << toString(dv_cast<unsigned int>(camera.getAttribute(CAMSDA::NROWS)), 8);
             output << toString(dv_cast<unsigned int>(camera.getAttribute(CAMSDA::NCOLS)), 8);
          }

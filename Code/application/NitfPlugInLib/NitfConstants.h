@@ -14,6 +14,10 @@
 #include <sstream>
 #include <string>
 
+#define NITF_TAG_START(_tname) namespace _tname { const static std::string TAG = #_tname;
+#define NITF_FIELD(_fname) const static std::string _fname = #_fname;
+#define NITF_TAG_END() }
+
 namespace Nitf
 {
    static const bool POS_SIGN_TRUE = true;
@@ -402,9 +406,9 @@ namespace Nitf
          const static std::string RESERVED2 = "RESERVED2";
       }
 
-
       namespace CAMSDA
       {
+         const static std::string TAG = "CAMSDA";
          const static std::string NUM_CAMERA_SETS = "NUM_CAMERA_SETS";
          const static std::string NUM_CAMERA_SETS_IN_TRE = "NUM_CAMERA_SETS_IN_TRE";
          const static std::string FIRST_CAMERA_SET_IN_TRE = "FIRST_CAMERA_SET_IN_TRE";
@@ -420,7 +424,6 @@ namespace Nitf
          const static std::string NROWS = "NROWS";
          const static std::string NCOLS = "NCOLS";
       }
-
 
       namespace CMETAA
       {
@@ -813,6 +816,7 @@ namespace Nitf
 
       namespace MIMCSA
       {
+         const static std::string TAG = "MIMCSA";
          const static std::string LAYER_ID = "LAYER_ID";
          const static std::string NOMINAL_FRAME_RATE = "NOMINAL_FRAME_RATE";
          const static std::string MIN_FRAME_RATE = "MIN_FRAME_RATE";
@@ -900,6 +904,24 @@ namespace Nitf
          const static std::string END_TIMESTAMP = "END_TIMESTAMP";
          const static std::string IMAGE_SEG_INDEX = "IMAGE_SEG_INDEX";
       }
+
+      NITF_TAG_START(MTIMSA)
+         NITF_FIELD(IMAGE_SEG_INDEX)
+         NITF_FIELD(GEOCOORDS_STATIC)
+         NITF_FIELD(LAYER_ID)
+         NITF_FIELD(CAMERA_SET_INDEX)
+         NITF_FIELD(CAMERA_ID)
+         NITF_FIELD(TIME_INTERVAL_INDEX)
+         NITF_FIELD(TEMP_BLOCK_INDEX)
+         NITF_FIELD(NOMINAL_FRAME_RATE)
+         NITF_FIELD(REFERENCE_FRAME_NUM)
+         NITF_FIELD(BASE_TIMESTAMP)
+         NITF_FIELD(DT_MULTIPLIER)
+         NITF_FIELD(DT_SIZE)
+         NITF_FIELD(NUMBER_FRAMES)
+         NITF_FIELD(NUMBER_DT)
+         NITF_FIELD(DT)
+      NITF_TAG_END()
 
       namespace PATCHA
       {

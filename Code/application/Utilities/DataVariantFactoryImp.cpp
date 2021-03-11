@@ -731,6 +731,8 @@ void DataVariantFactoryImp::initializeMaps()
    registerType<DataVariantValue<LineStyle> >();
    registerType<DataVariantValue<LinkType> >();
    registerType<DataVariantValue<LocationType> >();
+   registerType<DataVariantValue<Opticks::PixelLocation> >();
+   registerType<DataVariantValue<Opticks::PixelOffset> >();
    registerType<DataVariantValue<PanLimitType> >();
    registerType<DataVariantValue<PassArea> >();
    registerType<DataVariantValue<PlotObjectType> >();
