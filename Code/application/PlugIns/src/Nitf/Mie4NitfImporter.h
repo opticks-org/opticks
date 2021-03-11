@@ -27,7 +27,7 @@ namespace Nitf
                                                     const DynamicObject& mimcsa);
 
    private:
-      void loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId);
+      unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId);
    };
 }
 #endif

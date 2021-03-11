@@ -34,8 +34,11 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QRegExp>
 
+#include <boost/icl/interval_map.hpp>
 #include <sstream>
 #include <vector>
+
+using namespace boost::icl;
 
 REGISTER_PLUGIN(OpticksNitf, Mie4NitfImporter, Nitf::Mie4NitfImporter);
 
@@ -244,19 +247,18 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
       return nullptr;
    }
 
-   loadFileInfo(filename, pDescriptor->getName(), layerId);
-
    unsigned int totalRows = cameraData[1].rows;
    unsigned int totalCols = cameraData[1].cols;
-
-   std::vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(1, true, false, true);
-   pDescriptor->setBands(bands);
+   unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId);
 
    std::vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(totalRows, true, false, true);
    pDescriptor->setRows(rows);
 
    std::vector<DimensionDescriptor> cols = RasterUtilities::generateDimensionVector(totalCols, true, false, true);
    pDescriptor->setColumns(cols);
+
+   std::vector<DimensionDescriptor> bands = RasterUtilities::generateDimensionVector(totalBands, true, false, true);
+   pDescriptor->setBands(bands);
 
    pDescriptor->setInterleaveFormat(BSQ);
 
@@ -286,13 +288,16 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
    return pImportDescriptor.release();
 }
 
-void Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId)
+unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId)
 {
    QFileInfo fname(QString::fromStdString(indexfile));
    if (!mie4nitf_regexp.exactMatch(fname.fileName()))
    {
-      return;
+      return 0;
    }
+
+   interval_map<unsigned int, unsigned int, partial_absorber, std::less, inplace_plus, inter_section, right_open_interval<unsigned int> > index;
+
    std::vector<std::string> parent{parentName};
    auto fdir = fname.dir();
    QString filt = QString("%1.%2%3%4i*.*tf").arg(mie4nitf_regexp.cap(1)).arg(mie4nitf_regexp.cap(2)).arg(mie4nitf_regexp.cap(3)).arg(mie4nitf_regexp.cap(4));
@@ -305,16 +310,16 @@ void Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const st
       }
       std::string fname(file->absoluteFilePath().toStdString());
       Nitf::OssimFileResource pNitfFile(file->absoluteFilePath().toStdString());
-      VERIFYNRV(pNitfFile.get() != nullptr);
+      VERIFYRV(pNitfFile.get() != nullptr, 0);
       const ossimNitfFileHeaderV2_X* pFileHeader =
          dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
-      VERIFYNRV(pFileHeader != nullptr);
+      VERIFYRV(pFileHeader != nullptr, 0);
       for (int iidx = 0; iidx < pFileHeader->getNumberOfImages(); ++iidx)
       {
          DataDescriptorResource<RasterDataDescriptor> pDescriptor(dynamic_cast<RasterDataDescriptor*>(Service<ModelServices>()->createDataDescriptor(
             fname + "[" + StringUtilities::toDisplayString(iidx + 1) + "]", TypeConverter::toString<RasterElement>(), parent)));
          const ossimNitfImageHeaderV2_X* pImgHeader = dynamic_cast<const ossimNitfImageHeaderV2_X*>(pNitfFile->getNewImageHeader(iidx));
-         VERIFYNRV(pImgHeader != nullptr);
+         VERIFYRV(pImgHeader != nullptr, 0);
 
          std::map<std::string, TrePlugInResource> parsers;
          std::string errorMessage;
@@ -323,7 +328,7 @@ void Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const st
             continue;
          }
          const DynamicObject* pMetadata = pDescriptor->getMetadata();
-         VERIFYNRV(pMetadata);
+         VERIFYRV(pMetadata, 0);
          try
          {
             const DynamicObject& mtimsas = dv_cast<DynamicObject>(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA + "/" + Nitf::TRE::MTIMSA::TAG));
@@ -333,7 +338,10 @@ void Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const st
                // TODO: Make this more efficient by loading and caching all layer info in one pass
                continue;
             }
+            auto start_frame = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::REFERENCE_FRAME_NUM));
             auto frame_count = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_FRAMES));
+            right_open_interval<unsigned int>::type itv(start_frame, start_frame + frame_count);
+            index += std::make_pair(itv, start_frame);
          }
          catch (std::bad_cast&)
          {
@@ -341,4 +349,5 @@ void Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const st
          }
       }
    }
+   return index.rbegin()->first.upper() - 1;  // open interval
 }
