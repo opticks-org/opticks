@@ -8,6 +8,7 @@
  */
 
 #include "AppVersion.h"
+#include "CachedPager.h"
 #include "ImportDescriptor.h"
 #include "Mie4NitfImporter.h"
 #include "ModelServices.h"
@@ -17,7 +18,9 @@
 #include "NitfTreParser.h"
 #include "NitfUtilities.h"
 #include "PlugInRegistration.h"
+#include "PlugInResource.h"
 #include "Progress.h"
+#include "PlugInArgList.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
@@ -201,7 +204,7 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
       return nullptr;
    }
    // Populate specific fields in the data descriptor or file descriptor from the TREs
-   const DynamicObject* pMetadata = pDescriptor->getMetadata();
+   DynamicObject* pMetadata = pDescriptor->getMetadata();
    VERIFYRV(pMetadata, nullptr);
 
    struct CamData
@@ -249,7 +252,7 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
 
    unsigned int totalRows = cameraData[1].rows;
    unsigned int totalCols = cameraData[1].cols;
-   unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId);
+   unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId, *pMetadata);
 
    std::vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(totalRows, true, false, true);
    pDescriptor->setRows(rows);
@@ -269,7 +272,7 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
 
    // Set the file descriptor
    RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
-      RasterUtilities::generateAndSetFileDescriptor(pDescriptor, filename, layerName, LITTLE_ENDIAN_ORDER));
+      RasterUtilities::generateAndSetFileDescriptor(pDescriptor, filename, layerName, BIG_ENDIAN_ORDER));
    if (pFileDescriptor == nullptr)
    {
       return nullptr;
@@ -288,7 +291,63 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
    return pImportDescriptor.release();
 }
 
-unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId)
+bool Nitf::Mie4NitfImporter::validate(const DataDescriptor* pDescriptor,
+   const std::vector<const DataDescriptor*>& importedDescriptors,
+   std::string& errorMessage) const
+{
+   return true;  // TODO: implement  
+}
+
+bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
+{
+   if (pRaster == nullptr)
+   {
+      return false;
+   }
+
+   std::string filename;
+   unsigned int imageSegment = 99999;
+   {
+      // Get the first file and image index
+      const DynamicObject* pMetadata = pRaster->getMetadata();
+      VERIFY(pMetadata != nullptr);
+
+      auto startFrames = dv_cast<std::vector<unsigned int> >(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/StartFrames"));
+      VERIFY(startFrames.size() > 0);
+      const DynamicObject& frameIndex = dv_cast<DynamicObject>(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices/" 
+                                 + StringUtilities::toDisplayString(startFrames[0])));
+      const Filename& tmp = dv_cast<Filename>(frameIndex.getAttribute("FrameFile"));
+      filename = tmp.getFullPathAndName();
+      imageSegment = dv_cast<unsigned int>(frameIndex.getAttribute("ImageIndex"));
+   }
+
+   FactoryResource<Filename> pFilename;
+   pFilename->setFullPathAndName(filename);
+
+   --imageSegment;  // need 0 based for data structures
+
+   // Create the resource to execute the pager
+   ExecutableResource pPlugIn;
+
+   pPlugIn->setPlugIn("NitfPager");
+   pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
+   pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());
+   pPlugIn->getInArgList().setPlugInArgValue("Segment Number", &imageSegment);
+
+   if (pPlugIn->execute())
+   {
+      RasterPager* pPager = dynamic_cast<RasterPager*>(pPlugIn->getPlugIn());
+      if (pPager != NULL)
+      {
+         pRaster->setPager(pPager);
+         pPlugIn->releasePlugIn();
+         return true;
+      }
+   }
+   return false;
+}
+
+unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata)
 {
    QFileInfo fname(QString::fromStdString(indexfile));
    if (!mie4nitf_regexp.exactMatch(fname.fileName()))
@@ -296,7 +355,14 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
       return 0;
    }
 
+   {
+      FactoryResource<DynamicObject> pTmp;
+      manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices", *pTmp.get());
+   }
+   DynamicObject& frameIndices = dv_cast<DynamicObject>(manifestMetadata.getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices"));
+
    interval_map<unsigned int, unsigned int, partial_absorber, std::less, inplace_plus, inter_section, right_open_interval<unsigned int> > index;
+   std::vector<unsigned int> startFrames;
 
    std::vector<std::string> parent{parentName};
    auto fdir = fname.dir();
@@ -318,6 +384,8 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
       {
          DataDescriptorResource<RasterDataDescriptor> pDescriptor(dynamic_cast<RasterDataDescriptor*>(Service<ModelServices>()->createDataDescriptor(
             fname + "[" + StringUtilities::toDisplayString(iidx + 1) + "]", TypeConverter::toString<RasterElement>(), parent)));
+         RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
+            RasterUtilities::generateAndSetFileDescriptor(pDescriptor.get(), fname, pDescriptor->getName(), BIG_ENDIAN_ORDER));
          const ossimNitfImageHeaderV2_X* pImgHeader = dynamic_cast<const ossimNitfImageHeaderV2_X*>(pNitfFile->getNewImageHeader(iidx));
          VERIFYRV(pImgHeader != nullptr, 0);
 
@@ -342,6 +410,13 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
             auto frame_count = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_FRAMES));
             right_open_interval<unsigned int>::type itv(start_frame, start_frame + frame_count);
             index += std::make_pair(itv, start_frame);
+            startFrames.push_back(start_frame);
+
+            FactoryResource<DynamicObject> pFrameInfo;
+            pFrameInfo->setAttribute("FrameCount", frame_count);
+            pFrameInfo->setAttribute("FrameFile", pFileDescriptor->getFilename());
+            pFrameInfo->setAttribute("ImageIndex", static_cast<unsigned int>(iidx + 1));
+            frameIndices.setAttribute(StringUtilities::toDisplayString(start_frame), *pFrameInfo.get());
          }
          catch (std::bad_cast&)
          {
@@ -349,5 +424,9 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
          }
       }
    }
+   // Since the start frames are stored as strings and will be alphabetically sorted we'll keep
+   // a vector of the numeric values for quickly and easily accessing the sorted list
+   std::sort(startFrames.begin(), startFrames.end());
+   manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/StartFrames", startFrames);
    return index.rbegin()->first.upper() - 1;  // open interval
 }

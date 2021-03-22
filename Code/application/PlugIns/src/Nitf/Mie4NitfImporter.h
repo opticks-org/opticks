@@ -25,9 +25,11 @@ namespace Nitf
       virtual ImportDescriptor* getImportDescriptor(const std::string& filename, ossim_uint32 layerNum,
                                                     const Nitf::OssimFileResource& pFile, const ossimNitfFileHeaderV2_X* pFileHeader,
                                                     const DynamicObject& mimcsa);
+      virtual bool createRasterPager(RasterElement* pRaster) const;
+      bool validate(const DataDescriptor* pDescriptor, const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
    private:
-      unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId);
+      unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata);
    };
 }
 #endif
