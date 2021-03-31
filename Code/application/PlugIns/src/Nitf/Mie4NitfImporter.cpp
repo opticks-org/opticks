@@ -305,34 +305,26 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
       return false;
    }
 
-   std::string filename;
-   unsigned int imageSegment = 99999;
-   {
-      // Get the first file and image index
-      const DynamicObject* pMetadata = pRaster->getMetadata();
-      VERIFY(pMetadata != nullptr);
+   const DynamicObject* pMetadata = pRaster->getMetadata();
+   VERIFY(pMetadata != nullptr);
 
-      auto startFrames = dv_cast<std::vector<unsigned int> >(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/StartFrames"));
-      VERIFY(startFrames.size() > 0);
-      const DynamicObject& frameIndex = dv_cast<DynamicObject>(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices/" 
-                                 + StringUtilities::toDisplayString(startFrames[0])));
-      const Filename& tmp = dv_cast<Filename>(frameIndex.getAttribute("FrameFile"));
-      filename = tmp.getFullPathAndName();
-      imageSegment = dv_cast<unsigned int>(frameIndex.getAttribute("ImageIndex"));
-   }
+   auto startFrames = dv_cast<std::vector<unsigned int> >(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/StartFrames"));
+   auto frameFiles = dv_cast<std::vector<std::string> >(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameFiles"));
+   auto isegs = dv_cast<std::vector<unsigned int> >(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameImageSegments"));
+   VERIFY(startFrames.size() > 0 && startFrames.size() == frameFiles.size() && startFrames.size() == isegs.size());
 
    FactoryResource<Filename> pFilename;
-   pFilename->setFullPathAndName(filename);
-
-   --imageSegment;  // need 0 based for data structures
+   pFilename->setFullPathAndName(frameFiles[0]);
 
    // Create the resource to execute the pager
    ExecutableResource pPlugIn;
 
-   pPlugIn->setPlugIn("NitfPager");
+   pPlugIn->setPlugIn("Mie4NitfPager");
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
-   pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());
-   pPlugIn->getInArgList().setPlugInArgValue("Segment Number", &imageSegment);
+   pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());  // need something here so we'll use the index file
+   pPlugIn->getInArgList().setPlugInArgValue("Start Frames", &startFrames);
+   pPlugIn->getInArgList().setPlugInArgValue("Frame Files", &frameFiles);
+   pPlugIn->getInArgList().setPlugInArgValue("Frame Image Segments", &isegs);
 
    if (pPlugIn->execute())
    {
@@ -355,14 +347,12 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
       return 0;
    }
 
-   {
-      FactoryResource<DynamicObject> pTmp;
-      manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices", *pTmp.get());
-   }
-   DynamicObject& frameIndices = dv_cast<DynamicObject>(manifestMetadata.getAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameIndices"));
-
    interval_map<unsigned int, unsigned int, partial_absorber, std::less, inplace_plus, inter_section, right_open_interval<unsigned int> > index;
    std::vector<unsigned int> startFrames;
+   std::vector<std::string> frameFiles;
+   std::vector<unsigned int> isegs;
+
+   unsigned int start_frame = 0;
 
    std::vector<std::string> parent{parentName};
    auto fdir = fname.dir();
@@ -374,8 +364,8 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
       {
          continue;
       }
-      std::string fname(file->absoluteFilePath().toStdString());
-      Nitf::OssimFileResource pNitfFile(file->absoluteFilePath().toStdString());
+      std::string nitf_fname(file->absoluteFilePath().toStdString());
+      Nitf::OssimFileResource pNitfFile(nitf_fname);
       VERIFYRV(pNitfFile.get() != nullptr, 0);
       const ossimNitfFileHeaderV2_X* pFileHeader =
          dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
@@ -383,9 +373,9 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
       for (int iidx = 0; iidx < pFileHeader->getNumberOfImages(); ++iidx)
       {
          DataDescriptorResource<RasterDataDescriptor> pDescriptor(dynamic_cast<RasterDataDescriptor*>(Service<ModelServices>()->createDataDescriptor(
-            fname + "[" + StringUtilities::toDisplayString(iidx + 1) + "]", TypeConverter::toString<RasterElement>(), parent)));
+            nitf_fname + "[" + StringUtilities::toDisplayString(iidx + 1) + "]", TypeConverter::toString<RasterElement>(), parent)));
          RasterFileDescriptor* pFileDescriptor = dynamic_cast<RasterFileDescriptor*>(
-            RasterUtilities::generateAndSetFileDescriptor(pDescriptor.get(), fname, pDescriptor->getName(), BIG_ENDIAN_ORDER));
+            RasterUtilities::generateAndSetFileDescriptor(pDescriptor.get(), nitf_fname, pDescriptor->getName(), BIG_ENDIAN_ORDER));
          const ossimNitfImageHeaderV2_X* pImgHeader = dynamic_cast<const ossimNitfImageHeaderV2_X*>(pNitfFile->getNewImageHeader(iidx));
          VERIFYRV(pImgHeader != nullptr, 0);
 
@@ -397,36 +387,31 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
          }
          const DynamicObject* pMetadata = pDescriptor->getMetadata();
          VERIFYRV(pMetadata, 0);
-         try
+         auto mtimsas_dv = pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA + "/" + Nitf::TRE::MTIMSA::TAG);
+         unsigned int frame_count = 1;
+         if (mtimsas_dv.isValid())
          {
-            const DynamicObject& mtimsas = dv_cast<DynamicObject>(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA + "/" + Nitf::TRE::MTIMSA::TAG));
+            const DynamicObject& mtimsas = dv_cast<DynamicObject>(mtimsas_dv);
             const DynamicObject& mtimsa = dv_cast<DynamicObject>(mtimsas.getAttribute("0"));
             if (dv_cast<std::string>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::LAYER_ID)) != layerId)
             {
                // TODO: Make this more efficient by loading and caching all layer info in one pass
                continue;
             }
-            auto start_frame = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::REFERENCE_FRAME_NUM));
-            auto frame_count = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_FRAMES));
-            right_open_interval<unsigned int>::type itv(start_frame, start_frame + frame_count);
-            index += std::make_pair(itv, start_frame);
-            startFrames.push_back(start_frame);
+            start_frame = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::REFERENCE_FRAME_NUM));
+            frame_count = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_FRAMES));
+         }
+         right_open_interval<unsigned int>::type itv(start_frame, start_frame + frame_count);
+         index += std::make_pair(itv, start_frame);
 
-            FactoryResource<DynamicObject> pFrameInfo;
-            pFrameInfo->setAttribute("FrameCount", frame_count);
-            pFrameInfo->setAttribute("FrameFile", pFileDescriptor->getFilename());
-            pFrameInfo->setAttribute("ImageIndex", static_cast<unsigned int>(iidx + 1));
-            frameIndices.setAttribute(StringUtilities::toDisplayString(start_frame), *pFrameInfo.get());
-         }
-         catch (std::bad_cast&)
-         {
-            continue;  // image segment that isn't motion imagery so we'll just ignore it
-         }
+         startFrames.push_back(start_frame);
+         frameFiles.push_back(nitf_fname);
+         isegs.push_back(iidx);
+         start_frame += frame_count;
       }
    }
-   // Since the start frames are stored as strings and will be alphabetically sorted we'll keep
-   // a vector of the numeric values for quickly and easily accessing the sorted list
-   std::sort(startFrames.begin(), startFrames.end());
    manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/StartFrames", startFrames);
+   manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameFiles", frameFiles);
+   manifestMetadata.setAttributeByPath(Nitf::NITF_METADATA + "/MIE4NITF/FrameImageSegments", isegs);
    return index.rbegin()->first.upper() - 1;  // open interval
 }

@@ -1,5 +1,6 @@
 set (HEADER_FILES
     Mie4NitfImporter.h
+    Mie4NitfPager.h
     NitfDesExporter.h
     NitfExporter.h
     NitfImporter.h
@@ -12,6 +13,7 @@ set (HEADER_FILES
 set (SOURCE_FILES
     ModuleManager.cpp
     Mie4NitfImporter.cpp
+    Mie4NitfPager.cpp
     NitfDesExporter.cpp
     NitfExporter.cpp
     NitfImporter.cpp
