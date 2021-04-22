@@ -12,6 +12,8 @@
 
 #include "NitfImporterShell.h"
 
+class QStringList;
+
 namespace Nitf
 {
    class Mie4NitfImporter : public Nitf::NitfImporterShell
@@ -29,7 +31,7 @@ namespace Nitf
       bool validate(const DataDescriptor* pDescriptor, const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
 
    private:
-      unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata);
+      unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata, QStringList& fileList);
    };
 }
 #endif

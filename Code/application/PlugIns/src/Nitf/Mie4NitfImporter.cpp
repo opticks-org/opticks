@@ -32,6 +32,7 @@
 #include <ossim/support_data/ossimNitfFileHeaderV2_X.h>
 #include <ossim/support_data/ossimNitfImageHeader.h>
 #include <ossim/support_data/ossimNitfImageHeaderV2_X.h>
+#include <ossim/support_data/ossimNitfTextHeaderV2_1.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
@@ -45,19 +46,6 @@ using namespace boost::icl;
 
 REGISTER_PLUGIN(OpticksNitf, Mie4NitfImporter, Nitf::Mie4NitfImporter);
 
-namespace
-{
-   // Defined in NGA.STND.0044_1.3.1
-   // Matched section indices are below.
-   QRegExp mie4nitf_regexp("(.*)\\."      // 1:Match base portion of the name. Should probably limit to valid filename characters but we won't get an invalid filename into the methods
-                           "(r[0-9]+)"    // 2:Spatial resolution factor
-                           "(t[0-9]+)"    // 3:Temporal resolution factor
-                           "(q[0-9]+)"    // 4:Compression quality
-                           "(c[0-9]+)?"   // 5:Camera set. If there's only one camera set this may be missing
-                           "(i[0-9]+)"    // 6:Index of the frame set. 0 for the manifest file.
-                           "\\.ni?tf",    // 7:.nitf and .ntf are both valid.
-      Qt::CaseInsensitive);
-}
 
 Nitf::Mie4NitfImporter::Mie4NitfImporter()
 {
@@ -75,31 +63,26 @@ unsigned char Nitf::Mie4NitfImporter::getFileAffinity(const std::string& filenam
    if (rval == Importer::CAN_LOAD)
    {
       rval = Importer::CAN_NOT_LOAD;
-      // quick check on the filename, there's a specific format for MIE4NITF
-      QFileInfo fname(QString::fromStdString(filename));
-      if (mie4nitf_regexp.exactMatch(fname.fileName()) && mie4nitf_regexp.cap(6) == "i0")  // only use the manifest file
+      Nitf::OssimFileResource pNitfFile(filename);
+      if (pNitfFile.get() == nullptr)
       {
-         Nitf::OssimFileResource pNitfFile(filename);
-         if (pNitfFile.get() == nullptr)
+         return rval;
+      }
+      const ossimNitfFileHeaderV2_X* pFileHeader =
+         dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
+      if (pFileHeader == nullptr)
+      {
+         return rval;
+      }
+      for (auto tagIdx = 0; tagIdx < pFileHeader->getNumberOfTags(); ++tagIdx)
+      {
+         ossimNitfTagInformation tagInfo;
+         if (pFileHeader->getTagInformation(tagInfo, tagIdx))
          {
-            return rval;
-         }
-         const ossimNitfFileHeaderV2_X* pFileHeader =
-            dynamic_cast<const ossimNitfFileHeaderV2_X*>(pNitfFile->getHeader());
-         if (pFileHeader == nullptr)
-         {
-            return rval;
-         }
-         for (auto tagIdx = 0; tagIdx < pFileHeader->getNumberOfTags(); ++tagIdx)
-         {
-            ossimNitfTagInformation tagInfo;
-            if (pFileHeader->getTagInformation(tagInfo, tagIdx))
+            if (tagInfo.getTagName() == "MIMCSA")
             {
-               if (tagInfo.getTagName() == "MIMCSA")
-               {
-                  rval = Importer::CAN_LOAD + 10;
-                  break;
-               }
+               rval = Importer::CAN_LOAD + 10;
+               break;
             }
          }
       }
@@ -250,9 +233,18 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
       return nullptr;
    }
 
+   const ossimNitfTextHeaderV2_1* pTextHeader = dynamic_cast<const ossimNitfTextHeaderV2_1*>(pFile->getNewTextHeader(0));
+   if (pTextHeader == nullptr)
+   {
+      return nullptr;
+   }
+   const std::vector<unsigned char> textData = pTextHeader->getTextData();
+   auto qTextData = QString::fromLocal8Bit((const char*)&textData.front(), textData.size());
+   auto indexList = qTextData.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+
    unsigned int totalRows = cameraData[1].rows;
    unsigned int totalCols = cameraData[1].cols;
-   unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId, *pMetadata);
+   unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId, *pMetadata, indexList);
 
    std::vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(totalRows, true, false, true);
    pDescriptor->setRows(rows);
@@ -339,13 +331,9 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
    return false;
 }
 
-unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata)
+unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata, QStringList& fileList)
 {
    QFileInfo fname(QString::fromStdString(indexfile));
-   if (!mie4nitf_regexp.exactMatch(fname.fileName()))
-   {
-      return 0;
-   }
 
    interval_map<unsigned int, unsigned int, partial_absorber, std::less, inplace_plus, inter_section, right_open_interval<unsigned int> > index;
    std::vector<unsigned int> startFrames;
@@ -356,15 +344,17 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
 
    std::vector<std::string> parent{parentName};
    auto fdir = fname.dir();
-   QString filt = QString("%1.%2%3%4i*.*tf").arg(mie4nitf_regexp.cap(1)).arg(mie4nitf_regexp.cap(2)).arg(mie4nitf_regexp.cap(3)).arg(mie4nitf_regexp.cap(4));
-   auto files = fdir.entryInfoList(QStringList() << filt, QDir::Files, QDir::Name);
-   for (auto file = files.begin(); file != files.end(); ++file)
+   for (auto qfile = fileList.begin(); qfile != fileList.end(); ++qfile)
    {
-      if (file->fileName() == fname.fileName())
+      if (*qfile == fname.fileName())  // shouldn't happen but just to make sure we don't try to load the manifest file
       {
          continue;
       }
-      std::string nitf_fname(file->absoluteFilePath().toStdString());
+      if (!fdir.exists(*qfile))  // If the file doesn't exist we can still load
+      {
+         continue;
+      }
+      std::string nitf_fname(fdir.absoluteFilePath(*qfile).toStdString());
       Nitf::OssimFileResource pNitfFile(nitf_fname);
       VERIFYRV(pNitfFile.get() != nullptr, 0);
       const ossimNitfFileHeaderV2_X* pFileHeader =
