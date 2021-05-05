@@ -311,12 +311,45 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
    // Create the resource to execute the pager
    ExecutableResource pPlugIn;
 
-   pPlugIn->setPlugIn("Mie4NitfPager");
+   const std::string attributePath[] =
+   {
+      Nitf::NITF_METADATA,
+      Nitf::IMAGE_SUBHEADER,
+      Nitf::ImageSubheaderFieldNames::COMPRESSION,
+      END_METADATA_NAME
+   };
+   std::string imageCompression = pMetadata->getAttributeByPath(attributePath).toDisplayString();
+   bool isJpeg2000 = (imageCompression == Nitf::ImageSubheaderFieldValues::IC_C8) ||
+                     (imageCompression == Nitf::ImageSubheaderFieldValues::IC_M8);
+
+   if (isJpeg2000)
+   {
+      pPlugIn->setPlugIn("Mie4NitfPager");
+   }
+   else
+   {
+      pPlugIn->setPlugIn("Mie4NitfJpeg2000Pager");
+   }
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());  // need something here so we'll use the index file
    pPlugIn->getInArgList().setPlugInArgValue("Start Frames", &startFrames);
    pPlugIn->getInArgList().setPlugInArgValue("Frame Files", &frameFiles);
-   pPlugIn->getInArgList().setPlugInArgValue("Frame Image Segments", &isegs);
+   if (isJpeg2000)
+   {
+      pPlugIn->getInArgList().setPlugInArgValue("Frame Image Segments", &isegs);
+   }
+   else
+   {
+      std::vector<uint64_t> offsets;
+      std::vector<uint64_t> sizes;
+      for (int i = 0; i < frameFiles.size(); ++i)
+      {
+         offsets.push_back(getImageOffset(frameFiles[i], isegs[i]));
+         sizes.push_back(getImageSize(frameFiles[i], isegs[i]));
+      }
+      pPlugIn->getInArgList().setPlugInArgValue("Offsets", &offsets);
+      pPlugIn->getInArgList().setPlugInArgValue("Sizes", &sizes);
+   }
 
    if (pPlugIn->execute())
    {

@@ -23,6 +23,7 @@ set (HEADER_FILES
    Interfaces/InterpolationComboBox.h
    Interfaces/InterpreterUtilities.h
    Interfaces/IntValidator.h
+   Interfaces/Jpeg2000Utilities.h
    Interfaces/MatrixFunctions.h
    Interfaces/MessageLogResource.h
    Interfaces/ModifierWidget.h
@@ -171,6 +172,7 @@ set (SOURCE_FILES
    InterpolationComboBox.cpp
    InterpreterUtilities.cpp
    IntValidator.cpp
+   Jpeg2000Utilities.cpp
    LabeledSection.cpp
    LabeledSectionGroup.cpp
    LatLonLineEdit.cpp

@@ -8,7 +8,6 @@ set (HEADER_FILES
    Jpeg2000Exporter.h
    Jpeg2000Importer.h
    Jpeg2000Pager.h
-   Jpeg2000Utilities.h
    JpegDetails.h
    JpegExportOptionsWidget.h
    OptionsBmpExporter.h
@@ -36,7 +35,6 @@ set (SOURCE_FILES
    Jpeg2000Exporter.cpp
    Jpeg2000Importer.cpp
    Jpeg2000Pager.cpp
-   Jpeg2000Utilities.cpp
    JpegDetails.cpp
    JpegExportOptionsWidget.cpp
    ModuleManager.cpp

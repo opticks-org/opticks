@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B8F60BCE-BBAA-3D32-A37F-98E20291ED4D}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\SelectLibraryConfigurations.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCXXCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeRCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeSystem.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\CMakeParseArguments.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindFreetype.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOS.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGit.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJPEG.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJsonCpp.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageHandleStandardArgs.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageMessage.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimCommonVariables.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimUtilities.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimConfig.h.in;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimVersion.h.in;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfig.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfigVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-debug.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-release.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\tiff\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\SelectLibraryConfigurations.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCXXCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeRCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeSystem.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\CMakeParseArguments.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindFreetype.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOS.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGit.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJPEG.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJsonCpp.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageHandleStandardArgs.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageMessage.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimCommonVariables.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimUtilities.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimConfig.h.in;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimVersion.h.in;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfig.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfigVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-debug.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-release.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\tiff\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\SelectLibraryConfigurations.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCXXCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeRCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeSystem.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\CMakeParseArguments.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindFreetype.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOS.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGit.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJPEG.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJsonCpp.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageHandleStandardArgs.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageMessage.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimCommonVariables.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimUtilities.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimConfig.h.in;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimVersion.h.in;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfig.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfigVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-debug.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-release.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\tiff\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeDetermineSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystem.cmake.in;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\CheckTypeSize.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.19\Modules\SelectLibraryConfigurations.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeCXXCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeRCCompiler.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\3.19.1\CMakeSystem.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\CMakeParseArguments.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindFreetype.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOS.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGEOTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindGit.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJPEG.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindJsonCpp.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageHandleStandardArgs.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindPackageMessage.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\FindTIFF.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimCommonVariables.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimUtilities.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\cmake\CMakeModules\OssimVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimConfig.h.in;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\src\ossimVersion.h.in;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\jpeg\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfig.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaConfigVersion.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-debug.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets-release.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\liblzmaTargets.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\liblzma\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\share\tiff\vcpkg-cmake-wrapper.cmake;C:\dev\opticks-org\opticks\Dependencies\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\ZERO_CHECK.vcxproj">
+      <Project>{61EF8845-3831-3700-B75B-1240C997AD00}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\src\ossim.vcxproj">
+      <Project>{0E239FB4-A4A3-3232-A449-B7BD320913B8}</Project>
+      <Name>ossim</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

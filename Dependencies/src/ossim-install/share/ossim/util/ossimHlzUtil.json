@@ -1,0 +1,66 @@
+{
+    "name": "ossim-hlz",
+    "description": {
+        "version" : "1.00",
+        "short_description": "OSSIM HLZ Utility",
+        "long_description": "Utility for finding suitable helicopter landing zones surrounding a speciflzied target location."
+     },
+     "inputs": {
+        "exclude_regions": {         
+            "datatype": "list:string:csv_file",
+            "description": "List of raster image(s) representing mask files that defines regions to be excluded from HLZ solutions",
+            "required": false    
+        },
+        "include_regions": {         
+            "datatype": "list:file:csv_file",
+            "description": "List of raster image(s) representing mask files that defines regions that must be included in HLZ solutions",
+            "required": false    
+        },
+        "max_roughness": {         
+            "datatype": "double:positive_range",
+            "description": "Threshold for acceptable landing zone terrain roughness (meters).",
+            "required": false    
+        },
+        "max_slope": {         
+            "datatype": "double:positive_range",
+            "description": "Threshold for acceptable landing zone terrain slope (deg).",
+            "required": false    
+        },
+        "min_lz_radius": {         
+            "datatype": "double:positive_range",
+            "description": "Minimum radius of landing zone (meters)",
+            "required": true    
+        },
+        "point_clouds": {
+            "datatype": "list:file:csv",
+            "description": "Specifies list of ancillary point-cloud data for level-2 search for obstructions.",
+            "required": false    
+        },
+        "hlz_coding": {
+            "datatype": "int:byte_range",
+            "description": "Specifies the pixel values (0-255) for the pixels representing unsuitable terrain.",
+            "required": false    
+        },
+        "marginal_zone_index": {
+            "datatype": "int:byte_range",
+            "description": "Specifies the pixel values (0-255) for the pixels representing marginal terrain.",
+            "required": false    
+        },
+        "good_zone_index": {
+            "datatype": "int:byte_range",
+            "description": "Specifies the pixel values (0-255) for the pixels representing good terrain.",
+            "required": false    
+        },
+        "outputFile": {
+            "datatype": "url:wms",
+            "description": "The URL/filename of the WMS server where the file is now accessible",
+            "required": true
+        }
+    },
+    "outputs": { },
+    "ranges" : {
+       "azimuth_range": [ 0.0, 360.0 ],
+       "positive_range": [ 0, "+inf"],
+       "byte_range": [ 0, 255 ]
+    }
+}
