@@ -22,6 +22,9 @@
 class Mie4NitfJpeg2000Pager : public CachedPager
 {
 public:
+   static const std::string const FrameImageSegmentsArg() { return "Frame Image Segments"; }
+
+public:
    typedef std::map<unsigned int, boost::tuple<std::string, uint64_t, uint64_t> > FrameIndexType;
 
 public:

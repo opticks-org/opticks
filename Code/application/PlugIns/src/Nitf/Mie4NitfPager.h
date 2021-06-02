@@ -24,6 +24,13 @@ namespace Nitf
    class Mie4NitfPager : public CachedPager
    {
    public:
+      static const std::string const FrameImageSegmentsArg() { return "Frame Image Segments"; }
+      static const std::string const StartFramesArg() { return "Start Frames"; }
+      static const std::string const FrameFilesArg() { return "Frame Files"; }
+      static const std::string const OffsetsArg() { return "Offsets"; }
+      static const std::string const SizesArg() { return "Sizes"; }
+
+   public:
       typedef std::map<unsigned int, std::pair<std::string, unsigned int> > FrameIndexType;
 
    public:

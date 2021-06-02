@@ -11,6 +11,8 @@
 #include "CachedPager.h"
 #include "ImportDescriptor.h"
 #include "Mie4NitfImporter.h"
+#include "Mie4NitfJpeg2000Pager.h"
+#include "Mie4NitfPager.h"
 #include "ModelServices.h"
 #include "NitfFileHeader.h"
 #include "NitfMetadataParsing.h"
@@ -199,6 +201,7 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
       unsigned int rows;
       unsigned int cols;
    };
+   unsigned int idlvl = 0;
    std::map<unsigned int, CamData> cameraData;
    const DynamicObject& camSdas = dv_cast<DynamicObject>(pMetadata->getAttributeByPath(Nitf::NITF_METADATA + "/" + Nitf::TRE_METADATA + "/" + Nitf::TRE::CAMSDA::TAG));
    for (auto camSdaIt = camSdas.begin(); camSdaIt != camSdas.end(); ++camSdaIt)
@@ -216,7 +219,7 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
             {
                // This camera is in this layer
                auto cameraId = dv_cast<std::string>(camera.getAttribute(Nitf::TRE::CAMSDA::CAMERA_ID));
-               auto idlvl = dv_cast<unsigned int>(camera.getAttribute(Nitf::TRE::CAMSDA::IDLVL));
+               idlvl = dv_cast<unsigned int>(camera.getAttribute(Nitf::TRE::CAMSDA::IDLVL));
                auto ialvl = dv_cast<unsigned int>(camera.getAttribute(Nitf::TRE::CAMSDA::IALVL));
                const Opticks::PixelOffset& iloc = dv_cast<const Opticks::PixelOffset>(camera.getAttribute(Nitf::TRE::CAMSDA::ILOC));
                auto rows = dv_cast<unsigned int>(camera.getAttribute(Nitf::TRE::CAMSDA::NROWS));
@@ -225,12 +228,6 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
             }
          }
       }
-   }
-   // Now we have all the camera data we can determine the full size of the layer element
-   if (cameraData.size() > 1)
-   {
-      // TODO: NOT YET SUPPORTED
-      return nullptr;
    }
 
    const ossimNitfTextHeaderV2_1* pTextHeader = dynamic_cast<const ossimNitfTextHeaderV2_1*>(pFile->getNewTextHeader(0));
@@ -242,8 +239,8 @@ ImportDescriptor* Nitf::Mie4NitfImporter::getImportDescriptor(
    auto qTextData = QString::fromLocal8Bit((const char*)&textData.front(), textData.size());
    auto indexList = qTextData.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
 
-   unsigned int totalRows = cameraData[1].rows;
-   unsigned int totalCols = cameraData[1].cols;
+   unsigned int totalRows = cameraData[idlvl].rows;
+   unsigned int totalCols = cameraData[idlvl].cols;
    unsigned int totalBands = loadFileInfo(filename, pDescriptor->getName(), layerId, *pMetadata, indexList);
 
    std::vector<DimensionDescriptor> rows = RasterUtilities::generateDimensionVector(totalRows, true, false, true);
@@ -332,11 +329,11 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
    }
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());  // need something here so we'll use the index file
-   pPlugIn->getInArgList().setPlugInArgValue("Start Frames", &startFrames);
-   pPlugIn->getInArgList().setPlugInArgValue("Frame Files", &frameFiles);
+   pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::StartFramesArg(), &startFrames);
+   pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::FrameFilesArg(), &frameFiles);
    if (isJpeg2000)
    {
-      pPlugIn->getInArgList().setPlugInArgValue("Frame Image Segments", &isegs);
+      pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfJpeg2000Pager::FrameImageSegmentsArg(), &isegs);
    }
    else
    {
@@ -347,8 +344,8 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
          offsets.push_back(getImageOffset(frameFiles[i], isegs[i]));
          sizes.push_back(getImageSize(frameFiles[i], isegs[i]));
       }
-      pPlugIn->getInArgList().setPlugInArgValue("Offsets", &offsets);
-      pPlugIn->getInArgList().setPlugInArgValue("Sizes", &sizes);
+      pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::OffsetsArg(), &offsets);
+      pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::SizesArg(), &sizes);
    }
 
    if (pPlugIn->execute())

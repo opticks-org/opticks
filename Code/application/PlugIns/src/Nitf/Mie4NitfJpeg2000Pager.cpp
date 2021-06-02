@@ -12,6 +12,7 @@
 #include "DataRequest.h"
 #include "DimensionDescriptor.h"
 #include "Mie4NitfJpeg2000Pager.h"
+#include "Mie4NitfPager.h"
 #include "Jpeg2000Utilities.h"
 #include "ObjectResource.h"
 #include "PlugInArgList.h"
@@ -61,10 +62,10 @@ bool Mie4NitfJpeg2000Pager::getInputSpecification(PlugInArgList*& pArgList)
    }
 
    VERIFY(pArgList != NULL);
-   VERIFY(pArgList->addArg<std::vector<unsigned int> >("Start Frames"));
-   VERIFY(pArgList->addArg<std::vector<std::string> >("Frame Files"));
-   VERIFY(pArgList->addArg<std::vector<uint64_t> >("Offsets"));
-   VERIFY(pArgList->addArg<std::vector<uint64_t> >("Sizes"));
+   VERIFY(pArgList->addArg<std::vector<unsigned int> >(Nitf::Mie4NitfPager::StartFramesArg()));
+   VERIFY(pArgList->addArg<std::vector<std::string> >(Nitf::Mie4NitfPager::FrameFilesArg()));
+   VERIFY(pArgList->addArg<std::vector<uint64_t> >(Nitf::Mie4NitfPager::OffsetsArg()));
+   VERIFY(pArgList->addArg<std::vector<uint64_t> >(Nitf::Mie4NitfPager::SizesArg()));
 
    return true;
 }
@@ -79,24 +80,24 @@ bool Mie4NitfJpeg2000Pager::parseInputArgs(PlugInArgList* pArgList)
    VERIFY(pArgList != NULL);
 
    std::vector<uint64_t> offset;
-   if (!pArgList->getPlugInArgValue("Start Frames", offset))
+   if (!pArgList->getPlugInArgValue(Nitf::Mie4NitfPager::OffsetsArg(), offset))
    {
       return false;
    }
 
    std::vector<uint64_t> size;
-   if (!pArgList->getPlugInArgValue("Start Frames", size))
+   if (!pArgList->getPlugInArgValue(Nitf::Mie4NitfPager::SizesArg(), size))
    {
       return false;
    }
 
    std::vector<unsigned int> startFrames;
-   if (!pArgList->getPlugInArgValue("Start Frames", startFrames))
+   if (!pArgList->getPlugInArgValue(Nitf::Mie4NitfPager::StartFramesArg(), startFrames))
    {
       return false;
    }
    std::vector<std::string> frameFiles;
-   if (!pArgList->getPlugInArgValue("Frame Files", frameFiles))
+   if (!pArgList->getPlugInArgValue(Nitf::Mie4NitfPager::FrameFilesArg(), frameFiles))
    {
       return false;
    }
@@ -295,16 +296,10 @@ CachedPage::UnitPtr Mie4NitfJpeg2000Pager::populateImageData(const DimensionDesc
    }
 
    // Create the output data
-   unsigned int numPixels = concurrentRows * concurrentColumns * allBands.size();
-   unsigned int numBytes = numPixels * getBytesPerBand();
+   size_t numPixels = concurrentRows * concurrentColumns * allBands.size();
+   size_t numBytes = numPixels * getBytesPerBand();
 
-   if (numPixels > static_cast<unsigned int>(std::numeric_limits<int>::max()))   // ArrayResource only allocates up
-                                                                                 // to INT_MAX number of values
-   {
-      return CachedPage::UnitPtr();
-   }
-
-   ArrayResource<Out> pDestination(numPixels, true);
+   std::unique_ptr<Out> pDestination(new(std::nothrow) Out[numPixels]);
    char* pDest = reinterpret_cast<char*>(pDestination.get());
    if (pDest == NULL)
    {
@@ -356,13 +351,12 @@ CachedPage::UnitPtr Mie4NitfJpeg2000Pager::populateImageData(const DimensionDesc
    {
       for (unsigned int c = 0; c < concurrentColumns; ++c)
       {
-         for (std::vector<DimensionDescriptor>::size_type b = 0; b < allBands.size(); ++b)
+         unsigned int b = 0;  // don't support multi-band frames currentlly
+         for (int f = 0; f < bandFactor; ++f)
          {
-            for (int f = 0; f < bandFactor; ++f)
-            {
-               unsigned int componentIndex = b * bandFactor + f;
-               int imageWidth = pImage->comps[componentIndex].w;
-               int imageHeight = pImage->comps[componentIndex].h;
+            unsigned int componentIndex = b * bandFactor + f;
+            int imageWidth = pImage->comps[componentIndex].w;
+            int imageHeight = pImage->comps[componentIndex].h;
 
                int columnSpan = 1;
                if (imageWidth != static_cast<int>(concurrentColumns))
@@ -387,7 +381,6 @@ CachedPage::UnitPtr Mie4NitfJpeg2000Pager::populateImageData(const DimensionDesc
                }
 
                pDest += copySize; // Increment by up to 16 bits (2 bytes).
-            }
          }
       }
    }
