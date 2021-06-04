@@ -35,6 +35,7 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QRegExp>
 #include <QtCore/QString>
 
 using namespace std;
@@ -113,7 +114,9 @@ DynamicModule* PlugInManagerServicesImp::getDynamicModule(const string& value)
    //Only attempt to load a plug-in .dll if it's not in the excluded list.
    QFileInfo modulePath(QString::fromStdString(value));
    QString fileName = modulePath.fileName().toLower();
-   if (std::find(mExcludedPlugIns.begin(), mExcludedPlugIns.end(), fileName.toStdString()) != mExcludedPlugIns.end())
+   // There are lots of qt5 dll's so we'll just check for anything that starts with qt5 instead of individually listing them
+   if (std::find(mExcludedPlugIns.begin(), mExcludedPlugIns.end(), fileName.toStdString()) != mExcludedPlugIns.end()
+       || fileName.startsWith("qt5"))
    {
       return new DynamicModuleImp();
    }
@@ -422,11 +425,8 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    }
 
    // Add new modules and update existing modules
-   string autoImporter = "AutoImporter";
-#if defined(DEBUG)
-   autoImporter += "d";
-#endif
-   autoImporter += dlExtension;
+   // In debug builds, there might be a 'd' in the filename
+   QRegExp autoImporter(QString("AutoImporter(d)?%1").arg(QString::fromStdString(dlExtension)));
    finder.findFile(plugInPath, "*" + dlExtension);
 
    bool bSuccess = finder.findNextFile();
@@ -441,7 +441,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    while (bSuccess == true)
    {
       libraryFilename = finder.getFileName();
-      if (libraryFilename == autoImporter)
+      if (autoImporter.exactMatch(QString::fromStdString(libraryFilename)))
       {
          //skip AutoImporter, we will load it later
          //outside this loop
@@ -515,7 +515,7 @@ void PlugInManagerServicesImp::buildPlugInList(const string& plugInPath)
    //load AutoImporter as the last plug-in, so that it can
    //properly determine its extensions based upon extensions
    //of all other importers.
-   if (finder.findFile(plugInPath, autoImporter) == true)
+   if (finder.findFile(plugInPath, "AutoImporter*" + dlExtension) == true)
    {
       finder.findNextFile();
       string autoImporterPath;

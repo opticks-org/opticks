@@ -25,12 +25,14 @@ set (MOC_HEADERS
     FramerateWidget.h
     ViewResolutionWidget.h
 )
-include(${QT_USE_FILE})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${avutil_INCLUDE_DIRS})
+# Don't include avutil includes as it points to include/libavutil
+# This causes a conflict with time.h. Just make sure include/ is include
+# The path and always do a #include <libavutil/avutil.h>
+#include_directories(${avutil_INCLUDE_DIRS})
 include_directories(${avformat_INCLUDE_DIRS})
 include_directories(${avcodec_INCLUDE_DIRS})
 include_directories(${swscale_INCLUDE_DIRS})

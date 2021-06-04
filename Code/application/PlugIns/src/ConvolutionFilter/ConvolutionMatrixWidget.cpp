@@ -24,7 +24,7 @@
 #include "SpatialDataView.h"
 #include "WorkspaceWindow.h"
 
-#include <ossim/matrix/newmat.h>
+#include <eigen3/Eigen/Dense>
 #include <QtGui/QBitmap>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QInputDialog>
@@ -374,7 +374,7 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
    else if (mpMatrixButtons->buttonRole(pButton) == QDialogButtonBox::ApplyRole || 
             subsetClicked)
    {
-      NEWMAT::Matrix kernel = getCurrentMatrix() / mpDivisor->value();
+      EigenRowMajorXf kernel = getCurrentMatrix() / mpDivisor->value();
 
       ProgressResource progress("Convolve data");
       SpatialDataView* pView = dynamic_cast<SpatialDataView*>(
@@ -506,7 +506,7 @@ void ConvolutionMatrixWidget::matrixButtonPressed(QAbstractButton* pButton)
          pConv->getInArgList().setPlugInArgValue<SpatialDataView>(Executable::ViewArg(), NULL);
          std::string resultName = pRaster->getName() + ":Convolved";
          pConv->getInArgList().setPlugInArgValue("Result Name", &resultName);
-         pConv->getInArgList().setPlugInArgValueLoose("Kernel", &kernel);
+         pConv->getInArgList().setPlugInArgValue("Kernel", &kernel);
          pConv->getInArgList().setPlugInArgValue("Band Numbers", &bandNums);
          double offset = mpOffset->value();
          pConv->getInArgList().setPlugInArgValue("Offset", &offset);
@@ -557,13 +557,13 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
       QMap<QString, FilterSettings>::iterator pos = mPresets.find(filterName);
       if (pos != mPresets.end())
       {
-         NEWMAT::Matrix kernel = pos->mKernel;
-         mpLink->setChecked(kernel.Nrows() == kernel.Ncols());
-         mpHeightSlider->setValue(sizeToSlider(kernel.Nrows()));
-         mpWidthSlider->setValue(sizeToSlider(kernel.Ncols()));
-         for (int row = 0; row < kernel.Nrows(); ++row)
+         EigenRowMajorXf kernel = pos->mKernel;
+         mpLink->setChecked(kernel.rows() == kernel.cols());
+         mpHeightSlider->setValue(sizeToSlider(kernel.rows()));
+         mpWidthSlider->setValue(sizeToSlider(kernel.cols()));
+         for (int row = 0; row < kernel.rows(); ++row)
          {
-            for (int col = 0; col < kernel.Ncols(); ++col)
+            for (int col = 0; col < kernel.cols(); ++col)
             {
                mpFilter->item(row, col)->setData(Qt::DisplayRole, QVariant(kernel(row+1, col+1)));
             }
@@ -575,12 +575,12 @@ void ConvolutionMatrixWidget::presetButtonPressed(QAbstractButton* pButton)
    }
 }
 
-NEWMAT::Matrix ConvolutionMatrixWidget::getCurrentMatrix() const
+EigenRowMajorXf ConvolutionMatrixWidget::getCurrentMatrix() const
 {
-   NEWMAT::Matrix kernel(mpFilter->rowCount(), mpFilter->columnCount());
-   for (int row = 0; row < kernel.Nrows(); ++row)
+   EigenRowMajorXf kernel(mpFilter->rowCount(), mpFilter->columnCount());
+   for (int row = 0; row < kernel.rows(); ++row)
    {
-      for (int col = 0; col < kernel.Ncols(); ++col)
+      for (int col = 0; col < kernel.cols(); ++col)
       {
          kernel(row+1, col+1) = mpFilter->item(row, col)->data(Qt::DisplayRole).toDouble();
       }
@@ -598,13 +598,13 @@ void ConvolutionMatrixWidget::saveToConfigurationSettings() const
       pPresetsDo->setAttributeByPath(presetPrefix + "/divisor", preset->mDivisor);
       pPresetsDo->setAttributeByPath(presetPrefix + "/offset", preset->mOffset);
       pPresetsDo->setAttributeByPath(presetPrefix + "/floatOutput", preset->mFloatOutput);
-      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", preset->mKernel.Nrows());
-      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", preset->mKernel.Ncols());
+      pPresetsDo->setAttributeByPath(presetPrefix + "/rowcount", preset->mKernel.rows());
+      pPresetsDo->setAttributeByPath(presetPrefix + "/colcount", preset->mKernel.cols());
       std::vector<double> elements;
-      elements.reserve(preset->mKernel.Storage());
-      for (int row = 1; row <= preset->mKernel.Nrows(); ++row)
+      elements.reserve(preset->mKernel.size());
+      for (int row = 0; row < preset->mKernel.rows(); ++row)
       {
-         for (int col = 1; col <= preset->mKernel.Ncols(); ++col)
+         for (int col = 0; col < preset->mKernel.cols(); ++col)
          {
             elements.push_back(preset->mKernel(row, col));
          }
@@ -638,11 +638,11 @@ void ConvolutionMatrixWidget::loadFromConfigurationSettings()
       {
          continue;
       }
-      NEWMAT::Matrix kernel(rowcount, colcount);
+      EigenRowMajorXf kernel(rowcount, colcount);
       std::vector<double>::const_iterator element = elements.begin();
-      for (int row = 1; row <= rowcount; ++row)
+      for (int row = 0; row < rowcount; ++row)
       {
-         for (int col = 1; col <= colcount; ++col)
+         for (int col = 0; col < colcount; ++col)
          {
             kernel(row, col) = *element++;
          }

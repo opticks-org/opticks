@@ -7,7 +7,6 @@ set (SOURCE_FILES
     ModuleManager.cpp
     WizardExecutor.cpp
 ) 
-include(${QT_USE_FILE})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Xerces_INCLUDE_DIRS})

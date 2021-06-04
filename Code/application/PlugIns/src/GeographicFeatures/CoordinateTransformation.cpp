@@ -16,7 +16,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
 
-#include <gdal/ogr_spatialref.h>
+#include <ogr_spatialref.h>
 
 #include <string>
 

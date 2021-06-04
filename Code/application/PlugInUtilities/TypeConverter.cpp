@@ -17,6 +17,7 @@
 #include "TypesFile.h"
 #include "Point.h"
 
+#include <eigen3/Eigen/Dense>
 #include <string>
 #include <vector>
 
@@ -115,6 +116,8 @@ TYPECONVERTERTOSTRING_IMP(UnitType)
 TYPECONVERTERTOSTRING_IMP(WavelengthUnitsType)
 TYPECONVERTERTOSTRING_IMP(WindowSizeType)
 TYPECONVERTERTOSTRING_IMP(WindowType)
+
+TYPECONVERTERTOSTRING_IMP(EigenRowMajorXf)
 
 TYPECONVERTERTOSTRING_IMP_FORWARD(AebInstallTransaction)
 TYPECONVERTERTOSTRING_IMP_FORWARD(ApplicationWindow)

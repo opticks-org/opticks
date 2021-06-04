@@ -12,6 +12,13 @@
 
 #include "DataVariantValidator.h"
 #include "EnumWrapper.h"
+#include <eigen3/Eigen/Dense>
+
+/**
+ *  Eigen wrapper around a C style matrix.
+ *  This is here for consistency of naming, shorter type names, and use with TypeConverter.
+ */
+typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> EigenRowMajorXf;
 
 /**
  *  Specifies animation behavior after the last frame in the animation controller is set.

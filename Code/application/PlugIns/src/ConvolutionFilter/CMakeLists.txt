@@ -18,12 +18,11 @@ set (MOC_HEADERS
 set (UI_FILES
     ConvolutionMatrixWidget.ui
 )
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenCv_INCLUDE_DIRS})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
-qt4_wrap_ui(UI_OUTFILES ${UI_FILES})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_ui(UI_OUTFILES ${UI_FILES})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 source_group(moc FILES ${MOC_OUTFILES})
 include_directories(${Ossim_INCLUDE_DIRS})

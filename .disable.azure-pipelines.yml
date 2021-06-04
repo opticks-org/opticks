@@ -1,0 +1,66 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+jobs:
+  - job: Windows_VS2017_x64
+    pool:
+      vmImage: 'vs2017-win2016'
+
+    variables:
+        - name: VCPKG_BINARY_SOURCES
+          value: 'clear;nuget,dependencies,readwrite'
+
+    steps:
+      - task: NuGetAuthenticate@0
+      
+      - task: NuGetCommand@2
+        displayName: Setup nuget repo
+        inputs:
+          command: custom
+          arguments: 'sources add -name dependencies -Source https://pkgs.dev.azure.com/Opticks/aca72545-4b50-422e-87bb-6d06eb778bf0/_packaging/dependencies/nuget/v3/index.json'
+          
+      - task: NuGetCommand@2
+        displayName: Set nuget api key
+        inputs:
+          command: custom
+          arguments: 'setapikey BuildPipeline -Source dependencies'
+
+      - script: git submodule update --init Dependencies\vcpkg
+        displayName: Checkout vcpkg submodule
+
+      - script: .\Dependencies\vcpkg\bootstrap-vcpkg.bat
+        displayName: Bootstrap vcpkg
+                
+      - script: .\Dependencies\vcpkg\vcpkg.exe install @Dependencies\vcpkg.list --vcpkg-root Dependencies\vcpkg --triplet x64-windows
+        displayName: install vcpkg dependencies
+      
+      - task: DeleteFiles@1
+        displayName: Clear temporary vcpkg files
+        inputs:
+          SourceFolder: '.\Dependencies\vcpkg'
+          Contents: |
+            buildtrees
+            downloads
+            packages
+
+      - task: CMake@1
+        inputs:
+          cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../Dependencies/vcpkg/scripts/buildsystems/vcpkg.cmake ../Code/application'
+
+      - task: MSBuild@1
+        inputs:
+          solution: 'build\ALL_BUILD.vcxproj'
+          configuration: Debug
+          maximumCpuCount: true
+          platform: 'x64'
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: 'build'
+          artifact: 'Opticks Debug Build'
+          publishLocation: 'pipeline'

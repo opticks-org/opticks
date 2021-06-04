@@ -20,7 +20,7 @@
 #endif
 extern "C" {
 #include "avformat.h"
-#include "avutil.h"
+#include "libavutil/avutil.h"
 }
 #pragma warning(pop)
 

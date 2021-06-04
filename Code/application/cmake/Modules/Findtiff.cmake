@@ -8,7 +8,7 @@ if(tiff_INCLUDE_DIR AND EXISTS "${tiff_INCLUDE_DIR}/tiffvers.h")
 endif()
 
 find_library(tiff_LIBRARY_RELEASE NAMES libtiff tiff)
-find_library(tiff_LIBRARY_DEBUG NAMES libtiffd)
+find_library(tiff_LIBRARY_DEBUG NAMES libtiffd tiffd)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(tiff) #sets tiff_LIBRARY using tiff_LIBRARY_DEBUG and tiff_LIBRARY_RELEASE

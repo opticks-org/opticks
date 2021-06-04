@@ -35,8 +35,7 @@ set (SOURCE_FILES
 set (MOC_HEADERS
     OptionsIceExporter.h
 )
-include(${QT_USE_FILE})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_definitions(${Hdf5_DEFINITIONS})
 include_directories(${Opticks_INCLUDE_DIRS})
@@ -51,8 +50,8 @@ target_link_libraries(Ice
     ${Opticks_HdfPlugInLib_LIBRARY}
     ${QT_LIBRARIES}    
     ${Xerces_LIBRARIES}
+    ${PTHREADS_LIBRARY}
     ${Hdf5_LIBRARIES}
-	${PTHREADS_LIBRARY}
 )
 if(WIN32)
     install(TARGETS Ice RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

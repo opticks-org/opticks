@@ -27,7 +27,6 @@ set (SOURCE_FILES
     NitfUtilities.cpp
     StubString.cpp
 ) 
-include(${QT_USE_FILE})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)

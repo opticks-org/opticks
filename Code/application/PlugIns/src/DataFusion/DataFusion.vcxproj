@@ -67,7 +67,6 @@
       <TypeLibraryName>.\Release/DataFusion.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qt4\QtGui;$(OPTICKSDEPENDENCIESINCLUDE)\qt4\QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>

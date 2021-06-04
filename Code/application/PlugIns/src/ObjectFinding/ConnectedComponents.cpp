@@ -51,7 +51,7 @@ namespace
          {
             // Internal contours include the edge of object, not the edge of the hole
             // So we blank out the internal contour then redraw the contour line
-            cv::drawContours(labels, contours, contourIdx, cv::Scalar(0), CV_FILLED, 8, hierarchy, 0);
+            cv::drawContours(labels, contours, contourIdx, cv::Scalar(0), cv::FILLED, 8, hierarchy, 0);
             cv::drawContours(labels, contours, contourIdx, cv::Scalar(parentLabel), 1, 8, hierarchy, 0);
             if (hierarchy[contourIdx][2] != -1)
             {
@@ -62,7 +62,7 @@ namespace
          else
          {
             // Fill the entire contour poly
-            cv::drawContours(labels, contours, contourIdx, cv::Scalar(++label), CV_FILLED, 8, hierarchy, 0);
+            cv::drawContours(labels, contours, contourIdx, cv::Scalar(++label), cv::FILLED, 8, hierarchy, 0);
             if (hierarchy[contourIdx][2] != -1)
             {
                // If there are nested contours, draw them as well
@@ -221,7 +221,7 @@ bool ConnectedComponents::execute(PlugInArgList* pInArgList, PlugInArgList* pOut
       mProgress.report("Finding contours", 15, NORMAL);
       std::vector<std::vector<cv::Point> > contours;
       std::vector<cv::Vec4i> hierarchy;
-      cv::findContours(data, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+      cv::findContours(data, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
       cv::Mat labels(height, width, CV_16UC1, mpLabels->getRawData());
       mProgress.report("Filling blobs", 50, NORMAL);
       unsigned short lastLabel = 0;

@@ -62,9 +62,6 @@
       <TargetEnvironment>X64</TargetEnvironment>
       <TypeLibraryName>.\Release/BandMath.tlb</TypeLibraryName>
     </Midl>
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(OPTICKSDEPENDENCIESINCLUDE)\qt4\QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>

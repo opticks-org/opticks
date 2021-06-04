@@ -38,11 +38,10 @@ set(SOURCE_FILES
 set (MOC_HEADERS
     DockWindowShell.h
 )
-include(${QT_USE_FILE})
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Xerces_INCLUDE_DIRS})
-qt4_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
+qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
 add_library(PlugInLib STATIC ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 set_target_properties(PlugInLib PROPERTIES OUTPUT_NAME opticks-pluginlib)

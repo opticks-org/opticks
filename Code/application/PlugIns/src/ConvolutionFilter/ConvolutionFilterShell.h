@@ -14,7 +14,7 @@
 #include "MultiThreadedAlgorithm.h"
 #include "ProgressTracker.h"
 
-#include <ossim/matrix/newmat.h>
+#include <eigen3/Eigen/Dense>
 
 class AoiElement;
 class BitMaskIterator;
@@ -59,7 +59,7 @@ protected:
       const bool* mpAbortFlag;
       const BitMaskIterator* mpIterCheck;
       std::vector<unsigned int> mBands;
-      NEWMAT::Matrix mKernel;
+      EigenRowMajorXf mKernel;
       double mOffset;
       bool mForceFloat;
    };

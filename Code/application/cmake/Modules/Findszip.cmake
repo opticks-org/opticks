@@ -9,8 +9,8 @@ if(szip_INCLUDE_DIR AND EXISTS "${szip_INCLUDE_DIR}/szlib.h")
     set(szip_MINOR_VERSION "${szip_VERSION_MINOR}")
 endif()
 
-find_library(szip_LIBRARY_RELEASE NAMES szlibdll sz)
-find_library(szip_LIBRARY_DEBUG NAMES szlibdlld)
+find_library(szip_LIBRARY_RELEASE NAMES szlibdll szip sz)
+find_library(szip_LIBRARY_DEBUG NAMES szlibdlld szipd)
 
 include(SelectLibraryConfigurations)
 select_library_configurations(szip)
