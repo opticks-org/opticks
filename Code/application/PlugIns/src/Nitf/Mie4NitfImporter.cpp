@@ -7,6 +7,9 @@
  * http://www.gnu.org/licenses/lgpl.html
  */
 
+#include "Animation.h"
+#include "AnimationController.h"
+#include "AnimationServices.h"
 #include "AppVersion.h"
 #include "CachedPager.h"
 #include "ImportDescriptor.h"
@@ -26,7 +29,9 @@
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterFileDescriptor.h"
+#include "RasterLayer.h"
 #include "RasterUtilities.h"
+#include "SpatialDataView.h"
 #include "SpecialMetadata.h"
 
 #include <ossim/base/ossimConstants.h>
@@ -44,9 +49,26 @@
 #include <sstream>
 #include <vector>
 
+#define NS(x__) ((x__) * 1e-9)
+
 using namespace boost::icl;
 
 REGISTER_PLUGIN(OpticksNitf, Mie4NitfImporter, Nitf::Mie4NitfImporter);
+
+
+namespace
+{
+   template<typename T>
+   void addAnimationFrames(const DataVariant& dts, int start_frame, uint64_t dt_mult, double& baseTime, std::vector<AnimationFrame>& animationFrames)
+   {
+      auto dtvec = dv_cast<std::vector<T> >(dts);
+      for (int idx = 0; idx < dtvec.size(); ++idx)
+      {
+         baseTime += NS(dtvec[idx] * dt_mult);
+         animationFrames.push_back(AnimationFrame("", start_frame + idx, baseTime));
+      }
+   }
+}
 
 
 Nitf::Mie4NitfImporter::Mie4NitfImporter()
@@ -321,19 +343,19 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
 
    if (isJpeg2000)
    {
-      pPlugIn->setPlugIn("Mie4NitfPager");
+      pPlugIn->setPlugIn("Mie4NitfJpeg2000Pager");
    }
    else
    {
-      pPlugIn->setPlugIn("Mie4NitfJpeg2000Pager");
+      pPlugIn->setPlugIn("Mie4NitfPager");
    }
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedElementArg(), pRaster);
    pPlugIn->getInArgList().setPlugInArgValue(CachedPager::PagedFilenameArg(), pFilename.get());  // need something here so we'll use the index file
    pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::StartFramesArg(), &startFrames);
    pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::FrameFilesArg(), &frameFiles);
-   if (isJpeg2000)
+   if (!isJpeg2000)
    {
-      pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfJpeg2000Pager::FrameImageSegmentsArg(), &isegs);
+      pPlugIn->getInArgList().setPlugInArgValue(Mie4NitfPager::FrameImageSegmentsArg(), &isegs);
    }
    else
    {
@@ -359,6 +381,42 @@ bool Nitf::Mie4NitfImporter::createRasterPager(RasterElement* pRaster) const
       }
    }
    return false;
+}
+
+SpatialDataView* Nitf::Mie4NitfImporter::createView() const
+{
+   SpatialDataView* pView = NitfImporterShell::createView();
+   if (pView == nullptr)
+   {
+      return nullptr;
+   }
+   // If the controller exists (file was previous imported), destroy it so we can make sure it's created with the proper values
+   auto* pController = Service<AnimationServices>()->getAnimationController(pView->getName());
+   if (pController != nullptr)
+   {
+      Service<AnimationServices>()->destroyAnimationController(pController);
+   }
+   if (mAnimationFrames.empty())
+   {
+      // if we don't have any MTIMSA TREs we can't correctly create timestamps
+      // for the frames so we'll create a default animation
+      pView->createDefaultAnimation();
+   }
+   else
+   {
+      pController = Service<AnimationServices>()->createAnimationController(pView->getName(), FRAME_TIME);
+      VERIFYRV(pController, nullptr);
+      pView->setAnimationController(pController);
+      Service<AnimationServices>()->setCurrentAnimationController(pController);
+
+      RasterLayer* pRasterLayer = static_cast<RasterLayer*>(pView->getTopMostLayer(RASTER));
+      auto pAnimation = pController->createAnimation(pRasterLayer->getName());
+      VERIFYRV(pAnimation, nullptr);
+      pAnimation->setFrames(mAnimationFrames);
+      pRasterLayer->setAnimation(pAnimation);
+   }
+
+   return pView;
 }
 
 unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata, QStringList& fileList)
@@ -420,6 +478,34 @@ unsigned int Nitf::Mie4NitfImporter::loadFileInfo(const std::string& indexfile, 
             }
             start_frame = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::REFERENCE_FRAME_NUM));
             frame_count = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_FRAMES));
+            auto numdt = dv_cast<unsigned int>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::NUMBER_DT));
+            if (numdt != frame_count)
+            {
+               // warning should go here...not sure how to handle this situation, probably need to interpolate
+            }
+            time_t baseDateTime = dv_cast<DateTime>(mtimsa.getAttributeByPath(Nitf::TRE::MTIMSA::BASE_TIMESTAMP + "/TIMESTAMP")).getStructured();
+            double baseTime = baseDateTime + dv_cast<double>(mtimsa.getAttributeByPath(Nitf::TRE::MTIMSA::BASE_TIMESTAMP + "/FRACTIONAL_SECONDS"));
+            // number of ns per mult
+            uint64_t dt_mult = dv_cast<uint64_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT_MULTIPLIER));
+            uint8_t dt_size = dv_cast<uint8_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT_SIZE));
+
+            switch (dt_size)
+            {
+            case 1:
+               addAnimationFrames<uint8_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT), start_frame, dt_mult, baseTime, mAnimationFrames);
+               break;
+            case 2:
+               addAnimationFrames<uint16_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT), start_frame, dt_mult, baseTime, mAnimationFrames);
+               break;
+            case 4:
+               addAnimationFrames<uint32_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT), start_frame, dt_mult, baseTime, mAnimationFrames);
+               break;
+            case 8:
+               addAnimationFrames<uint64_t>(mtimsa.getAttribute(Nitf::TRE::MTIMSA::DT), start_frame, dt_mult, baseTime, mAnimationFrames);
+               break;
+            default:
+               VERIFYRV(false, 0);
+            }
          }
          right_open_interval<unsigned int>::type itv(start_frame, start_frame + frame_count);
          index += std::make_pair(itv, start_frame);

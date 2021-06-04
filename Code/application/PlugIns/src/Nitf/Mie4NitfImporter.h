@@ -10,6 +10,7 @@
 #ifndef MIE4NITFIMPORTER_H
 #define MIE4NITFIMPORTER_H
 
+#include "AnimationFrame.h"
 #include "NitfImporterShell.h"
 
 class QStringList;
@@ -29,9 +30,12 @@ namespace Nitf
                                                     const DynamicObject& mimcsa);
       virtual bool createRasterPager(RasterElement* pRaster) const;
       bool validate(const DataDescriptor* pDescriptor, const std::vector<const DataDescriptor*>& importedDescriptors, std::string& errorMessage) const;
+      SpatialDataView* createView() const override;
 
    private:
       unsigned int loadFileInfo(const std::string& indexfile, const std::string& parentName, const std::string& layerId, DynamicObject& manifestMetadata, QStringList& fileList);
+
+      std::vector<AnimationFrame> mAnimationFrames;
    };
 }
 #endif
