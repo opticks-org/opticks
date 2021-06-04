@@ -76,9 +76,9 @@ bool Nitf::Mie4NitfPager::getInputSpecification(PlugInArgList*& pArgList)
       return false;
    }
    VERIFY(pArgList != nullptr);  // already checked in CachedPager::getInputSpecification() but we'll put this here just in case
-   pArgList->addArg<std::vector<unsigned int> >("Start Frames");
-   pArgList->addArg<std::vector<std::string> >("Frame Files");
-   pArgList->addArg<std::vector<unsigned int> >("Frame Image Segments");
+   pArgList->addArg<std::vector<unsigned int> >(StartFramesArg());
+   pArgList->addArg<std::vector<std::string> >(FrameFilesArg());
+   pArgList->addArg<std::vector<unsigned int> >(FrameImageSegmentsArg());
 
    return true;
 }
@@ -138,17 +138,17 @@ bool Nitf::Mie4NitfPager::parseInputArgs(PlugInArgList* pInputArgList)
          ;;
       }
       std::vector<unsigned int> startFrames;
-      if (!pInputArgList->getPlugInArgValue("Start Frames", startFrames))
+      if (!pInputArgList->getPlugInArgValue(StartFramesArg(), startFrames))
       {
          return false;
       }
       std::vector<std::string> frameFiles;
-      if (!pInputArgList->getPlugInArgValue("Frame Files", frameFiles))
+      if (!pInputArgList->getPlugInArgValue(FrameFilesArg(), frameFiles))
       {
          return false;
       }
       std::vector<unsigned int> isegs;
-      if (!pInputArgList->getPlugInArgValue("Frame Image Segments", isegs))
+      if (!pInputArgList->getPlugInArgValue(FrameImageSegmentsArg(), isegs))
       {
          return false;
       }
