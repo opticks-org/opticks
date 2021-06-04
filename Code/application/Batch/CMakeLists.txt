@@ -24,7 +24,7 @@ target_link_libraries(OpticksBatch
     ${Xerces_LIBRARIES}
     ${XQilla_LIBRARIES}
     ${Raptor_LIBRARIES}
-    GLEW::GLEW
+    ${GLEW_LIBRARIES}
     ${PTHREADS_LIBRARY}
     ${Qwt5ForQt5_LIBRARY}
 )

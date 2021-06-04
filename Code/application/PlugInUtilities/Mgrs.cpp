@@ -8,7 +8,6 @@
  */
 
 #include "Mgrs.h"
-#include "TypesFile.h"
 
 #include <stdio.h>
 #include <string>

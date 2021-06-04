@@ -9,14 +9,14 @@ set (SOURCE_FILES
 ) 
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${Gdal_INCLUDE_DIRS})
+include_directories(${GDAL_INCLUDE_DIR})
 add_library(GdalImporter SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(GdalImporter
     ${Opticks_LIBRARIES}
     ${QT_LIBRARIES}    
-    ${Gdal_LIBRARIES}    
+    ${GDAL_LIBRARY}
     ${Xerces_LIBRARIES}
-	${PTHREADS_LIBRARY}
+    ${PTHREADS_LIBRARY}
 )
 if(WIN32)
     install(TARGETS GdalImporter RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

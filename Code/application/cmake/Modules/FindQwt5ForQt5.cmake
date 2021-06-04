@@ -1,4 +1,4 @@
-find_path(Qwt5ForQt5_INCLUDE_DIR qwt.h PATH_SUFFIXES qwt qwt5 qt5/qwt)
+find_path(Qwt5ForQt5_INCLUDE_DIR qwt.h PATH_SUFFIXES qt5/qwt5-qt5 qt5/qwt5 qwt5-qt5 qwt5 qt5/qwt qwt)
 if(Qwt5ForQt5_INCLUDE_DIR AND EXISTS "${Qwt5ForQt5_INCLUDE_DIR}/qwt_global.h")
     file(STRINGS "${Qwt5ForQt5_INCLUDE_DIR}/qwt_global.h" Qwt5ForQt5_Parsed_Version REGEX "^#define QWT_VERSION_STR +\"[^\"]+\"$")
     string(REGEX REPLACE "^.*QWT_VERSION_STR +\"([0-9]+).*$" "\\1" Qwt5ForQt5_VERSION_MAJOR "${Qwt5ForQt5_Parsed_Version}")

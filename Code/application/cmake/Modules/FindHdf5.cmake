@@ -28,3 +28,7 @@ mark_as_advanced(Hdf5_DEFINITIONS)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Hdf5 REQUIRED_VARS Hdf5_INCLUDE_DIR Hdf5_LIBRARY VERSION_VAR Hdf5_VERSION_STRING)
 set(Hdf5_FOUND ${HDF5_FOUND})
+
+if(Hdf5_FOUND)
+   message(STATUS "Found Hdf5: ${Hdf5_INCLUDE_DIRS} ${Hdf5_LIBRARIES}")
+endif()

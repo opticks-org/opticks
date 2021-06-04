@@ -84,13 +84,15 @@ set (MOC_HEADERS
    ShapelibProxy.h
 )
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
-find_package(Gdal REQUIRED)
+find_package(GDAL REQUIRED)
 source_group(moc FILES ${MOC_OUTFILES})
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${shapelib_INCLUDE_DIRS})
 include_directories("${Opticks_SOURCE_DIR}/ArcProxyLib")
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
+include_directories(${GDAL_INCLUDE_DIR})
+
 add_library(GeographicFeatures SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 target_link_libraries(GeographicFeatures
     ${Opticks_LIBRARIES}
@@ -98,7 +100,6 @@ target_link_libraries(GeographicFeatures
     ${shapelib_LIBRARIES}    
     ${Xerces_LIBRARIES}
     ${GDAL_LIBRARY}
-    ${Gdal_LIBRARIES}
 )
 if(WIN32)
     install(TARGETS GeographicFeatures RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)

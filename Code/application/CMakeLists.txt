@@ -196,12 +196,12 @@ find_package(YamlCpp REQUIRED)
 find_package(Raptor REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(Glew REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(Ossim) #TODO: is this optional?
 find_package(Hdf4 COMPONENTS SD REQUIRED)
+find_package(Hdf5 REQUIRED)
 find_package(szip REQUIRED)
 find_package(shapelib REQUIRED)
-find_package(Hdf5 REQUIRED)
 find_package(tiff REQUIRED)
 find_package(geotiff REQUIRED)
 find_package(proj REQUIRED)
@@ -214,10 +214,21 @@ find_package(avutil)
 find_package(swscale)
 
 find_package(cfitsio)
-find_package(Gdal)
+find_package(GDAL)
 find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
 find_package(OpenJpeg)
+
+
+if(GLEW_FOUND)
+   message(STATUS "Found GLEW: ${GLEW_INCLUDE_DIRS} ${GLEW_LIBRARIES}")
+endif()
+
+if(GDAL_FOUND)
+   message(STATUS "Found GDAL: ${GDAL_INCLUDE_DIR} ${GDAL_LIBRARY}")
+endif()
+
+
 
 set(OLD_CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" "${OPTICKS_DEP_PATH}/tools/graphviz")
@@ -290,7 +301,7 @@ add_subdirectory(PlugIns/src/ENVI)
 if(cfitsio_FOUND)
    add_subdirectory(PlugIns/src/Fits)
 endif()
-if(Gdal_FOUND)
+if(GDAL_FOUND)
    add_subdirectory(PlugIns/src/GdalImporter)
 endif()
 add_subdirectory(PlugIns/src/Generic)
@@ -377,6 +388,10 @@ include_directories(${Raptor_INCLUDE_DIRS})
 include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${Glew_INCLUDE_DIRS})
+if(GDAL_FOUND)
+   include_directories(${GDAL_INCLUDE_DIR})
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include_directories(${EXPAT_INCLUDE_DIRS})
 endif()
@@ -647,10 +662,13 @@ target_link_libraries(Opticks
     ${Xerces_LIBRARIES}
     ${XQilla_LIBRARIES}
     ${Raptor_LIBRARIES}
-    GLEW::GLEW
+    ${GLEW_LIBRARIES}
     ${PTHREADS_LIBRARY}
     ${Qwt5ForQt5_LIBRARY}
     )
+if(GDAL_FOUND)
+   target_link_libraries(Opticks ${GDAL_LIBRARY})
+endif()
 
 set_target_properties(Opticks PROPERTIES DEBUG_POSTFIX "d")
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

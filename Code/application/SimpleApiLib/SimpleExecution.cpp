@@ -104,7 +104,7 @@ extern "C"
          if (pPlugin == NULL)
          {
             setLastError(SIMPLE_BAD_PARAMS);
-            return NULL;
+            return 0;
          }
          setLastError(SIMPLE_NO_ERROR);
          return pPlugin->execute();

@@ -9,6 +9,7 @@
 
 #include <qwt_scale_engine.h>
 #include <qwt_scale_div.h>
+#include <qwt_valuelist.h>
 
 #include "CartesianGridlinesImp.h"
 #include "CartesianPlotImp.h"

@@ -1,4 +1,4 @@
-find_path(OpenJpeg_INCLUDE_DIR openjpeg.h PATH_SUFFIXES openjpeg openjpeg-2.3)
+find_path(OpenJpeg_INCLUDE_DIR openjpeg.h PATH_SUFFIXES openjpeg-2.0 openjpeg-2.4 openjpeg-2.3 openjpeg)
 
 find_library(OpenJpeg_LIBRARY_RELEASE NAMES openjp2 openjpeg)
 find_library(OpenJpeg_LIBRARY_DEBUG NAMES openjp2d openjpegd)
