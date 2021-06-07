@@ -1277,7 +1277,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
       fileLength = static_cast<size_t>(ftell(pFile.get()));
    }
 
-   opj_stream_t* pStream = opj_stream_create_file_stream(filename.c_str(), fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(pFile.get(), fileLength, true);
    if (pStream == NULL)
    {
       return NULL;

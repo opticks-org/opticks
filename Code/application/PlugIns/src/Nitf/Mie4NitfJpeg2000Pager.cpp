@@ -415,8 +415,7 @@ opj_image_t* Mie4NitfJpeg2000Pager::decodeImage(unsigned int originalStartRow, u
 
       fileLength = fileSize - static_cast<size_t>(offset);
    }
-   const char *fname = mpFilename;
-   opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
    if (pStream == NULL)
    {
       return NULL;
