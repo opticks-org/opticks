@@ -148,6 +148,7 @@ configure_file(cmake/Templates/BuildRevision.h "${Opticks_SOURCE_DIR}/Utilities"
 # runtime configurations
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 if(WIN32)
+    file(TO_NATIVE_PATH "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}" VCPKG_INSTALL)
     configure_file(cmake/Templates/Opticks.vcxproj.user "${CMAKE_BINARY_DIR}")
     configure_file(cmake/Templates/opticks.dep "${CMAKE_BINARY_DIR}/bin")
     configure_file(cmake/Templates/opticks-debug.dep "${CMAKE_BINARY_DIR}/bin")

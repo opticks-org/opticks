@@ -1,5 +1,5 @@
 # Dependencies
-A number of external dependencies are requried and a complete list can be found [here](../Dependencies/vcpkg.list). It's best to use systems libraries
+A number of external dependencies are requried and a complete list can be found [here](../Dependencies/dependency_versions.txt). It's best to use systems libraries
 on Linux when they are available (via apt, yum, etc.) and build additional libraries on your system. Details are left as an exercise to the reader.
 On Windows, it is suggested that you use vcpkg to install dependencies.
 

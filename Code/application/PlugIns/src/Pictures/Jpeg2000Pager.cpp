@@ -379,7 +379,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 
       fileLength = fileSize - static_cast<size_t>(mOffset);
    }
-   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
    if (pStream == NULL)
    {
       return NULL;
