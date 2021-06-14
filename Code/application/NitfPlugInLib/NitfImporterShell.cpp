@@ -1277,7 +1277,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
       fileLength = static_cast<size_t>(ftell(pFile.get()));
    }
 
-   opj_stream_t* pStream = opj_stream_create_file_stream(pFile.get(), fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(filename.c_str(), fileLength, true);
    if (pStream == NULL)
    {
       return NULL;
@@ -1286,8 +1286,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
    opj_stream_set_user_data_length(pStream, fileLength);
 
    // Seek to the position of the compressed data in the file
-   // TODO: no way to seek in openjpeg any longer. This hack should work until a solution can be worked with the openjpeg team
-   fseek(reinterpret_cast<FILE*>(*pStream), static_cast<long>(dataOffset), SEEK_SET);
+   opj_stream_seek_stream(pStream, dataOffset);
 
    // Create the appropriate codec
    opj_codec_t* pCodec = opj_create_decompress(decoderType);

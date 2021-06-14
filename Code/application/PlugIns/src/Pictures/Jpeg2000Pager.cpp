@@ -379,7 +379,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 
       fileLength = fileSize - static_cast<size_t>(mOffset);
    }
-   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
    if (pStream == NULL)
    {
       return NULL;
@@ -388,8 +388,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    opj_stream_set_user_data_length(pStream, fileLength);
 
    // Seek to the required position in the file
-   // TODO: no way to seek in openjpeg any longer. This hack should work until a solution can be worked with the openjpeg team
-   fseek(reinterpret_cast<FILE*>(*pStream), static_cast<long>(mOffset), SEEK_SET);
+   opj_stream_seek_stream(pStream, mOffset);
 
 
    // Create the appropriate codec

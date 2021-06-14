@@ -184,13 +184,7 @@ opj_image_t* Jpeg2000Importer::getImageInfo(const string& filename, bool logErro
    string filenameCopy = filename;
 
    // open a byte stream from the file
-   FileResource pFile(filename.c_str(), "rb");
-   if (pFile.get() == NULL)
-   {
-      return NULL;
-   }
-
-   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile.get(), true);
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(filename.c_str(), true);
    if (pStream == NULL)
    {
       return NULL;

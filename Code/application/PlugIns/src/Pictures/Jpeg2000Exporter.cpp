@@ -329,23 +329,7 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   FileResource pFile(parameters.outfile, "wb", true);
-   if (pFile.get() == NULL)
-   {
-      opj_image_destroy(pImage);
-      opj_destroy_codec(pCodec);
-
-      const std::string message = "Opening the output file for writing failed.";
-      if (pProgress != NULL)
-      {
-         pProgress->updateProgress(message, 0, ERRORS);
-      }
-
-      pStep->finalize(Message::Failure, message);
-      return false;
-   }
-
-   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile.get(), false);
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(parameters.outfile, false);
    if (pStream == NULL)
    {
       opj_image_destroy(pImage);
@@ -383,8 +367,6 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       pStep->finalize(Message::Failure, message);
       return false;
    }
-
-   pFile.setDeleteOnClose(false);
 
    if (pProgress != NULL)
    {

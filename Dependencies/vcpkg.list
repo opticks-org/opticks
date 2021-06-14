@@ -39,3 +39,4 @@ hdf5[szip,zlib]
 libgeotiff
 gdal
 opencv
+ossim
