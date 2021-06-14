@@ -206,6 +206,7 @@ namespace Nitf
          OPJ_CODEC_FORMAT decoderType) const;
       double getGsd(const DataVariant& spacing, const std::string& units) const;
 
+   protected:
       std::map<ossim_uint32, std::string> mParseMessages;
    };
 }

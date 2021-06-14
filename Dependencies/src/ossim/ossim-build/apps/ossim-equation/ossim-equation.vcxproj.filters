@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\apps\ossim-equation\ossim-equation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\apps\ossim-equation\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8FAF4821-518F-3898-AB59-AE01F76740A0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

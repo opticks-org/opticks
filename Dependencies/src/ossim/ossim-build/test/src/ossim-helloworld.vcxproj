@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{996FA5F1-7FBB-3FBE-941F-BF5FA31B0E7D}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName> ossim-helloworld</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="do_not_import_user.props" Condition="exists('do_not_import_user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\bin\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ossim-helloworld.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ossim-helloworldd</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\bin\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ossim-helloworld.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ossim-helloworld</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\bin\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ossim-helloworld.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ossim-helloworld</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\bin\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ossim-helloworld.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ossim-helloworld</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file C:/dev/opticks-org/opticks/Dependencies/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/Debug/ossim-helloworldd.exe -installedDir C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\lib\Debug\ossimd.lib;ossimd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\geos_cd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\geotiff_d_i.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\jpegd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\lzmad.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\jpegd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\lzmad.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\zlibd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\freetyped.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\zlibd.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\debug\lib\freetyped.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/lib/Debug;C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/lib/Debug/$(Configuration);C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/debug/lib;C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/debug/lib/$(Configuration);C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/lib;C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/lib/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/Debug/ossim-helloworldd.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/Debug/ossim-helloworldd.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file C:/dev/opticks-org/opticks/Dependencies/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/Release/ossim-helloworld.exe -installedDir C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\lib\Release\ossim.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geos_c.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geotiff_i.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/Release/ossim-helloworld.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/Release/ossim-helloworld.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file C:/dev/opticks-org/opticks/Dependencies/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/MinSizeRel/ossim-helloworld.exe -installedDir C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\lib\MinSizeRel\ossim.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geos_c.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geotiff_i.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/MinSizeRel/ossim-helloworld.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/MinSizeRel/ossim-helloworld.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\include;C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\include;\ossim;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\include\ossim;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noprofile -executionpolicy Bypass -file C:/dev/opticks-org/opticks/Dependencies/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/RelWithDebInfo/ossim-helloworld.exe -installedDir C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>..\..\lib\RelWithDebInfo\ossim.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geos_c.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\geotiff_i.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\jpeg.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\tiff.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\lzma.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\zlib.lib;C:\dev\opticks-org\opticks\Dependencies\vcpkg\installed\x64-windows\lib\freetype.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <ForceFileOutput>MultiplyDefinedSymbolOnly</ForceFileOutput>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/RelWithDebInfo/ossim-helloworld.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/bin/RelWithDebInfo/ossim-helloworld.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\test\src\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/test/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\test\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/test/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\test\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/test/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\test\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/test/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim -BC:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build --check-stamp-file C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/test/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\test\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim\test\src\ossim-helloworld.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\ZERO_CHECK.vcxproj">
+      <Project>{61EF8845-3831-3700-B75B-1240C997AD00}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\dev\opticks-org\opticks\Dependencies\src\ossim\ossim-build\src\ossim.vcxproj">
+      <Project>{0E239FB4-A4A3-3232-A449-B7BD320913B8}</Project>
+      <Name>ossim</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

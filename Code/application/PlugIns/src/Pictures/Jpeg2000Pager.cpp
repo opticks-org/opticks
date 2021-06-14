@@ -388,7 +388,8 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    opj_stream_set_user_data_length(pStream, fileLength);
 
    // Seek to the required position in the file
-   fseek(mpFile, static_cast<long>(mOffset), SEEK_SET);
+   opj_stream_seek_stream(pStream, mOffset);
+
 
    // Create the appropriate codec
    opj_codec_t* pCodec = NULL;

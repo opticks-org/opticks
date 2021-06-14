@@ -176,7 +176,7 @@ bool Nitf::NitfExporter::execute(PlugInArgList *pInParam, PlugInArgList *pOutPar
    pSelector->setOutputBandList(bandList);
    pSelector->enableSource();
    pSelector->initialize();
-   pFileWriter->connectMyInputTo(0, pSelector.get());
+   pFileWriter->connectMyInputTo(0, pSelector.release());
 
    pFileWriter->initialize();
    pFileWriter->addListener(this);

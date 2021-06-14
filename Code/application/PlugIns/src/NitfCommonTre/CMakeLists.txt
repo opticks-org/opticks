@@ -1,4 +1,5 @@
 set (HEADER_FILES
+    EngrdaWidget.h
     NitfAcftaParser.h
     NitfAcftbParser.h
     NitfAimidaParser.h
@@ -6,6 +7,7 @@ set (HEADER_FILES
     NitfBandsaParser.h
     NitfBandsbParser.h
     NitfBlockaParser.h
+    NitfCamsdaParser.h
     NitfCmetaaParser.h
     NitfEngrdaParser.h
     NitfExoptaParser.h
@@ -14,8 +16,12 @@ set (HEADER_FILES
     NitfIchipbParser.h
     NitfMensraParser.h
     NitfMensrbParser.h
+    NitfMicidaParser.h
+    NitfMimcsaParser.h
     NitfMod26aParser.h
     NitfMpd26aParser.h
+    NitfMtimfaParser.h
+    NitfMtimsaParser.h
     NitfPatchaParser.h
     NitfPatchbParser.h
     NitfRadsdaParser.h
@@ -28,6 +34,7 @@ set (HEADER_FILES
     NitfSensrbParser.h
     NitfStdidbParser.h
     NitfStdidcParser.h
+    NitfTmintaParser.h
     NitfUse00aParser.h
     NitfUse26aParser.h
 )
@@ -41,6 +48,7 @@ set (SOURCE_FILES
     NitfBandsaParser.cpp
     NitfBandsbParser.cpp
     NitfBlockaParser.cpp
+    NitfCamsdaParser.cpp
     NitfCmetaaParser.cpp
     NitfEngrdaParser.cpp
     NitfExoptaParser.cpp
@@ -49,8 +57,12 @@ set (SOURCE_FILES
     NitfIchipbParser.cpp
     NitfMensraParser.cpp
     NitfMensrbParser.cpp
+    NitfMicidaParser.cpp
+    NitfMimcsaParser.cpp
     NitfMod26aParser.cpp
     NitfMpd26aParser.cpp
+    NitfMtimfaParser.cpp
+    NitfMtimsaParser.cpp
     NitfPatchaParser.cpp
     NitfPatchbParser.cpp
     NitfRadsdaParser.cpp
@@ -63,6 +75,7 @@ set (SOURCE_FILES
     NitfSensrbParser.cpp
     NitfStdidbParser.cpp
     NitfStdidcParser.cpp
+    NitfTmintaParser.cpp
     NitfUse00aParser.cpp
     NitfUse26aParser.cpp
 ) 

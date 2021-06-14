@@ -1,0 +1,5 @@
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/INSTALL.dir
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/ALL_BUILD.dir
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/ZERO_CHECK.dir
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/src/CMakeFiles/ossim.dir
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/src/CMakeFiles/INSTALL.dir

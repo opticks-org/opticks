@@ -43,7 +43,7 @@ namespace
                            std::vector<Opticks::PixelLocation>& endPoints)
    {
       endPoints.clear();
-      bool steep = abs(point1.mY - point0.mY) > abs(point1.mX - point0.mX);
+      bool steep = abs(static_cast<long>(point1.mY - point0.mY)) > abs(static_cast<long>(point1.mX - point0.mX));
       if (steep)
       {
          std::swap(point0.mX, point0.mY);
@@ -55,11 +55,11 @@ namespace
          std::swap(point0, point1);
       }
       int deltax = point1.mX - point0.mX;
-      int deltay = abs(point1.mY - point0.mY);
+      int deltay = abs(static_cast<long>(point1.mY - point0.mY));
       int error = deltax / 2;
       int ystep = (point0.mY < point1.mY) ? 1 : -1;
       int y = point0.mY;
-      for (int x = point0.mX; x <= point1.mX; ++x)
+      for (auto x = point0.mX; x <= point1.mX; ++x)
       {
          endPoints.push_back(steep ? Opticks::PixelLocation(y, x) : Opticks::PixelLocation(x, y));
          error -= deltay;

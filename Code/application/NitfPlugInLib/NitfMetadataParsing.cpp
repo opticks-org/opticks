@@ -208,7 +208,7 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
 //#pragma message(__FILE__ "(" STRING(__LINE__) ") : warning : Separate the file header parsing " \
 //   "from the subheader parsing (dadkins)")
 
-   VERIFY(pFileHeader != NULL && pImageSubheader != NULL && pDescriptor != NULL);
+   VERIFY(pFileHeader != NULL && pDescriptor != NULL);
 
    // Add metadata for the NITF File Header and the supported subheaders
    const string fileVersion = pFileHeader->getVersion();
@@ -237,7 +237,7 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
 
    Nitf::ImageSubheader imageSubheader(fileVersion, currentImage);
    
-   if (imageSubheader.importMetadata(pImageSubheader, pDescriptor) == false)
+   if (pImageSubheader != nullptr && imageSubheader.importMetadata(pImageSubheader, pDescriptor) == false)
    {
       errorMessage += "Unable to import metadata from the image subheader.\n";
       return false;
@@ -247,19 +247,22 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
    FactoryResource<DynamicObject> pTres;
    FactoryResource<DynamicObject> pTreInfo;
 
-   const unsigned int numImageTags = pImageSubheader->getNumberOfTags();
-   for (unsigned int imageTag = 0; imageTag < numImageTags; ++imageTag)
+   if (pImageSubheader != nullptr)
    {
-      ossimNitfTagInformation tagInfo;
-      if (pImageSubheader->getTagInformation(tagInfo, imageTag) == false)
+      const unsigned int numImageTags = pImageSubheader->getNumberOfTags();
+      for (unsigned int imageTag = 0; imageTag < numImageTags; ++imageTag)
       {
-         stringstream errorStream;
-         errorStream << "Unable to retrieve tag #" << imageTag << " from the image subheader." << endl;
-         errorMessage += errorStream.str();
-      }
-      else
-      {
-         addTagToMetadata(currentImage, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), parsers, errorMessage);
+         ossimNitfTagInformation tagInfo;
+         if (pImageSubheader->getTagInformation(tagInfo, imageTag) == false)
+         {
+            stringstream errorStream;
+            errorStream << "Unable to retrieve tag #" << imageTag << " from the image subheader." << endl;
+            errorMessage += errorStream.str();
+         }
+         else
+         {
+            addTagToMetadata(currentImage, tagInfo, pDescriptor, pTres.get(), pTreInfo.get(), parsers, errorMessage);
+         }
       }
    }
 
@@ -306,7 +309,7 @@ bool Nitf::importMetadata(const unsigned int& currentImage, const Nitf::OssimFil
 
    // Special case if NTM: build and insert an ICHIPB if it is missing
    // trust the ICHIPB more than the other tags; only create an ICHIPB if none exist
-   if (pTres->getAttribute("STDIDB").isValid() == true && pTres->getAttribute("ICHIPB").isValid() == false)
+   if (pImageSubheader != nullptr && pTres->getAttribute("STDIDB").isValid() == true && pTres->getAttribute("ICHIPB").isValid() == false)
    {
       int x_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockHoriz();
       int y_pixel_block_size = pImageSubheader->getNumberOfPixelsPerBlockVert();

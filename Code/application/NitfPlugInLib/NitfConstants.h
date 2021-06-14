@@ -14,6 +14,10 @@
 #include <sstream>
 #include <string>
 
+#define NITF_TAG_START(_tname) namespace _tname { const static std::string TAG = #_tname;
+#define NITF_FIELD(_fname) const static std::string _fname = #_fname;
+#define NITF_TAG_END() }
+
 namespace Nitf
 {
    static const bool POS_SIGN_TRUE = true;
@@ -402,6 +406,24 @@ namespace Nitf
          const static std::string RESERVED2 = "RESERVED2";
       }
 
+      namespace CAMSDA
+      {
+         const static std::string TAG = "CAMSDA";
+         const static std::string NUM_CAMERA_SETS = "NUM_CAMERA_SETS";
+         const static std::string NUM_CAMERA_SETS_IN_TRE = "NUM_CAMERA_SETS_IN_TRE";
+         const static std::string FIRST_CAMERA_SET_IN_TRE = "FIRST_CAMERA_SET_IN_TRE";
+         const static std::string CAMERA_SETS = "CAMERA_SETS";
+         const static std::string NUM_CAMERAS_IN_SET = "NUM_CAMERAS_IN_SET";
+         const static std::string CAMERAS = "CAMERAS";
+         const static std::string CAMERA_ID = "CAMERA_ID";
+         const static std::string CAMERA_DESC = "CAMERA_DESC";
+         const static std::string LAYER_ID = "LAYER_ID";
+         const static std::string IDLVL = "IDLVL";
+         const static std::string IALVL = "IALVL";
+         const static std::string ILOC = "ILOC";
+         const static std::string NROWS = "NROWS";
+         const static std::string NCOLS = "NCOLS";
+      }
 
       namespace CMETAA
       {
@@ -782,6 +804,29 @@ namespace Nitf
          const static std::string TOTAL_TILES_ROWS = "TOTAL_TILES_ROWS";
       }
 
+      namespace MICIDA
+      {
+         const static std::string MIIS_CORE_ID_VERSION = "MIIS_CORE_ID_VERSION";
+         const static std::string NUM_CAMERA_IDS_IN_TRE = "NUM_CAMERA_IDS_IN_TRE";
+         const static std::string CAMERA_IDS = "CAMERA_IDS";
+         const static std::string CAMERA_ID = "CAMERA_ID";
+         const static std::string CORE_ID_LENGTH = "CORE_ID_LENGTH";
+         const static std::string CAMERA_CORE_ID = "CAMERA_CORE_ID";
+      }
+
+      namespace MIMCSA
+      {
+         const static std::string TAG = "MIMCSA";
+         const static std::string LAYER_ID = "LAYER_ID";
+         const static std::string NOMINAL_FRAME_RATE = "NOMINAL_FRAME_RATE";
+         const static std::string MIN_FRAME_RATE = "MIN_FRAME_RATE";
+         const static std::string MAX_FRAME_RATE = "MAX_FRAME_RATE";
+         const static std::string T_RSET = "T_RSET";
+         const static std::string MI_REQ_DECODER = "MI_REQ_DECODER";
+         const static std::string MI_REQ_PROFILE = "MI_REQ_PROFILE";
+         const static std::string MI_REQ_LEVEL = "MI_REQ_LEVEL";
+      }
+
       namespace MOD26A
       {
          const static std::string FIELD1 = "FIELD1";
@@ -844,6 +889,39 @@ namespace Nitf
          const static std::string FIELD44 = "FIELD44";
          const static std::string FIELD45 = "FIELD45";
       }
+
+      namespace MTIMFA
+      {
+         const static std::string LAYER_ID = "LAYER_ID";
+         const static std::string CAMERA_SET_INDEX = "CAMERA_SET_INDEX";
+         const static std::string TIME_INTERVAL_INDEX = "TIME_INTERVAL_INDEX";
+         const static std::string NUM_CAMERAS_DEFINED = "NUM_CAMERAS_DEFINED";
+         const static std::string CAMERAS_DEFINED = "CAMERAS_DEFINED";
+         const static std::string CAMERA_ID = "CAMERA_ID";
+         const static std::string NUM_TEMP_BLOCKS = "NUM_TEMP_BLOCKS";
+         const static std::string TEMP_BLOCKS = "TEMP_BLOCKS";
+         const static std::string START_TIMESTAMP = "START_TIMESTAMP";
+         const static std::string END_TIMESTAMP = "END_TIMESTAMP";
+         const static std::string IMAGE_SEG_INDEX = "IMAGE_SEG_INDEX";
+      }
+
+      NITF_TAG_START(MTIMSA)
+         NITF_FIELD(IMAGE_SEG_INDEX)
+         NITF_FIELD(GEOCOORDS_STATIC)
+         NITF_FIELD(LAYER_ID)
+         NITF_FIELD(CAMERA_SET_INDEX)
+         NITF_FIELD(CAMERA_ID)
+         NITF_FIELD(TIME_INTERVAL_INDEX)
+         NITF_FIELD(TEMP_BLOCK_INDEX)
+         NITF_FIELD(NOMINAL_FRAME_RATE)
+         NITF_FIELD(REFERENCE_FRAME_NUM)
+         NITF_FIELD(BASE_TIMESTAMP)
+         NITF_FIELD(DT_MULTIPLIER)
+         NITF_FIELD(DT_SIZE)
+         NITF_FIELD(NUMBER_FRAMES)
+         NITF_FIELD(NUMBER_DT)
+         NITF_FIELD(DT)
+      NITF_TAG_END()
 
       namespace PATCHA
       {
@@ -1296,6 +1374,15 @@ namespace Nitf
          const static std::string RESERVED13 = "RESERVED13";
          const static std::string SUN_EL = "SUN_EL";
          const static std::string SUN_AZ = "SUN_AZ";
+      }
+
+      namespace TMINTA
+      {
+         const static std::string NUM_TIME_INT = "NUM_TIME_INT";
+         const static std::string TIME_INT = "TIME_INT";
+         const static std::string TIME_INTERVAL_INDEX = "TIME_INTERVAL_INDEX";
+         const static std::string START_TIMESTAMP = "START_TIMESTAMP";
+         const static std::string END_TIMESTAMP = "END_TIMESTAMP";
       }
 
       namespace USE26A

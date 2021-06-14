@@ -427,6 +427,57 @@ namespace Nitf
    bool DtgParseCCYYMMDDhhmmss(const std::string& fDTG, DateTime* pDateTime);
 
    /**
+    * Parse a date-time string of the form CCYYMMDDhhmmss.sssssssss.
+    *
+    * @param fDTG
+    *        The string to parse
+    * @param year
+    *        Upon successful return, this contains the year (including century) from the string.
+    * @param month
+    *        Upon successful return, this contains the month from the string.
+    * @param day
+    *        Upon successful return, this contains the day from the string.
+    * @param hour
+    *        Upon successful return, this contains the hours from the string.
+    * @param min
+    *        Upon successful return, this contains the minutes from the string.
+    * @param sec
+    *        Upon successful return, this contains the seconds from the string including decimal seconds.
+    * @param precision
+    *        Upon successful return, this contains the number of significant digits in the fractional seconds.
+    * @param pDateValid
+    *        If non-NULL, the value pointed at will contain true if the date portion
+    *        of the date-time string parsed successfully.
+    * @param pTimeValid
+    *        If non-NULL, the value pointed at will contain true if the time portion
+    *        of the date-time string parsed successfully.
+    *
+    * @return True if the parse completely succeeded, false otherwise. Note
+    *         that even if this returns false, pDateValid and pTimeValid will
+    *         be set appropriately.
+    */
+   bool DtgParseCCYYMMDDhhmmssns(const std::string& fDTG, unsigned short& year, unsigned short& month,
+      unsigned short& day, unsigned short& hour, unsigned short& min, double& sec, int& precision, bool* pDateValid = NULL,
+      bool* pTimeValid = NULL);
+
+   /**
+    * Parse a date-time string of the form CCYYMMDDhhmmss.sssssssss.
+    *
+    * @param fDTG
+    *        The string to parse
+    * @param pDateTime
+    *        Upon successful return, this contains the date and time from the string.
+    * @param fractionalSeconds
+    *        Since a DateTime uses an int for seconds, this will contain the fractional portion of the seconds.
+    * @param precision
+    *        Upon successful return, this contains the number of significant digits in the fractional seconds.
+    *
+    * @return True if the parse succeeded, false otherwise.
+    *         Note that even if this returns false, pDateTime may contain partially valid data.
+    */
+   bool DtgParseCCYYMMDDhhmmssns(const std::string& fDTG, DateTime* pDateTime, double& fractionalSeconds, int& precision);
+
+   /**
     * Parse a date-time string of the form CCYYMMDD.
     *
     * @param fDTG

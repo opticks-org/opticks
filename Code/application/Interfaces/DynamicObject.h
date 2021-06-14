@@ -15,6 +15,7 @@
 #include "Serializable.h"
 #include "Subject.h"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -40,6 +41,14 @@ class QRegExp;
  */
 class DynamicObject : public Subject, public Serializable
 {
+public:
+   /**
+    * Const iterator type for DynamicObject.
+    *
+    * @see DynamicObject::iterator
+    */
+   typedef std::map<std::string, DataVariant>::const_iterator const_iterator;
+
 public:
    /**
     * Emitted just after a new attribute is added with
@@ -524,6 +533,20 @@ public:
     * @see     remove()
     */
    virtual void clear() = 0;
+
+   /**
+    * Itertor for the first child element of the DynamicObject.
+    *
+    * @return bidirectional read-only iterator.
+    */
+   virtual const_iterator begin() const = 0;
+
+   /**
+    * Itertor just past the last child element of the DynamicObject.
+    *
+    * @return bidirectional read-only iterator.
+    */
+   virtual const_iterator end() const = 0;
 
 protected:
    /**

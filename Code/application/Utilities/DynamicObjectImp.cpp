@@ -794,3 +794,13 @@ bool DynamicObjectImp::isParentOf(const DynamicObjectImp* pObject) const
    }
    return false;
 }
+
+DynamicObject::const_iterator DynamicObjectImp::begin() const
+{
+   return mVariantAttributes.begin();
+}
+
+DynamicObject::const_iterator DynamicObjectImp::end() const
+{
+   return mVariantAttributes.end();
+}

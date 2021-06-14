@@ -63,6 +63,9 @@ public:
    virtual bool toXml(XMLWriter* pWriter) const;
    virtual bool fromXml(DOMNode* pDocument, unsigned int version);
 
+   virtual DynamicObject::const_iterator begin() const;
+   virtual DynamicObject::const_iterator end() const;
+
 protected:
    virtual bool setAttribute(const std::string& name, DataVariant &value, bool swap);
    virtual bool setAttributeByPath(const std::string& path, DataVariant& value, bool swap);
@@ -176,6 +179,14 @@ protected:
    void clear() \
    { \
       return impClass::clear(); \
+   } \
+   DynamicObject::const_iterator begin() const \
+   { \
+      return impClass::begin(); \
+   } \
+   DynamicObject::const_iterator end() const \
+   { \
+      return impClass::end(); \
    }
 
 #endif

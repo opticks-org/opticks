@@ -15,6 +15,7 @@ boost-any
 boost-array
 boost-atomic
 boost-crc
+boost-icl
 boost-integer
 boost-ptr-container
 boost-rational
@@ -38,3 +39,4 @@ hdf5[szip,zlib]
 libgeotiff
 gdal
 opencv
+ossim

@@ -203,6 +203,8 @@ public:
     *  - #PassArea
     *  - #PlotObjectType
     *  - Point::PointSymbolType
+    *  - #Opticks::PixelLocation
+    *  - #Opticks::PixelOffset
     *  - #PositionType
     *  - #ProcessingLocation
     *  - #SessionSaveType

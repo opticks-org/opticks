@@ -1239,6 +1239,158 @@ LocationType fromXmlString<LocationType>(string value, bool* pError)
 }
 
 template<>
+string toDisplayString(const Opticks::PixelLocation& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   ostringstream formatter;
+   formatter << setprecision(numeric_limits<double>::digits10) << "(" << val.mX << "," << val.mY << ")";
+   return formatter.str();
+}
+
+template<>
+string toDisplayString(const Opticks::PixelOffset& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   ostringstream formatter;
+   formatter << setprecision(numeric_limits<double>::digits10) << "(" << val.mX << "," << val.mY << ")";
+   return formatter.str();
+}
+
+template<>
+string toXmlString(const Opticks::PixelLocation& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   ostringstream formatter;
+   formatter << setprecision(numeric_limits<double>::digits10) << val.mX << " " << val.mY;
+   return formatter.str();
+}
+
+template<>
+string toXmlString(const Opticks::PixelOffset& val, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   ostringstream formatter;
+   formatter << setprecision(numeric_limits<double>::digits10) << val.mX << " " << val.mY;
+   return formatter.str();
+}
+
+template<>
+Opticks::PixelLocation fromDisplayString<Opticks::PixelLocation>(string value, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   Opticks::PixelLocation parsedValue;
+   istringstream parser;
+   parser.str(value);
+   if (parser.get() == '(')
+   {
+      parser >> parsedValue.mX;
+      if (parser.get() == ',')
+      {
+         parser >> parsedValue.mY;
+         return parsedValue;
+      }
+   }
+   if (pError != NULL)
+   {
+      *pError = true;
+   }
+   return Opticks::PixelLocation();
+}
+
+template<>
+Opticks::PixelOffset fromDisplayString<Opticks::PixelOffset>(string value, bool* pError)
+{
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   Opticks::PixelOffset parsedValue;
+   istringstream parser;
+   parser.str(value);
+   if (parser.get() == '(')
+   {
+      parser >> parsedValue.mX;
+      if (parser.get() == ',')
+      {
+         parser >> parsedValue.mY;
+         return parsedValue;
+      }
+   }
+   if (pError != NULL)
+   {
+      *pError = true;
+   }
+   return Opticks::PixelOffset();
+}
+
+template<>
+Opticks::PixelLocation fromXmlString<Opticks::PixelLocation>(string value, bool* pError)
+{
+   Opticks::PixelLocation parsedValue;
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   stringstream parser(value);
+   parser >> parsedValue.mX;
+   if (!parser.fail())
+   {
+      parser >> parsedValue.mY;
+      if (!parser.fail())
+      {
+         return parsedValue;
+      }
+   }
+   if (pError != NULL)
+   {
+      *pError = true;
+   }
+   return Opticks::PixelLocation();
+}
+
+
+
+template<>
+Opticks::PixelOffset fromXmlString<Opticks::PixelOffset>(string value, bool* pError)
+{
+   Opticks::PixelOffset parsedValue;
+   if (pError != NULL)
+   {
+      *pError = false;
+   }
+   stringstream parser(value);
+   parser >> parsedValue.mX;
+   if (!parser.fail())
+   {
+      parser >> parsedValue.mY;
+      if (!parser.fail())
+      {
+         return parsedValue;
+      }
+   }
+   if (pError != NULL)
+   {
+      *pError = true;
+   }
+   return Opticks::PixelOffset();
+}
+
+template<>
 string toDisplayString(const string& val, bool* pError)
 {
    if (pError != NULL)

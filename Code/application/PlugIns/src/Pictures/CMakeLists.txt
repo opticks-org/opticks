@@ -8,7 +8,6 @@ set (HEADER_FILES
    Jpeg2000Exporter.h
    Jpeg2000Importer.h
    Jpeg2000Pager.h
-   Jpeg2000Utilities.h
    JpegDetails.h
    JpegExportOptionsWidget.h
    OptionsBmpExporter.h
@@ -36,7 +35,6 @@ set (SOURCE_FILES
    Jpeg2000Exporter.cpp
    Jpeg2000Importer.cpp
    Jpeg2000Pager.cpp
-   Jpeg2000Utilities.cpp
    JpegDetails.cpp
    JpegExportOptionsWidget.cpp
    ModuleManager.cpp
@@ -65,7 +63,6 @@ set (MOC_HEADERS
    Jpeg2000Exporter.h
    Jpeg2000Importer.h
    Jpeg2000Pager.h
-   Jpeg2000Utilities.h
    JpegDetails.h
    JpegExportOptionsWidget.h
    OptionsBmpExporter.h
@@ -88,13 +85,11 @@ if(OpenJpeg_FOUND)
        Jpeg2000Exporter.h
        Jpeg2000Importer.h
        Jpeg2000Pager.h
-       Jpeg2000Utilities.h
     )
     set (JPEG2000_SOURCE_FILES
        Jpeg2000Exporter.cpp
        Jpeg2000Importer.cpp
        Jpeg2000Pager.cpp
-       Jpeg2000Utilities.cpp
     ) 
 endif()
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})

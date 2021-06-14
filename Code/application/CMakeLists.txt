@@ -1,7 +1,8 @@
 set(Opticks_VERSION "5.0.0Unofficial") # Change project(Opticks) below when VERSION becomes an official dotted-decimal
 cmake_minimum_required (VERSION 2.8.12)
 
-#set(VCPKG_APPLOCAL_DEPS OFF)
+# disable copying of DLLs to the build directory by vcpkg, we'll do this with our own script
+set(VCPKG_APPLOCAL_DEPS OFF)
 
 # Order is important on this. It MUST be before project()
 if(DEFINED CMAKE_BUILD_TYPE)
@@ -650,6 +651,18 @@ if(ONE_OPTICKS_LIB)
 endif()
 add_subdirectory(Batch)
 add_executable(Opticks WIN32 ${SOURCE_FILES} ${INTERFACE_HEADER_FILES})
+if(DEFINED _VCPKG_ROOT_DIR)
+    add_custom_command(TARGET Opticks
+        POST_BUILD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMAND ${_VCPKG_POWERSHELL_PATH} -noprofile -executionpolicy Bypass -file "${Opticks_SOURCE_DIR}/cmake/copy_dependencies.ps1"
+                            -targetBinary $<TARGET_FILE:Opticks>
+                            -baseTargetBinaryDir "${CMAKE_CURRENT_BINARY_DIR}/bin"
+                            -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
+                            -OutVariable out
+        )
+endif()
+
 source_group(Interfaces FILES ${INTERFACE_HEADER_FILES})
 target_link_libraries(Opticks
     ${OPTICKS_EXECUTABLE_LIBS}

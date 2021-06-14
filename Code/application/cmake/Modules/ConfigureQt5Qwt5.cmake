@@ -23,7 +23,7 @@ include_directories(${QT_INCLUDE_DIRS})
 # Debug messages:
 # Message(STATUS "QT_INCLUDES: ${QT_INCLUDES}")
 # Message(STATUS "QT_INCLUDE_DIRS: ${QT_INCLUDE_DIRS}")
-# Message(STATUS "QT_LIBRARIES: ${QT_LIBRARIES}")
+Message(STATUS "QT_LIBRARIES: ${QT_LIBRARIES}")
 #######################################################################################
 find_package(Qwt5ForQt5 REQUIRED)
 include_directories(${Qwt5ForQt5_INCLUDE_DIR})

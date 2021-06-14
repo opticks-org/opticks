@@ -1,0 +1,62 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeDependentOption.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeDetermineSystem.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeFindDependencyMacro.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeSystem.cmake.in
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckCSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckLibraryExists.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Compiler/MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindThreads.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindZLIB.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Internal/CheckSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/SelectLibraryConfigurations.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/3.19.1/CMakeCCompiler.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/3.19.1/CMakeCXXCompiler.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/3.19.1/CMakeRCCompiler.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim-build/CMakeFiles/3.19.1/CMakeSystem.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/CMakeLists.txt
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/CMakeParseArguments.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindFreetype.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindGEOS.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindGEOTIFF.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindGit.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindJPEG.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindJsonCpp.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindPackageHandleStandardArgs.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindPackageMessage.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/FindTIFF.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/OssimCommonVariables.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/OssimUtilities.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/cmake/CMakeModules/OssimVersion.cmake
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/src/ossimConfig.h.in
+C:/dev/opticks-org/opticks/Dependencies/src/ossim/ossim/src/ossimVersion.h.in
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/jpeg/vcpkg-cmake-wrapper.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/liblzmaConfig.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/liblzmaConfigVersion.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/liblzmaTargets-debug.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/liblzmaTargets-release.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/liblzmaTargets.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/liblzma/vcpkg-cmake-wrapper.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/installed/x64-windows/share/tiff/vcpkg-cmake-wrapper.cmake
+C:/dev/opticks-org/opticks/Dependencies/vcpkg/scripts/buildsystems/vcpkg.cmake
