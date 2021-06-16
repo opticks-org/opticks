@@ -207,6 +207,7 @@ find_package(shapelib REQUIRED)
 find_package(tiff REQUIRED)
 find_package(geotiff REQUIRED)
 find_package(proj REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 #----- Optional packages -----
 # ffmpeg packages for MovieExporter plugin

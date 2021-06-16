@@ -7,11 +7,12 @@ set (SOURCE_FILES
     Sio.cpp
     SioImporter.cpp
 ) 
-include_directories(${Opticks_INCLUDE_DIRS})
+include_directories(${Opticks_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 add_library(Sio SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(Sio
     ${Opticks_LIBRARIES}
     ${Xerces_LIBRARIES}
+    Eigen3::Eigen
 )
 if(WIN32)
     install(TARGETS Sio RUNTIME DESTINATION PlugIns CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
