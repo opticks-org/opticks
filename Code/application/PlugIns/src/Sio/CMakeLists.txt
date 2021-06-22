@@ -11,6 +11,7 @@ include_directories(${Opticks_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 add_library(Sio SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(Sio
     ${Opticks_LIBRARIES}
+	${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
     Eigen3::Eigen
 )

@@ -16,6 +16,7 @@ add_library(Hdf SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(Hdf
     ${Opticks_LIBRARIES}
     ${Opticks_HdfPlugInLib_LIBRARY}
+	${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
     ${Hdf4_LIBRARIES}
     ${PTHREADS_LIBRARY}

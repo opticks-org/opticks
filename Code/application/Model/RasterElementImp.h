@@ -17,10 +17,13 @@
 #include "SafePtr.h"
 #include "StatisticsImp.h"
 #include "TypesFile.h"
-#include "ProgressAdapter.h"
 
 #include <boost/any.hpp>
 #include <vector>
+
+class DataRequest;
+class Georeference;
+class RasterPager;
 
 class RasterElementImp : public DataElementImp
 {
@@ -157,20 +160,6 @@ protected:
       const std::vector<DimensionDescriptor> &selectedDims, 
       std::vector<DimensionDescriptor> &chipActiveDims,
       std::vector<DimensionDescriptor> &chipOnDiskDims);
-
-   class StatusBarProgress : public ProgressAdapter
-   {
-   public:
-      StatusBarProgress();
-      void getProgress(std::string &text, int &percent, ReportingLevel &gran) const;
-      using ProgressAdapter::updateProgress;
-      void updateProgress(const char *pText, int percent, ReportingLevel gran);
-
-   private:
-      std::string mText;
-      int mPercent;
-      ReportingLevel mGranularity;
-   };
 
 private:
    RasterElementImp(const RasterElementImp& rhs);

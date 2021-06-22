@@ -69,6 +69,7 @@
 #include "WorkspaceWindow.h"
 
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 using namespace std;
 
@@ -1303,6 +1304,42 @@ ProgressDlg* DesktopServicesImp::createProgressDialog(const string& caption, Pro
    }
    return pProgressDlg;
 }
+
+bool DesktopServicesImp::createStatusBarProgress(Progress* pProgress)
+{
+   bool success = false;
+   if (pProgress != NULL)
+   {
+      pProgress->attach(SIGNAL_NAME(Subject, Modified), Slot(this, &DesktopServicesImp::statusBarProgressUpdated));
+      pProgress->attach(SIGNAL_NAME(Subject, Deleted), Slot(this, &DesktopServicesImp::statusBarProgressDeleted));
+      success = true;
+   }
+   return success;
+}
+
+void DesktopServicesImp::statusBarProgressUpdated(Subject& subject, const string& signal, const boost::any& value)
+{
+   // Get the current Progress values
+   ProgressAdapter* pProgressObject = dynamic_cast<ProgressAdapter*> (&subject);
+   VERIFYNRV(pProgressObject != NULL);
+
+   string message = "";
+   int percent = 0;
+   ReportingLevel gran = NORMAL;
+   pProgressObject->getProgress(message, percent, gran);
+
+   if (gran == NORMAL)
+   {
+      message += ": " + boost::lexical_cast<string>(percent) + "%";
+   }
+   setStatusBarMessage(message);
+}
+
+void DesktopServicesImp::statusBarProgressDeleted(Subject& subject, const string& signal, const boost::any& value)
+{
+   setStatusBarMessage("");
+}
+
 
 const vector<string>& DesktopServicesImp::getAvailableSymbolNames() const
 {

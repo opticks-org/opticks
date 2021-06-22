@@ -169,6 +169,7 @@ public:
    virtual bool createProgressDialog(const std::string& caption, Progress* pProgress) const;
    ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress, QObject* pObject,
       const char* pSlot) const;
+   virtual bool createStatusBarProgress(Progress* pProgress);
 
    // Plug-in services
    void addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const;

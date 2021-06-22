@@ -24,6 +24,7 @@ include_directories(${Xerces_INCLUDE_DIRS})
 add_library(Dted SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(Dted
     ${Opticks_LIBRARIES}
+	${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 )
 if(WIN32)

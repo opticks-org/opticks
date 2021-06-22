@@ -29,6 +29,7 @@ include_directories(${Xerces_INCLUDE_DIRS})
 add_library(PlugInSampler SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(PlugInSampler
     ${Opticks_LIBRARIES}
+	${QT_LIBRARIES}
     ${Xerces_LIBRARIES}
 	${PTHREADS_LIBRARY}
 )

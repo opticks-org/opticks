@@ -103,6 +103,7 @@ set (HEADER_FILES
    PixmapGrid.h
    PlugInSelectDlg.h
    PrintPixmap.h
+   RasterDataCopyController.h
    Rdf.h
    RegionUnitsComboBox.h
    ResolutionWidget.h
@@ -195,6 +196,7 @@ set (SOURCE_FILES
    PlugInSelectDlg.cpp
    PrintPixmap.cpp
    ProgressTracker.cpp
+   RasterDataCopyController.cpp
    RasterUtilities.cpp
    Rdf.cpp
    RegionUnitsComboBox.cpp
@@ -292,6 +294,7 @@ set (MOC_HEADERS
    PixmapGrid.h
    PlugInSelectDlg.h
    PrintPixmap.h
+   RasterDataCopyController.h
    Rdf.h
    RegionUnitsComboBox.h
    ResolutionWidget.h

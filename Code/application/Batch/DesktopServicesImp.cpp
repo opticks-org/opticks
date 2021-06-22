@@ -410,6 +410,11 @@ ProgressDlg* DesktopServicesImp::createProgressDialog(const string& caption, Pro
    return NULL;
 }
 
+bool DesktopServicesImp::createStatusBarProgress(Progress* pProgress)
+{
+   return NULL;
+}
+
 const vector<string>& DesktopServicesImp::getAvailableSymbolNames() const
 {
    static vector<string> sEmpty;

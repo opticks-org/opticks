@@ -40,6 +40,9 @@ set (MOC_HEADERS
 )
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Opticks_INCLUDE_DIRS})
+include_directories(
+    ${Opticks_SOURCE_DIR}/Model
+)
 include_directories(${Xerces_INCLUDE_DIRS})
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})

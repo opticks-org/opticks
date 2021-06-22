@@ -26,6 +26,7 @@
 #include "PlugInArg.h"
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
+#include "ProgressResource.h"
 #include "RasterDataDescriptor.h"
 #include "RasterDataDescriptorImp.h"
 #include "RasterElement.h"
@@ -706,10 +707,11 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
    const vector<DimensionDescriptor> &selectedBands,
    bool &abort, Progress *pProgress) const
 {
-   StatusBarProgress statusBarProgress;
+   ProgressResource pStatusBarProgress(std::string(), true);
    if (pProgress == NULL)
    {
-      pProgress = &statusBarProgress;
+      Service<DesktopServices>()->createStatusBarProgress(pStatusBarProgress.get());
+      pProgress = pStatusBarProgress.get();
    }
 
    VERIFY(pRasterChip != NULL);
@@ -735,7 +737,6 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
 
    return success;
 }
-
 
 bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
                                    const vector<DimensionDescriptor>& selectedColumns,
@@ -1191,32 +1192,6 @@ RasterElement* RasterElementImp::copyShallow(const string& name, DataElement* pP
 {
    vector<DimensionDescriptor> dims;
    return createChipInternal(pParent, name, dims, dims, dims, false);
-}
-
-RasterElementImp::StatusBarProgress::StatusBarProgress() : mText(), mPercent(0), mGranularity(NORMAL)
-{
-}
-
-void RasterElementImp::StatusBarProgress::getProgress(string &text, int &percent, ReportingLevel &gran) const
-{
-   text = mText;
-   percent = mPercent;
-   gran = mGranularity;
-}
-
-void RasterElementImp::StatusBarProgress::updateProgress(const char *pText, int percent, ReportingLevel gran)
-{
-   mText = pText;
-   mPercent = percent;
-   mGranularity = gran;
-
-   string message = mText;
-   if (gran == NORMAL)
-   {
-      message += ": " + boost::lexical_cast<string>(percent) + "%";
-   }
-
-   Service<DesktopServices>()->setStatusBarMessage(message);
 }
 
 bool RasterElementImp::createTemporaryFile()

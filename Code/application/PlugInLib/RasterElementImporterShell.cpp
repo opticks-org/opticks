@@ -23,6 +23,7 @@
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
+#include "RasterDataCopyController.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterElementImporterShell.h"
@@ -35,6 +36,7 @@
 #include "StringUtilities.h"
 #include "Undo.h"
 
+#include <QtWidgets/QWidget>
 #include <limits>
 using namespace std;
 
@@ -1075,9 +1077,19 @@ bool RasterElementImporterShell::copyData(const RasterElement* pSrcElement) cons
       success = RasterUtilities::chipMetadata(mpRasterElement->getMetadata(), selectedRows, selectedColumns,
          selectedBands);
    }
-
-   success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows, 
-      selectedColumns, selectedBands, mAborted, mpProgress);
+   
+   bool async = true;
+   if (async)
+   {
+      RasterDataCopyController* pController = new RasterDataCopyController(pSrcElement, mpRasterElement,
+         selectedRows, selectedColumns, selectedBands, Service<DesktopServices>()->getMainWidget());
+      pController->startCopy();
+   }
+   else
+   {
+      success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows,
+         selectedColumns, selectedBands, mAborted, mpProgress);
+   }
 
    return success;
 }

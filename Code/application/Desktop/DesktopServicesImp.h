@@ -51,6 +51,9 @@ public:
 
    SUBJECTADAPTER_METHODS(SubjectImp)
 
+   void statusBarProgressUpdated(Subject& subject, const std::string& signal, const boost::any& value);
+   void statusBarProgressDeleted(Subject& subject, const std::string& signal, const boost::any& value);
+
    QWidget* getMainWidget() const;
    MenuBar* getMainMenuBar() const;
 
@@ -164,6 +167,7 @@ public:
    virtual bool createProgressDialog(const std::string& caption, Progress* pProgress) const;
    ProgressDlg* createProgressDialog(const std::string& caption, Progress* pProgress, QObject* pObject,
       const char* pSlot) const;
+   virtual bool createStatusBarProgress(Progress* pProgress);
 
    // Plug-in services
    void addBackgroundPlugIn(PlugIn* pPlugIn, Progress* pProgress) const;

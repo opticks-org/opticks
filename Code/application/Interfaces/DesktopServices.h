@@ -1250,6 +1250,19 @@ public:
    virtual bool createProgressDialog(const std::string &caption, Progress *pProgress) const = 0;
 
    /**
+    *  Attach a Progress object to the status bar.
+    *
+    *  @note Multiple Progress objects can be attached at the same time.
+    *        Only the most recently updated Progress will display in the status bar.
+    *
+    *  @param pProgress
+    *         The Progress object to attach.
+    *
+    *  @returns True of successful, false otherwise.
+    */
+   virtual bool createStatusBarProgress(Progress* pProgress) = 0;
+
+   /**
     * Get a list of all available symbols for MultipointObjects.
     *
     * The list is formed from all supported files within the Annotation directory.

@@ -13,7 +13,7 @@ include_directories(${GDAL_INCLUDE_DIR})
 add_library(GdalImporter SHARED ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(GdalImporter
     ${Opticks_LIBRARIES}
-    ${QT_LIBRARIES}    
+    ${QT_LIBRARIES}
     ${GDAL_LIBRARY}
     ${Xerces_LIBRARIES}
     ${PTHREADS_LIBRARY}
