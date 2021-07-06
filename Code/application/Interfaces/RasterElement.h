@@ -235,6 +235,9 @@ public:
     *           Set this to true when abort is desired.
     *  @param   pProgress
     *           The progress object to report the current progress to.
+    *  @param   updateDataWhileLoading
+    *           If true, updateData() is called on the chip element each time through the outer copy loop.
+    *           This is used for progressive loading only.
     * 
     *  @return  True if the operation succeeded, false otherwise
     *
@@ -244,7 +247,7 @@ public:
       const std::vector<DimensionDescriptor> &selectedRows,
       const std::vector<DimensionDescriptor> &selectedColumns,
       const std::vector<DimensionDescriptor> &selectedBands,
-      bool &abort, Progress *pProgress = NULL) const = 0;
+      bool &abort, Progress *pProgress = NULL, bool updateWhileLoading = false) const = 0;
 
    /**
     *  Creates a new raster element with the same values as this element but without copying the raster data.
@@ -611,6 +614,36 @@ public:
     * @return The plugin used.
     */
    virtual Georeference *getGeoreferencePlugin() const = 0;
+
+   /**
+    *  Queue a background data copy.
+    *
+    *  Must later call copyDataToChipWorker().
+    *
+    *  @see copyDataToChipWorker()
+    *
+    *  @param pMain
+    *         The element to copy from.
+    *  @param selectedRows
+    *         Which rows to copy from pMain.
+    *  @param selectedColumns
+    *         Which columns to copy from pMain.
+    *  @param selectedBands
+    *         Which bands to copy from pMain.
+    */
+   virtual void queueCopyDataToChip(const RasterElement* pMain,
+                                    const std::vector<DimensionDescriptor>& selectedRows,
+                                    const std::vector<DimensionDescriptor>& selectedColumns,
+                                    const std::vector<DimensionDescriptor>& selectedBands) = 0;
+
+   /**
+    *  Copy data from one element to another.
+    *
+    *  This should be called as a background thread function. queueCopyDataToChip() must have been called first.
+    *
+    *  @see queueCopyDataToChip()
+    */
+   virtual void copyDataToChipWorker() = 0;
 
 protected:
    /**

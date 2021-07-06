@@ -163,7 +163,8 @@ RasterElementImp::RasterElementImp(const DataDescriptorImp& descriptor, const st
    mpBsqConverterPager(NULL),
    mCubePointerAccessor(NULL, NULL),
    mModified(false),
-   mpGeoPlugin(NULL)
+   mpGeoPlugin(NULL),
+   mpMainForCopy(NULL)
 {
    RasterDataDescriptorImp* pDescriptor = dynamic_cast<RasterDataDescriptorImp*>(getDataDescriptor());
    if (pDescriptor != NULL)
@@ -701,11 +702,39 @@ string RasterElementImp::appendToBasename(const string &name,
    return appendedName;
 }
 
+void RasterElementImp::queueCopyDataToChip(const RasterElement* pMain,
+       const std::vector<DimensionDescriptor>& selectedRows,
+       const std::vector<DimensionDescriptor>& selectedColumns,
+       const std::vector<DimensionDescriptor>& selectedBands)
+{
+   mpMainForCopy = pMain;
+   mRowsForCopy = selectedRows;
+   mColumnsForCopy = selectedColumns;
+   mBandsForCopy = selectedBands;
+}
+
+void RasterElementImp::copyDataToChipWorker()
+{
+   if (mpMainForCopy == nullptr)
+   {
+      return;
+   }
+
+   bool abort = false;
+   mpMainForCopy->copyDataToChip(dynamic_cast<RasterElement*>(this), mRowsForCopy, mColumnsForCopy, mBandsForCopy, abort, nullptr, true);
+   mRowsForCopy = std::vector<DimensionDescriptor>();
+   mColumnsForCopy = std::vector<DimensionDescriptor>();
+   mBandsForCopy = std::vector<DimensionDescriptor>();
+   Service<ModelServices>()->destroyElement(const_cast<RasterElement*>(mpMainForCopy));
+   mpMainForCopy = nullptr;
+   updateData();
+}
+
 bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip, 
    const vector<DimensionDescriptor> &selectedRows,
    const vector<DimensionDescriptor> &selectedColumns,
    const vector<DimensionDescriptor> &selectedBands,
-   bool &abort, Progress *pProgress) const
+   bool &abort, Progress *pProgress, bool updateDataWhileLoading) const
 {
    ProgressResource pStatusBarProgress(std::string(), true);
    if (pProgress == NULL)
@@ -723,13 +752,13 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
    switch (pDescriptorChip->getInterleaveFormat())
    {
    case BIP:
-      success = copyDataBip(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
+      success = copyDataBip(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress, updateDataWhileLoading);
       break;
    case BSQ:
-      success = copyDataBsq(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
+      success = copyDataBsq(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress, updateDataWhileLoading);
       break;
    case BIL:
-      success = copyDataBil(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress);
+      success = copyDataBil(pRasterChip, selectedRows, selectedColumns, selectedBands, abort, pProgress, updateDataWhileLoading);
       break;
    default:
       break;
@@ -741,7 +770,7 @@ bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip,
 bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
                                    const vector<DimensionDescriptor>& selectedColumns,
                                    const vector<DimensionDescriptor>& selectedBands, bool& abort,
-                                   Progress* pProgress) const
+                                   Progress* pProgress, bool updateDataWhileLoading) const
 {
    VERIFY(pProgress != NULL);
    string progressText = "Copying data";
@@ -795,6 +824,10 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
             {
                return false;
             }
+            if (updateDataWhileLoading)
+            {
+               pChipElement->updateData();
+            }
          }
          copyCompleted = true;
       }
@@ -836,6 +869,10 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
             if (abort)
             {
                return false;
+            }
+            if (updateDataWhileLoading)
+            {
+               pChipElement->updateData();
             }
          }
          copyCompleted = true;
@@ -889,6 +926,10 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
          {
             return false;
          }
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
       copyCompleted = true;
 
@@ -901,7 +942,7 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
 bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
                                    const vector<DimensionDescriptor>& selectedColumns,
                                    const vector<DimensionDescriptor>& selectedBands, bool& abort,
-                                   Progress* pProgress) const
+                                   Progress* pProgress, bool updateDataWhileLoading) const
 {
    VERIFY(pChipElement != NULL);
    VERIFY(pProgress != NULL);
@@ -952,6 +993,10 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          {
             return false;
          }
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
    }
    else if (selectedColumns.size() ==
@@ -997,6 +1042,10 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          }
 
          chipDa->nextRow();
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
    }
    else
@@ -1050,6 +1099,10 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          }
 
          chipDa->nextRow();
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
    }
 
@@ -1059,7 +1112,7 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
 bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<DimensionDescriptor>& selectedRows,
                                    const vector<DimensionDescriptor>& selectedColumns,
                                    const vector<DimensionDescriptor>& selectedBands, bool& abort,
-                                   Progress* pProgress) const
+                                   Progress* pProgress, bool updateDataWhileLoading) const
 {
    VERIFY(pChipElement != NULL);
    VERIFY(pProgress != NULL);
@@ -1122,6 +1175,10 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
             }
          }
          ++chipBand;
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
       copyCompleted = true;
    }
@@ -1175,6 +1232,10 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
             }
          }
          ++chipBand;
+         if (updateDataWhileLoading)
+         {
+            pChipElement->updateData();
+         }
       }
       copyCompleted = true;
    }

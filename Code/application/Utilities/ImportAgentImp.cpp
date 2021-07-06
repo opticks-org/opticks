@@ -10,6 +10,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QRegExp>
 #include <QtCore/QString>
+#include <QtCore/QThread>
 
 #include "ApplicationServices.h"
 #include "AppVerify.h"
@@ -32,6 +33,8 @@
 #include "PlugInArgList.h"
 #include "PlugInManagerServices.h"
 #include "Progress.h"
+#include "RasterElement.h"
+#include "RasterElementImp.h"
 
 #include <algorithm>
 #include <map>
@@ -729,6 +732,15 @@ bool ImportAgentImp::execute()
             {
                toVisit.push(*elmnt);
             }
+         }
+
+         //TODO: background
+         RasterElementImp* pImp = dynamic_cast<RasterElementImp*>(mpElement);
+         if (pImp != nullptr)
+         {
+            QThread* pThread = QThread::create([pImp] { pImp->copyDataToChipWorker(); });
+            pThread->connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
+            pThread->start(QThread::LowPriority);
          }
 
          success = true;

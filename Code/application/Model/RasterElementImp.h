@@ -96,6 +96,15 @@ public:
    void setGeoreferencePlugin(Georeference* pGeo);
    Georeference *getGeoreferencePlugin() const;
    void updateGeoreferenceData();
+   virtual void queueCopyDataToChip(const RasterElement* pMain,
+                                    const std::vector<DimensionDescriptor>& selectedRows,
+                                    const std::vector<DimensionDescriptor>& selectedColumns,
+                                    const std::vector<DimensionDescriptor>& selectedBands);
+   virtual void copyDataToChipWorker();
+   const RasterElement* mpMainForCopy;
+   std::vector<DimensionDescriptor> mRowsForCopy;
+   std::vector<DimensionDescriptor> mColumnsForCopy;
+   std::vector<DimensionDescriptor> mBandsForCopy;
 
 protected:
    void updateStatisticsBadValues(Subject& subject, const std::string& signal, const boost::any& value);
@@ -113,19 +122,19 @@ protected:
       const std::vector<DimensionDescriptor> &selectedRows,
       const std::vector<DimensionDescriptor> &selectedColumns,
       const std::vector<DimensionDescriptor> &selectedBands,
-      bool &abort, Progress *pProgress = NULL) const;
+      bool &abort, Progress *pProgress = NULL, bool updateDataWhileLoading=false) const;
 
    bool copyDataBip(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
-      bool& abort, Progress* pProgress) const;
+      bool& abort, Progress* pProgress, bool updateDataWhileLoading=false) const;
 
    bool copyDataBil(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
-      bool& abort, Progress* pProgress) const;
+      bool& abort, Progress* pProgress, bool updateDataWhileLoading=false) const;
 
    bool copyDataBsq(RasterElement* pChipElement, const std::vector<DimensionDescriptor>& selectedRows,
       const std::vector<DimensionDescriptor>& selectedColumns, const std::vector<DimensionDescriptor>& selectedBands,
-      bool& abort, Progress* pProgress) const;
+      bool& abort, Progress* pProgress, bool updateDataWhileLoading=false) const;
 
    /**
     * Appends to the basename of name.
@@ -179,6 +188,13 @@ private:
    mutable bool mModified;
 
    Georeference* mpGeoPlugin;
+
+   mutable struct {
+      RasterElement *pRasterChip;
+      std::vector<DimensionDescriptor> selectedRows;
+      std::vector<DimensionDescriptor> selectedColumns;
+      std::vector<DimensionDescriptor> selectedBands;
+   } mBackgroundCopy;
 };
 
 #define RASTERELEMENTADAPTEREXTENSION_CLASSES \
@@ -279,10 +295,10 @@ private:
       const std::vector<DimensionDescriptor> &selectedRows, \
       const std::vector<DimensionDescriptor> &selectedColumns, \
       const std::vector<DimensionDescriptor> &selectedBands, \
-      bool &abort, Progress *pProgress = NULL) const \
+      bool &abort, Progress *pProgress = NULL, bool updateDataWhileLoading = false) const \
    { \
       return impClass::copyDataToChip(pRasterChip, selectedRows, selectedColumns, \
-         selectedBands, abort, pProgress); \
+         selectedBands, abort, pProgress, false); \
    } \
    LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false, bool* pAccurate = NULL) const \
    { \
@@ -317,6 +333,17 @@ private:
    void updateGeoreferenceData() \
    { \
       return impClass::updateGeoreferenceData(); \
+   } \
+   void queueCopyDataToChip(const RasterElement* pMain, \
+                            const std::vector<DimensionDescriptor>& selectedRows, \
+                            const std::vector<DimensionDescriptor>& selectedColumns, \
+                            const std::vector<DimensionDescriptor>& selectedBands) \
+   { \
+      return impClass::queueCopyDataToChip(pMain, selectedRows, selectedColumns, selectedBands); \
+   } \
+   void copyDataToChipWorker() \
+   { \
+      return impClass::copyDataToChipWorker(); \
    } \
    bool writeRawData(void* pData, InterleaveFormatType interleaveType, \
       unsigned int startRow, unsigned int numRows, unsigned int startColumn, unsigned int numColumns, \

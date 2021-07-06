@@ -23,7 +23,6 @@
 #include "PlugInArgList.h"
 #include "PlugInResource.h"
 #include "Progress.h"
-#include "RasterDataCopyController.h"
 #include "RasterDataDescriptor.h"
 #include "RasterElement.h"
 #include "RasterElementImporterShell.h"
@@ -617,7 +616,9 @@ bool RasterElementImporterShell::performImport() const
       {
          return checkAbortOrError("Could not copy data from source RasterElement", pStep.get());
       }
-
+      pSourceRaster.release();
+ 
+      //TODO: backgrouned
       double value = 0.0;
       uint64_t badValueCount = mpRasterElement->sanitizeData(value);
       if (badValueCount != 0)
@@ -1078,17 +1079,14 @@ bool RasterElementImporterShell::copyData(const RasterElement* pSrcElement) cons
          selectedBands);
    }
    
-   bool async = true;
-   if (async)
-   {
-      RasterDataCopyController* pController = new RasterDataCopyController(pSrcElement, mpRasterElement,
-         selectedRows, selectedColumns, selectedBands, Service<DesktopServices>()->getMainWidget());
-      pController->startCopy();
-   }
-   else
+   if (false) // TODO:background
    {
       success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows,
          selectedColumns, selectedBands, mAborted, mpProgress);
+   }
+   else
+   {
+      mpRasterElement->queueCopyDataToChip(pSrcElement, selectedRows, selectedColumns, selectedBands);
    }
 
    return success;
