@@ -745,6 +745,10 @@ bool ImportAgentImp::execute()
                QThread* pThread = QThread::create([pImp] { pImp->copyDataToChipWorker(); });
                pThread->connect(pThread, SIGNAL(finished()), pUpdater, SLOT(updateData()));
                pThread->connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
+               if (pProgress != nullptr)
+               {
+                  pProgress->updateProgress("Copying data in background thread.", 100, NORMAL);
+               }
                pThread->start(QThread::LowPriority);
             }
          }
