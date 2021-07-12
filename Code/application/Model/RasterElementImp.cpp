@@ -727,7 +727,6 @@ void RasterElementImp::copyDataToChipWorker()
    mBandsForCopy = std::vector<DimensionDescriptor>();
    Service<ModelServices>()->destroyElement(const_cast<RasterElement*>(mpMainForCopy));
    mpMainForCopy = nullptr;
-   updateData();
 }
 
 bool RasterElementImp::copyDataToChip(RasterElement *pRasterChip, 

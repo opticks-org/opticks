@@ -36,6 +36,7 @@
 #include "RasterElement.h"
 #include "RasterElementImp.h"
 #include "RasterElementImporterShell.h"
+#include "RasterElementUpdater.h"
 
 #include <algorithm>
 #include <map>
@@ -740,7 +741,9 @@ bool ImportAgentImp::execute()
             RasterElementImp* pImp = dynamic_cast<RasterElementImp*>(mpElement);
             if (pImp != nullptr)
             {
+               RasterElementUpdater* pUpdater = new RasterElementUpdater(dynamic_cast<RasterElement*>(mpElement), Service<DesktopServices>()->getMainWidget());
                QThread* pThread = QThread::create([pImp] { pImp->copyDataToChipWorker(); });
+               pThread->connect(pThread, SIGNAL(finished()), pUpdater, SLOT(updateData()));
                pThread->connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
                pThread->start(QThread::LowPriority);
             }
