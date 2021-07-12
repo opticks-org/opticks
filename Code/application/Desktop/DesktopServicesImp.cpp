@@ -1320,7 +1320,7 @@ bool DesktopServicesImp::createStatusBarProgress(Progress* pProgress)
 void DesktopServicesImp::statusBarProgressUpdated(Subject& subject, const string& signal, const boost::any& value)
 {
    // Get the current Progress values
-   ProgressAdapter* pProgressObject = dynamic_cast<ProgressAdapter*> (&subject);
+   ProgressImp* pProgressObject = dynamic_cast<ProgressImp*> (&subject);
    VERIFYNRV(pProgressObject != NULL);
 
    string message = "";
