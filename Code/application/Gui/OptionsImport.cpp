@@ -19,6 +19,7 @@ OptionsImport::OptionsImport() :
 {
    // Background Import
    mpBackgroundImport = new QCheckBox("Import in background", this);
+   mpBackgroundImport->setToolTip("Import in a background thread. WARNING: This is beta functionality and may contain bugs.");
    LabeledSection* pGeneralSection = new LabeledSection(mpBackgroundImport, "General Import Options", this);
 
    // Dialog layout
