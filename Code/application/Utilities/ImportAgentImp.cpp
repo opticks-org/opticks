@@ -35,6 +35,7 @@
 #include "Progress.h"
 #include "RasterElement.h"
 #include "RasterElementImp.h"
+#include "RasterElementImporterShell.h"
 
 #include <algorithm>
 #include <map>
@@ -734,13 +735,15 @@ bool ImportAgentImp::execute()
             }
          }
 
-         //TODO: background
-         RasterElementImp* pImp = dynamic_cast<RasterElementImp*>(mpElement);
-         if (pImp != nullptr)
+         if (RasterElementImporterShell::getSettingBackgroundImport())
          {
-            QThread* pThread = QThread::create([pImp] { pImp->copyDataToChipWorker(); });
-            pThread->connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
-            pThread->start(QThread::LowPriority);
+            RasterElementImp* pImp = dynamic_cast<RasterElementImp*>(mpElement);
+            if (pImp != nullptr)
+            {
+               QThread* pThread = QThread::create([pImp] { pImp->copyDataToChipWorker(); });
+               pThread->connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
+               pThread->start(QThread::LowPriority);
+            }
          }
 
          success = true;

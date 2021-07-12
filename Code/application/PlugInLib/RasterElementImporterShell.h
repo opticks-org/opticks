@@ -10,6 +10,7 @@
 #ifndef RASTERELEMENTIMPORTERSHELL_H
 #define RASTERELEMENTIMPORTERSHELL_H
 
+#include "ConfigurationSettings.h"
 #include "DesktopServices.h"
 #include "ImporterShell.h"
 #include "ModelServices.h"
@@ -66,6 +67,8 @@ class Step;
 class RasterElementImporterShell : public ImporterShell
 {
 public:
+   SETTING(BackgroundImport, RasterElementImporterShell, bool, false);
+
    /**
     *  Creates a raster element importer plug-in.
     *

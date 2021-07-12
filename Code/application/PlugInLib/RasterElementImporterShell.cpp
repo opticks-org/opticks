@@ -618,16 +618,18 @@ bool RasterElementImporterShell::performImport() const
       }
       pSourceRaster.release();
  
-      //TODO: backgrouned
-      double value = 0.0;
-      uint64_t badValueCount = mpRasterElement->sanitizeData(value);
-      if (badValueCount != 0)
+      if (!getSettingBackgroundImport())
       {
-         if (mpProgress != NULL)
+         double value = 0.0;
+         uint64_t badValueCount = mpRasterElement->sanitizeData(value);
+         if (badValueCount != 0)
          {
-            string message = StringUtilities::toDisplayString(badValueCount) + " bad value(s) found in data.\n" +
-               "Bad values set to " + StringUtilities::toDisplayString(value);
-            mpProgress->updateProgress(message, 100, WARNING);
+            if (mpProgress != NULL)
+            {
+               string message = StringUtilities::toDisplayString(badValueCount) + " bad value(s) found in data.\n" +
+                  "Bad values set to " + StringUtilities::toDisplayString(value);
+               mpProgress->updateProgress(message, 100, WARNING);
+            }
          }
       }
    }
@@ -1079,7 +1081,7 @@ bool RasterElementImporterShell::copyData(const RasterElement* pSrcElement) cons
          selectedBands);
    }
    
-   if (false) // TODO:background
+   if (!getSettingBackgroundImport())
    {
       success = success && pSrcElement->copyDataToChip(mpRasterElement, selectedRows,
          selectedColumns, selectedBands, mAborted, mpProgress);

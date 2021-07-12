@@ -84,6 +84,7 @@ set (HEADER_FILES
     GuiFunctors.h
     OptionsFullScreen.h
     OptionsDockWindow.h
+    OptionsImport.h
     OptionsLayer.h
     OptionsPropertiesDialog.h
     OptionsToolBar.h
@@ -257,6 +258,7 @@ set (SOURCE_FILES
     OptionsGcpLayer.cpp
     OptionsGeneral.cpp
     OptionsGeoreference.cpp
+    OptionsImport.cpp
     OptionsLatLonLayer.cpp
     OptionsLayer.cpp
     OptionsMeasurementLayer.cpp
@@ -402,6 +404,7 @@ set (MOC_HEADERS
     OptionsGcpLayer.h
     OptionsGeneral.h
     OptionsGeoreference.h
+    OptionsImport.h
     OptionsLatLonLayer.h
     OptionsLayer.h
     OptionsMeasurementLayer.h
