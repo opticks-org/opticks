@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "vcpkg deps w/ VS2017",
+      "description": "This will use the vcpkg builder location in CODE_DIR/../Dependencies/vcpkg which is the default checkout location.",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "generator": "Visual Studio 15 2017",
+      "binaryDir": "${sourceDir}/../Build",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/../install",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/../../Dependencies/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      },
+      "architecture": {
+        "value": "x64"
+      }
+    }
+  ]
+}

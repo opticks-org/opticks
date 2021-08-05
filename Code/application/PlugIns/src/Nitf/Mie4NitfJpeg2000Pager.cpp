@@ -415,7 +415,7 @@ opj_image_t* Mie4NitfJpeg2000Pager::decodeImage(unsigned int originalStartRow, u
 
       fileLength = fileSize - static_cast<size_t>(offset);
    }
-   opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
+   opj_stream_t* pStream = opj_stream_create_file_stream(mpFile, fileLength, true);
    if (pStream == NULL)
    {
       return NULL;
@@ -423,7 +423,7 @@ opj_image_t* Mie4NitfJpeg2000Pager::decodeImage(unsigned int originalStartRow, u
 
    opj_stream_set_user_data_length(pStream, fileLength);
 
-   opj_stream_seek_stream(pStream, offset);
+   fseek(mpFile, offset, SEEK_SET);
 
    // Create the appropriate codec
    opj_codec_t* pCodec = NULL;

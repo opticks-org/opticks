@@ -329,7 +329,8 @@ bool Jpeg2000Exporter::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArg
       return false;
    }
 
-   opj_stream_t* pStream = opj_stream_create_default_file_stream(parameters.outfile, false);
+   FileResource pFile(parameters.outfile, "w");
+   opj_stream_t* pStream = opj_stream_create_default_file_stream(pFile.get(), false);
    if (pStream == NULL)
    {
       opj_image_destroy(pImage);
