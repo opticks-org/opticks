@@ -653,17 +653,6 @@ if(ONE_OPTICKS_LIB)
 endif()
 add_subdirectory(Batch)
 add_executable(Opticks WIN32 ${SOURCE_FILES} ${INTERFACE_HEADER_FILES})
-if(DEFINED _VCPKG_ROOT_DIR)
-    add_custom_command(TARGET Opticks
-        POST_BUILD
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND ${_VCPKG_POWERSHELL_PATH} -noprofile -executionpolicy Bypass -file "${Opticks_SOURCE_DIR}/cmake/copy_dependencies.ps1"
-                            -targetBinary $<TARGET_FILE:Opticks>
-                            -baseTargetBinaryDir "${CMAKE_CURRENT_BINARY_DIR}/bin"
-                            -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
-                            -OutVariable out
-        )
-endif()
 
 source_group(Interfaces FILES ${INTERFACE_HEADER_FILES})
 target_link_libraries(Opticks
