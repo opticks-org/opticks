@@ -298,7 +298,7 @@ private:
       bool &abort, Progress *pProgress = NULL, bool updateDataWhileLoading = false) const \
    { \
       return impClass::copyDataToChip(pRasterChip, selectedRows, selectedColumns, \
-         selectedBands, abort, pProgress, false); \
+         selectedBands, abort, pProgress, updateDataWhileLoading); \
    } \
    LocationType convertPixelToGeocoord(LocationType pixel, bool quick = false, bool* pAccurate = NULL) const \
    { \
