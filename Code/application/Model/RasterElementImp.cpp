@@ -42,12 +42,15 @@
 #include "SignalBlocker.h"
 #include "Slot.h"
 #include "StatisticsImp.h"
+#include "UtilityServices.h"
 #include "xmlwriter.h"
 
 #include <fstream>
+#include <functional>
 #include <limits>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+
 using namespace std;
 XERCES_CPP_NAMESPACE_USE
 
@@ -825,7 +828,11 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
             }
             if (updateDataWhileLoading)
             {
-               pChipElement->updateData();
+               Service<UtilityServices>()->callInMainThread(
+                  std::function<void()>(
+                     [pChipElement]() { pChipElement->updateData(); }
+                  )
+               );
             }
          }
          copyCompleted = true;
@@ -871,7 +878,11 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
             }
             if (updateDataWhileLoading)
             {
-               pChipElement->updateData();
+               Service<UtilityServices>()->callInMainThread(
+                  std::function<void()>(
+                     [pChipElement]() { pChipElement->updateData(); }
+                     )
+               );
             }
          }
          copyCompleted = true;
@@ -927,7 +938,11 @@ bool RasterElementImp::copyDataBip(RasterElement* pChipElement, const vector<Dim
          }
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
       copyCompleted = true;
@@ -994,7 +1009,11 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          }
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
    }
@@ -1043,7 +1062,11 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          chipDa->nextRow();
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
    }
@@ -1100,7 +1123,11 @@ bool RasterElementImp::copyDataBil(RasterElement* pChipElement, const vector<Dim
          chipDa->nextRow();
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
    }
@@ -1176,7 +1203,11 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
          ++chipBand;
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
       copyCompleted = true;
@@ -1233,7 +1264,11 @@ bool RasterElementImp::copyDataBsq(RasterElement* pChipElement, const vector<Dim
          ++chipBand;
          if (updateDataWhileLoading)
          {
-            pChipElement->updateData();
+            Service<UtilityServices>()->callInMainThread(
+               std::function<void()>(
+                  [pChipElement]() { pChipElement->updateData(); }
+                  )
+            );
          }
       }
       copyCompleted = true;

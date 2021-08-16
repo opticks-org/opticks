@@ -34,6 +34,9 @@
 #endif
 
 #include <algorithm>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QThread>
+
 using namespace std;
 
 struct SecurityFieldValue
@@ -55,6 +58,7 @@ UtilityServicesImp* UtilityServicesImp::instance()
             "destroying it.");
       }
       spInstance = new UtilityServicesImp;
+      UtilityServicesImp::CallFunctionEvent::CallFunction = QEvent::registerEventType();
    }
 
    return spInstance;
@@ -511,4 +515,42 @@ string UtilityServicesImp::getTextFromFile(const string& filename)
    }
 
    return fileStr.toStdString();
+}
+
+void UtilityServicesImp::callInMainThread(std::function<void()> func)
+{
+   if (QCoreApplication::instance()->thread() == QThread::currentThread())
+   {
+      // already in the main thread, just call it
+      func();
+   }
+   else
+   {
+      // send an event
+      QEvent* pEvent = new UtilityServicesImp::CallFunctionEvent(func);
+      QCoreApplication::postEvent(this, pEvent, Qt::HighEventPriority);
+   }
+}
+
+bool UtilityServicesImp::event(QEvent* pEvent)
+{
+   if (pEvent != nullptr && pEvent->type() == UtilityServicesImp::CallFunctionEvent::CallFunction)
+   {
+      auto* pCfe = static_cast<UtilityServicesImp::CallFunctionEvent*>(pEvent);
+      pCfe->getFunction()();
+      return true;
+   }
+   return QObject::event(pEvent);
+}
+
+int UtilityServicesImp::CallFunctionEvent::CallFunction = -1;
+
+UtilityServicesImp::CallFunctionEvent::CallFunctionEvent(std::function<void()> func) :
+   QEvent(static_cast<QEvent::Type>(UtilityServicesImp::CallFunctionEvent::CallFunction)),
+   mFunc(func)
+{}
+
+std::function<void()> UtilityServicesImp::CallFunctionEvent::getFunction() const
+{
+   return mFunc;
 }

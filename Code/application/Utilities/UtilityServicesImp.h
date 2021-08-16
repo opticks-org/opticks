@@ -13,8 +13,11 @@
 #include "UtilityServices.h"
 #include "TypesFile.h"
 
+#include <functional>
 #include <map>
 #include <string>
+#include <QtCore/QEvent>
+#include <QtCore/QObject>
 
 class DateTime;
 class DateTimeImp;
@@ -23,8 +26,10 @@ class ProgressImp;
 class MessageLogMgr;
 class Options;
 
-class UtilityServicesImp : public UtilityServices
+class UtilityServicesImp : public QObject, public UtilityServices
 {
+   Q_OBJECT
+
 public:
    static UtilityServicesImp* instance();
    static void destroy();
@@ -58,7 +63,7 @@ public:
     * Overrides the default classification with the given value.
     * This should NOT be put in the public interfaces, it should
     * only be used by internal testing code.
-    * 
+    *
     * @param newClassification
     *        The new default level.  Provide empty string to
     *        stop overriding the default classification.
@@ -67,6 +72,9 @@ public:
    void overrideDefaultClassification(const std::string& newClassification);
 
    virtual std::string getTextFromFile(const std::string& filename);
+
+   virtual void callInMainThread(std::function<void()> func);
+   virtual bool event(QEvent* pEvent) override;
 
 protected:
    virtual ~UtilityServicesImp() {};
@@ -90,6 +98,17 @@ private:
    static UtilityServicesImp* spInstance;
    static bool mDestroyed;
    std::string mClassificationOverride;
+
+   class CallFunctionEvent : public QEvent
+   {
+   public:
+      static int CallFunction;
+      CallFunctionEvent(std::function<void()> func);
+      std::function<void()> getFunction() const;
+
+   private:
+      std::function<void()> mFunc;
+   };
 };
 
 #endif

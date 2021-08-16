@@ -214,6 +214,18 @@ public:
     */
    virtual std::string getTextFromFile(const std::string& filename) = 0;
 
+   /**
+    *  Call a function in the main thread using Qt's threading support.
+    *
+    *  This will post an event to the main thread which will execute a wrapped function.
+    *  Since the function must have no parameters and no return value, this will likely be a lambda.
+    *  For example, calling a member function: callInMainThread(std::function<void()>([this](){ this->memberFunction(); });
+    *
+    *  @parameter func
+    *             The function to call.
+    */
+   virtual void callInMainThread(std::function<void()> func) = 0;
+
 protected:
    /**
     * This will be cleaned up during application close.  Plug-ins do not
