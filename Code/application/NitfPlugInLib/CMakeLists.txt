@@ -5,7 +5,6 @@ set (HEADER_FILES
     NitfFileHeader.h
     NitfHeader.h
     NitfImageSubheader.h
-    NitfImporterShell.h
     NitfMetadataParsing.h
     NitfProperties.h
     NitfPropertiesQWidgetWrapper.h
@@ -20,13 +19,20 @@ set (SOURCE_FILES
     NitfFileHeader.cpp
     NitfHeader.cpp
     NitfImageSubheader.cpp
-    NitfImporterShell.cpp
     NitfMetadataParsing.cpp
     NitfResource.cpp
     NitfTreParserShell.cpp
     NitfUtilities.cpp
     StubString.cpp
-) 
+)
+
+if(NOT OpenJpeg_opj_stream_seek_stream)
+   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include NitfPlugInLib/NitfImporterShell")
+else()
+   list(APPEND SOURCE_FILES " NitfImporterShell.cpp ")
+   list(APPEND HEADER_FILES " NitfImporterShell.h ")
+endif()
+
 include_directories(${Opticks_INCLUDE_DIRS})
 include_directories(${Ossim_INCLUDE_DIRS})
 add_definitions(-DAPPLICATION_XERCES)

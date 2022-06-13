@@ -1,6 +1,5 @@
 set (HEADER_FILES
     Mie4NitfImporter.h
-    Mie4NitfJpeg2000Pager.h
     Mie4NitfPager.h
     NitfDesExporter.h
     NitfExporter.h
@@ -14,7 +13,6 @@ set (HEADER_FILES
 set (SOURCE_FILES
     ModuleManager.cpp
     Mie4NitfImporter.cpp
-    Mie4NitfJpeg2000Pager.cpp
     Mie4NitfPager.cpp
     NitfDesExporter.cpp
     NitfExporter.cpp
@@ -27,7 +25,15 @@ set (SOURCE_FILES
     OssimServices.cpp
     RpcGeoreference.cpp
     RpcGui.cpp
-) 
+)
+
+if(NOT OpenJpeg_opj_stream_seek_stream)
+   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include Nitf/Mie4NitfJpeg2000Pager")
+else()
+   list(APPEND SOURCE_FILES " Mie4NitfJpeg2000Pager.cpp ")
+   list(APPEND HEADER_FILES " Mie4NitfJpeg2000Pager.h ")
+endif()
+
 set (MOC_HEADERS
     OptionsNitfExporter.h
     RpcGui.h

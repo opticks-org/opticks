@@ -5,9 +5,6 @@ set (HEADER_FILES
    GeoTIFFImporter.h
    GeoTiffPage.h
    GeoTiffPager.h
-   Jpeg2000Exporter.h
-   Jpeg2000Importer.h
-   Jpeg2000Pager.h
    JpegDetails.h
    JpegExportOptionsWidget.h
    OptionsBmpExporter.h
@@ -32,9 +29,6 @@ set (SOURCE_FILES
    GeoTIFFImporter.cpp
    GeoTiffPage.cpp
    GeoTiffPager.cpp
-   Jpeg2000Exporter.cpp
-   Jpeg2000Importer.cpp
-   Jpeg2000Pager.cpp
    JpegDetails.cpp
    JpegExportOptionsWidget.cpp
    ModuleManager.cpp
@@ -60,9 +54,6 @@ set (MOC_HEADERS
    GeoTIFFImporter.h
    GeoTiffPage.h
    GeoTiffPager.h
-   Jpeg2000Exporter.h
-   Jpeg2000Importer.h
-   Jpeg2000Pager.h
    JpegDetails.h
    JpegExportOptionsWidget.h
    OptionsBmpExporter.h
@@ -80,7 +71,12 @@ set (MOC_HEADERS
    TiffDetails.h
    TiffExportOptionsWidget.h
 )
-if(OpenJpeg_FOUND)
+
+if(NOT OpenJpeg_opj_stream_seek_stream)
+   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include Pictures Jpeg2000Importer, Jpeg2000Exporter, or Jpeg2000Pager")
+endif()
+
+if(OpenJpeg_FOUND AND OpenJpeg_opj_stream_seek_stream)
     set (JPEG2000_HEADER_FILES
        Jpeg2000Exporter.h
        Jpeg2000Importer.h
@@ -90,7 +86,10 @@ if(OpenJpeg_FOUND)
        Jpeg2000Exporter.cpp
        Jpeg2000Importer.cpp
        Jpeg2000Pager.cpp
-    ) 
+    )
+    list(APPEND SOURCE_FILES ${JPEG2000_SOURCE_FILES})
+    list(APPEND HEADER_FILES ${JPEG2000_HEADER_FILES})
+    list(APPEND MOC_HEADERS  ${JPEG2000_HEADER_FILES})
 endif()
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})

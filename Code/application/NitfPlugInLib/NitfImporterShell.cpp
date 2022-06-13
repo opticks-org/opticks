@@ -118,7 +118,7 @@ unsigned char Nitf::NitfImporterShell::getFileAffinity(const string& filename)
 
    // Check the file header and version (9 bytes plus a terminating NULL)
    char buffer[10];
-   memset(buffer, NULL, sizeof(buffer));
+   memset(buffer, 0, sizeof(buffer));
    fgets(buffer, sizeof(buffer), pFile);
 
    if (buffer == Nitf::NITF_METADATA + Nitf::VERSION_02_00 ||
