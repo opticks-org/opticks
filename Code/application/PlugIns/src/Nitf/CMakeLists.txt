@@ -27,11 +27,11 @@ set (SOURCE_FILES
     RpcGui.cpp
 )
 
-if(NOT OpenJpeg_opj_stream_seek_stream)
-   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include Nitf/Mie4NitfJpeg2000Pager")
+if(NOT JPEG2000_SUPPORT)
+   message(STATUS "openjpeg.h NOTFOUND: cannot include Nitf/Mie4NitfJpeg2000Pager")
 else()
-   list(APPEND SOURCE_FILES " Mie4NitfJpeg2000Pager.cpp ")
-   list(APPEND HEADER_FILES " Mie4NitfJpeg2000Pager.h ")
+   list(APPEND SOURCE_FILES Mie4NitfJpeg2000Pager.cpp)
+   list(APPEND HEADER_FILES Mie4NitfJpeg2000Pager.h)
 endif()
 
 set (MOC_HEADERS

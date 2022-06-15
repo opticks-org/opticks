@@ -379,17 +379,48 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 
       fileLength = fileSize - static_cast<size_t>(mOffset);
    }
+
+#ifdef OPJ_STREAM_SEEK_STREAM_FOUND
+   // Close filename as opj_stream_create_file_stream() will open it again and multiple fopen() are undefined
+   fclose(mpFile);
    opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
+#else
+   opj_stream_t* pStream = opj_stream_default_create(true);
+#endif
+
    if (pStream == NULL)
    {
       return NULL;
    }
 
-   opj_stream_set_user_data_length(pStream, fileLength);
-
    // Seek to the required position in the file
+#ifdef OPJ_STREAM_SEEK_STREAM_FOUND
+   opj_stream_set_user_data_length(pStream, fileLength);
    opj_stream_seek_stream(pStream, mOffset);
+#else
+   if(fseek(mpFile, mOffset, SEEK_SET))
+   {
+       perror(strerror(errno)); // how does Opticks handle this sort of error?
+       opj_stream_destroy(pStream);
+       return NULL;
+   }
 
+   void* userData = malloc(fileLength);
+
+   size_t numBytes(0);
+   clearerr(mpFile);
+   while((numBytes < fileLength) && !(feof(mpFile) || ferror(mpFile)))
+   {
+       numBytes += fread(userData, 1, fileLength-numBytes, mpFile);
+   }
+   if(feof(mpFile) || ferror(mpFile))
+   {
+       opj_stream_destroy(pStream);
+       return NULL;
+   }
+   opj_stream_set_user_data_length(pStream, std::min(fileLength,numBytes));
+   opj_stream_set_user_data(pStream, userData, free);
+#endif
 
    // Create the appropriate codec
    opj_codec_t* pCodec = NULL;

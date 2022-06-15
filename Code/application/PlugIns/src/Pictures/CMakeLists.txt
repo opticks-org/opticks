@@ -72,24 +72,22 @@ set (MOC_HEADERS
    TiffExportOptionsWidget.h
 )
 
-if(NOT OpenJpeg_opj_stream_seek_stream)
-   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include Pictures Jpeg2000Importer, Jpeg2000Exporter, or Jpeg2000Pager")
-endif()
-
-if(OpenJpeg_FOUND AND OpenJpeg_opj_stream_seek_stream)
-    set (JPEG2000_HEADER_FILES
-       Jpeg2000Exporter.h
-       Jpeg2000Importer.h
-       Jpeg2000Pager.h
-    )
-    set (JPEG2000_SOURCE_FILES
-       Jpeg2000Exporter.cpp
-       Jpeg2000Importer.cpp
-       Jpeg2000Pager.cpp
-    )
-    list(APPEND SOURCE_FILES ${JPEG2000_SOURCE_FILES})
-    list(APPEND HEADER_FILES ${JPEG2000_HEADER_FILES})
-    list(APPEND MOC_HEADERS  ${JPEG2000_HEADER_FILES})
+if(NOT JPEG2000_SUPPORT)
+   message(STATUS "openjpeg.h NOTFOUND: cannot include Pictures Jpeg2000Importer, Jpeg2000Exporter, or Jpeg2000Pager")
+else()
+   set (JPEG2000_HEADER_FILES
+      Jpeg2000Exporter.h
+      Jpeg2000Importer.h
+      Jpeg2000Pager.h
+      )
+   set (JPEG2000_SOURCE_FILES
+      Jpeg2000Exporter.cpp
+      Jpeg2000Importer.cpp
+      Jpeg2000Pager.cpp
+      )
+   list(APPEND SOURCE_FILES ${JPEG2000_SOURCE_FILES})
+   list(APPEND HEADER_FILES ${JPEG2000_HEADER_FILES})
+   list(APPEND MOC_HEADERS  ${JPEG2000_HEADER_FILES})
 endif()
 qt5_wrap_cpp(MOC_OUTFILES ${MOC_HEADERS})
 source_group(moc FILES ${MOC_OUTFILES})
@@ -103,7 +101,7 @@ if(OpenJpeg_FOUND)
 endif()
 add_definitions(-DAPPLICATION_XERCES)
 include_directories(${Xerces_INCLUDE_DIRS})
-add_library(Pictures SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES} ${JPEG2000_HEADER_FILES} ${JPEG2000_SOURCE_FILES})
+add_library(Pictures SHARED ${SOURCE_FILES} ${MOC_HEADERS} ${MOC_OUTFILES} ${HEADER_FILES})
 target_link_libraries(Pictures
     ${Opticks_LIBRARIES}
     ${QT_LIBRARIES}    

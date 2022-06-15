@@ -26,11 +26,11 @@ set (SOURCE_FILES
     StubString.cpp
 )
 
-if(NOT OpenJpeg_opj_stream_seek_stream)
-   message(STATUS "OpenJpeg_opj_stream_seek_stream NOTFOUND: cannot include NitfPlugInLib/NitfImporterShell")
+if(NOT JPEG2000_SUPPORT)
+   message(STATUS "openjpeg.h NOTFOUND: cannot include NitfPlugInLib/NitfImporterShell")
 else()
-   list(APPEND SOURCE_FILES " NitfImporterShell.cpp ")
-   list(APPEND HEADER_FILES " NitfImporterShell.h ")
+   list(APPEND SOURCE_FILES "NitfImporterShell.cpp")
+   list(APPEND HEADER_FILES "NitfImporterShell.h")
 endif()
 
 include_directories(${Opticks_INCLUDE_DIRS})
