@@ -1,4 +1,5 @@
-find_path(OpenCv_INCLUDE_DIR opencv2/opencv.hpp PATH_SUFFIXES opencv4)
+find_path(OpenCv_INCLUDE_DIR opencv2/opencv.hpp PATH_SUFFIXES opencv2 opencv4)
+#message(STATUS "OpenCv_INCLUDE_DIR: ${OpenCv_INCLUDE_DIR}")
 if(OpenCv_INCLUDE_DIR AND EXISTS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp")
     file(STRINGS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp" OpenCv_Parsed_Major_Version REGEX "^#define CV_MAJOR_VERSION.*[0-9]+.*$")
     file(STRINGS "${OpenCv_INCLUDE_DIR}/opencv2/core/version.hpp" OpenCv_Parsed_Minor_Version REGEX "^#define CV_MINOR_VERSION.*[0-9]+.*$")

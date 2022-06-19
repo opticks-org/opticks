@@ -1297,7 +1297,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
 #else
    if(fseek(pFile.get(), dataOffset, SEEK_SET))
    {
-       perror(strerror(errno)); // how does Opticks handle this sort of error?
+       perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
        opj_stream_destroy(pStream);
        return NULL;
    }

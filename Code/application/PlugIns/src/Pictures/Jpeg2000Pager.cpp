@@ -400,7 +400,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 #else
    if(fseek(mpFile, mOffset, SEEK_SET))
    {
-       perror(strerror(errno)); // how does Opticks handle this sort of error?
+       perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
        opj_stream_destroy(pStream);
        return NULL;
    }

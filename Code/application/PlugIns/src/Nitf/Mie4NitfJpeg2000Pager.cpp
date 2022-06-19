@@ -431,12 +431,11 @@ opj_image_t* Mie4NitfJpeg2000Pager::decodeImage(unsigned int originalStartRow, u
 
 #ifdef OPJ_STREAM_SEEK_STREAM_FOUND
    opj_stream_set_user_data_length(pStream, fileLength);
-
    opj_stream_seek_stream(pStream, offset);
 #else
    if(fseek(mpFile, offset, SEEK_SET))
    {
-       perror(strerror(errno)); // how does Opticks handle this sort of error?
+       perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
        opj_stream_destroy(pStream);
        return NULL;
    }

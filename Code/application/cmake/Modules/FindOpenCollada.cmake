@@ -1,5 +1,4 @@
-#find_path(OpenCollada_INCLUDE_DIR COLLADAFW.h PATHS /usr/include/COLLADAFramework /usr/include/opencollada/COLLADAFramework)
-find_path(OpenCollada_INCLUDE_DIR COLLADAFW.h PATHS COLLADAFramework opencollada/COLLADAFramework /usr/include/COLLADAFramework /usr/include/opencollada/COLLADAFramework)
+find_path(OpenCollada_INCLUDE_DIR COLLADAFW.h PATH_SUFFIXES COLLADAFramework opencollada/COLLADAFramework)
 message(STATUS "OpenCollada_INCLUDE_DIR: ${OpenCollada_INCLUDE_DIR}")
 
 set(opencollada_lib_names
