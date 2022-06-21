@@ -23,6 +23,7 @@ if(CMAKE_MAJOR_VERSION GREATER 2)
   cmake_policy(SET CMP0043 NEW)
   cmake_policy(SET CMP0048 NEW)
   cmake_policy(SET CMP0020 NEW)
+  cmake_policy(SET CMP0075 NEW)
 endif()
 
 if(CMAKE_MAJOR_VERSION GREATER 2)
