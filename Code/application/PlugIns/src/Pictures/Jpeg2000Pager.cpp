@@ -405,15 +405,22 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
        return NULL;
    }
 
-   void* userData = malloc(fileLength);
+   errno = 0;
+   void* userData = calloc(fileLength,1);
+   if(userData == nullptr)
+   {
+       perror(strerror(errno));
+       opj_stream_destroy(pStream);
+       return NULL;
+   }
 
    size_t numBytes(0);
    clearerr(mpFile);
-   while((numBytes < fileLength) && !(feof(mpFile) || ferror(mpFile)))
+   while((numBytes < fileLength) && !feof(mpFile) && !ferror(mpFile))
    {
-       numBytes += fread(userData, 1, fileLength-numBytes, mpFile);
+       numBytes += fread(userData+numBytes, 1, fileLength-numBytes, mpFile);
    }
-   if(feof(mpFile) || ferror(mpFile))
+   if(ferror(mpFile))
    {
        opj_stream_destroy(pStream);
        return NULL;

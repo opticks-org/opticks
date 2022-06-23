@@ -1302,15 +1302,22 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
        return NULL;
    }
 
-   void* userData = malloc(fileLength);
+   errno = 0;
+   void* userData = calloc(fileLength,1);
+   if(userData == nullptr)
+   {
+       perror(strerror(errno));
+       opj_stream_destroy(pStream);
+       return NULL;
+   }
 
    size_t numBytes(0);
    clearerr(pFile.get());
-   while( (numBytes < fileLength) && !(feof(pFile.get()) || ferror(pFile.get())))
+   while((numBytes < fileLength) && !feof(pFile.get()) && !ferror(pFile.get()))
    {
-       numBytes += fread(userData, 1, fileLength-numBytes, pFile.get());
+       numBytes += fread(userData+numBytes, 1, fileLength-numBytes, pFile.get());
    }
-   if(feof(pFile.get()) || ferror(pFile.get()))
+   if(ferror(pFile.get()))
    {
        opj_stream_destroy(pStream);
        return NULL;

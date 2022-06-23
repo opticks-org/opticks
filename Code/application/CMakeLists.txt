@@ -223,6 +223,7 @@ find_package(OpenCollada)
 find_package(OpenCv COMPONENTS ImgProc)
 find_package(OpenJpeg)
 
+
 if(GLEW_FOUND)
    message(STATUS "Found GLEW: ${GLEW_INCLUDE_DIRS} ${GLEW_LIBRARIES}")
 endif()
