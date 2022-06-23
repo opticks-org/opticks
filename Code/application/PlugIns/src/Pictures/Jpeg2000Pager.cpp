@@ -383,34 +383,33 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
 #ifdef OPJ_STREAM_SEEK_STREAM_FOUND
    // Close filename as opj_stream_create_file_stream() will open it again and multiple fopen() are undefined
    fclose(mpFile);
+   mpFile = NULL;
    opj_stream_t* pStream = opj_stream_create_file_stream(mpFilename, fileLength, true);
-#else
-   opj_stream_t* pStream = opj_stream_default_create(true);
-#endif
-
    if (pStream == NULL)
    {
       return NULL;
    }
-
    // Seek to the required position in the file
-#ifdef OPJ_STREAM_SEEK_STREAM_FOUND
    opj_stream_set_user_data_length(pStream, fileLength);
    opj_stream_seek_stream(pStream, mOffset);
 #else
+   // No OpenJpeg opj_stream_seek_stream() function:
+   // 1. Seek into mpFile
+   // 2. allocate a userData buffer
+   // 3. read image data from mpFile into userData
+   // 4. create a default opj stream
+   // 5. set the stream's userData buffer to the one just allocated and filled.
    if(fseek(mpFile, mOffset, SEEK_SET))
    {
        perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
-       opj_stream_destroy(pStream);
        return NULL;
    }
 
    errno = 0;
-   void* userData = calloc(fileLength,1);
-   if(userData == nullptr)
+   uchar* userData = static_cast<uchar*>(calloc(fileLength,1));
+   if(userData == NULL)
    {
        perror(strerror(errno));
-       opj_stream_destroy(pStream);
        return NULL;
    }
 
@@ -422,11 +421,19 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    }
    if(ferror(mpFile))
    {
-       opj_stream_destroy(pStream);
+       free(userData);
        return NULL;
    }
-   opj_stream_set_user_data_length(pStream, std::min(fileLength,numBytes));
+
+   opj_stream_t* pStream = opj_stream_default_create(true); // doesn't do much, not likely to fail
+   if (pStream == NULL)
+   {
+       free(userData);
+       return NULL;
+   }
+
    opj_stream_set_user_data(pStream, userData, free);
+   opj_stream_set_user_data_length(pStream, std::min(fileLength,numBytes)); // numBytes should always equal fileLength
 #endif
 
    // Create the appropriate codec
