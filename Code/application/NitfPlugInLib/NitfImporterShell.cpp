@@ -1295,13 +1295,13 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
    // 3. read image data from pFile into userData
    // 4. create a default opj stream
    // 5. set the stream's userData buffer to the one just allocated and filled.
+   errno = 0;
    if(fseek(pFile.get(), dataOffset, SEEK_SET))
    {
        perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
        return NULL;
    }
 
-   errno = 0;
    uchar* userData = static_cast<uchar*>(calloc(fileLength,1)); // allocate zero-initialized buffer for image.
    if(userData == nullptr)
    {
@@ -1318,6 +1318,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
    if(ferror(pFile.get()))
    {
        free(userData);
+       perror(strerror(errno));
        return NULL;
    }
 
@@ -1325,6 +1326,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
    if (pStream == NULL)
    {
        free(userData);
+       perror(strerror(errno));
        return NULL;
    }
 

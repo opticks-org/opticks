@@ -399,13 +399,13 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    // 3. read image data from mpFile into userData
    // 4. create a default opj stream
    // 5. set the stream's userData buffer to the one just allocated and filled.
+   errno = 0;
    if(fseek(mpFile, mOffset, SEEK_SET))
    {
        perror(strerror(errno)); // How does Opticks handle this sort of error? What MessageLog?
        return NULL;
    }
 
-   errno = 0;
    uchar* userData = static_cast<uchar*>(calloc(fileLength,1));
    if(userData == NULL)
    {
@@ -422,6 +422,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    if(ferror(mpFile))
    {
        free(userData);
+       perror(strerror(errno));
        return NULL;
    }
 
@@ -429,6 +430,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
    if (pStream == NULL)
    {
        free(userData);
+       perror(strerror(errno));
        return NULL;
    }
 
