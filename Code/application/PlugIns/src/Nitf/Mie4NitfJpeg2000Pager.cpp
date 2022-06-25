@@ -425,7 +425,7 @@ opj_image_t* Mie4NitfJpeg2000Pager::decodeImage(unsigned int originalStartRow, u
    {
       return NULL;
    }
-   opj_stream_set_user_data_length(pStream, fileLength);
+   opj_stream_set_user_data_length(pStream, fileLength); // Isn't this redundant?
    opj_stream_seek_stream(pStream, offset);
 #else
    // No OpenJpeg opj_stream_seek_stream() function:

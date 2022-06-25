@@ -1286,7 +1286,7 @@ opj_image_t* Nitf::NitfImporterShell::getImageInfo(const std::string& filename, 
       return NULL;
    }
    // Seek to the position of the compressed data in the file
-   opj_stream_set_user_data_length(pStream, fileLength);
+   opj_stream_set_user_data_length(pStream, fileLength);  // Isn't this redundant?
    opj_stream_seek_stream(pStream, dataOffset);
 #else
    // No OpenJpeg opj_stream_seek_stream() function:

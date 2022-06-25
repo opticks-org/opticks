@@ -19,6 +19,12 @@ if(avformat_INCLUDE_DIR AND EXISTS "${avformat_INCLUDE_DIR}/avformat.h")
    set(avformat_PATCH_VERSION "${avformat_VERSION_PATCH}")
 endif()
 
+string(COMPARE GREATER "${avformat_MAJOR_VERSION}" "52" avformatTooNew)
+if(avformatTooNew)
+   message(STATUS "Warning: ffmpeg avformat_MAJOR_VERSION ${avformat_MAJOR_VERSION} is greater than 52. Only ffmpeg version 0.7 is currently supported")
+   return()
+endif()
+
 find_library(avformat_LIBRARY_RELEASE NAMES avformat)
 find_library(avformat_LIBRARY_DEBUG NAMES avformatd)
 

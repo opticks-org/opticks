@@ -390,7 +390,7 @@ opj_image_t* Jpeg2000Pager::decodeImage(unsigned int originalStartRow, unsigned 
       return NULL;
    }
    // Seek to the required position in the file
-   opj_stream_set_user_data_length(pStream, fileLength);
+   opj_stream_set_user_data_length(pStream, fileLength);  // Isn't this redundant?
    opj_stream_seek_stream(pStream, mOffset);
 #else
    // No OpenJpeg opj_stream_seek_stream() function:

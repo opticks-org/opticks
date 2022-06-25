@@ -1,7 +1,8 @@
 find_path(Ossim_INCLUDE_DIR ossimConfig.h HINTS ${Ossim_INCLUDE_DIR} PATH_SUFFIXES ossim)
 
-if(Ossim_INCLUDE_DIR-NOTFOUND)
-   message(ERROR " could not find Ossim_INCLUDE_DIR: ${Ossim_INCLUDE_DIR}")
+if(NOT Ossim_INCLUDE_DIR)
+   message(STATUS "Could not find Ossim: ${Ossim_INCLUDE_DIR}")
+   return()
 endif()
 
 # message(STATUS "Ossim_INCLUDE_DIR: " ${Ossim_INCLUDE_DIR})
